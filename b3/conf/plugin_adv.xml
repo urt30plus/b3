@@ -1,0 +1,41 @@
+<configuration plugin="adv">
+    <!--
+        Note: within ads, you can use the following variables : @nextmap @time
+        or rules as defined in the admin plugin config file. ie: /spam#rule1
+    -->
+    <settings name="settings">
+        <!-- rate in minutes. 
+          If you want a rate faster than once 
+          per minutes, then you can add a 's' as a suffix for seconds.
+          i.e. : <set name="rate">30s</set> 
+        -->
+        <set name="rate">3</set>
+        <!--
+            you can either set here a text file that will contain one ad per line
+            or fill the <ads> section below
+        -->
+        <!-- <set name="ads">c:/somewhere/my_ads.txt</set> -->
+    </settings>
+    <ads>
+    <!-- you can use the following keywords in your messages :
+      /spam#rule1 - rule 1 as defined in you admin plugin config file
+      @time - the server time
+      @nextmap - the next map in your game server rotation list (if available)
+      @topstats - the top stats from XLRstats (if the plugin is enabled)
+      @admins - connected admins' names. You can change the message format in your admin plugin config
+      @regulars - connected players from the regular grout. You can change the message format in your admin plugin config
+    -->
+        <ad>^2Yes, we are watching.</ad>
+        <ad>^2Visit us at www.urt-30plus.org.</ad>
+        <ad>^2Public Teamspeak 3 server: ts3.urt-30plus.org.</ad>
+        <ad>^2Type !register to register as a user.</ad>
+        <ad>^2Type !fa in chat to forgive team damage!</ad>
+        <ad>^2Send demos to ltstriker@urt-30plus.org</ad>
+        <ad>/spam#rule8</ad>    This is the language rule
+        <ad>@time</ad>
+        <ad>@nextmap</ad>
+        <ad>^2Type !help for commands.</ad>
+        <ad>^2Type !xlrstats for statistics.</ad>
+        <ad>@topstats</ad>
+    </ads>
+</configuration>

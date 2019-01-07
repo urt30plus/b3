@@ -1,0 +1,39 @@
+<configuration plugin="Nader">
+    <!-- levels (from weaponcontrol)
+        0 : guest
+        1 : user
+        2 : regular
+        20 : moderator
+        40 : admin
+        60 : fulladmin
+        80 : senioradmin
+        100 : superadmin
+      -->
+
+    <settings name="settings">
+        <set name="enabled">1</set>
+        <set name="minlevel">40</set>
+        <set name="nbtop">5</set>
+        <!-- From xlrstats conf file -->
+        <set name="hegrenadeid">25</set>
+        <set name="nadefactor">2</set>
+        <set name="challengeduration">240</set>
+        <set name="db_table_hof">plugin_nader_hof</set>
+        <set name="db_map_name">map_name</set>
+        <set name="db_playerid">player_id</set>
+        <set name="db_score">score</set>
+    </settings>
+    <settings name="messages">
+    <set name="msg_5">^3$name ^4$score ^7HE grenade kills!</set>
+        <set name="msg_10">Watch out,^3$name has ^4$score ^7HE grenade kills!</set>
+        <set name="msg_15">^3$name ^4$score ^7HE grenade kills, beware ^4his^7/^6her ^7nades!</set>
+        <set name="msg_20">^4$score ^7kills : ^3$name ^7is a grenade master!</set>
+        <set name="msg_25">^4$score ^7HE grenade kills : ^3$name is a ^1grinding machine!</set>
+        <set name="msg_30">^4$score ^7HE grenade kills : ^3$name stop your HE grenade aimbot please :)</set>
+        <set name="msg_35">^4$score ^7HE grenade kills ^2No way...</set>
+        <set name="msg_40">^3$name has ^4$score successful ^7HE grenade launches!!!</set>
+        <set name="msg_45">^3$name ^4$score ^7HE grenade kills.</set>
+        <set name="msg_50">^4$score ^7HE grenade kills -> ^3$name ^7you sick freak!!!</set>
+        <set name="msg_55">^3$name : ^4Buffer Overflow ^7HE grenade kills</set>
+    </settings>
+</configuration>

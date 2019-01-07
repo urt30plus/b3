@@ -1,0 +1,6 @@
+# Python modules needed to run the B3 test suite
+mockito
+mock>=0.8
+pylint
+pytest
+psycopg2-binary
