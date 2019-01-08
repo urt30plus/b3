@@ -56,7 +56,7 @@
         <plugin name="spamcontrol" config="@conf/plugin_spamcontrol.ini" />
         <!-- <plugin name="spawnkill" config="@conf/plugin_spawnkill.ini" /> -->
         <!-- <plugin name="spree" config="@conf/plugin_spree.ini" /> -->
-        <plugin name="stats" config="@conf/plugin_stats.xml" />
+        <plugin name="stats" config="@conf/plugin_stats.ini" />
         <plugin name="status" config="@conf/plugin_status.ini" />
         <plugin name="tk" config="@conf/plugin_tk.ini" />
         <plugin name="urtbslap" config="@conf/urtbslap.xml" />
