@@ -18,10 +18,10 @@ b3/docs/user_documentation/_build/*
 b3.test.xml
 b3.database.sqlite
 venv/
-venv3/
 b3_doc.htm
 scratch.py
 conf30/status.xml
 .pytest_cache
 .tox
 b3/conf/b3.xml
+b3/conf/status.xml
