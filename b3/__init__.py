@@ -23,7 +23,7 @@
 # ################################################################### #
 
 __author__ = 'ThorN'
-__version__ = '3.30.3'
+__version__ = '3.30.4'
 
 import os
 import platform
@@ -38,7 +38,7 @@ import b3.pkg_handler
 modulePath = b3.pkg_handler.resource_directory(__name__)
 
 versionId = 'v%s' % __version__
-version = '^0(^8b3^0) ^9%s ^9[MandoTheMapper Edition^9]^3' % versionId
+version = '^0(^8b3^0) ^9%s ^9[WindyCity Edition^9]^3' % versionId
 
 confdir = None
 console = None

@@ -48,9 +48,9 @@
         <plugin name="adv" config="@conf/plugin_adv.xml" />
         <plugin name="censor" config="@conf/plugin_censor.xml" />
         <plugin name="firstkill" config="@conf/plugin_firstkill.ini" />
-        <plugin name="flagstats" config="@conf/flagstats.xml" />
-        <plugin name="knifer" config="@conf/knifer.xml" />
-        <plugin name="nader" config="@conf/nader.xml" />
+        <plugin name="flagstats" config="@conf/plugin_flagstats.xml" />
+        <plugin name="knifer" config="@conf/plugin_knifer.xml" />
+        <plugin name="nader" config="@conf/plugin_nader.xml" />
         <plugin name="pingwatch" config="@conf/plugin_pingwatch.ini" />
         <plugin name="poweradminurt" config="@conf/plugin_poweradminurt.ini" />
         <plugin name="spamcontrol" config="@conf/plugin_spamcontrol.ini" />
@@ -59,7 +59,7 @@
         <plugin name="stats" config="@conf/plugin_stats.ini" />
         <plugin name="status" config="@conf/plugin_status.ini" />
         <plugin name="tk" config="@conf/plugin_tk.ini" />
-        <plugin name="urtbslap" config="@conf/urtbslap.xml" />
+        <plugin name="urtbslap" config="@conf/plugin_urtbslap.xml" />
         <plugin name="welcome" config="@conf/plugin_welcome.ini" />
         <plugin name="xlrstats" config="@conf/plugin_xlrstats.ini"/>
     </plugins>
