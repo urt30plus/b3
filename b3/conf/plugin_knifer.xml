@@ -24,10 +24,10 @@
         <set name="db_score">score</set>
     </settings>
     <settings name="messages">
-        <set name="msg_10">^3$name ^4$score ^7knife kills!</set>
-        <set name="msg_15">^3$name ^4$score ^7knife kills!</set>
+        <set name="msg_5">^3$name ^4$score ^7knife kills!</set>
+        <set name="msg_10">Watch out,^3$name has ^4$score ^7knife kills!</set>
+        <set name="msg_15">^3$name ^4$score ^7knife kills, beware of ^4his^7/^6her ^7blade!</set>
         <set name="msg_20">^4$score ^7kills : ^3$name ^7is a knife master!</set>
-        <!-- <set name="msg_20">^3$name ^4$score ^7knife kills ^2Woo00oot!</set> -->
         <set name="msg_25">^4$score ^7knife kills : ^3$name is a ^1butcher!</set>
         <set name="msg_30">^4$score ^7knife kills : ^3$name stop your knife aimbot please :)</set>
         <set name="msg_35">^4$score ^7knife kills ^2No way...</set>
