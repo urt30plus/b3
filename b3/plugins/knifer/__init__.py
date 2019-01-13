@@ -302,7 +302,7 @@ class KniferPlugin(b3.plugin.Plugin):
                     break
             # self.debug('^1Top %d knife killers : %s' % (self._nbTop, string.join(results, ' ,')))
             self.console.say(
-                '^1Top %d knife killers (total %d)  : %s' % (limit, self._nbKK, string.join(results, ' ,')))
+                '^1Top %d knife killers (total %d)  : %s' % (limit, self._nbKK, ' ,'.join(results)))
         # else:
         # if fromCmd:
         # self.console.say('No knife kills this round')
