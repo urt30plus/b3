@@ -1338,7 +1338,7 @@ class Test_cmd_warns(Admin_functional_test):
         self.joe.says('!warns')
         self.joe.message.assert_called_once_with('^7Warnings: adv, afk, argue, badname, camp, ci, color, cuss, fakecmd,'
                                                  ' jerk, lang, language, name, nocmd, obj, profanity, racism, recruit, rule1, rule10, rule2, rule3, rule4, rule5'
-                                                 ', rule6, rule7, rule8, rule9, sfire, spam, spawnfire, spec, spectator, stack, stacking, tk')
+                                                 ', rule6, rule7, rule8, rule9, sfire, spam, spawnfire, spec, spectator, stack, tk')
 
 
 class Test_cmd_admins(Admin_functional_test):
