@@ -5,7 +5,7 @@
         <set name="bot_name">30+Bot</set>
         <set name="bot_prefix">^0(^230+Bot^0)^7:</set>
         <set name="time_format">%I:%M%p %Z %m/%d/%y</set>
-        <set name="time_zone">MDT</set>
+        <set name="time_zone">CST</set>
         <!-- How much detail in the b3 logfile: 9 = verbose, 10 = debug, 21 = bot, 22 = console -->
         <set name="log_level">9</set>
 	<set name="logfile">@conf/b3.log</set>
@@ -38,7 +38,7 @@
         <set name="temp_banned_by">$clientname^7 was temp banned by $adminname^7 for $banduration^7 $reason</set>
         <set name="temp_banned">$clientname^7 was temp banned for $banduration^7 $reason</set>
         <set name="unbanned_by">$clientname^7 was un-banned by $adminname^7 $reason</set>
-        <set name="unbanned">$clientname^7 was un-banned $reason</set>
+        <set name="unbanned">$clientname^7 was un-banned^7 $reason</set>
     </settings>
     <settings name="plugins">
 	    <set name="external_dir">@conf/../extplugins</set>
