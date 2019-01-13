@@ -24,7 +24,7 @@
         <set name="db_score">score</set>
     </settings>
     <settings name="messages">
-    <set name="msg_5">^3$name ^4$score ^7HE grenade kills!</set>
+        <set name="msg_5">^3$name ^4$score ^7HE grenade kills!</set>
         <set name="msg_10">Watch out,^3$name has ^4$score ^7HE grenade kills!</set>
         <set name="msg_15">^3$name ^4$score ^7HE grenade kills, beware ^4his^7/^6her ^7nades!</set>
         <set name="msg_20">^4$score ^7kills : ^3$name ^7is a grenade master!</set>
