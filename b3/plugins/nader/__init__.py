@@ -121,6 +121,11 @@ class NaderPlugin(b3.plugin.Plugin):
     def on_round_start(self, event):
         if self._challengeThread is not None:
             self._challengeThread.cancel()
+        for c in self.console.clients.getList():
+            prev_kills = c.var(self, 'hegrenadeKills', 0).value
+            if prev_kills > 0:
+                self.debug("Resetting [hegrenadeKills] var [%d] for client %s" % (prev_kills, c.name))
+                c.setvar(self, 'hegrenadeKills', 0)
 
     def on_round_end(self, event):
         self.displayScores(0)
@@ -325,7 +330,7 @@ class NaderPlugin(b3.plugin.Plugin):
             # if not numCuts % 3:
             # self.console.write('bigtext "%s : %d nade kills !"' % (client.name, client.var(self, 'nadeKills', 0).value))
             if (not self._stfu) and (numnades in self._msgLevels):
-                msg = self.getMessage('msg_%d' % numnades, {'name': client.exactName, 'score': numnades})
+                msg = self.getMessage('hekills_%d' % numnades, {'name': client.exactName, 'score': numnades})
                 self.console.write('bigtext "%s"' % msg)
 
             if self._challengeTarget != None:

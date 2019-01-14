@@ -120,6 +120,11 @@ class KniferPlugin(b3.plugin.Plugin):
     def on_round_start(self, event):
         if self._challengeThread is not None:
             self._challengeThread.cancel()
+        for c in self.console.clients.getList():
+            prev_kills = c.var(self, 'knifeKills', 0).value
+            if prev_kills > 0:
+                self.debug("Resetting [knifeKills] var [%d] for client %s" % (prev_kills, c.name))
+                c.setvar(self, 'knifeKills', 0)
 
     def on_round_end(self, event):
         self.displayScores(0)
@@ -323,7 +328,7 @@ class KniferPlugin(b3.plugin.Plugin):
             # if not numCuts % 3:
             # self.console.write('bigtext "%s : %d knife kills !"' % (client.name, client.var(self, 'knifeKills', 0).value))
             if (not self._stfu) and (numCuts in self._msgLevels):
-                msg = self.getMessage('msg_%d' % numCuts, {'name': client.exactName, 'score': numCuts})
+                msg = self.getMessage('knkills_%d' % numCuts, {'name': client.exactName, 'score': numCuts})
                 self.console.write('bigtext "%s"' % msg)
 
             if self._challengeTarget != None:
