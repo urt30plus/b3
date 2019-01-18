@@ -26,7 +26,7 @@ __author__ = 'SvaRoX'
 __version__ = '0.3'
 
 import b3.plugin
-import string
+import operator
 import threading
 
 from b3.functions import start_daemon_thread
@@ -290,14 +290,14 @@ class KniferPlugin(b3.plugin.Plugin):
 
         if len(listKills):
             tmplist = [(x[1], x) for x in listKills]
-            tmplist.sort()
+            tmplist.sort(key=operator.itemgetter(0))
             listKills = [x for (key, x) in tmplist]
             listKills.reverse()
 
             limit = self._nbTop
             if len(listKills) < limit:
                 limit = len(listKills)
-                # self._nbTop = len(listKills)
+
             i = 0
             results = []
             for c, kills in listKills:
@@ -305,12 +305,9 @@ class KniferPlugin(b3.plugin.Plugin):
                 results.append('^1#%d. ^4%s ^1(^3%d^1)^7' % (i, c.name, c.var(self, 'knifeKills', 0).value))
                 if i >= limit:
                     break
-            # self.debug('^1Top %d knife killers : %s' % (self._nbTop, string.join(results, ' ,')))
+
             self.console.say(
                 '^1Top %d knife killers (total %d)  : %s' % (limit, self._nbKK, ' ,'.join(results)))
-        # else:
-        # if fromCmd:
-        # self.console.say('No knife kills this round')
 
     def someoneKilled(self, client, target, data=None):
         if data[1] == self.console.UT_MOD_KNIFE:
@@ -405,7 +402,7 @@ class KniferPlugin(b3.plugin.Plugin):
 
         if len(listKills):
             tmplist = [(x[1], x) for x in listKills]
-            tmplist.sort()
+            tmplist.sort(key=operator.itemgetter(0))
             listKills = [x for (key, x) in tmplist]
             listKills.reverse()
 

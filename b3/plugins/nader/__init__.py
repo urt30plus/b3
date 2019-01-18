@@ -25,6 +25,7 @@
 __author__ = 'SvaRoX'
 __version__ = '0.3'
 
+import operator
 import threading
 
 import b3.plugin
@@ -293,26 +294,23 @@ class NaderPlugin(b3.plugin.Plugin):
 
         if len(listKills):
             tmplist = [(x[1], x) for x in listKills]
-            tmplist.sort()
+            tmplist.sort(key=operator.itemgetter(0))
             listKills = [x for (key, x) in tmplist]
             listKills.reverse()
 
             limit = self._nbTop
             if len(listKills) < limit:
                 limit = len(listKills)
-                # self._nbTop = len(listKills)
+
             i = 0
             results = []
             for c, kills in listKills:
                 i = i + 1
-                results.append('^1#%d. ^4%s ^1(^3%d^1)^7' % (i, c.name, c.var(self, 'hegrenadeKills', 0).value))
+                results.append('^1#%d. ^4%s ^1(^3%d^1)^7' % (i, c.name, kills))
                 if i >= limit:
                     break
             self.console.say(
                 '^1Top %d HE grenade killers (total %d)  : %s' % (limit, self._nbHEK, ' ,'.join(results)))
-        # else:
-        # if fromCmd:
-        # self.console.say('No nade kills this round')
 
     def someoneKilled(self, client, target, data=None):
         if data[1] == self.console.UT_MOD_HEGRENADE:
@@ -327,8 +325,7 @@ class NaderPlugin(b3.plugin.Plugin):
                 numnades = self._nadeKillers[client.cid].var(self, 'hegrenadeKills', 0).value + 1
                 self._nadeKillers[client.cid].setvar(self, 'hegrenadeKills', numnades)
             self.debug('Client %s, %d HE grenade kills' % (client.name, client.var(self, 'hegrenadeKills', 0).value))
-            # if not numCuts % 3:
-            # self.console.write('bigtext "%s : %d nade kills !"' % (client.name, client.var(self, 'nadeKills', 0).value))
+
             if (not self._stfu) and (numnades in self._msgLevels):
                 msg = self.getMessage('hekills_%d' % numnades, {'name': client.exactName, 'score': numnades})
                 self.console.write('bigtext "%s"' % msg)
@@ -409,7 +406,7 @@ class NaderPlugin(b3.plugin.Plugin):
 
         if len(listKills):
             tmplist = [(x[1], x) for x in listKills]
-            tmplist.sort()
+            tmplist.sort(key=operator.itemgetter(0))
             listKills = [x for (key, x) in tmplist]
             listKills.reverse()
 
