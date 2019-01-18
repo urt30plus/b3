@@ -237,6 +237,19 @@ class Test_log_lines_parsing(Iourt43TestCase):
                          event_target=psyp,
                          event_data=(100, '38', 'body', 'UT_MOD_GLOCK'))
 
+    def test_Assist(self):
+        mandolin = FakeClient(self.console, name="mandolin", guid="mandolin_guid")
+        money = FakeClient(self.console, name="money", guid="money_guid")
+        striker = FakeClient(self.console, name="striker", guid="striker_guid")
+        mandolin.connects('0')
+        money.connects('1')
+        striker.connects('2')
+        self.assertEvent(r'''Assist: 0 1 2: mandolin assisted money to kill striker''',
+                         event_type='EVT_ASSIST',
+                         event_client=mandolin,
+                         event_target=striker,
+                         event_data=money)
+
     def test_say(self):
         marcel = FakeClient(self.console, name="^5Marcel^2[^6CZARMY^2]", guid="11111111111111")
         marcel.connects('6')

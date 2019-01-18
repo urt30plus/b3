@@ -345,6 +345,10 @@ class Iourt43Parser(AbstractParser):
                    r'(?P<aweap>[0-9]+):\s+'
                    r'(?P<text>.*))$', re.IGNORECASE),
 
+        # Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
+        re.compile(r'^(?P<action>Assist):\s(?P<acid>[0-9]+)\s(?P<kcid>[0-9]+)\s(?P<dcid>[0-9]+):\s+(?P<text>.*)$',
+                   re.IGNORECASE),
+
         # 6:37 Kill: 0 1 16: XLR8or killed =lvl1=Cheetah by UT_MOD_SPAS
         # 2:56 Kill: 14 4 21: Qst killed Leftovercrack by UT_MOD_PSG1
         # 6:37 Freeze: 0 1 16: Fenix froze Biddle by UT_MOD_SPAS
@@ -354,10 +358,6 @@ class Iourt43Parser(AbstractParser):
                    r'(?P<cid>[0-9]+)\s'
                    r'(?P<aweap>[0-9]+):\s+'
                    r'(?P<text>.*))$', re.IGNORECASE),
-
-        # Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
-        re.compile(r'^(?P<action>Assist):\s(?P<acid>[0-9]+)\s(?P<kcid>[0-9]+)\s(?P<dcid>[0-9]+):\s+(?P<text>.*)$',
-                   re.IGNORECASE),
 
         # ThawOutStarted: 0 1: Fenix started thawing out Biddle
         # ThawOutFinished: 0 1: Fenix thawed out Biddle
