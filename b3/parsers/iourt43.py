@@ -193,7 +193,6 @@ class Iourt43Parser(AbstractParser):
     all UrT version from 4.3.3 on.
     """
     gameName = 'iourt43'
-    spamcontrolPlugin = None
 
     """
     Translate the gametype to a readable format (also for teamkill plugin!)
@@ -618,7 +617,6 @@ class Iourt43Parser(AbstractParser):
 
     def pluginsStarted(self):
         self.__setup_connected_players()
-        self.patch_spamcontrolPlugin()
 
     def load_conf_frozensand_ban_settings(self):
         """
@@ -1728,23 +1726,6 @@ class Iourt43Parser(AbstractParser):
     def defineGameType(self, gametype_int):
         gametype = str(gametype_int)
         return self.game_types.get(gametype, gametype)
-
-    def patch_spamcontrolPlugin(self):
-        """
-        This method alters the Spamcontrol plugin after it started to make it aware of RADIO spam.
-        """
-        self.spamcontrolPlugin = self.getPlugin("spamcontrol")
-        if not self.spamcontrolPlugin:
-            return
-
-        self.info("Patching spamcontrol plugin...")
-
-        def onRadio(this, event):
-            new_event = Event(type=event.type, client=event.client, target=event.target, data=repr(event.data))
-            this.onChat(new_event)
-
-        self.spamcontrolPlugin.onRadio = onRadio
-        self.spamcontrolPlugin.registerEvent('EVT_CLIENT_RADIO', self.spamcontrolPlugin.onRadio)
 
     @staticmethod
     def patch_Clients():

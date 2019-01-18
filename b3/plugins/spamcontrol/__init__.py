@@ -57,6 +57,7 @@ class SpamcontrolPlugin(b3.plugin.Plugin):
         self.registerEvent('EVT_CLIENT_SAY', self.onChat)
         self.registerEvent('EVT_CLIENT_TEAM_SAY', self.onChat)
         self.registerEvent('EVT_CLIENT_PRIVATE_SAY', self.onChat)
+        self.registerEvent('EVT_CLIENT_RADIO', self.onRadio)
 
         self._adminPlugin = self.console.getPlugin('admin')
 
@@ -131,6 +132,15 @@ class SpamcontrolPlugin(b3.plugin.Plugin):
             points += 1
 
         self.add_spam_points(client, points, text)
+
+    def onRadio(self, event):
+        new_event = b3.events.Event(
+            type=event.type,
+            client=event.client,
+            target=event.target,
+            data=repr(event.data)
+        )
+        self.onChat(new_event)
 
     def cmd_spamins(self, data, client, cmd=None):
         """
