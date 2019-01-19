@@ -25,11 +25,12 @@
 __author__ = 'HSO Clan Development http://www.hsoclan.co.uk'
 __version__ = '0.0.2'
 
-import b3.events
+import b3.plugin
 
 
 class UrtbslapPlugin(b3.plugin.Plugin):
     minlevel = 0
+    _slap_safe_level = 0
     _adminPlugin = None
 
     def onLoadConfig(self):
@@ -37,6 +38,13 @@ class UrtbslapPlugin(b3.plugin.Plugin):
             self.minlevel = self.config.getint('settings', 'minlevel')
         except:
             self.minlevel = 80
+        self.debug(f"minlevel set to {self.minlevel}")
+
+        try:
+            self._slap_safe_level = self.config.getint('settings', 'slap_safe_level')
+        except:
+            self._slap_safe_level = 100
+        self.debug(f"slap safe level set to {self._slap_safe_level}")
 
     def onStartup(self):
         self._adminPlugin = self.console.getPlugin('admin')
@@ -55,7 +63,11 @@ class UrtbslapPlugin(b3.plugin.Plugin):
         cname = input[0]
         creps = input[1]
         sclient = self._adminPlugin.findClientPrompt(cname, client)
-        if not sclient: return False
+        if not sclient:
+            return False
+        if sclient.maxLevel >= self._slap_safe_level:
+            client.message("^7You don't have enough privileges to slap this Admin")
+            return False
         self.console.write('bigtext "^7Play by 30+ Rules Please!"')
         self.__do_slap(sclient, int(creps))
         return True
@@ -68,8 +80,12 @@ class UrtbslapPlugin(b3.plugin.Plugin):
         sclient = self._adminPlugin.findClientPrompt(input[0], client)
         if not sclient:
             return False
+        if sclient.maxLevel >= self._slap_safe_level:
+            client.message("^7You don't have enough privileges to slap this Admin")
+            return False
         self.console.write('bigtext "^7Slapped to Death Because You Deserved It!"')
         self.__do_slap(sclient, 20)
+        return True
 
     def __do_slap(self, sclient, reps):
         while reps > 0:
