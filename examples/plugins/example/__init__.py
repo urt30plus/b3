@@ -85,14 +85,6 @@ class ExamplePlugin(b3.plugin.Plugin):
 
     # Specify here a list of plugins needed to run your plugin.
     # Here below the list is empty which means that this plugin does not required any other plugin to run.
-    # To better understand how this work, think about this example:
-    # The Geolocation plugin (in b3.plugins.geolocation) produces 2 new events: EVT_GEOLOCATION_SUCCESS and
-    # EVT_GEOLOCATION_FAILURE. If your plugin needs to react on those  events, you need the geolocation plugin
-    # to be loaded, and the following line would have been: requiresPlugins = ['geolocation']. B3 will then attempt
-    # to load the geolocation plugin (even if the user did not specified such plugin in the B3 main configuration
-    # file). If the geolocation plugin can't be loaded, also your plugin won't be loaded since a 'strong' requirement
-    # is missing (if instead you need a 'weak' requirement, which means that your plugin may use another one but it's
-    # not mandatory, you need to fill the loadAfterPlugins attribute here below.
     requiresPlugins = []
 
     # Specify here a list of plugins which needs to be loaded before your plugin.

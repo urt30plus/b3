@@ -2,4 +2,3 @@
 six
 pymysql==0.9.2
 python-dateutil==2.7.3
-requests==2.21.0
