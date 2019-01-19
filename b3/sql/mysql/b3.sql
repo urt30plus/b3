@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS `xlr_playerstats` (
   `rounds` smallint(5) unsigned NOT NULL default '0',
   `hide` tinyint(4) NOT NULL default '0',
   `fixed_name` varchar(32) NOT NULL default '',
-  `id_token` VARCHAR(10) NOT NULL DEFAULT ''
+  `id_token` VARCHAR(10) NOT NULL DEFAULT '',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `client_id` (`client_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

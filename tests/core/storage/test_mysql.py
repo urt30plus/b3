@@ -112,7 +112,20 @@ class Test_MySQL(B3TestCase, StorageAPITest):
              'groups',
              'penalties',
              'data',
-             'plugin_hof'
+             'plugin_hof',
+             'xlr_actionstats',
+             'xlr_playerstats',
+             'xlr_playeractions',
+             'xlr_history_weekly',
+             'ctime',
+             'xlr_history_monthly',
+             'xlr_bodyparts',
+             'xlr_playerbody',
+             'xlr_opponents',
+             'xlr_weaponstats',
+             'xlr_playermaps',
+             'xlr_mapstats',
+             'xlr_weaponusage'
              ]), set(self.storage.getTables()))
 
 
