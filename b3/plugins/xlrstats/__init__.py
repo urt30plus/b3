@@ -326,31 +326,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                 else:
                     self.error("could not create schema for database table '%s': missing SQL script '%s'", v, sql_path)
 
-        # EXECUTE SCHEMA UPDATE
-        update_schema = {
-            'mysql': {
-                'history_monthly-update-3.0.0.sql': self.history_monthly_table,
-                'history_weekly-update-3.0.0.sql': self.history_weekly_table,
-                'playerstats-update-3.0.0.sql': self.playerstats_table,
-            },
-            'sqlite': {
-                'playerstats-update-3.0.0.sql': self.playerstats_table,
-            }
-        }
-
-        for k, v in update_schema[self.console.storage.protocol].items():
-            sql_path = os.path.join(sql_main, k)
-            if os.path.isfile(sql_path):
-                with open(sql_path, 'r') as sql_file:
-                    # execute statements separately since we need to substitute the table name
-                    for q in self.console.storage.getQueriesFromFile(sql_file):
-                        try:
-                            self.console.storage.query(q % v)
-                        except Exception:
-                            # DONT LOG HERE!!! (schema might have already changed so executing the update query will
-                            # raise an exception without actually changing the database table structure (which is OK!)
-                            pass
-
     def load_config_tables(self):
         """
         Load config section 'tables'
