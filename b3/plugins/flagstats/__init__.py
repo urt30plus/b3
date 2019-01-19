@@ -55,10 +55,10 @@ class FlagstatsPlugin(b3.plugin.Plugin):
     def onLoadConfig(self):
 
         try:
-            self._min_level_flagstats_cmd = self.config.getint('commands', 'flag')
+            self._min_level_flagstats_cmd = self.config.getint('commands', 'flagstats')
         except:
             self._min_level_flagstats_cmd = 1
-            self.debug('Using default value (%i) for commands::flag', self._min_level_flagstats_cmd)
+            self.debug('Using default value (%i) for commands::flagstats', self._min_level_flagstats_cmd)
 
         try:
             self._min_level_topflags_cmd = self.config.getint('commands', 'topflags')
