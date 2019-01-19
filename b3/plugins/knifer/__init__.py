@@ -57,7 +57,6 @@ class KniferPlugin(b3.plugin.Plugin):
         if not self._xlrstatsPlugin:
             self.debug('Could not find xlrstats plugin')
 
-        # Options loading
         try:
             self._minLevel = self.config.getint('settings', 'minlevel')
         except:

@@ -53,13 +53,11 @@ class NaderPlugin(b3.plugin.Plugin):
         if not self._adminPlugin:
             self.error('Could not find admin plugin')
             return False
-        # else:
-        # self._adminPlugin.debug('Plugin loaded')
+
         self._xlrstatsPlugin = self.console.getPlugin('xlrstats')
         if not self._xlrstatsPlugin:
             self.debug('Could not find xlrstats plugin')
 
-        # Options loading
         try:
             self._minLevel = self.config.getint('settings', 'minlevel')
         except:
