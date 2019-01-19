@@ -20,8 +20,8 @@ b3.database.sqlite
 venv/
 b3_doc.htm
 scratch.py
-conf30/status.xml
 .pytest_cache
 .tox
 b3/conf/b3.xml
+b3/conf/b3.ini
 b3/conf/status.xml
