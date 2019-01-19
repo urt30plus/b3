@@ -19,7 +19,7 @@
 __author__ = 'Courgette'
 __version__ = '1.2'
 
-PROTOCOLS = ('mysql', 'sqlite', 'postgresql')
+PROTOCOLS = ('mysql', 'sqlite')
 
 
 class Storage(object):
@@ -107,7 +107,6 @@ class Storage(object):
 
 from .mysql import MysqlStorage
 from .sqlite import SqliteStorage
-from .postgresql import PostgresqlStorage
 
 
 def getStorage(dsn, dsnDict, console):

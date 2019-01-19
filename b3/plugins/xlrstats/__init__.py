@@ -335,9 +335,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             },
             'sqlite': {
                 'playerstats-update-3.0.0.sql': self.playerstats_table,
-            },
-            'postgresql': {
-                # NO UPDATE NEEDED FOR THE MOMENT
             }
         }
 

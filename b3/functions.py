@@ -101,9 +101,6 @@ def splitDSN(url):
     elif g['protocol'] == 'mysql':
         if g['password'] is None:
             g['password'] = ''
-    elif g['protocol'] == 'postgresql':
-        if g['password'] is None:
-            g['password'] = ''
 
     if g['port']:
         g['port'] = int(g['port'])
@@ -113,8 +110,6 @@ def splitDSN(url):
         g['port'] = 22
     elif g['protocol'] == 'mysql':
         g['port'] = 3306
-    elif g['protocol'] == 'postgresql':
-        g['port'] = 5432
     return g
 
 

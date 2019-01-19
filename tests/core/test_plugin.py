@@ -564,7 +564,7 @@ class Test_Plugin_requiresStorage(B3TestCase):
 
     def test_correct_storage(self):
         # GIVEN
-        self.console.storage.protocol = 'postgresql'
+        self.console.storage.protocol = 'sqlite'
         self.plugin_list.append(
             {'name': 'testplugin3', 'conf': None, 'path': external_plugins_dir, 'disabled': False}
         )

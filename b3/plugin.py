@@ -75,7 +75,7 @@ class Plugin(object):
     requiresParsers = []
     """:type: list"""
 
-    # List of storage protocols supported by your plugin ('mysql', 'sqlite', 'postgresql'): if no value is specified
+    # List of storage protocols supported by your plugin ('mysql', 'sqlite'): if no value is specified
     # B3 will load the plugin no matter the type of storage module being used (so it will assume that your plugin will
     # not use the storage layer at all, or that your plugin is capable of handling all of them).
     # NOTE: B3 will not generate the database schema: you would have to handle this yourself in plugin onStartup()

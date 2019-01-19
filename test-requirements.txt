@@ -3,4 +3,3 @@ mockito
 mock>=0.8
 pylint
 pytest
-psycopg2-binary

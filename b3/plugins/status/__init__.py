@@ -87,31 +87,6 @@ class StatusPlugin(b3.plugin.Plugin):
                             PRIMARY KEY (id)
                          ) ENGINE = MYISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;"""
         },
-        'postgresql': {
-
-            'svars': """CREATE TABLE IF NOT EXISTS %(svars)s (
-                            id SERIAL PRIMARY KEY,
-                            name VARCHAR(255) NOT NULL,
-                            value VARCHAR(255) NOT NULL,
-                            CONSTRAINT %(svars)s_name UNIQUE (name));""",
-
-            'cvars': """CREATE TABLE IF NOT EXISTS %(cvars)s (
-                            id SERIAL PRIMARY KEY,
-                            Updated VARCHAR(25) NOT NULL,
-                            Name VARCHAR(32) NOT NULL,
-                            Level INTEGER NOT NULL,
-                            DBID INTEGER NOT NULL,
-                            CID VARCHAR(32) NOT NULL,
-                            Joined VARCHAR(25) NOT NULL,
-                            Connections INTEGER NOT NULL,
-                            State SMALLINT NOT NULL,
-                            Score INTEGER NOT NULL,
-                            IP VARCHAR(16) NOT NULL,
-                            GUID VARCHAR(36) NOT NULL,
-                            PBID VARCHAR(32) NOT NULL,
-                            Team SMALLINT NOT NULL,
-                            ColorName VARCHAR(32) NOT NULL);""",
-        },
         'sqlite': {
 
             'svars': """CREATE TABLE IF NOT EXISTS %(svars)s (
@@ -467,15 +442,8 @@ class StatusPlugin(b3.plugin.Plugin):
             k = re.sub("'", "", str(k))
             v = re.sub("'", "", str(v))[:255]  # length of the database varchar field
             try:
-                if self.console.storage.dsnDict['protocol'] == 'postgresql':
-                    self.console.storage.query(
-                        """UPDATE %s SET value='%s' WHERE name='%s';""" % (self._tables['svars'], v, k))
-                    self.console.storage.query("""INSERT INTO %s (name, value) SELECT '%s', '%s' WHERE NOT EXISTS (
-                                                  SELECT 1 FROM %s WHERE name='%s');""" % (self._tables['svars'], k, v,
-                                                                                           self._tables['svars'], k))
-                else:
-                    self.console.storage.query("""INSERT INTO %s (name, value) VALUES ('%s','%s') ON DUPLICATE KEY
-                                                  UPDATE value = VALUES(value);""" % (self._tables['svars'], k, v))
+                self.console.storage.query("""INSERT INTO %s (name, value) VALUES ('%s','%s') ON DUPLICATE KEY
+                                              UPDATE value = VALUES(value);""" % (self._tables['svars'], k, v))
             except Exception:
                 # exception is already logged, just don't raise it again
                 pass
