@@ -37,20 +37,11 @@ import b3.pkg_handler
 
 modulePath = b3.pkg_handler.resource_directory(__name__)
 
-versionId = 'v%s' % __version__
-version = '^0(^8b3^0) ^9%s ^9[WindyCity Edition^9]^3' % versionId
+versionId = f'v{__version__}'
+version = f'^0(^8b3^0) ^9{versionId} ^9[WindyCity Edition^9]^3'
 
 confdir = None
 console = None
-
-# STRINGS
-B3_TITLE = 'BigBrotherBot (B3) %s' % versionId
-B3_TITLE_SHORT = 'B3 %s' % versionId
-B3_COPYRIGHT = 'Copyright © 2005 Michael "ThorN" Thornton'
-B3_LICENSE = 'GNU General Public License v2'
-B3_WEBSITE = 'http://www.bigbrotherbot.net'
-B3_WIKI = 'http://wiki.bigbrotherbot.net/'
-B3_XLRSTATS = 'http://www.xlrstats.com/'
 
 # TEAMS
 TEAM_UNKNOWN = -1
@@ -114,8 +105,10 @@ def getConfPath(decode=False, conf=None):
             path = os.path.dirname(conf.fileName)
         else:
             raise TypeError(
-                'invalid configuration type specified: expected str|XmlConfigParser|CfgConfigParser|MainConfig, got %s instead' % type(
-                    conf))
+                "Invalid configuration type specified: expected "
+                "str|XmlConfigParser|CfgConfigParser|MainConfig, "
+                f"got {type(conf)} instead"
+            )
     else:
         path = confdir or os.path.dirname(console.config.fileName)
 
@@ -163,7 +156,9 @@ def getB3versionInfo():
     Returns a tuple with B3 version information.
     :return: version, platform, architecture :type: tuple
     """
-    return __version__, getPlatform(), right_cut(platform.architecture()[0], 'bit')
+    return __version__, \
+           getPlatform(), \
+           right_cut(platform.architecture()[0], 'bit')
 
 
 def getB3versionString():
@@ -229,10 +224,10 @@ def loadParser(pname):
     :param pname: The parser name
     :return The parser module
     """
-    name = 'b3.parsers.%s' % pname
+    name = f'b3.parsers.{pname}'
     mod = __import__(name)
     components = name.split('.')
-    components.append('%sParser' % pname.title())
+    components.append(f'{pname.title()}Parser')
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
@@ -254,13 +249,13 @@ def start(mainconfig, options):
     global confdir
     confdir = os.path.dirname(mainconfig.fileName)
 
-    stdout_write('Starting B3      : %s\n' % getB3versionString())
+    stdout_write(f'Starting B3      : {getB3versionString()}\n')
 
     # not real loading but the user will get what's configuration he is using
-    stdout_write('Loading config   : %s\n' % getShortPath(mainconfig.fileName, True))
+    stdout_write(f'Loading config   : {getShortPath(mainconfig.fileName, True)}\n')
 
     parsertype = mainconfig.get('b3', 'parser')
-    stdout_write('Loading parser   : %s\n' % parsertype)
+    stdout_write(f'Loading parser   : {parsertype}\n')
 
     parser = loadParser(parsertype)
     global console
@@ -288,10 +283,10 @@ def start(mainconfig, options):
         print('Goodbye')
         return
     except SystemExit as msg:
-        print('EXITING: %s' % msg)
+        print(f'EXITING: {msg}')
         raise
     except Exception as msg:
-        print('ERROR: %s' % msg)
+        print(f'ERROR: {msg}')
         traceback.print_exc()
         sys.exit(223)
 

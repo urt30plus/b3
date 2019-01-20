@@ -28,7 +28,7 @@ __version__ = '1.2'
 import sys
 
 if sys.version_info < (3, 6):
-    raise SystemExit("Sorry, cannot continue: B3 is not compatible with python versions earlier than 3.6!")
+    raise SystemExit("B3 is not compatible with Python versions <3.6")
 
 import b3.run
 

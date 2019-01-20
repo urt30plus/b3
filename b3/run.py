@@ -55,14 +55,14 @@ def run(options):
     Run B3 in console.
     :param options: command line options
     """
-    analysis = None  # main config analysis result
+    analysis = None
 
     try:
 
         if options.config:
             config = b3.getAbsolutePath(options.config, True)
             if not os.path.isfile(config):
-                console_exit('ERROR: configuration file not found (%s).' % config)
+                console_exit(f'ERROR: configuration file not found ({config}).')
         else:
             config = None
             for p in ('b3.%s', 'conf/b3.%s', 'b3/conf/b3.%s',
@@ -71,7 +71,7 @@ def run(options):
                 for e in ('ini', 'cfg', 'xml'):
                     path = b3.getAbsolutePath(p % e, True)
                     if os.path.isfile(path):
-                        print("Using configuration file: %s" % path)
+                        print(f"Using configuration file: {path}")
                         config = path
                         sleep(3)
                         break
@@ -82,7 +82,7 @@ def run(options):
         main_config = b3.config.MainConfig(b3.config.load(config))
         analysis = main_config.analyze()
         if analysis:
-            raise b3.config.ConfigFileNotValid('invalid configuration file specified')
+            raise b3.config.ConfigFileNotValid('Invalid configuration file specified')
 
         b3.start(main_config, options)
 
@@ -90,9 +90,9 @@ def run(options):
         if analysis:
             print('CRITICAL: invalid configuration file specified:\n')
             for problem in analysis:
-                print("  >>> %s\n" % problem)
+                print(f"  >>> {problem}\n")
         else:
-            print('CRITICAL: invalid configuration file specified!')
+            print('CRITICAL: invalid configuration file specified')
         raise SystemExit(1)
     except SystemExit:
         raise
