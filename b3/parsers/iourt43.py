@@ -1888,7 +1888,7 @@ class Iourt43Parser(AbstractParser):
         if self._maplist is not None:
             return self._maplist
 
-        data = self.write('fdir *.bsp', socketTimeout=15)
+        data = self.write('fdir *.bsp', socketTimeout=1.5)
         if not data:
             return []
 
@@ -1900,6 +1900,8 @@ class Iourt43Parser(AbstractParser):
                 if m.group('map'):
                     maps.append(m.group('map'))
 
+        self._maplist = maps
+        self.info(f"getMaps() cached {len(maps)} maps")
         return maps
 
     def inflictCustomPenalty(self, penalty_type, client, reason=None, duration=None, admin=None, data=None):
@@ -2285,7 +2287,7 @@ class Iourt43Parser(AbstractParser):
         if mapname:
             self.game.mapName = mapname
             self.info('map is: %s' % self.game.mapName)
-        self._maplist = self.getMaps()
+        self.getMaps()
 
     def __setup_log_sync(self):
         self.debug('Forcing server cvar g_logsync to %s' % self._logSync)
