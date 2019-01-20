@@ -27,7 +27,6 @@ import unittest
 
 from mock import Mock, call, patch
 from mockito import mock, when, unstub, any as anything
-from six.moves import map
 
 import b3
 from b3.clients import Clients, Client

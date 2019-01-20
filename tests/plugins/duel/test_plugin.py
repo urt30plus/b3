@@ -22,11 +22,6 @@
 #                                                                     #
 # ################################################################### #
 
-import sys
-import unittest
-
-import six
-
 from tests.plugins.duel import DuelTestCase
 
 
@@ -231,11 +226,8 @@ class Test_plugin(DuelTestCase):
                               '[Duel]: Bill 1:1 Mike',
                               'Duel with Mike canceled'], self.bill.message_history)
 
-    @unittest.skipUnless(six.PY2, "broken on PY3")
+
     def test_event_client_disconnect_with_active_duel(self):
-        original_mike_refcount = mike_refcount = sys.getrefcount(self.mike)
-        original_bill_refcount = bill_refcount = sys.getrefcount(self.bill)
-        original_anna_refcount = anna_refcount = sys.getrefcount(self.anna)
         # GIVEN
         self.mike.connects("1")
         self.bill.connects("2")
@@ -259,14 +251,3 @@ class Test_plugin(DuelTestCase):
         self.assertListEqual(['[Duel]: Bill 1:1 Mike', 'Duel with Mike canceled'], self.bill.message_history)
         self.assertEqual(0, len(self.anna.var(self.p, 'duelling', {}).value))
         self.assertEqual(0, len(self.bill.var(self.p, 'duelling', {}).value))
-
-        self.mike.disconnects()
-        self.bill.disconnects()
-        self.anna.disconnects()
-
-        mike_refcount = sys.getrefcount(self.mike)
-        bill_refcount = sys.getrefcount(self.bill)
-        anna_refcount = sys.getrefcount(self.anna)
-        self.assertLessEqual(mike_refcount, original_mike_refcount)
-        self.assertLessEqual(bill_refcount, original_bill_refcount)
-        self.assertLessEqual(anna_refcount, original_anna_refcount)

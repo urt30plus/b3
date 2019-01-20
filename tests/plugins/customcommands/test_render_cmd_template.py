@@ -29,8 +29,6 @@ from b3.plugins.customcommands import CustomcommandsPlugin
 from tests import logging_disabled
 from tests.plugins.customcommands import CustomcommandsTestCase
 
-import six
-
 with logging_disabled():
     from b3.fake import FakeClient
 
@@ -38,8 +36,6 @@ with logging_disabled():
 class Test_render_cmd_template(CustomcommandsTestCase):
 
     def setUp(self):
-        if six.PY2:
-            self.assertRaisesRegex = self.assertRaisesRegexp
         CustomcommandsTestCase.setUp(self)
         self.conf = CfgConfigParser()
         self.p = CustomcommandsPlugin(self.console, self.conf)

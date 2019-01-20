@@ -24,7 +24,6 @@
 
 from textwrap import dedent
 
-import six
 from mock import patch, call
 
 import b3
@@ -341,7 +340,7 @@ class Test_get_config_for_levels(Test_Tk_plugin):
         self.assertListEqual([
             call('value for kill_multiplier is invalid. '
                  'could not convert string to float: {}'
-                 .format("f00" if six.PY2 else "'f00'")),
+                 .format("'f00'")),
         ], self.error_mock.mock_calls)
 
     def test_bad_damage_multiplier(self):
@@ -365,7 +364,7 @@ class Test_get_config_for_levels(Test_Tk_plugin):
         self.assertListEqual([
             call('value for damage_multiplier is invalid. '
                  'could not convert string to float: {}'
-                 .format("f00" if six.PY2 else "'f00'")),
+                 .format("'f00'")),
         ], self.error_mock.mock_calls)
 
     def test_bad_ban_length(self):

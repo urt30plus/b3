@@ -26,7 +26,6 @@ import time
 import unittest
 
 from mock import sentinel, Mock
-from six.moves import range
 
 from b3.cron import CronTab, OneTimeCronTab, PluginCronTab, Cron
 from tests import B3TestCase

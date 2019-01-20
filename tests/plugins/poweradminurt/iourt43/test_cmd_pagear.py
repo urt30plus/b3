@@ -27,8 +27,6 @@ import time
 from mock import patch, call
 from mockito import when
 
-import six
-
 from b3.config import CfgConfigParser
 from b3.cvar import Cvar
 from b3.plugins.poweradminurt import PoweradminurtPlugin
@@ -160,13 +158,9 @@ weapon_codes = (
 
 
 def all_gear_but(*args):
-    if six.PY2:
-        return "".join(sorted(G_ALL.translate(None, "".join(args))))
     return "".join(sorted(G_ALL.translate({ord(c): None for c in args})))
 
 def only_gear(*args):
-    if six.PY2:
-        return "".join(sorted(G_ALL.translate(None, all_gear_but(*args))))
     return "".join(sorted(G_ALL.translate({ord(c): None for c in all_gear_but(*args)})))
 
 
