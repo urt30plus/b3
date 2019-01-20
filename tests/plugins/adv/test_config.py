@@ -29,26 +29,23 @@ class Test_config(AdvTestCase):
 
     def test_default_config(self):
         self.init_plugin()
-        self.assertEqual('3', self.p._rate)
+        self.assertEqual('2', self.p._rate)
         self.assertIsNone(self.p._fileName)
         self.assertIsNotNone(self.p._cronTab)
-        self.assertTupleEqual((0, list(range(0, 59, 3)), -1, -1, -1, -1),
+        self.assertTupleEqual((0, list(range(0, 59, 2)), -1, -1, -1, -1),
                               (self.p._cronTab.second, self.p._cronTab.minute, self.p._cronTab.hour,
                                self.p._cronTab.day, self.p._cronTab.month, self.p._cronTab.dow))
-        self.assertEqual(12, len(self.p._msg.items))
+        self.assertEqual(9, len(self.p._msg.items))
         self.assertListEqual([
-            '^2Yes, we are watching.',
             '^2Visit us at www.urt-30plus.org.',
             '^2Public Teamspeak 3 server: ts3.urt-30plus.org.',
             '^2Type !register to register as a user.',
             '^2Type !fa in chat to forgive team damage!',
             '^2Send demos to admin@urt-30plus.org',
             '^3Rule #8: No profanity or offensive language (in any language)',
-            '@time',
             '@nextmap',
             '^2Type !help for commands.',
-            '^2Type !xlrstats for statistics.',
-            '@topstats'
+            '^2Type !xlrstats for statistics.'
         ], self.p._msg.items)
 
     def test_empty(self):
