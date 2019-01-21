@@ -217,7 +217,6 @@ class Iourt43Parser(AbstractParser):
 
     IpsOnly = False
     IpCombi = False
-    PunkBuster = None
 
     _maplist = None
     _empty_name_default = 'EmptyNameDefault'
@@ -1159,7 +1158,7 @@ class Iourt43Parser(AbstractParser):
     def authorizeClients(self):
         """
         For all connected players, fill the client object with properties allowing to find
-        the user in the database (usualy guid, or punkbuster id, ip) and call the
+        the user in the database (usualy guid, ip) and call the
         Client.auth() method.
         """
         pass

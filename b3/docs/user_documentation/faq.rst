@@ -152,17 +152,6 @@ The syntax for the `database` setting is :
 Make sure all that info is correct by connecting to your MySQL database with a MySQL adminstration tool (see :ref:`mysql-tools`).
 
 
-Can I run B3 on a LAN?
-----------------------
-
-Unfortunately not for all games.
-
-For some games B3 uses Punkbuster (The Anti-Cheat tool) to authenticate players. Punkbuster doesn't authorize people on
-LAN servers, so B3 will not run correctly.
-
-Also the CoD series games will not provide you with a GUID, so on CoD B3 won't even work without PunkBuster on a LAN.
-
-
 Can I run many different bots? Using the same sort of settings and database?
 ----------------------------------------------------------------------------
 

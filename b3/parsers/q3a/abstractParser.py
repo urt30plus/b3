@@ -36,7 +36,6 @@ import b3.events
 import b3.functions
 import b3.parser
 from b3.functions import prefixText
-from b3.parsers.punkbuster import PunkBuster
 from b3.parsers.q3a import rcon
 
 
@@ -48,7 +47,6 @@ class AbstractParser(b3.parser.Parser):
     privateMsg = True
     rconTest = True
     OutputClass = rcon.Rcon
-    PunkBuster = None
 
     _clientConnectID = None
     _logSync = 2
@@ -159,8 +157,6 @@ class AbstractParser(b3.parser.Parser):
 
         # add the world client
         self.clients.newClient('1022', guid='WORLD', name='World', hide=True, pbid='WORLD')
-        if self.config.has_option('server', 'punkbuster') and self.config.getboolean('server', 'punkbuster'):
-            self.PunkBuster = PunkBuster(self)
 
         self._eventMap['warmup'] = self.getEventID('EVT_GAME_WARMUP')
         self._eventMap['shutdowngame'] = self.getEventID('EVT_GAME_ROUND_END')
@@ -495,10 +491,7 @@ class AbstractParser(b3.parser.Parser):
             self.write(self.getCommand('kick', cid=client, reason=reason))
             return
 
-        if self.PunkBuster:
-            self.PunkBuster.kick(client, 0.5, reason)
-        else:
-            self.write(self.getCommand('kick', cid=client.cid, reason=reason))
+        self.write(self.getCommand('kick', cid=client.cid, reason=reason))
 
         if admin:
             variables = self.getMessageVariables(client=client, reason=reason, admin=admin)
@@ -552,13 +545,7 @@ class AbstractParser(b3.parser.Parser):
             self.error('Q3AParser.ban(): no client id, database must be down, doing tempban')
             return self.tempban(client, reason, 1440, admin, silent)
 
-        if self.PunkBuster:
-            self.PunkBuster.ban(client, reason)
-            # bans will only last 7 days, this is a failsafe incase a ban cant
-            # be removed from punkbuster
-            # self.PunkBuster.kick(client, 1440 * 7, reason)
-        else:
-            self.write(self.getCommand('ban', cid=client.cid, reason=reason))
+        self.write(self.getCommand('ban', cid=client.cid, reason=reason))
 
         if admin:
             variables = self.getMessageVariables(client=client, reason=reason, admin=admin)
@@ -581,25 +568,7 @@ class AbstractParser(b3.parser.Parser):
         :param admin: The admin who unbanned this client
         :param silent: Whether or not to announce this unban
         """
-        if self.PunkBuster:
-            if client.pbid:
-                result = self.PunkBuster.unBanGUID(client)
-
-                if result:
-                    admin.message('^3Unbanned^7: %s^7: %s' % (client.exactName, result))
-
-                if admin:
-                    variables = self.getMessageVariables(client=client, reason=reason, admin=admin)
-                    fullreason = self.getMessage('unbanned_by', variables)
-                else:
-                    variables = self.getMessageVariables(client=client, reason=reason)
-                    fullreason = self.getMessage('unbanned', variables)
-
-                if not silent and fullreason != '':
-                    self.say(fullreason)
-            elif admin:
-                admin.message('%s^7 unbanned but has no punkbuster id' % client.exactName)
-        elif admin:
+        if admin:
             admin.message('^3Unbanned^7: %s^7. You may need to manually remove the user '
                           'from the game\'s ban file.' % client.exactName)
 
@@ -628,16 +597,7 @@ class AbstractParser(b3.parser.Parser):
             variables = self.getMessageVariables(client=client, reason=reason, banduration=banduration)
             fullreason = self.getMessage('temp_banned', variables)
 
-        if self.PunkBuster:
-            # punkbuster acts odd if you ban for more than a day
-            # tempban for a day here and let b3 re-ban if the player
-            # comes back
-            if duration > 1440:
-                duration = 1440
-
-            self.PunkBuster.kick(client, duration, reason)
-        else:
-            self.write(self.getCommand('tempban', cid=client.cid, reason=reason))
+        self.write(self.getCommand('tempban', cid=client.cid, reason=reason))
 
         if not silent and fullreason != '':
             self.say(fullreason)
@@ -710,27 +670,24 @@ class AbstractParser(b3.parser.Parser):
         Query the game server for connected players.
         Return a dict having players' id for keys and players' data as another dict for values.
         """
-        if self.PunkBuster:
-            return self.PunkBuster.getPlayerList()
-        else:
-            data = self.write('status', maxRetries=maxRetries)
-            if not data:
-                return {}
+        data = self.write('status', maxRetries=maxRetries)
+        if not data:
+            return {}
 
-            players = {}
-            lastslot = -1
-            for line in data.split('\n')[3:]:
-                m = re.match(self._regPlayer, line.strip())
-                if m:
-                    d = m.groupdict()
-                    if int(m.group('slot')) > lastslot:
-                        lastslot = int(m.group('slot'))
-                        d['pbid'] = None
-                        players[str(m.group('slot'))] = d
+        players = {}
+        lastslot = -1
+        for line in data.split('\n')[3:]:
+            m = re.match(self._regPlayer, line.strip())
+            if m:
+                d = m.groupdict()
+                if int(m.group('slot')) > lastslot:
+                    lastslot = int(m.group('slot'))
+                    d['pbid'] = None
+                    players[str(m.group('slot'))] = d
 
-                    else:
-                        self.debug('Duplicate or incorrect slot number - '
-                                   'client ignored %s last slot %s' % (m.group('slot'), lastslot))
+                else:
+                    self.debug('Duplicate or incorrect slot number - '
+                               'client ignored %s last slot %s' % (m.group('slot'), lastslot))
 
         return players
 
@@ -841,7 +798,7 @@ class AbstractParser(b3.parser.Parser):
     def authorizeClients(self):
         """
         For all connected players, fill the client object with properties allowing to find
-        the user in the database (usualy guid, or punkbuster id, ip) and call the
+        the user in the database (usualy guid, or ip) and call the
         Client.auth() method.
         """
         players = self.getPlayerList(maxRetries=4)

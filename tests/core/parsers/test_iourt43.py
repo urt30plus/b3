@@ -87,7 +87,6 @@ class Iourt43TestCase(unittest.TestCase):
             </configuration>""")
         with logging_disabled():
             self.console = Iourt43Parser(self.parser_conf)
-        self.console.PunkBuster = None  # no Punkbuster support in that game
 
         self.output_mock = mock()
 
@@ -552,7 +551,6 @@ class Test_OnClientuserinfo(Iourt43TestCase):
 
     def setUp(self):
         super(Test_OnClientuserinfo, self).setUp()
-        self.console.PunkBuster = None
 
     def test_ioclient(self):
         self.console.queryClientFrozenSandAccount = Mock(return_value={})
@@ -627,7 +625,6 @@ class Test_OnClientuserinfochanged(Iourt43TestCase):
 
     def setUp(self):
         super(Test_OnClientuserinfochanged, self).setUp()
-        self.console.PunkBuster = None
 
     def test_ioclient(self):
         # do OnClientuserinfo first to generate the client
@@ -1328,7 +1325,6 @@ class Test_config(unittest.TestCase):
                 </settings>
             </configuration>""")
         self.console = Iourt43Parser(self.parser_conf)
-        self.console.PunkBuster = None  # no Punkbuster support in that game
 
     def tearDown(self):
         if hasattr(self, "parser"):

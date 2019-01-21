@@ -2025,11 +2025,6 @@ class CtimePlugin(b3.plugin.Plugin):
         self.debug(u'CTIME LEFT:')
         if clientid in self._clients:
             ts = self._clients[clientid]
-            # Fail: Sometimes PB in cod4 returns 31 character guids, we need to dump them.
-            # Lets look ahead and do this for the whole codseries.
-            # if(self.console.gameName[:3] == 'cod' and self.console.PunkBuster and len(ts.client.guid) != 32):
-            #    pass
-            # else:
             ts.left = datetime.datetime.now()
             diff = (int(time.mktime(ts.left.timetuple())) - int(time.mktime(ts.came.timetuple())))
 

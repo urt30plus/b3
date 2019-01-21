@@ -22,4 +22,3 @@ Contents:
    welcome
    spamcontrol
    pingwatch
-   punkbuster

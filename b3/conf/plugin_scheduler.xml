@@ -44,22 +44,6 @@
                 <arg>argument 2</arg>
             </frostbite>
 
-    Example :
-
-        If you want to run the punkbuster command 'pb_sv_update' every night at 3:30 am
-
-        for Quake3 like games :
-            <daily name="myDailyPBupdate" hour="3" minutes="30">
-                <rcon>pb_sv_update</rcon>
-            </daily>
-
-        for Frostbite like games :
-            <daily name="myDailyPBupdate" hour="3" minutes="30">
-                <frostbite command="punkBuster.pb_sv_command">
-                    <arg>pb_sv_update</arg>
-                </frostbite>
-            </daily>
-
     enable_plugin and disable_plugin are commands that make B3 enable or disable
     any plugin. Let say you want to enable the tk plugin only at night when no
     admin is online, use the following tasks :

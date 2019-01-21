@@ -345,7 +345,7 @@ def fuzzyGuidMatch(a, b):
 
     if len(a) == 32 and len(b) == 31:
         # Looks like a truncated id, check using levenshtein
-        # Use levenshtein_distance to find GUIDs off by 1 char, as caused by a bug in COD Punkbuster
+        # Use levenshtein_distance to find GUIDs off by 1 char
         distance = levenshteinDistance(a, b)
         if distance <= 1:
             return True

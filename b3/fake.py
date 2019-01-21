@@ -42,7 +42,6 @@ from io import StringIO
 import b3.events
 import b3.output
 import b3.parser
-import b3.parsers.punkbuster
 from b3.clients import Clients
 from b3.cvar import Cvar
 from b3.functions import splitDSN
@@ -85,9 +84,6 @@ class FakeConsole(b3.parser.Parser):
         self.game.mapName = 'ut4_turnpike'
         self.cvars = {}
         self._handlers = {}
-
-        if not self.config.has_option('server', 'punkbuster') or self.config.getboolean('server', 'punkbuster'):
-            self.PunkBuster = b3.parsers.punkbuster.PunkBuster(self)
 
         self.input = StringIO()
         self.working = True

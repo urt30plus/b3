@@ -61,9 +61,6 @@ Some placeholders are special and also define a parameter which can be added aft
 #### `<ARG:FIND_PLAYER:GUID>`
   Makes your custom command accept a mandatory parameter which represents a player. The placeholder will be replaced with that player's GUID.
 
-#### `<ARG:FIND_PLAYER:PBID>`
-  Makes your custom command accept a mandatory parameter which represents a player. The placeholder will be replaced with that player's Punkbuster id.
-
 #### `<ARG:FIND_PLAYER:NAME>`
   Makes your custom command accept a mandatory parameter which represents a player. The placeholder will be replaced with that player's cleaned up name.
 
@@ -100,9 +97,6 @@ Some placeholders are special and also define a parameter which can be added aft
 #### `<LAST_KILLER:GUID>`
   The placeholder will be replaced with the GUID of the player who killed the player calling the command last.
 
-#### `<LAST_KILLER:PBID>`
-  The placeholder will be replaced with the Punkbuster id of the player who killed the player calling the command last.
-
 #### `<LAST_KILLER:NAME>`
   The placeholder will be replaced with the cleaned up name of the player who killed the player calling the command last.
 
@@ -119,9 +113,6 @@ Some placeholders are special and also define a parameter which can be added aft
 #### `<LAST_VICTIM:GUID>`
   The placeholder will be replaced with the GUID of the player who got last killed by the player calling the command.
 
-#### `<LAST_VICTIM:PBID>`
-  The placeholder will be replaced with the Punkbuster id of the player who got last killed by the player calling the command.
-
 #### `<LAST_VICTIM:NAME>`
   The placeholder will be replaced with the cleaned up name of the player who got last killed by the player calling the command.
 
@@ -137,9 +128,6 @@ Some placeholders are special and also define a parameter which can be added aft
 
 #### `<PLAYER:GUID>`
   The placeholder will be replaced with the GUID of the player calling the command.
-
-#### `<PLAYER:PBID>`
-  The placeholder will be replaced with the Punkbuster id of the player calling the command.
 
 #### `<PLAYER:NAME>`
   The placeholder will be replaced with the cleaned up name of the player calling the command.

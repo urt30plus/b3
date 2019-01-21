@@ -53,7 +53,6 @@ class CommonDefaultTestMethodsMixin:
         self.assertEqual('games_mp.log', self.conf.get('server', 'game_log'))
         self.assertEqual('127.0.0.1', self.conf.get('server', 'public_ip'))
         self.assertEqual('127.0.0.1', self.conf.get('server', 'rcon_ip'))
-        self.assertEqual('on', self.conf.get('server', 'punkbuster'))
         self.assertEqual('0.33', self.conf.get('server', 'delay'))
         self.assertEqual('50', self.conf.get('server', 'lines_per_second'))
 

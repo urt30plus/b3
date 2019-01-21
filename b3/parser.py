@@ -1465,7 +1465,7 @@ class Parser(object):
     def authorizeClients(self):
         """
         For all connected players, fill the client object with properties allowing to find 
-        the user in the database (usualy guid, or punkbuster id, ip) and call the 
+        the user in the database (usualy guid, or ip) and call the
         Client.auth() method 
         """
         raise NotImplementedError
