@@ -33,7 +33,6 @@ import b3.clients
 import b3.events
 import b3.parser
 from b3.clients import Client
-from b3.events import Event
 from b3.functions import getStuffSoundingLike
 from b3.functions import prefixText
 from b3.functions import start_daemon_thread
@@ -187,10 +186,8 @@ class Iourt43Client(Client):
 
 
 class Iourt43Parser(AbstractParser):
-    """Forked from the Iourt41 parser with 4.2 and 4.3 additions.
-
-    This parser is meant to serve as the new base parser for
-    all UrT version from 4.3.3 on.
+    """This parser is meant to serve as the new base parser for
+    all UrT version from 4.3 on.
     """
     gameName = 'iourt43'
 
@@ -2246,34 +2243,6 @@ class Iourt43Parser(AbstractParser):
             self.debug('fs_homepath: %s' % self.game.fs_homepath)
 
     def __setup_events(self):
-        # add UrT 4.1 specific events
-        self.Events.createEvent('EVT_GAME_FLAG_RETURNED', 'Flag returned')
-        self.Events.createEvent('EVT_CLIENT_GEAR_CHANGE', 'Client gear change')
-        self.Events.createEvent('EVT_SURVIVOR_WIN', 'Survivor Winner')
-        self.Events.createEvent('EVT_BOMB_EXPLODED', 'Bomb exploded')
-        self.Events.createEvent('EVT_SENTRY_KILL', 'Mr Sentry kill')
-        # add UrT 4.2 specific events
-        self.Events.createEvent('EVT_CLIENT_RADIO', 'Event client radio')
-        self.Events.createEvent('EVT_GAME_FLAG_HOTPOTATO', 'Event game hotpotato')
-        self.Events.createEvent('EVT_CLIENT_CALLVOTE', 'Event client call vote')
-        self.Events.createEvent('EVT_CLIENT_VOTE', 'Event client vote')
-        self.Events.createEvent('EVT_VOTE_PASSED', 'Event vote passed')
-        self.Events.createEvent('EVT_VOTE_FAILED', 'Event vote failed')
-        self.Events.createEvent('EVT_FLAG_CAPTURE_TIME', 'Event flag capture time')
-        self.Events.createEvent('EVT_CLIENT_JUMP_RUN_START', 'Event client jump run started')
-        self.Events.createEvent('EVT_CLIENT_JUMP_RUN_STOP', 'Event client jump run stopped')
-        self.Events.createEvent('EVT_CLIENT_JUMP_RUN_CANCEL', 'Event client jump run canceled')
-        self.Events.createEvent('EVT_CLIENT_POS_SAVE', 'Event client position saved')
-        self.Events.createEvent('EVT_CLIENT_POS_LOAD', 'Event client position loaded')
-        self.Events.createEvent('EVT_CLIENT_GOTO', 'Event client goto')
-        self.Events.createEvent('EVT_CLIENT_SPAWN', 'Event client spawn')
-        self.Events.createEvent('EVT_CLIENT_SURVIVOR_WINNER', 'Event client survivor winner')
-        self.Events.createEvent('EVT_CLIENT_FREEZE', 'Event client freeze')
-        self.Events.createEvent('EVT_CLIENT_THAWOUT_STARTED', 'Event client thawout started')
-        self.Events.createEvent('EVT_CLIENT_THAWOUT_FINISHED', 'Event client thawout finished')
-        self.Events.createEvent('EVT_CLIENT_MELTED', 'Event client melted')
-        # add UrT 4.3 specific events
-        self.Events.createEvent('EVT_ASSIST', 'Event assist')
         # add event mappings
         self._eventMap['warmup'] = self.getEventID('EVT_GAME_WARMUP')
         self._eventMap['shutdowngame'] = self.getEventID('EVT_GAME_ROUND_END')
