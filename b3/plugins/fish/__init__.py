@@ -1,3 +1,6 @@
+__author__ = '|30+|moneyshot'
+__version__ = '1.0.0'
+
 import b3.clients
 import b3.plugin
 
