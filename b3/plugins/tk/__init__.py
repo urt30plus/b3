@@ -432,7 +432,7 @@ class TkPlugin(b3.plugin.Plugin):
         self.debug(msg)
         for cid, c in self.console.clients.items():
             tkinfo = self.getClientTkInfo(c)
-            for acid, points in tkinfo.attackers.items():
+            for acid, points in list(tkinfo.attackers.items()):
                 points = int(round(points / 2))
                 if points == 0:
                     self.forgive(acid, c, True)
