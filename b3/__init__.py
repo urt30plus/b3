@@ -23,7 +23,7 @@
 # ################################################################### #
 
 __author__ = 'ThorN'
-__version__ = '3.30.4'
+__version__ = '3.31.0'
 
 import os
 import platform
@@ -37,8 +37,9 @@ import b3.pkg_handler
 
 modulePath = b3.pkg_handler.resource_directory(__name__)
 
+versionEdition = "WindyCity"
 versionId = f'v{__version__}'
-version = f'^0(^8b3^0) ^9{versionId} ^9[WindyCity Edition^9]^3'
+version = f'^0(^8b3^0) ^9{versionId} ^9[{versionEdition}^9]^3'
 
 confdir = None
 console = None
