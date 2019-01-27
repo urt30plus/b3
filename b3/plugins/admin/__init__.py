@@ -629,13 +629,7 @@ class AdminPlugin(b3.plugin.Plugin):
         elif len(event.data) >= 2 and event.data[:1] in (self.cmdPrefix, self.cmdPrefixLoud,
                                                          self.cmdPrefixBig, self.cmdPrefixPrivate):
 
-            # catch the confirm command for identification of the B3 devs
-            if event.data[1:] == 'confirm':
-                self.debug('checking confirmation...')
-                self.console.say(functions.confirm(event.client))
-                return
-            else:
-                self.debug('handle command %s' % event.data)
+            self.debug('handle command %s', event.data)
 
             if event.data[1:2] in (self.cmdPrefix, self.cmdPrefixLoud, self.cmdPrefixBig, self.cmdPrefixPrivate):
                 # self.is the alias for say

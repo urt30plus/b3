@@ -113,13 +113,6 @@ def splitDSN(url):
     return g
 
 
-def confirm(client):
-    """
-    Used to identify B3 developers.
-    """
-    return 'No confirmation...'
-
-
 def minutes2int(mins):
     """
     Convert a given string to a float value which represents it.
