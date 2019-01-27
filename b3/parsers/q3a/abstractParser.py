@@ -375,7 +375,7 @@ class AbstractParser(b3.parser.Parser):
 
     def getClient(self, match=None, attacker=None, victim=None):
         """
-        Get a client object using the best availible data.
+        Get a client object using the best available data.
         :param match: The match group extracted from the log line parsing
         :param attacker: The attacker group extracted from the log line parsing
         :param victim: The victim group extracted from the log line parsing
@@ -409,7 +409,7 @@ class AbstractParser(b3.parser.Parser):
     #                                                                                                                  #
     ####################################################################################################################
 
-    def message(self, client, text):
+    def message(self, client, text, *args):
         """
         Send a private message to a client.
         :param client: The client to who send the message.
@@ -431,7 +431,7 @@ class AbstractParser(b3.parser.Parser):
             lines.append(self.getCommand('message', cid=client.cid, message=line))
         self.writelines(lines)
 
-    def say(self, text):
+    def say(self, text, *args):
         """
         Broadcast a message to all players.
         :param text: The message to be broadcasted
@@ -443,10 +443,10 @@ class AbstractParser(b3.parser.Parser):
             lines.append(self.getCommand('say', message=line))
         self.writelines(lines)
 
-    def saybig(self, text):
+    def saybig(self, text, *args):
         """
         Broadcast a message to all players in a way that will catch their attention.
-        :param text: The message to be broadcasted
+        :param text: The message to be broadcast
         """
         for c in range(1, 6):
             self.say('^%i%s' % (c, text))
@@ -510,14 +510,14 @@ class AbstractParser(b3.parser.Parser):
         """
         Kick the client matching the given name.
         We get here if a name was given, and the name was not found as
-        a client: this will allow the kicking of non autenticated players
+        a client: this will allow the kicking of non authenticated players
         :param client: The client name
         :param reason: The reason for this kick
         :param admin: The admin who performed the kick
         :param silent: Whether or not to announce this kick
         """
         # We get here if a name was given, and the name was not found as a client
-        # This will allow the kicking of non autenticated players
+        # This will allow the kicking of non authenticated players
         if 'kickbyfullname' in self._commands:
             self.debug('Trying kick by full name: %s for %s' % (client, reason))
             result = self.write(self.getCommand('kickbyfullname', name=client))

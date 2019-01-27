@@ -1531,7 +1531,7 @@ class Iourt43Parser(AbstractParser):
             lines.append(self.getCommand('broadcast', message=line))
         self.writelines(lines)
 
-    def saybig(self, text):
+    def saybig(self, text, *args):
         """
         Print a message in the center screen.
         :param text: The message to be sent.
