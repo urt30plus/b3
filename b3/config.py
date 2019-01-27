@@ -325,15 +325,20 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         Return a configuration value as a string.
         """
+        # Some calls will pass `raw` in the args (True,) and others
+        # will have kwargs {raw: True, vars: None}. There should not
+        # be a situation where both args and kwargs are present. But...
+        # TODO: remove print statements after confirming they are not fired
+        opts = kwargs
+        if args and not opts:
+            opts = {"raw": args[0]}
+            if len(args) > 1:
+                print(f"ERROR: CfgConfigParser.get(option={option}) too many values: {args}")
+                opts["vars"] = args[1]
+        else:
+            print(f"ERROR: CfgConfigParser.get(option={option}) args and kwargs: args={args} / kwargs={kwargs}")
         try:
-            # TODO: fix this hack, PY3 configparser requires named params for `raw` and `vars`
-            opts = {"self": self, "section": section, "option": option}
-            opts.update(kwargs)
-            if len(args) > 0:
-                opts["raw"] = args[0]
-                if len(args) > 1:
-                    opts["vars"] = args[1]
-            value = configparser.ConfigParser.get(**opts)
+            value = configparser.ConfigParser.get(self, section, option, **opts)
             if value is None:
                 return ""
             return value
