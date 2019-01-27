@@ -27,13 +27,11 @@ import logging
 import unittest
 from unittest import TestCase
 
-import b3
 from b3.config import XmlConfigParser, CfgConfigParser, ConfigFileNotValid
 from tests import B3TestCase
 
 
-@unittest.skipUnless(b3.getPlatform() == "nt", "requires Windows")
-class Test_XmlConfigParser_windows(B3TestCase):
+class Test_XmlConfigParser_outputfile(B3TestCase):
 
     def setUp(self):
         B3TestCase.setUp(self)
@@ -47,8 +45,8 @@ class Test_XmlConfigParser_windows(B3TestCase):
         """)
 
     def test_getpath(self):
-        self.console.config.fileName = r"c:\some\where\conf\b3.xml"
-        self.assertEqual(r"c:\some\where\conf\status.xml", self.conf.getpath('settings', 'output_file'))
+        self.console.config.fileName = r"/tmp/b3.xml"
+        self.assertEqual(r"/tmp/status.xml", self.conf.getpath('settings', 'output_file'))
 
     def test_issue_xlr8or_18(self):
         self.console.config.fileName = r"b3.xml"
