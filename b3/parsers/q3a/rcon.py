@@ -56,7 +56,7 @@ class Rcon(object):
 
     def __init__(self, console, host, password):
         """
-        Object contructor.
+        Object constructor.
         :param console: The console implementation
         :param host: The host where to send RCON commands
         :param password: The RCON password
@@ -73,8 +73,8 @@ class Rcon(object):
             self.status_cache_expire_time = abs(self.console.config.getint('caching', 'status_cache_expire'))
             if self.status_cache_expire_time > 5:
                 self.status_cache_expire_time = 5
-        # set the cacche expire time to now, so the first status request will retrieve a status from the server
-        status_cache_expired = time.time()
+        # set the cache expire time to now, so the first status request will retrieve a status from the server
+        self.status_cache_expired = time.time()
 
         self.console.bot('Rcon status cache expire time: [%s sec] Type: [%s]' % (self.status_cache_expire_time,
                                                                                  self.status_cache))
