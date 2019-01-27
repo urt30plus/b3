@@ -881,7 +881,7 @@ class Parser(object):
                     variables[obj] = obj
             else:
                 for attr in vars(obj):
-                    pattern = re.compile('[\W_]+')
+                    pattern = re.compile(r'[\W_]+')
                     cleanattr = pattern.sub('', attr)  # trim any underscore or any non alphanumeric character
                     variables[cleanattr] = getattr(obj, attr)
 
@@ -896,7 +896,7 @@ class Parser(object):
             # self.debug('Classname of object %s: %s' % (key, obj.__class__.__name__))
             else:
                 for attr in vars(obj):
-                    pattern = re.compile('[\W_]+')
+                    pattern = re.compile(r'[\W_]+')
                     cleanattr = pattern.sub('', attr)  # trim any underscore or any non alphanumeric character
                     currkey = ''.join([key, cleanattr])
                     variables[currkey] = getattr(obj, attr)
@@ -1504,7 +1504,7 @@ class Parser(object):
         Called if b3.admin.penalizeClient() does not know a given penalty type. 
         Overwrite this to add customized penalties for your game like 'slap', 'nuke', 
         'mute', 'kill' or anything you want.
-        /!\ This method must return True if the penalty was inflicted.
+        IMPORTANT: This method must return True if the penalty was inflicted.
         """
         pass
 
