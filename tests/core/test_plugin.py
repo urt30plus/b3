@@ -441,7 +441,7 @@ class Test_Plugin_requiresParser(B3TestCase):
         with patch.object(self.console, 'error') as error_mock:
             self.console.loadPlugins()
         # THEN
-        self.assertListEqual([call('Could not load plugin testplugin2', exc_info=ANY)], error_mock.mock_calls)
+        self.assertListEqual([call('Could not load plugin %s', 'testplugin2', exc_info=ANY)], error_mock.mock_calls)
 
 
 class Test_Plugin_getSetting(B3TestCase):
@@ -584,4 +584,4 @@ class Test_Plugin_requiresStorage(B3TestCase):
         with patch.object(self.console, 'error') as error_mock:
             self.console.loadPlugins()
         # THEN
-        self.assertListEqual([call('Could not load plugin testplugin3', exc_info=ANY)], error_mock.mock_calls)
+        self.assertListEqual([call('Could not load plugin %s', 'testplugin3', exc_info=ANY)], error_mock.mock_calls)
