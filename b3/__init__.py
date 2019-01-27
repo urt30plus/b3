@@ -268,7 +268,7 @@ def start(mainconfig, options):
         """
         console.bot("TERM signal received: shutting down")
         console.shutdown()
-        raise SystemExit(222)
+        raise SystemExit(0)
 
     try:
         # necessary if using the functions profiler,
