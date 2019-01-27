@@ -330,13 +330,14 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         # be a situation where both args and kwargs are present. But...
         # TODO: remove print statements after confirming they are not fired
         opts = kwargs
-        if args and not opts:
-            opts = {"raw": args[0]}
-            if len(args) > 1:
-                print(f"ERROR: CfgConfigParser.get(option={option}) too many values: {args}")
-                opts["vars"] = args[1]
-        else:
-            print(f"ERROR: CfgConfigParser.get(option={option}) args and kwargs: args={args} / kwargs={kwargs}")
+        if args:
+            if opts:
+                print(f"ERROR: CfgConfigParser.get(option={option}) args and kwargs: args={args} / kwargs={opts}")
+            else:
+                opts = {"raw": args[0]}
+                if len(args) > 1:
+                    print(f"ERROR: CfgConfigParser.get(option={option}) too many values: {args}")
+                    opts["vars"] = args[1]
         try:
             value = configparser.ConfigParser.get(self, section, option, **opts)
             if value is None:
