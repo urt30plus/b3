@@ -137,7 +137,7 @@ class AdvPlugin(b3.plugin.Plugin):
             self.warning('could not find settings/max_level in config file, using default: 2')
 
         if self.config.has_option('settings', 'ads'):
-            self._fileName = self.console.getAbsolutePath(self.config.get('settings', 'ads'))
+            self._fileName = b3.getAbsolutePath(self.config.get('settings', 'ads'), False)
             self.load_from_file(self._fileName)
         else:
             self._fileName = None

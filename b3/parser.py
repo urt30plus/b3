@@ -360,14 +360,6 @@ class Parser(object):
         self.debug("Creating the event queue with size %s", queuesize)
         self.queue = queue.Queue(queuesize)
 
-    def getAbsolutePath(self, path, decode=False):
-        """
-        Return an absolute path name and expand the user prefix (~)
-        :param path: the relative path we want to expand
-        :param decode: indicates whether decoding is required
-        """
-        return b3.getAbsolutePath(path, decode=decode)
-
     def _dumpEventsStats(self):
         """
         Dump event statistics into the B3 log file.
@@ -635,7 +627,7 @@ class Parser(object):
                 self.error('Could not load plugin %s', p['name'], exc_info=err)
 
         # check for AdminPlugin
-        if not 'admin' in plugins:
+        if 'admin' not in plugins:
             # critical will exit, admin plugin must be loaded!
             self.critical('Plugin admin is essential and MUST be loaded! '
                           'Cannot continue without admin plugin')
@@ -669,8 +661,9 @@ class Parser(object):
 
                 # check if the plugin needs a particular storage protocol to work
                 if p_data.clazz.requiresStorage and self.storage.protocol not in p_data.clazz.requiresStorage:
-                    raise MissingRequirement(f'plugin {p_data.name} is not compatible with the storage protocol being used ({self.storage.protocol}) : '
-                                             f'supported protocols are : {", ".join(p_data.clazz.requiresStorage)}')
+                    raise MissingRequirement(
+                        f'plugin {p_data.name} is not compatible with the storage protocol being used ({self.storage.protocol}) : '
+                        f'supported protocols are : {", ".join(p_data.clazz.requiresStorage)}')
 
                 # check for plugin dependency
                 if p_data.clazz.requiresPlugins:
@@ -680,7 +673,8 @@ class Parser(object):
                         if r not in plugins and r not in plugin_required:
                             try:
                                 # missing requirement, try to load it
-                                self.debug('Plugin %s has unmet dependency : %s : trying to load plugin %s...', p_data.name, r, r)
+                                self.debug('Plugin %s has unmet dependency : %s : trying to load plugin %s...',
+                                           p_data.name, r, r)
                                 collection += _get_plugin_data(PluginData(name=r))
                                 self.debug('Plugin %s dependency satisfied: %s', p_data.name, r)
                             except Exception as ex:
@@ -717,8 +711,8 @@ class Parser(object):
 
         # sort remaining plugins according to their inclusion requirements
         self.bot('Sorting plugins according to their dependency tree...')
-        sorted_list = [y for y in \
-                       topological_sort([(x.name, set(x.clazz.requiresPlugins + [z for z in \
+        sorted_list = [y for y in
+                       topological_sort([(x.name, set(x.clazz.requiresPlugins + [z for z in
                                                                                  x.clazz.loadAfterPlugins if
                                                                                  z in plugin_dict])) for x in
                                          plugin_list])]
@@ -847,7 +841,7 @@ class Parser(object):
         Enable all plugins except for 'admin'
         """
         for k in self._plugins:
-            if k not in ('admin'):
+            if k not in 'admin':
                 p = self._plugins[k]
                 self.bot('Enabling plugin: %s', k)
                 p.enable()
@@ -949,7 +943,7 @@ class Parser(object):
         :return: tuple
         """
         if tz_name:
-            if not tz_name in b3.timezones.timezones:
+            if tz_name not in b3.timezones.timezones:
                 self.warning("Unknown timezone name [%s]: "
                              "falling back to auto-detection mode.", tz_name)
             else:
@@ -1073,7 +1067,7 @@ class Parser(object):
         """
         self.debug('%s: register event <%s>',
                    event_handler.__class__.__name__, self.getEventName(event_name))
-        if not event_name in self._handlers:
+        if event_name not in self._handlers:
             self._handlers[event_name] = []
         if event_handler not in self._handlers[event_name]:
             self._handlers[event_name].append(event_handler)
