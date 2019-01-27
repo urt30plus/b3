@@ -947,7 +947,7 @@ num score ping name            lastmsg address               qport rate
         # WHEN
         rv = self.console.getPlayerList()
         # THEN
-        self.assertDictContainsSubset({
+        self.assertDictEqual({
             '5': {'slot': '5', 'last': '0', 'name': 'theName2^7', 'ip': '11.22.33.45', 'ping': '48', 'pbid': None,
                   'qport': '38410', 'rate': '8000', 'score': '0', 'port': '27961'},
             '4': {'slot': '4', 'last': '0', 'name': 'theName^7', 'ip': '11.22.33.44', 'ping': '141', 'pbid': None,

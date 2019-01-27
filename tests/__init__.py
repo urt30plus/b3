@@ -30,7 +30,7 @@ import unittest
 from contextlib import contextmanager
 
 from mock import Mock, patch
-from mockito import when, unstub
+from mockito import unstub
 
 from b3.config import CfgConfigParser
 from b3.config import MainConfig

@@ -78,20 +78,24 @@ class Test_getMessageVariables(unittest.TestCase):
     def setUp(self):
         self.parser = DummyParser()
 
+    def assertDictIsSubset(self, subset, superset, *args):
+        compare_sub = dict([(k, superset[k]) for k in subset.keys() if k in superset.keys()])
+        self.assertEqual(subset, compare_sub)
+
     def test_with_parameters(self):
         client = Client(name="Jack")
         rv = self.parser.getMessageVariables(client)
-        self.assertDictContainsSubset({'name': client.name}, rv, rv)
+        self.assertDictIsSubset({'name': client.name}, rv, rv)
 
     def test_with_named_parameters(self):
         client = Client(name="Jack")
-        self.assertDictContainsSubset({'clientname': client.name, 'reason': 'this is a good reason'},
-                                      self.parser.getMessageVariables(client=client, reason="this is a good reason"))
+        self.assertDictIsSubset({'clientname': client.name, 'reason': 'this is a good reason'},
+                                self.parser.getMessageVariables(client=client, reason="this is a good reason"))
 
     def test_with_named_parameters__unicode(self):
         client = Client(name=u"ÄÖé")
-        self.assertDictContainsSubset({'clientname': client.name, 'reason': 'this is a good reason'},
-                                      self.parser.getMessageVariables(client=client, reason="this is a good reason"))
+        self.assertDictIsSubset({'clientname': client.name, 'reason': 'this is a good reason'},
+                                self.parser.getMessageVariables(client=client, reason="this is a good reason"))
 
 
 class Test_getWrap(unittest.TestCase):
