@@ -56,6 +56,18 @@ class TestClients(B3TestCase):
         clients = self.clients.getClientsByName('qsdfqsdf fqsd fsqd fsd f')
         self.assertEqual([], clients)
 
+    def test_lookupClientsByName(self):
+        clients = self.clients.lookupByName('joe')
+        self.assertEqual(1, len(clients))
+        self.assertEqual(1, clients[0].cid)
+
+        clients = self.clients.lookupByName('oe')
+        self.assertEqual(1, len(clients))
+        self.assertEqual(1, clients[0].cid)
+
+        clients = self.clients.lookupByName('qsdfqsdf fqsd fsqd fsd f')
+        self.assertEqual([], clients)
+
     def test_getByDB_when_client_connected(self):
         # GIVEN
         haxor = self.clients[2]

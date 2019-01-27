@@ -284,3 +284,27 @@ class Test_utils(unittest.TestCase):
         self.assertEqual(functions.getCmd(self, "foo"), self.cmd_foo)
         self.assertEqual(functions.getCmd(self, "bar"), self.cmd_bar)
         self.assertIsNone(functions.getCmd(self, "baz"))
+
+
+class Test_escape_string(unittest.TestCase):
+
+    def test_ord_zero(self):
+        self.assertEqual(functions.escape_string('\0'), '\\0')
+
+    def test_backslash(self):
+        self.assertEqual(functions.escape_string('\\'), '\\\\')
+
+    def test_newline(self):
+        self.assertEqual(functions.escape_string('\n'), '\\n')
+
+    def test_return(self):
+        self.assertEqual(functions.escape_string('\r'), '\\r')
+
+    def test_control(self):
+        self.assertEqual(functions.escape_string('\032'), '\\Z')
+
+    def test_double_quote(self):
+        self.assertEqual(functions.escape_string('"'), '\\"')
+
+    def test_single_quote(self):
+        self.assertEqual(functions.escape_string("'"), "\\'")

@@ -1198,15 +1198,6 @@ class Clients(dict):
         self._guidIndex = {}
         self._nameIndex = {}
 
-        self.escape_table = [chr(x) for x in range(128)]
-        self.escape_table[0] = u'\\0'
-        self.escape_table[ord('\\')] = u'\\\\'
-        self.escape_table[ord('\n')] = u'\\n'
-        self.escape_table[ord('\r')] = u'\\r'
-        self.escape_table[ord('\032')] = u'\\Z'
-        self.escape_table[ord('"')] = u'\\"'
-        self.escape_table[ord("'")] = u"\\'"
-
     def find(self, handle, maxres=None):
         """
         Search a client.
@@ -1404,29 +1395,6 @@ class Clients(dict):
                 return None
         return None
 
-    def escape_string(self, value, mapping=None):
-        """
-        escape_string escapes *value* but not surround it with quotes.
-        Value should be bytes or unicode.
-        Source - https://github.com/PyMySQL/PyMySQL/blob/40f6a706144a9b65baa123e6d5d89d23558646ac/pymysql/converters.py
-        """
-        # TODO: fix me
-        # return self.__escape_string_py2(value, mapping)
-        return value
-
-    def __escape_string_py2(self, value, mapping=None):
-        if isinstance(value, str):
-            return value.translate(self.escape_table)
-        if isinstance(value, (bytes, bytearray)):
-            value = value.replace('\\', '\\\\')
-            value = value.replace('\0', '\\0')
-            value = value.replace('\n', '\\n')
-            value = value.replace('\r', '\\r')
-            value = value.replace('\032', '\\Z')
-            value = value.replace("'", "\\'")
-            value = value.replace('"', '\\"')
-        return value
-
     def lookupByName(self, name):
         """
         Return a lst of clients matching the given name.
@@ -1438,7 +1406,7 @@ class Clients(dict):
         if c and not c.hide:
             return [c]
 
-        name = self.escape_string(name)
+        name = functions.escape_string(name)
 
         sclient = self.console.storage.getClientsMatching({'%name%': name})
 

@@ -656,3 +656,22 @@ def start_daemon_thread(target, args=(), kwargs=None):
 
 def cmp(a, b):
     return (a > b) - (a < b)
+
+
+_escape_table = [chr(x) for x in range(128)]
+_escape_table[0] = u'\\0'
+_escape_table[ord('\\')] = u'\\\\'
+_escape_table[ord('\n')] = u'\\n'
+_escape_table[ord('\r')] = u'\\r'
+_escape_table[ord('\032')] = u'\\Z'
+_escape_table[ord('"')] = u'\\"'
+_escape_table[ord("'")] = u"\\'"
+
+
+def escape_string(value):
+    """
+    escape_string escapes *value* but not surround it with quotes.
+    Value should be bytes or unicode.
+    Source - https://github.com/PyMySQL/PyMySQL/blob/40f6a706144a9b65baa123e6d5d89d23558646ac/pymysql/converters.py
+    """
+    return value.translate(_escape_table)
