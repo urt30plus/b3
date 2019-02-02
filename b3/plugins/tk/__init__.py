@@ -638,7 +638,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         if not data:
             if len(v.attackers) == 1:
-                for cid, points in v.attackers.items():
+                for cid, points in list(v.attackers.items()):
                     self.forgive(cid, client)
             else:
                 self.cmd_forgivelist(data, client)
@@ -648,7 +648,7 @@ class TkPlugin(b3.plugin.Plugin):
             self.forgive(data, client)
         else:
             data = data.lower()
-            for cid, points in v.attackers.items():
+            for cid, points in list(v.attackers.items()):
                 c = self.console.clients.getByCID(cid)
                 if c and c.name.lower().find(data) != -1:
                     self.forgive(c.cid, client)
@@ -659,7 +659,7 @@ class TkPlugin(b3.plugin.Plugin):
         """
         v = self.getClientTkInfo(client)
         if len(v.attackers) == 1:
-            for cid, attacker in v.attackers.items():
+            for cid, attacker in list(v.attackers.items()):
                 if v.isGrudged(cid):
                     client.message(self.getMessage('no_forgive'))
                 else:
