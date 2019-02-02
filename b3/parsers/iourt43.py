@@ -539,7 +539,7 @@ class Iourt43Parser(AbstractParser):
         26: UT_MOD_MAGNUM,
         27: UT_MOD_TOD50,
         28: UT_MOD_KICKED,
-        29: UT_MOD_KNIFE_THROWN,
+        30: UT_MOD_KNIFE_THROWN,
     }
 
     ## damage table

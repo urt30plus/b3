@@ -210,6 +210,17 @@ class Test_log_lines_parsing(Iourt43TestCase):
                          event_target=fatmatic,
                          event_data=(13, '36', '9'))
 
+    def test_Hit_knife_thrown(self):
+        fatmatic = FakeClient(self.console, name="Fat'Matic", guid="11111111111111")
+        d4dou = FakeClient(self.console, name="[FR]d4dou", guid="11111111111111")
+        fatmatic.connects('3')
+        d4dou.connects('6')
+        self.assertEvent(r'''Hit: 3 6 9 30: [FR]d4dou hit Fat'Matic in the Legs''',
+                         event_type='EVT_CLIENT_DAMAGE',
+                         event_client=d4dou,
+                         event_target=fatmatic,
+                         event_data=(20, '13', '9'))
+
     def test_Hit_unkown_location(self):
         fatmatic = FakeClient(self.console, name="Fat'Matic", guid="11111111111111")
         d4dou = FakeClient(self.console, name="[FR]d4dou", guid="11111111111111")
