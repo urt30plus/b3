@@ -25,6 +25,7 @@
 __author__ = 'ThorN'
 __version__ = '3.31.0'
 
+import importlib
 import os
 import platform
 import re
@@ -57,15 +58,15 @@ STATE_ALIVE = 2
 STATE_UNKNOWN = 3
 
 # CUSTOM TYPES FOR DYNAMIC CASTING
-STRING = STR = 1  ## built-in string
-INTEGER = INT = 2  ## built-in integer
-BOOLEAN = BOOL = 3  ## built-in boolean
-FLOAT = 4  ## built-in float
-LEVEL = 5  ## b3.clients.Group level
-DURATION = 6  ## b3.functions.time2minutes conversion
-PATH = 7  ## b3.getAbsolutePath path conversion
-TEMPLATE = 8  ## b3.functions.vars2printf conversion
-LIST = 9  ## string split into list of tokens
+STRING = STR = 1
+INTEGER = INT = 2
+BOOLEAN = BOOL = 3
+FLOAT = 4
+LEVEL = 5  # b3.clients.Group level
+DURATION = 6  # b3.functions.time2minutes conversion
+PATH = 7  # b3.getAbsolutePath path conversion
+TEMPLATE = 8  # b3.functions.vars2printf conversion
+LIST = 9  # string split into list of tokens
 
 
 def getHomePath():
@@ -225,13 +226,8 @@ def loadParser(pname):
     :param pname: The parser name
     :return The parser module
     """
-    name = f'b3.parsers.{pname}'
-    mod = __import__(name)
-    components = name.split('.')
-    components.append(f'{pname.title()}Parser')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
+    mod = importlib.import_module(f'b3.parsers.{pname}')
+    return getattr(mod, f'{pname.title()}Parser')
 
 
 def stdout_write(message, flush=True):
