@@ -33,8 +33,7 @@ import b3.events
 from b3 import functions
 
 
-class ClientVar(object):
-    value = None
+class ClientVar:
 
     def __init__(self, value):
         """
@@ -76,8 +75,8 @@ class ClientVar(object):
         return len(self.value)
 
 
-class Client(object):
-    ## PVT
+class Client:
+    # PVT
     _autoLogin = 1
     _data = None
     _exactName = ''
@@ -472,11 +471,11 @@ class Client(object):
 
         if self._name == newName:
             if self.console:
-                self.console.verbose2('Aborted making alias for cid %s: name is the same' % self.cid)
+                self.console.verbose2('Aborted making alias for cid %s: name is the same', self.cid)
             return
         if self.cid == '-1' or self.cid == 'Server':  # bfbc2 addition
             if self.console:
-                self.console.verbose2('Aborted making alias for cid %s: must be B3' % self.cid)
+                self.console.verbose2('Aborted making alias for cid %s: must be B3', self.cid)
             return
 
         self.makeAlias(self._name)
@@ -834,7 +833,7 @@ class Client(object):
         return "Client<@%s:%s|%s:\"%s\":%s>" % (self.id, self.guid, self.pbid, self.name, self.cid)
 
 
-class Struct(object):
+class Struct:
     """
     Base class for Penalty/Alias/IpAlias/Group classes.
     """
@@ -1192,7 +1191,7 @@ class Clients(dict):
         Object constructor.
         :param console: The console implementation
         """
-        super(Clients, self).__init__()
+        super().__init__()
         self.console = console
         self._exactNameIndex = {}
         self._guidIndex = {}
@@ -1223,7 +1222,6 @@ class Clients(dict):
         except Exception:
             for cid, c in self.items():
                 if c.name and c.name.lower() == name:
-                    # self.console.debug('found client by name %s = %s', name, c.name)
                     self._nameIndex[name] = c.cid
                     return c
         return None
@@ -1236,12 +1234,10 @@ class Clients(dict):
         name = name.lower() + '^7'
         try:
             c = self[self._exactNameIndex[name]]
-            # self.console.debug('found client by exact name in index %s = %s : %s', name, c.exactName, c.__class__.__name__)
             return c
         except Exception:
             for cid, c in self.items():
                 if c.exactName and c.exactName.lower() == name:
-                    # self.console.debug('Found client by exact name %s = %s', name, c.exactName)
                     self._exactNameIndex[name] = c.cid
                     return c
         return None
@@ -1250,11 +1246,7 @@ class Clients(dict):
         """
         Return the list of line clients.
         """
-        clist = []
-        for cid, c in self.items():
-            if not c.hide:
-                clist.append(c)
-        return clist
+        return [c for _, c in self.items() if not c.hide]
 
     def getClientsByLevel(self, min=0, max=100, masked=False):
         """
@@ -1388,7 +1380,6 @@ class Clients(dict):
         except Exception as e:
             self.console.error('Unexpected error getByCID(%s) - %s', cid, e)
         else:
-            # self.console.debug('found client by CID %s = %s', cid, c.name)
             if c.cid == cid:
                 return c
             else:
