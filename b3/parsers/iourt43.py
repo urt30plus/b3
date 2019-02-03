@@ -23,7 +23,7 @@
 # ################################################################### #
 
 __author__ = 'xlr8or, Courgette, Fenix'
-__version__ = '4.33'
+__version__ = '4.34'
 
 import re
 import time
