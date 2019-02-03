@@ -26,6 +26,7 @@ __author__ = 'ThorN, xlr8or, courgette'
 __version__ = '1.23'
 
 import collections
+import importlib
 import os
 import re
 import shutil
@@ -43,11 +44,7 @@ def getModule(name):
     Return a module given its name.
     :param name: The module name
     """
-    mod = __import__(name)
-    components = name.split('.')
-    for comp in components[1:]:
-        mod = getattr(mod, comp)
-    return mod
+    return importlib.import_module(name)
 
 
 def getCmd(instance, cmd):
@@ -57,11 +54,9 @@ def getCmd(instance, cmd):
     :param cmd: The command name.
     :return The command function reference.
     """
-    cmd = 'cmd_%s' % cmd
+    cmd = f"cmd_{cmd}"
     if hasattr(instance, cmd):
-        func = getattr(instance, cmd)
-        return func
-    return None
+        return getattr(instance, cmd)
 
 
 def splitDSN(url):
@@ -86,14 +81,14 @@ def splitDSN(url):
         g['protocol'] = 'file'
     if g['protocol'] == 'file':
         if g['host'] and g['path']:
-            g['path'] = '%s%s' % (g['host'], g['path'])
+            g['path'] = f"{g['host']}{g['path']}"
             g['host'] = None
         elif g['host']:
             g['path'] = g['host']
             g['host'] = None
     elif g['protocol'] == 'exec':
         if g['host'] and g['path']:
-            g['path'] = '%s/%s' % (g['host'], g['path'])
+            g['path'] = f"{g['host']}/{g['path']}"
             g['host'] = None
         elif g['host']:
             g['path'] = g['host']
@@ -277,7 +272,7 @@ def soundex(s1):
     """
     Return the soundex value to a string argument.
     """
-    ignore = "~!@#$%^&*()_+=-`[]\|;:'/?.,<>\" \t\f\v"
+    ignore = r"~!@#$%^&*()_+=-`[]\|;:'/?.,<>\" \t\f\v"
     table = str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202', ignore)
 
     s1 = s1.upper().strip()
@@ -300,8 +295,8 @@ def soundex(s1):
 def meanstdv(x):
     """
     Calculate mean and standard deviation of data x[]:
-        mean = {\sum_i x_i \over n}
-        std = sqrt(\sum_i (x_i - mean)^2 \over n-1)
+        mean = {sum_i x_i over n}
+        std = sqrt(sum_i (x_i - mean)^2 over n-1)
     credit: http://www.physics.rutgers.edu/~masud/computing/WPark_recipes_in_python.html
     """
     from math import sqrt
@@ -415,8 +410,8 @@ def hash_file(filepath):
     """
     Calculate the MD5 digest of a given file.
     """
-    with open(filepath, 'rb') as afile:
-        digest = md5(afile.read()).hexdigest()
+    with open(filepath, 'rb') as f:
+        digest = md5(f.read()).hexdigest()
     return digest
 
 
@@ -605,7 +600,7 @@ def getBytes(size):
     r = re.compile(r'''^(?P<size>\d+)\s*(?P<mult>KB|MB|GB|TB|K|M|G|T?)$''')
     m = r.match(size)
     if not m:
-        raise TypeError('invalid input given: %s' % size)
+        raise TypeError(f'invalid input given: {size}')
 
     multipliers = {
         'K': 1024, 'KB': 1024,
