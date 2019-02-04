@@ -1032,7 +1032,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             client.message("^7You don't have enough privileges to mute this player")
             return
 
-        if args[1] is not None and re.match('^([0-9]+)\s*$', args[1]):
+        if args[1] is not None and re.match(r'^([0-9]+)\s*$', args[1]):
             duration = int(args[1])
         else:
             duration = ''
@@ -1583,7 +1583,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         gametype = self._getGameType()
         # run teambalance only if current gametype is in autobalance_gametypes list
-        if not gametype in self._autobalance_gametypes_array:
+        if gametype not in self._autobalance_gametypes_array:
             self.debug('current gametype (%s) is not specified in autobalance_gametypes - teambalancer disabled',
                        gametype)
             return
@@ -1711,7 +1711,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         d = {}
         if self.isEnabled() and self.console.time() > self._ignoreTill:
             for player in self.console.clients.getList():
-                if not player.name in d:
+                if player.name not in d:
                     d[player.name] = [player.cid]
                 else:
                     # l = d[player.name]
@@ -1756,7 +1756,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 client.setvar(self, 'savedname', self.clean(client.exactName))
 
             cleanedname = self.clean(client.exactName)
-            ## also check if the name is ending with '_<slot num>' (happens with clients having deconnections)
+            # also check if the name is ending with '_<slot num>' (happens with clients having deconnections)
             if cleanedname.endswith('_' + str(client.cid)):
                 cleanedname = cleanedname[:-len('_' + str(client.cid))]
 
@@ -2494,7 +2494,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             client.setvar(self, "prev_" + var, old)
 
     def _getScores(self, clients, usexlrstats=True):
-        xlrstats = usexlrstats and self.console.getPlugin('xlrstats')
+        xlrstats = self.console.getPlugin('xlrstats') if usexlrstats else None
         playerstats = {}
         maxstats = {}
         minstats = {}
@@ -2527,7 +2527,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 'flagperf': flagperf,
                 'bombperf': bombperf,
             }
-            # TODO: check this?
             stats = xlrstats.get_PlayerStats(c) if xlrstats else None
             if stats:
                 playerstats[c.id]['xkillratio'] = stats.ratio
@@ -2920,7 +2919,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         # run skillbalancer only if current
         # gametype is in autobalance_gametypes list
-        if not gametype in self._autobalance_gametypes_array:
+        if gametype not in self._autobalance_gametypes_array:
             self.debug('current gametype (%s) is not specified in autobalance_gametypes - '
                        'skillbalancer disabled', self.console.game.gameType)
             return

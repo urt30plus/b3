@@ -165,6 +165,7 @@ class XmlConfigParser(B3ConfigParserMixin):
         Return a configuration value as a string.
         :param section: The configuration file section.
         :param setting: The configuration file setting.
+        :param dummy: not used
         :return basestring
         """
         if setting is None:
@@ -385,9 +386,11 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
             self.write(f)
         return True
 
-    def write(self, fp):
+    def write(self, fp, **kwargs):
         """
         Write an .ini-format representation of the configuration state.
+        :param fp: a file-like object
+        :param **kwargs: not used
         """
         if self._defaults:
             fp.write("[%s]\n" % configparser.DEFAULTSECT)
@@ -460,13 +463,13 @@ class MainConfig(B3ConfigParserMixin):
             })
 
     def _init_plugins_from_cfg(self):
-        ## Load the list of disabled plugins
+        # Load the list of disabled plugins
         try:
             disabled_plugins_raw = self._config_parser.get('b3', 'disabled_plugins')
         except NoOptionError:
             disabled_plugins = []
         else:
-            disabled_plugins = re.split('\W+', disabled_plugins_raw.lower())
+            disabled_plugins = re.split(r'\W+', disabled_plugins_raw.lower())
 
         def get_custom_plugin_path(plugin_name):
             try:
@@ -516,7 +519,7 @@ class MainConfig(B3ConfigParserMixin):
     def analyze(self):
         """
         Analyze the main configuration file checking for common mistakes.
-        This will mostly check configuration file values and will not perform any futher check related,
+        This will mostly check configuration file values and will not perform any further check related,
         i.e: connection with the database can be established using the provided dsn, rcon password is valid etc.
         Such validations needs to be handled somewhere else.
         :return: A list of strings highlighting problems found (so they can be logged/displayed easily)
@@ -531,14 +534,14 @@ class MainConfig(B3ConfigParserMixin):
         _mandatory_option('b3', 'database')
         _mandatory_option('b3', 'bot_name')
 
-        ## PARSER CHECK
+        # PARSER CHECK
         if self.has_option('b3', 'parser'):
             try:
                 b3.functions.getModule('b3.parsers.%s' % self.get('b3', 'parser'))
             except ImportError as ie:
                 analysis.append('invalid parser specified in b3::parser (%s-%s)' % (self.get('b3', 'parser'), ie))
 
-        ## DSN DICT
+        # DSN DICT
         if self.has_option('b3', 'database'):
             dsndict = b3.functions.splitDSN(self.get('b3', 'database'))
             if not dsndict:
@@ -548,7 +551,7 @@ class MainConfig(B3ConfigParserMixin):
                 analysis.append('invalid storage protocol specified in b3::database (%s) : '
                                 'valid protocols are : %s' % (dsndict['protocol'], ', '.join(b3.storage.PROTOCOLS)))
 
-        ## ADMIN PLUGIN CHECK
+        # ADMIN PLUGIN CHECK
         has_admin = False
         has_admin_config = False
         for plugin in self.get_plugins():
