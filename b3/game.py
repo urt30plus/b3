@@ -26,7 +26,7 @@ __author__ = 'ThorN'
 __version__ = '1.6'
 
 
-class Game(object):
+class Game:
     _mapName = None
     _mapTimeStart = None
     _roundTimeStart = None
