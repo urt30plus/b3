@@ -70,7 +70,7 @@ except ImportError:
     from xml.etree import ElementTree
 
 
-class Parser(object):
+class Parser:
     OutputClass = b3.parsers.q3a.rcon.Rcon  # default output class set to the q3a rcon class
 
     _commands = {}  # will hold RCON commands for the current game
@@ -1509,7 +1509,7 @@ class Parser(object):
         pass
 
 
-class StubParser(object):
+class StubParser:
     """
     Parser implementation used when dealing with the Storage module while updating B3 database.
     """
