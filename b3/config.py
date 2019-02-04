@@ -50,7 +50,7 @@ NoSectionError = b3.exceptions.NoSectionError
 MUST_HAVE_PLUGINS = ('admin',)
 
 
-class B3ConfigParserMixin(object):
+class B3ConfigParserMixin:
     """
     Mixin implementing ConfigParser methods more useful for B3 business.
     """
