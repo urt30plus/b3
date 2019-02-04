@@ -34,7 +34,7 @@ import traceback
 import b3.functions
 
 
-class ReMatcher(object):
+class ReMatcher:
     _re = None
 
     def match(self, regexp, value):
@@ -54,7 +54,7 @@ class ReMatcher(object):
     results = property(_get_match)
 
 
-class CronTab(object):
+class CronTab:
     _second = None
     _minute = None
     _hour = None
@@ -268,7 +268,7 @@ class PluginCronTab(CronTab):
             CronTab.run(self)
 
 
-class Cron(object):
+class Cron:
 
     def __init__(self, console):
         """
