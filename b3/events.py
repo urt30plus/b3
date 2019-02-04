@@ -127,7 +127,7 @@ class Events:
         if name:
             self._eventNames[_id] = name
         else:
-            self._eventNames[_id] = 'Unnamed (%s)' % key
+            self._eventNames[_id] = f'Unnamed ({key})'
 
         g[key] = _id
         return _id
@@ -153,8 +153,8 @@ class Events:
         """
         matching_keys = [k for k, v in self._events.items() if v == event_id]
         if not matching_keys:
-            raise KeyError('could not find any B3 event with ID %s' % event_id)
-        assert len(matching_keys) == 1, 'expecting only one event key per event ID: %r' % matching_keys
+            raise KeyError(f'could not find any B3 event with ID {event_id}')
+        assert len(matching_keys) == 1, f'expecting only one event key per event ID: {matching_keys!r}'
         return matching_keys[0]
 
     def getName(self, key):
@@ -165,7 +165,7 @@ class Events:
         try:
             return self._eventNames[self.getId(key)]
         except KeyError:
-            return 'Unknown (%s)' % key
+            return f'Unknown ({key})'
 
     def loadEvents(self, events):
         """
@@ -184,7 +184,7 @@ class Events:
     events = property(_get_events)
 
 
-class Event(object):
+class Event:
 
     def __init__(self, type, data, client=None, target=None):
         """
@@ -204,7 +204,7 @@ class Event(object):
         return "Event<%s>(%r, %s, %s)" % (eventManager.getKey(self.type), self.data, self.client, self.target)
 
 
-class EventsStats(object):
+class EventsStats:
 
     def __init__(self, console, max_samples=100):
         """
