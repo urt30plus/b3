@@ -26,7 +26,7 @@ __author__ = 'ThorN'
 __version__ = '1.1'
 
 
-class Cvar(object):
+class Cvar:
     name = ''
     value = None
     default = None
