@@ -251,6 +251,41 @@ class Iourt43Parser(AbstractParser):
     _line_length = 90
 
     _lineFormats = (
+        # Generated with ioUrbanTerror v4.1:
+        # Hit: 12 7 1 19: BSTHanzo[FR] hit ercan in the Helmet
+        # Hit: 13 10 0 8: Grover hit jacobdk92 in the Head
+        re.compile(r'^(?P<action>Hit):\s'
+                   r'(?P<data>'
+                   r'(?P<cid>[0-9]+)\s'
+                   r'(?P<acid>[0-9]+)\s'
+                   r'(?P<hitloc>[0-9]+)\s'
+                   r'(?P<aweap>[0-9]+):\s+'
+                   r'(?P<text>.*))$', re.IGNORECASE),
+
+        # 6:37 Kill: 0 1 16: XLR8or killed =lvl1=Cheetah by UT_MOD_SPAS
+        re.compile(r'^(?P<action>Kill):\s'
+                   r'(?P<data>'
+                   r'(?P<acid>[0-9]+)\s'
+                   r'(?P<cid>[0-9]+)\s'
+                   r'(?P<aweap>[0-9]+):\s+'
+                   r'(?P<text>.*))$', re.IGNORECASE),
+
+        # Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
+        re.compile(r'^(?P<action>Assist):\s(?P<acid>[0-9]+)\s(?P<kcid>[0-9]+)\s(?P<dcid>[0-9]+):\s+(?P<text>.*)$',
+                   re.IGNORECASE),
+
+        # FlagCaptureTime: 0: 1234567890
+        # FlagCaptureTime: 1: 1125480101
+        re.compile(r'^(?P<action>FlagCaptureTime):\s(?P<cid>[0-9]+):\s(?P<captime>[0-9]+)$', re.IGNORECASE),
+
+        # 15:42 Flag Return: RED
+        # 15:42 Flag Return: BLUE
+        re.compile(r'^(?P<action>Flag Return):\s(?P<data>(?P<color>.+))$', re.IGNORECASE),
+
+        # ClientSpawn: 0
+        # ClientMelted: 1
+        re.compile(r'^(?P<action>Client(Melted|Spawn)):\s(?P<cid>[0-9]+)$', re.IGNORECASE),
+
         # Radio: 0 - 7 - 2 - "New Alley" - "I'm going for the flag"
         re.compile(r'^(?P<action>Radio): '
                    r'(?P<data>(?P<cid>[0-9]+) - '
@@ -270,10 +305,6 @@ class Iourt43Parser(AbstractParser):
 
         # VoteFailed: 1 - 1 - "restart"
         re.compile(r'^(?P<action>VoteFailed): (?P<data>(?P<yes>[0-9]+) - (?P<no>[0-9]+) - "(?P<what>.*)")$', re.I),
-
-        # FlagCaptureTime: 0: 1234567890
-        # FlagCaptureTime: 1: 1125480101
-        re.compile(r'^(?P<action>FlagCaptureTime):\s(?P<cid>[0-9]+):\s(?P<captime>[0-9]+)$', re.IGNORECASE),
 
         # 13:34 ClientJumpRunStarted: 0 - way: 1
         # 13:34 ClientJumpRunStarted: 0 - way: 1 - attempt: 1 of 5
@@ -326,25 +357,6 @@ class Iourt43Parser(AbstractParser):
                    r'(?P<y>-?\d+(?:\.\d+)?)\s-\s'
                    r'(?P<z>-?\d+(?:\.\d+)?))$', re.IGNORECASE),
 
-        # ClientSpawn: 0
-        # ClientMelted: 1
-        re.compile(r'^(?P<action>Client(Melted|Spawn)):\s(?P<cid>[0-9]+)$', re.IGNORECASE),
-
-        # Generated with ioUrbanTerror v4.1:
-        # Hit: 12 7 1 19: BSTHanzo[FR] hit ercan in the Helmet
-        # Hit: 13 10 0 8: Grover hit jacobdk92 in the Head
-        re.compile(r'^(?P<action>Hit):\s'
-                   r'(?P<data>'
-                   r'(?P<cid>[0-9]+)\s'
-                   r'(?P<acid>[0-9]+)\s'
-                   r'(?P<hitloc>[0-9]+)\s'
-                   r'(?P<aweap>[0-9]+):\s+'
-                   r'(?P<text>.*))$', re.IGNORECASE),
-
-        # Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
-        re.compile(r'^(?P<action>Assist):\s(?P<acid>[0-9]+)\s(?P<kcid>[0-9]+)\s(?P<dcid>[0-9]+):\s+(?P<text>.*)$',
-                   re.IGNORECASE),
-
         # 6:37 Kill: 0 1 16: XLR8or killed =lvl1=Cheetah by UT_MOD_SPAS
         # 2:56 Kill: 14 4 21: Qst killed Leftovercrack by UT_MOD_PSG1
         # 6:37 Freeze: 0 1 16: Fenix froze Biddle by UT_MOD_SPAS
@@ -381,10 +393,6 @@ class Iourt43Parser(AbstractParser):
                    r'(?P<cid>[0-9]+)\s'
                    r'(?P<name>[^ ]+):\s*'
                    r'(?P<text>.*))$', re.IGNORECASE),
-
-        # 15:42 Flag Return: RED
-        # 15:42 Flag Return: BLUE
-        re.compile(r'^(?P<action>Flag Return):\s(?P<data>(?P<color>.+))$', re.IGNORECASE),
 
         # Bombmode actions:
         # 3:06 Bombholder is 2
