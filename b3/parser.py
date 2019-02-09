@@ -498,10 +498,7 @@ class Parser:
         """
         Get a reference to a loaded plugin
         """
-        try:
-            return self._plugins[plugin]
-        except KeyError:
-            return None
+        return self._plugins.get(plugin)
 
     def reloadConfigs(self):
         """
@@ -509,9 +506,9 @@ class Parser:
         """
         # reload main config
         self.config.load(self.config.fileName)
-        for k in self._plugins:
-            self.bot('Reload configuration file for plugin %s', k)
-            self._plugins[k].loadConfig()
+        for plugin_name, plugin in self._plugins.items():
+            self.bot('Reload configuration file for plugin %s', plugin_name)
+            plugin.loadConfig()
         self.updateDocumentation()
 
     def loadPlugins(self):
@@ -766,9 +763,8 @@ class Parser:
         """
         For each loaded plugin, call the onLoadConfig hook.
         """
-        for plugin_name in self._plugins:
-            p = self._plugins[plugin_name]
-            p.onLoadConfig()
+        for _, plugin in self._plugins.items():
+            plugin.onLoadConfig()
 
     def pluginImport(self, name, path=None):
         """
@@ -808,12 +804,11 @@ class Parser:
         self.screen.flush()
 
         plugin_num = 1
-        for plugin_name in self._plugins:
+        for plugin_name, plugin in self._plugins.items():
 
             try:
                 self.bot('Starting plugin #%s : %s', plugin_num, plugin_name)
-                p = self._plugins[plugin_name]
-                p.onStartup()
+                plugin.onStartup()
                 p.start()
             except Exception as err:
                 self.error("Could not start plugin %s", plugin_name, exc_info=err)
@@ -830,21 +825,19 @@ class Parser:
         """
         Disable all plugins except for 'admin'
         """
-        for k in self._plugins:
-            if k not in 'admin':
-                p = self._plugins[k]
-                self.bot('Disabling plugin: %s', k)
-                p.disable()
+        for plugin_name, plugin in self._plugins.items():
+            if plugin_name not in 'admin':
+                self.bot('Disabling plugin: %s', plugin_name)
+                plugin.disable()
 
     def enablePlugins(self):
         """
         Enable all plugins except for 'admin'
         """
-        for k in self._plugins:
-            if k not in 'admin':
-                p = self._plugins[k]
-                self.bot('Enabling plugin: %s', k)
-                p.enable()
+        for plugin_name, plugin in self._plugins.items():
+            if plugin_name not in 'admin':
+                self.bot('Enabling plugin: %s', plugin_name)
+                plugin.enable()
 
     def getMessage(self, msg, *args):
         """
