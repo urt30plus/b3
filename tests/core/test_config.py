@@ -24,6 +24,7 @@
 
 import configparser
 import logging
+import os
 import unittest
 from unittest import TestCase
 
@@ -45,8 +46,9 @@ class Test_XmlConfigParser_outputfile(B3TestCase):
         """)
 
     def test_getpath(self):
-        self.console.config.fileName = r"/tmp/b3.xml"
-        self.assertEqual(r"/tmp/status.xml", self.conf.getpath('settings', 'output_file'))
+        status_file = os.path.join("tmp", "status.xml")
+        self.console.config.fileName = os.path.join("tmp", "b3.xml")
+        self.assertEqual(status_file, self.conf.getpath('settings', 'output_file'))
 
     def test_issue_xlr8or_18(self):
         self.console.config.fileName = r"b3.xml"
