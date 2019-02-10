@@ -48,10 +48,9 @@ class ReMatcher:
         self._re = re.match(regexp, value)
         return self._re
 
-    def _get_match(self):
+    @property
+    def results(self):
         return self._re
-
-    results = property(_get_match)
 
 
 class CronTab:
@@ -84,48 +83,53 @@ class CronTab:
         """
         self.command()
 
-    def _set_second(self, value):
-        self._second = self._getRate(value, 60)
-
-    def _get_second(self):
+    @property
+    def second(self):
         return self._second
 
-    def _set_minute(self, value):
-        self._minute = self._getRate(value, 60)
+    @second.setter
+    def second(self, value):
+        self._second = self._getRate(value, 60)
 
-    def _get_minute(self):
+    @property
+    def minute(self):
         return self._minute
 
-    def _set_hour(self, value):
-        self._hour = self._getRate(value, 24)
+    @minute.setter
+    def minute(self, value):
+        self._minute = self._getRate(value, 60)
 
-    def _get_hour(self):
+    @property
+    def hour(self):
         return self._hour
 
-    def _set_day(self, value):
-        self._day = self._getRate(value, 31)
+    @hour.setter
+    def hour(self, value):
+        self._hour = self._getRate(value, 24)
 
-    def _get_day(self):
+    @property
+    def day(self):
         return self._day
 
-    def _set_month(self, value):
-        self._month = self._getRate(value, 12)
+    @day.setter
+    def day(self, value):
+        self._day = self._getRate(value, 31)
 
-    def _get_month(self):
+    @property
+    def month(self):
         return self._month
 
-    def _set_dow(self, value):
-        self._dow = self._getRate(value, 7)
+    @month.setter
+    def month(self, value):
+        self._month = self._getRate(value, 12)
 
-    def _get_dow(self):
+    @property
+    def dow(self):
         return self._dow
 
-    second = property(_get_second, _set_second)
-    minute = property(_get_minute, _set_minute)
-    hour = property(_get_hour, _set_hour)
-    day = property(_get_day, _set_day)
-    month = property(_get_month, _set_month)
-    dow = property(_get_dow, _set_dow)
+    @dow.setter
+    def dow(self, value):
+        self._dow = self._getRate(value, 7)
 
     def _getRate(self, rate, maxrate=None):
         """
@@ -317,7 +321,6 @@ class Cron:
         """
         Start the cron scheduler in a separate thread.
         """
-        # thread.start_new_thread(self.run, ())
         b3.functions.start_daemon_thread(self.run)
 
     @staticmethod
