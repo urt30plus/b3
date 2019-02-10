@@ -121,7 +121,7 @@ class STDOutLogger:
         Write a message in the logger with severity 'INFO'
         :param msg: The message to write
         """
-        self.logger.info('STDOUT %r' % msg)
+        self.logger.info(f"STDOUT {msg!r}")
 
     def flush(self):
         pass
@@ -144,7 +144,7 @@ class STDErrLogger:
         Write a message in the logger with severity 'ERROR'
         :param msg: The message to write
         """
-        self.logger.error('STDERR %r' % msg)
+        self.logger.error(f"STDERR {msg!r}")
 
     def flush(self):
         pass
