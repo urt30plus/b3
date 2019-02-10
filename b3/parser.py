@@ -813,7 +813,7 @@ class Parser:
             try:
                 self.bot('Starting plugin #%s : %s', plugin_num, plugin_name)
                 plugin.onStartup()
-                p.start()
+                plugin.start()
             except Exception as err:
                 self.error("Could not start plugin %s", plugin_name, exc_info=err)
                 self.screen.write('x')
