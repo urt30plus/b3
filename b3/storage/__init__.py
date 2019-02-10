@@ -22,7 +22,7 @@ __version__ = '1.2'
 PROTOCOLS = ('mysql', 'sqlite')
 
 
-class Storage(object):
+class Storage:
     console = None
     protocol = None
 
@@ -121,11 +121,11 @@ def getStorage(dsn, dsnDict, console):
     :return: The storage module object instance connected with the underlying storage layer.
     """
     if not dsnDict:
-        raise AttributeError('invalid database configuration specified: %s' % dsn)
+        raise AttributeError(f"invalid database configuration specified: {dsn}")
 
-    if not dsnDict['protocol'] in PROTOCOLS:
-        raise AttributeError('invalid storage protocol specified: %s: supported storage '
-                             'protocols are: %s' % (dsnDict['protocol'], ','.join(PROTOCOLS)))
+    if dsnDict['protocol'] not in PROTOCOLS:
+        raise AttributeError(f"invalid storage protocol specified: {dsnDict['protocol']}: supported storage "
+                             f"protocols are: {','.join(PROTOCOLS)}")
 
-    construct = globals()['%sStorage' % dsnDict['protocol'].title()]
+    construct = globals()[f"{dsnDict['protocol'].title()}Storage"]
     return construct(dsn, dsnDict, console)

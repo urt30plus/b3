@@ -22,8 +22,6 @@
 #                                                                     #
 # ################################################################### #
 
-from __future__ import print_function, absolute_import
-
 import os
 import re
 import sys
@@ -45,15 +43,11 @@ from b3.storage.cursor import Cursor as DBCursor
 
 
 class DatabaseStorage(Storage):
-    _lock = None
+
     _lastConnectAttempt = 0
     _consoleNotice = True
     _reName = re.compile(r'([A-Z])')
     _reVar = re.compile(r'_([a-z])')
-
-    db = None
-    dsn = None
-    dsnDict = None
 
     def __init__(self, dsn, dsnDict, console):
         """
@@ -117,14 +111,14 @@ class DatabaseStorage(Storage):
         Return a client object fetching data from the storage.
         :param client: The client object to fill with fetch data.
         """
-        self.console.debug('Storage: getClient %s' % client)
+        self.console.debug('Storage: getClient %s', client)
         where = {'id': client.id} if client.id > 0 else {'guid': client.guid}
 
         try:
 
             cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'clients', where, None, 1))
             if not cursor.rowcount:
-                raise KeyError('no client matching guid %s' % client.guid)
+                raise KeyError(f'no client matching guid {client.guid}')
 
             found = False
             for k, v in cursor.getRow().items():
@@ -136,7 +130,7 @@ class DatabaseStorage(Storage):
 
             cursor.close()
             if not found:
-                raise KeyError('no client matching guid %s' % client.guid)
+                raise KeyError(f'no client matching guid {client.guid}')
 
             return client
 
@@ -144,21 +138,21 @@ class DatabaseStorage(Storage):
             # query failed, try local cache
             if self.console.config.has_option('admins_cache', client.guid):
                 data = self.console.config.get('admins_cache', client.guid, True)
-                self.console.debug('pulling user form admins_cache %s' % data)
+                self.console.debug('pulling user form admins_cache %s', data)
                 cid, name, level = data.split(',')
                 client.id = cid.strip()
                 client.name = name.strip()
                 client._tempLevel = int(level.strip())
                 return client
             else:
-                raise KeyError('no client matching guid %s in admins_cache' % client.guid)
+                raise KeyError(f'no client matching guid {client.guid} in admins_cache')
 
     def getClientsMatching(self, match):
         """
         Return a list of clients matching the given data:
         :param match: The data to match clients against.
         """
-        self.console.debug('Storage: getClientsMatching %s' % match)
+        self.console.debug('Storage: getClientsMatching %s', match)
         cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'clients', match, 'time_edit DESC', 5))
 
         clients = []
@@ -179,7 +173,7 @@ class DatabaseStorage(Storage):
         :param client: The client to be saved.
         :return: The ID of the client stored into the database.
         """
-        self.console.debug('Storage: setClient %s' % client)
+        self.console.debug('Storage: setClient %s', client)
         fields = ('ip', 'greeting', 'connections', 'time_edit',
                   'guid', 'pbid', 'name', 'time_add', 'auto_login',
                   'mask_level', 'group_bits', 'login', 'password')
@@ -190,7 +184,7 @@ class DatabaseStorage(Storage):
             if hasattr(client, self.getVar(f)):
                 data[f] = getattr(client, self.getVar(f))
 
-        self.console.debug('Storage: setClient data %s' % data)
+        self.console.debug('Storage: setClient data %s', data)
         if client.id > 0:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'clients', {'id': client.id}))
         else:
@@ -206,7 +200,7 @@ class DatabaseStorage(Storage):
         :param alias: The alias to be saved.
         :return: The ID of the alias stored into the database.
         """
-        self.console.debug('Storage: setClientAlias %s' % alias)
+        self.console.debug('Storage: setClientAlias %s', alias)
         fields = ('num_used', 'alias', 'client_id', 'time_add', 'time_edit')
         data = {'id': alias.id} if alias.id else {}
 
@@ -214,7 +208,7 @@ class DatabaseStorage(Storage):
             if hasattr(alias, self.getVar(f)):
                 data[f] = getattr(alias, self.getVar(f))
 
-        self.console.debug('Storage: setClientAlias data %s' % data)
+        self.console.debug('Storage: setClientAlias data %s', data)
         if alias.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'aliases', {'id': alias.id}))
         else:
@@ -230,19 +224,19 @@ class DatabaseStorage(Storage):
         :param alias: The alias object to fill with fetch data.
         :return: The alias object given in input with all the fields set.
         """
-        self.console.debug('Storage: getClientAlias %s' % alias)
+        self.console.debug('Storage: getClientAlias %s', alias)
         if hasattr(alias, 'id') and alias.id > 0:
             query = QueryBuilder(self.db).SelectQuery('*', 'aliases', {'id': alias.id}, None, 1)
         elif hasattr(alias, 'alias') and hasattr(alias, 'clientId'):
             query = QueryBuilder(self.db).SelectQuery('*', 'aliases', {'alias': alias.alias,
                                                                        'client_id': alias.clientId}, None, 1)
         else:
-            raise KeyError('no alias found matching %s' % alias)
+            raise KeyError(f'no alias found matching {alias}')
 
         cursor = self.query(query)
         if cursor.EOF:
             cursor.close()
-            raise KeyError('no alias found matching %s' % alias)
+            raise KeyError(f'no alias found matching {alias}')
 
         row = cursor.getOneRow()
         alias.id = int(row['id'])
@@ -260,7 +254,7 @@ class DatabaseStorage(Storage):
         :param client: The client whose aliases we want to retrieve.
         :return: List of b3.clients.Alias instances.
         """
-        self.console.debug('Storage: getClientAliases %s' % client)
+        self.console.debug('Storage: getClientAliases %s', client)
         cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'aliases', {'client_id': client.id}, 'id'))
 
         aliases = []
@@ -284,7 +278,7 @@ class DatabaseStorage(Storage):
         Insert/update an ipalias in the storage.
         :param ipalias: The ipalias to be saved.
         """
-        self.console.debug('Storage: setClientIpAddress %s' % ipalias)
+        self.console.debug('Storage: setClientIpAddress %s', ipalias)
         fields = ('num_used', 'ip', 'client_id', 'time_add', 'time_edit')
         data = {'id': ipalias.id} if ipalias.id else {}
 
@@ -292,7 +286,7 @@ class DatabaseStorage(Storage):
             if hasattr(ipalias, self.getVar(f)):
                 data[f] = getattr(ipalias, self.getVar(f))
 
-        self.console.debug('Storage: setClientIpAddress data %s' % data)
+        self.console.debug('Storage: setClientIpAddress data %s', data)
         if ipalias.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'ipaliases', {'id': ipalias.id}))
         else:
@@ -308,19 +302,19 @@ class DatabaseStorage(Storage):
         :param ipalias: The ipalias object to fill with fetch data.
         :return: The ip alias object given in input with all the fields set.
         """
-        self.console.debug('Storage: getClientIpAddress %s' % ipalias)
+        self.console.debug('Storage: getClientIpAddress %s', ipalias)
         if hasattr(ipalias, 'id') and ipalias.id > 0:
             query = QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'id': ipalias.id}, None, 1)
         elif hasattr(ipalias, 'ip') and hasattr(ipalias, 'clientId'):
             query = QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'ip': ipalias.ip,
                                                                          'client_id': ipalias.clientId}, None, 1)
         else:
-            raise KeyError('no ip found matching %s' % ipalias)
+            raise KeyError(f'no ip found matching {ipalias}')
 
         cursor = self.query(query)
         if cursor.EOF:
             cursor.close()
-            raise KeyError('no ip found matching %s' % ipalias)
+            raise KeyError(f'no ip found matching {ipalias}')
 
         row = cursor.getOneRow()
         ipalias.id = int(row['id'])
@@ -338,7 +332,7 @@ class DatabaseStorage(Storage):
         :param client: The client whose ip aliases we want to retrieve.
         :return: List of b3.clients.IpAlias instances
         """
-        self.console.debug('Storage: getClientIpAddresses %s' % client)
+        self.console.debug('Storage: getClientIpAddresses %s', client)
         cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'client_id': client.id}, 'id'))
 
         aliases = []
@@ -393,7 +387,7 @@ class DatabaseStorage(Storage):
             if hasattr(penalty, self.getVar(f)):
                 data[f] = getattr(penalty, self.getVar(f))
 
-        self.console.debug('Storage: setClientPenalty data %s' % data)
+        self.console.debug('Storage: setClientPenalty data %s', data)
 
         if penalty.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'penalties', {'id': penalty.id}))
@@ -410,11 +404,11 @@ class DatabaseStorage(Storage):
         :param penalty: The penalty object to fill with fetch data.
         :return: The penalty given as input with all the fields set.
         """
-        self.console.debug('Storage: getClientPenalty %s' % penalty)
+        self.console.debug('Storage: getClientPenalty %s', penalty)
         cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'penalties', {'id': penalty.id}, None, 1))
         if cursor.EOF:
             cursor.close()
-            raise KeyError('no penalty matching id %s' % penalty.id)
+            raise KeyError(f'no penalty matching id {penalty.id}')
         row = cursor.getOneRow()
         return self._createPenaltyFromRow(row)
 
@@ -425,7 +419,7 @@ class DatabaseStorage(Storage):
         :param type: The type of the penalties we want to retrieve.
         :return: List of penalties
         """
-        self.console.debug('Storage: getClientPenalties %s' % client)
+        self.console.debug('Storage: getClientPenalties %s', client)
         where = QueryBuilder(self.db).WhereClause({'type': type, 'client_id': client.id, 'inactive': 0})
         where += ' AND (time_expire = -1 OR time_expire > %s)' % int(time())
         cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'penalties', where, 'time_add DESC'))
@@ -531,7 +525,7 @@ class DatabaseStorage(Storage):
             cursor = self.query(query)
             row = cursor.getOneRow()
             if not row:
-                raise KeyError('no group matching keyword: %s' % group.keyword)
+                raise KeyError(f'no group matching keyword: {group.keyword}')
 
         elif hasattr(group, 'level') and group.level >= 0:
             query = QueryBuilder(self.db).SelectQuery('*', 'groups', dict(level=group.level), None, 1)
@@ -539,7 +533,7 @@ class DatabaseStorage(Storage):
             cursor = self.query(query)
             row = cursor.getOneRow()
             if not row:
-                raise KeyError('no group matching level: %s' % group.level)
+                raise KeyError(f'no group matching level: {group.level}')
         else:
             raise KeyError("cannot find Group as no keyword/level provided")
 
@@ -652,7 +646,7 @@ class DatabaseStorage(Storage):
 
         path = b3.getAbsolutePath(fp)
         if not os.path.exists(path):
-            raise Exception('SQL file does not exist: %s' % path)
+            raise Exception(f'SQL file does not exist: {path}')
 
         with open(path, 'r') as sqlfile:
             statements = self.getQueriesFromFile(sqlfile)

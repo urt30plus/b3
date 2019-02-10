@@ -23,13 +23,9 @@
 # ################################################################### #
 
 
-class Cursor(object):
-    _cursor = None
-    _conn = None
+class Cursor:
 
     fields = None
-    lastrowid = 0
-    rowcount = 0
 
     EOF = False
 

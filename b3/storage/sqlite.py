@@ -49,7 +49,7 @@ class SqliteStorage(DatabaseStorage):
         try:
             import sqlite3
             path = b3.getWritableFilePath(self.dsn[9:])
-            self.console.bot("Using database file: %s" % path)
+            self.console.bot("Using database file: %s", path)
             is_new_database = not os.path.isfile(path)
             self.db = sqlite3.connect(path, check_same_thread=False)
             self.db.isolation_level = None  # set autocommit mode
@@ -62,7 +62,7 @@ class SqliteStorage(DatabaseStorage):
         else:
             # import SQL script if necessary
             if path == ':memory:' or is_new_database:
-                self.console.info("Importing SQL file: %s..." % b3.getAbsolutePath("@b3/sql/sqlite/b3.sql"))
+                self.console.info("Importing SQL file: %s...", b3.getAbsolutePath("@b3/sql/sqlite/b3.sql"))
                 self.queryFromFile("@b3/sql/sqlite/b3.sql")
 
             if self._consoleNotice:
@@ -115,14 +115,14 @@ class SqliteStorage(DatabaseStorage):
         if isinstance(table, tuple) or isinstance(table, list):
             for v in table:
                 if not v in current_tables:
-                    raise KeyError("could not find table '%s' in the database" % v)
-                self.query("DELETE FROM %s;" % v)
-                self.query("DELETE FROM sqlite_sequence WHERE name='%s';" % v)
+                    raise KeyError(f"could not find table '{v}' in the database")
+                self.query(f"DELETE FROM {v};")
+                self.query(f"DELETE FROM sqlite_sequence WHERE name='{v}';")
         else:
             if not table in current_tables:
-                raise KeyError("could not find table '%s' in the database" % table)
-            self.query("DELETE FROM %s;" % table)
-            self.query("DELETE FROM sqlite_sequence WHERE name='%s';" % table)
+                raise KeyError(f"could not find table '{table}' in the database")
+            self.query(f"DELETE FROM {table};")
+            self.query(f"DELETE FROM sqlite_sequence WHERE name='{table}';")
 
     def status(self):
         """
