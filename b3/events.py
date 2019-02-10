@@ -39,7 +39,7 @@ class Events:
 
     def __init__(self):
         self._events = {}
-        self._eventNames = {}
+        self._event_names = {}
 
         self.loadEvents((
             ('EVT_EXIT', 'Program Exit'),
@@ -124,10 +124,7 @@ class Events:
         except KeyError:
             _id = self._events[key] = len(self._events) + 1
 
-        if name:
-            self._eventNames[_id] = name
-        else:
-            self._eventNames[_id] = f'Unnamed ({key})'
+        self._event_names[_id] = name or f'Unnamed ({key})'
 
         g[key] = _id
         return _id
@@ -139,11 +136,7 @@ class Events:
         """
         if re.match('^[0-9]+$', str(key)):
             return int(key)
-        else:
-            try:
-                return self._events[key]
-            except KeyError:
-                return None
+        return self._events.get(key)
 
     @Memoize
     def getKey(self, event_id):
@@ -162,10 +155,7 @@ class Events:
         Return an event name given its key.
         :param key: The event key
         """
-        try:
-            return self._eventNames[self.getId(key)]
-        except KeyError:
-            return f'Unknown ({key})'
+        return self._event_names.get(self.getId(key), f"Unknown ({key})")
 
     def loadEvents(self, events):
         """
@@ -175,13 +165,12 @@ class Events:
         for k, n in events:
             self.createEvent(k, n)
 
-    def _get_events(self):
+    @property
+    def events(self):
         """
         Return the Event dict.
         """
         return self._events
-
-    events = property(_get_events)
 
 
 class Event:
