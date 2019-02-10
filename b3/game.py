@@ -52,15 +52,14 @@ class Game:
         self.startRound()
 
     def __getattr__(self, key):
-        if key in self.__dict__:
-            return self.__dict__[key]
-        return None
+        return self.__dict__.get(key)
 
     def __setitem__(self, key, value):
         self.__dict__[key] = value
         return self.__dict__[key]
 
-    def _get_mapName(self):
+    @property
+    def mapName(self):
         if not self._mapName:
             try:
                 # try to get the mapname from the server
@@ -72,14 +71,13 @@ class Game:
                 self._set_mapName(mapname)
         return self._mapName
 
-    def _set_mapName(self, newmap):
+    @mapName.setter
+    def mapName(self, newmap):
         if self._mapName != newmap:
             # generate EVT_GAME_MAP_CHANGE so plugins can detect that a new game is starting
             event = self.console.getEvent('EVT_GAME_MAP_CHANGE', data={'old': self._mapName, 'new': newmap})
             self.console.queueEvent(event)
         self._mapName = newmap
-
-    mapName = property(_get_mapName, _set_mapName)
 
     def mapTime(self):
         """
@@ -87,7 +85,6 @@ class Game:
         """
         if self._mapTimeStart:
             return self.console.time() - self._mapTimeStart
-        return None
 
     def roundTime(self):
         """
