@@ -26,6 +26,7 @@ __author__ = 'ThorN, Courgette'
 __version__ = '1.30.1'
 
 import re
+from collections import defaultdict
 
 import b3.clients
 import b3.config
@@ -34,7 +35,7 @@ import b3.functions
 from b3 import __version__ as b3_version
 
 
-class Plugin(object):
+class Plugin:
     """
     This class implements a B3 plugin.
     All the B3 plugins MUST inherit from this one and properly overriding methods and attributes.
@@ -58,7 +59,6 @@ class Plugin(object):
     >>>         self._my_attribute_1 = 'something'
     >>>         self._my_attribute_2 = 1337
     """
-    ################################## PLUGIN DEVELOPERS: CUSTOMIZE THE FOLLOWING ######################################
 
     # Whether this plugin requires a configuration file to run. When this is set to False,
     # a configuration file can still be loaded if specified in B3 main configuration file.
@@ -99,18 +99,7 @@ class Plugin(object):
     _default_messages = {}
     """:type: dict"""
 
-    ################################## PLUGIN DEVELOPERS: END PLUGIN CUSTOMIZATION #####################################
-
-    _enabled = True
-    _messages = {}
-
-    config = None
-    console = None
-    eventmanager = None
-    eventmap = None
     events = []
-
-    working = True
 
     def __init__(self, console, config=None):
         """
@@ -120,7 +109,11 @@ class Plugin(object):
         """
         self.console = console
         self.eventmanager = b3.events.eventManager
-        self.eventmap = dict()
+        self.eventmap = defaultdict(list)
+        self._messages = {}
+        self._enabled = True
+        self.working = True
+        self.config = None
         if isinstance(config, b3.config.XmlConfigParser) or isinstance(config, b3.config.CfgConfigParser):
             # this will be used by default from the Parser class since B3 1.10dev
             self.config = config
@@ -149,7 +142,7 @@ class Plugin(object):
         Enable the plugin.
         """
         self._enabled = True
-        name = b3.functions.right_cut(self.__class__.__name__, 'Plugin').lower()
+        name = self.__get_plugin_name()
         self.console.queueEvent(self.console.getEvent('EVT_PLUGIN_ENABLED', data=name))
         self.onEnable()
 
@@ -158,9 +151,12 @@ class Plugin(object):
         Disable the plugin.
         """
         self._enabled = False
-        name = b3.functions.right_cut(self.__class__.__name__, 'Plugin').lower()
+        name = self.__get_plugin_name()
         self.console.queueEvent(self.console.getEvent('EVT_PLUGIN_DISABLED', data=name))
         self.onDisable()
+
+    def __get_plugin_name(self):
+        return b3.functions.right_cut(self.__class__.__name__, 'Plugin').lower()
 
     def isEnabled(self):
         """
@@ -168,12 +164,6 @@ class Plugin(object):
         :return True if the plugin is enabled, False otherwise
         """
         return self._enabled
-
-    ####################################################################################################################
-    #                                                                                                                  #
-    #   CONFIG RELATED METHODS                                                                                         #
-    #                                                                                                                  #
-    ####################################################################################################################
 
     def loadConfig(self, filename=None):
         """
@@ -366,12 +356,6 @@ class Plugin(object):
                 self.error("failed to format message %r (%r) with parameters %r: %s", msg, _msg, args, err)
                 raise
 
-    ####################################################################################################################
-    #                                                                                                                  #
-    #   EVENTS RELATED METHODS                                                                                         #
-    #                                                                                                                  #
-    ####################################################################################################################
-
     def registerEventHook(self, event_id, hook):
         """
         Register an event hook which will be used to dispatch a specific event once it reaches our plugin.
@@ -382,21 +366,17 @@ class Plugin(object):
         event_name = self.console.getEventName(event_id)
         if event_id not in self.events:
             # make sure the event we are going to map has been registered already
-            raise AssertionError('%s is not an event registered for plugin %s' % (event_name, self.__class__.__name__))
+            raise AssertionError(f"{event_name} is not an event registered for plugin {self.__class__.__name__}")
 
         hook = getattr(self, hook.__name__, None)
         if not callable(hook):
             # make sure the given hook to be a valid method of our plugin
-            raise AttributeError('%s is not a valid method of class %s' % (hook.__name__, self.__class__.__name__))
+            raise AttributeError(f"{hook.__name__} is not a valid method of class {self.__class__.__name__}")
 
-        # if it's the first time we are mapping
-        if not event_id in self.eventmap:
-            self.eventmap[event_id] = []
-
-        # create the mapping
         if hook not in self.eventmap[event_id]:
             self.eventmap[event_id].append(hook)
-        self.debug('created event mapping: <%s:%s>' % (event_name, hook.__name__))
+
+        self.debug('created event mapping: <%s:%s>', event_name, hook.__name__)
 
     def registerEvent(self, name, *args):
         """
@@ -415,12 +395,12 @@ class Plugin(object):
                 try:
                     self.registerEventHook(event_id, hook)
                 except (AssertionError, AttributeError) as e:
-                    self.error('could not create mapping for event %s: %s' % (event_name, e))
+                    self.error('could not create mapping for event %s: %s', event_name, e)
         else:
             try:
                 self.registerEventHook(event_id, self.onEvent)
             except (AssertionError, AttributeError) as e:
-                self.error('could not create mapping for event %s: %s' % (event_name, e))
+                self.error('could not create mapping for event %s: %s', event_name, e)
 
     def createEvent(self, key, name):
         """
@@ -440,7 +420,7 @@ class Plugin(object):
             try:
                 func(event)
             except TypeError as e:
-                self.error('could not parse event %s: %s' % (self.console.getEventName(event.type), e))
+                self.error('could not parse event %s: %s', self.console.getEventName(event.type), e)
 
         if event.type == self.console.getEventID('EVT_EXIT') or event.type == self.console.getEventID('EVT_STOP'):
             self.working = False
@@ -475,12 +455,6 @@ class Plugin(object):
             func = b3.functions.getCmd(self, cmd)
             if func:
                 admin_plugin.registerCommand(self, cmd, level, func, alias)
-
-    ####################################################################################################################
-    #                                                                                                                  #
-    #   LOGGING METHODS                                                                                                #
-    #                                                                                                                  #
-    ####################################################################################################################
 
     def error(self, msg, *args, **kwargs):
         """
@@ -530,13 +504,6 @@ class Plugin(object):
         """
         self.console.critical('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
 
-    ####################################################################################################################
-    #                                                                                                                  #
-    #   PLUGIN HOOKS                                                                                                   #
-    #   INHERITING CLASSES CAN IMPLEMENT THE FOLLOWING METHODS                                                         #
-    #                                                                                                                  #
-    ####################################################################################################################
-
     def onLoadConfig(self):
         """
         This is called after loadConfig() and if a user use the !reconfig command.
@@ -569,13 +536,6 @@ class Plugin(object):
         """
         pass
 
-    ####################################################################################################################
-    #                                                                                                                  #
-    #   EVENT HANDLERS                                                                                                 #
-    #   THOSE ARE DEFAULT EVENT HANDLERS WHICH MAY BE OVERRIDDEN IN PLUGIN CLASSES                                     #
-    #                                                                                                                  #
-    ####################################################################################################################
-
     def onExit(self, event):
         """
         Perform operations when EVT_EXIT is received.
@@ -590,12 +550,6 @@ class Plugin(object):
         """
         pass
 
-    ####################################################################################################################
-    #                                                                                                                  #
-    #   DEPRECATED METHODS                                                                                             #
-    #                                                                                                                  #
-    ####################################################################################################################
-
     def handle(self, _):
         """
         Deprecated. Use onEvent().
@@ -609,7 +563,7 @@ class Plugin(object):
         self.warning('use of deprecated method: startup()')
 
 
-class PluginData(object):
+class PluginData:
     """
     Class used to hold plugin data needed for plugin instance initialization.
     """
@@ -630,4 +584,4 @@ class PluginData(object):
         self.disabled = disabled
 
     def __repr__(self):
-        return 'PluginData<%s>' % self.name
+        return f"PluginData<{self.name}>"

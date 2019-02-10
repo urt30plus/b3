@@ -22,17 +22,18 @@
 #                                                                     #
 # ################################################################### #
 
-import unittest
 from mock import Mock, sentinel
 
-from b3.plugins.tk import TkPlugin, TkInfo
+from b3.plugins.tk import TkInfo
+from tests.plugins.tk import Tk_functional_test
 
 
-class Test_TkInfo(unittest.TestCase):
+class Test_TkInfo(Tk_functional_test):
 
     def setUp(self):
+        super().setUp()
         self.my_cid = 1
-        self.mock_plugin = Mock(name="plugin", spec=TkPlugin)
+        self.mock_plugin = self.p
         self.info = TkInfo(self.mock_plugin, self.my_cid)
 
     def test_construct(self):
