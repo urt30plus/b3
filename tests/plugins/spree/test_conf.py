@@ -73,7 +73,7 @@ class Test_killingspree_messages(SpreeTestCase):
             [loosingspree_messages]
             7: Keep it up %player%, it will come eventually # You're back in business %player%
         """))
-        self.assertListEqual([call("ignoring killingspree message 'foo' due to missing '#'")],
+        self.assertListEqual([call("ignoring killingspree message %r due to missing '#'", 'foo')],
                              self.p.warning.mock_calls)
 
 
@@ -118,5 +118,5 @@ class Test_loosingspree_messages(SpreeTestCase):
             # The # character splits the 'start' spree from the 'end' spree.
             7: bar
         """))
-        self.assertListEqual([call("ignoring killingspree message 'bar' due to missing '#'")],
+        self.assertListEqual([call("ignoring killingspree message %r due to missing '#'", 'bar')],
                              self.p.warning.mock_calls)
