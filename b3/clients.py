@@ -1224,7 +1224,6 @@ class Clients(dict):
                 if c.name and c.name.lower() == name:
                     self._nameIndex[name] = c.cid
                     return c
-        return None
 
     def getByExactName(self, name):
         """
@@ -1240,7 +1239,6 @@ class Clients(dict):
                 if c.exactName and c.exactName.lower() == name:
                     self._exactNameIndex[name] = c.cid
                     return c
-        return None
 
     def getList(self):
         """
@@ -1287,9 +1285,8 @@ class Clients(dict):
         """
         name = name.lower()
         for cid, c in self.items():
-            if not c.hide and c.name.lower().find(name) != -1:
+            if not c.hide and name in c.name.lower():
                 return c
-        return None
 
     def getClientsByState(self, state):
         """
@@ -1366,7 +1363,6 @@ class Clients(dict):
                 elif functions.fuzzyGuidMatch(c.guid, guid):
                     # found by fuzzy matching: don't index
                     return c
-        return None
 
     def getByCID(self, cid):
         """
@@ -1382,9 +1378,6 @@ class Clients(dict):
         else:
             if c.cid == cid:
                 return c
-            else:
-                return None
-        return None
 
     def lookupByName(self, name):
         """
