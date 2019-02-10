@@ -29,31 +29,24 @@ import b3.plugin
 
 
 class UrtbslapPlugin(b3.plugin.Plugin):
-    minlevel = 0
-    _slap_safe_level = 0
-    _adminPlugin = None
+
+    def __init__(self, console, config=None):
+        super().__init__(console, config)
+        self._admin_plugin = None
+        self._slap_safe_level = 100
 
     def onLoadConfig(self):
-        try:
-            self.minlevel = self.config.getint('settings', 'minlevel')
-        except:
-            self.minlevel = 80
-        self.debug(f"minlevel set to {self.minlevel}")
-
-        try:
-            self._slap_safe_level = self.config.getint('settings', 'slap_safe_level')
-        except:
-            self._slap_safe_level = 100
-        self.debug(f"slap safe level set to {self._slap_safe_level}")
+        self._slap_safe_level = self.getSetting("settings", "slap_safe_level", b3.INTEGER, default=100)
 
     def onStartup(self):
-        self._adminPlugin = self.console.getPlugin('admin')
-        if self._adminPlugin:
-            self._adminPlugin.registerCommand(self, 'mslap', self.minlevel, self.cmd_mslap, 'f')
-            self._adminPlugin.registerCommand(self, 'bslap', self.minlevel, self.cmd_bslap, 'f')
+        self.register_commands_from_config()
+        self._admin_plugin = self.console.getPlugin('admin')
 
     def cmd_mslap(self, data, client=None, cmd=None):
-        input = self._adminPlugin.parseUserCmd(data)
+        """
+        <name> <number of slaps> - slap a player multiple times
+        """
+        input = self._admin_plugin.parseUserCmd(data)
         if not input:
             client.message('^7command is !mslap <playername or partialname> <number of slaps>')
             return False
@@ -62,7 +55,7 @@ class UrtbslapPlugin(b3.plugin.Plugin):
             return False
         cname = input[0]
         creps = input[1]
-        sclient = self._adminPlugin.findClientPrompt(cname, client)
+        sclient = self._admin_plugin.findClientPrompt(cname, client)
         if not sclient:
             return False
         if sclient.maxLevel >= self._slap_safe_level:
@@ -73,11 +66,14 @@ class UrtbslapPlugin(b3.plugin.Plugin):
         return True
 
     def cmd_bslap(self, data, client=None, cmd=None):
-        input = self._adminPlugin.parseUserCmd(data)
+        """
+        <name> - slap a player to death
+        """
+        input = self._admin_plugin.parseUserCmd(data)
         if not input:
             client.message('^7Slap who???')
             return False
-        sclient = self._adminPlugin.findClientPrompt(input[0], client)
+        sclient = self._admin_plugin.findClientPrompt(input[0], client)
         if not sclient:
             return False
         if sclient.maxLevel >= self._slap_safe_level:
@@ -89,5 +85,5 @@ class UrtbslapPlugin(b3.plugin.Plugin):
 
     def __do_slap(self, sclient, reps):
         while reps > 0:
-            self.console.write('slap %s' % (sclient.cid))
+            self.console.write(f'slap {sclient.cid}')
             reps -= 1
