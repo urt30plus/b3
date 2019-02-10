@@ -27,9 +27,6 @@ __version__ = '1.1'
 
 
 class Cvar:
-    name = ''
-    value = None
-    default = None
 
     def __init__(self, name, **kwargs):
         """
@@ -38,12 +35,8 @@ class Cvar:
         :param kwargs: A dict containing optional value and default.
         """
         self.name = name
-
-        if 'value' in kwargs:
-            self.value = kwargs['value']
-
-        if 'default' in kwargs:
-            self.default = kwargs['default']
+        self.value = kwargs.get("value")
+        self.default = kwargs.get("default")
 
     def __getitem__(self, key):
         """
@@ -60,7 +53,7 @@ class Cvar:
             elif key == 1:
                 return self.default
             else:
-                raise KeyError('no key %s' % key)
+                raise KeyError(f"no key {key}")
         else:
             return self.__dict__[key]
 
@@ -105,7 +98,7 @@ class Cvar:
         elif self.value in ('no', '0', 'off', 'false'):
             return False
         else:
-            raise ValueError('%s is not a boolean value' % self.value)
+            raise ValueError(f"{self.value} is not a boolean value")
 
     def save(self, console):
         """
