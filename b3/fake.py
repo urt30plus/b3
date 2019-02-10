@@ -35,6 +35,7 @@ import re
 import sys
 import time
 import traceback
+from collections import defaultdict
 from sys import stdout
 
 from io import StringIO
@@ -83,7 +84,7 @@ class FakeConsole(b3.parser.Parser):
         self.game = b3.game.Game(self, "fakeGame")
         self.game.mapName = 'ut4_turnpike'
         self.cvars = {}
-        self._handlers = {}
+        self._handlers = defaultdict(list)
 
         self.input = StringIO()
         self.working = True
@@ -111,12 +112,9 @@ class FakeConsole(b3.parser.Parser):
         if event.type == self.getEventID('EVT_EXIT') or event.type == self.getEventID('EVT_STOP'):
             self.working = False
 
-        nomore = False
         for hfunc in self._handlers[event.type]:
             if not hfunc.isEnabled():
                 continue
-            elif nomore:
-                break
 
             self.verbose('parsing event: %s: %s', self.Events.getName(event.type), hfunc.__class__.__name__)
 
@@ -126,7 +124,7 @@ class FakeConsole(b3.parser.Parser):
             except b3.events.VetoEvent:
                 # plugin called for event hault, do not continue processing
                 self.bot('Event %s vetoed by %s', self.Events.getName(event.type), str(hfunc))
-                nomore = True
+                break
             except SystemExit as e:
                 self.exitcode = e.code
             except Exception as msg:
@@ -169,20 +167,20 @@ class FakeConsole(b3.parser.Parser):
         """
         Send text to the server.
         """
-        print(">>> %s" % re.sub(re.compile('\^[0-9]'), '', msg % args).strip())
+        print(">>> %s" % re.sub(re.compile(r'\^[0-9]'), '', msg % args).strip())
 
     def saybig(self, msg, *args):
         """
         Send bigtext to the server.
         """
-        print("+++ %s" % re.sub(re.compile('\^[0-9]'), '', msg % args).strip())
+        print("+++ %s" % re.sub(re.compile(r'\^[0-9]'), '', msg % args).strip())
 
     def write(self, msg, maxRetries=0, socketTimeout=None):
         """
         Send text to the console.
         """
         if type(msg) == str:
-            print("### %s" % re.sub(re.compile('\^[0-9]'), '', msg).strip())
+            print("### %s" % re.sub(re.compile(r'\^[0-9]'), '', msg).strip())
         else:
             # which happens for BFBC2
             print("### %s" % msg)
@@ -236,7 +234,7 @@ class FakeConsole(b3.parser.Parser):
         elif client.cid is None:
             pass
         else:
-            print("sending msg to %s: %s" % (client.name, re.sub(re.compile('\^[0-9]'), '', text % args).strip()))
+            print("sending msg to %s: %s" % (client.name, re.sub(re.compile(r'\^[0-9]'), '', text % args).strip()))
 
     def getCvar(self, key):
         """
@@ -273,7 +271,7 @@ class FakeClient(b3.clients.Client):
         self.message_history = []
 
     def getMessageHistoryLike(self, needle):
-        clean_needle = re.sub(re.compile('\^[0-9]'), '', needle).strip()
+        clean_needle = re.sub(re.compile(r'\^[0-9]'), '', needle).strip()
         for m in self.message_history:
             if clean_needle in m:
                 return m
@@ -281,7 +279,7 @@ class FakeClient(b3.clients.Client):
 
     def getAllMessageHistoryLike(self, needle):
         result = []
-        clean_needle = re.sub(re.compile('\^[0-9]'), '', needle).strip()
+        clean_needle = re.sub(re.compile(r'\^[0-9]'), '', needle).strip()
         for m in self.message_history:
             if clean_needle in m:
                 result.append(m)
@@ -289,7 +287,7 @@ class FakeClient(b3.clients.Client):
 
     def message(self, msg, *args):
         msg = msg % args
-        cleanmsg = re.sub(re.compile('\^[0-9]'), '', msg).strip()
+        cleanmsg = re.sub(re.compile(r'\^[0-9]'), '', msg).strip()
         self.message_history.append(cleanmsg)
         print("sending msg to %s: %s" % (self.name, cleanmsg))
 

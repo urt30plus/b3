@@ -36,7 +36,7 @@ import socket
 import sys
 import threading
 import time
-from collections import OrderedDict
+from collections import defaultdict, OrderedDict
 from textwrap import TextWrapper
 from traceback import extract_tb
 
@@ -77,8 +77,8 @@ class Parser:
     _cron = None  # cron instance
     _events = {}  # available events (K=>EVENT)
     _eventsStats_cronTab = None  # crontab used to log event statistics
-    _handlers = {}  # event handlers
-    _lineTime = None  # used to track log file time changes
+    _handlers = defaultdict(list)  # event handlers
+    _lineTime = re.compile(r'^(?P<minutes>[0-9]+):(?P<seconds>[0-9]+).*')  # used to track log file time changes
     _lineFormat = re.compile('^([a-z ]+): (.*?)', re.IGNORECASE)
     _line_color_prefix = ''  # a color code prefix to be added to every line resulting from getWrap
     _line_length = 80  # max wrap length
@@ -107,7 +107,7 @@ class Parser:
     log = None  # logger instance
     logTime = 0  # time in seconds of epoch of game log
     name = 'b3'  # bot name
-    output = None  # will contain the instance used to send data to the game server (default to b3.parsers.q3a.rcon.Rcon)
+    output = None  # used to send data to the game server (default to b3.parsers.q3a.rcon.Rcon)
     privateMsg = False  # will be set to True if the game supports private messages
     queue = None  # event queue
     rconTest = False  # whether to perform RCON testing or not
@@ -314,6 +314,10 @@ class Parser:
                 self.screen.write(f">>> Cannot read file: {os.path.abspath(f)}\n")
                 self.screen.flush()
                 self.critical(f"Cannot read file: {os.path.abspath(f)}")
+        else:
+            self.screen.write("server > game_log setting is required")
+            self.screen.flush()
+            self.critical("server > game_log setting is required")
 
     def __init_rcon(self):
         try:
@@ -900,12 +904,9 @@ class Parser:
         """
         Return a reference to a loaded command
         """
-        try:
-            cmd = self._commands[cmd]
-        except KeyError:
-            return None
-
-        return cmd % kwargs
+        cmd = self._commands.get(cmd)
+        if cmd:
+            return cmd % kwargs
 
     @Memoize
     def getGroup(self, data):
@@ -1004,7 +1005,7 @@ class Parser:
                 if lines:
                     for line in lines:
                         line = str(line).strip()
-                        if line and self._lineTime is not None:
+                        if line:
                             # Track the log file time changes. This is mostly for
                             # parsing old log files for testing and to have time increase
                             # predictably
@@ -1060,8 +1061,6 @@ class Parser:
         """
         self.debug('%s: register event <%s>',
                    event_handler.__class__.__name__, self.getEventName(event_name))
-        if event_name not in self._handlers:
-            self._handlers[event_name] = []
         if event_handler not in self._handlers[event_name]:
             self._handlers[event_name].append(event_handler)
 
@@ -1069,11 +1068,11 @@ class Parser:
         """
         Unregister an event handler.
         """
-        for event_name in self._handlers:
-            if event_handler in self._handlers[event_name]:
+        for event_name, handlers in self._handlers.items():
+            if event_handler in handlers:
                 self.debug('%s: unregister event <%s>',
                            event_handler.__class__.__name__, self.getEventName(event_name))
-                self._handlers[event_name].remove(event_handler)
+                handlers.remove(event_handler)
 
     def queueEvent(self, event, expire=10):
         """
@@ -1108,12 +1107,9 @@ class Parser:
                 self.error('**** Event sat in queue too long: %s %s',
                            event_name, self.time() - expire)
             else:
-                nomore = False
                 for hfunc in self._handlers[event.type]:
                     if not hfunc.isEnabled():
                         continue
-                    elif nomore:
-                        break
 
                     self.verbose('Parsing event: %s: %s',
                                  event_name, hfunc.__class__.__name__)
@@ -1122,9 +1118,9 @@ class Parser:
                         hfunc.parseEvent(event)
                         time.sleep(0.001)
                     except b3.events.VetoEvent:
-                        # plugin called for event hault, do not continue processing
+                        # plugin called for a halt to event processing
                         self.bot('Event %s vetoed by %s', event_name, str(hfunc))
-                        nomore = True
+                        break
                     except SystemExit as e:
                         self.exitcode = e.code
                     except Exception as msg:
@@ -1148,17 +1144,16 @@ class Parser:
         """
         Write a message to Rcon/Console
         """
-        if self.output:
-            res = self.output.write(msg, maxRetries=maxRetries, socketTimeout=socketTimeout)
-            self.output.flush()
-            return res
+        res = self.output.write(msg, maxRetries=maxRetries, socketTimeout=socketTimeout)
+        self.output.flush()
+        return res
 
     def writelines(self, msg):
         """
         Write a sequence of messages to Rcon/Console. Optimized for speed.
         :param msg: The message to be sent to Rcon/Console.
         """
-        if self.output and msg:
+        if msg:
             res = self.output.writelines(msg)
             self.output.flush()
             return res
@@ -1167,10 +1162,6 @@ class Parser:
         """
         Read from game server log file
         """
-        if not hasattr(self, 'input'):
-            self.critical("Cannot read game log file: check that you have a correct "
-                          "value for the 'game_log' setting in your main config file")
-
         # Getting the stats of the game log (we are looking for the size)
         filestats = os.fstat(self.input.fileno())
         # Compare the current cursor position against the current file size,
@@ -1192,7 +1183,7 @@ class Parser:
             if self.working and self.exiting.acquire():
                 self.bot('Shutting down...')
                 self.working = False
-                for k, plugin in self._plugins.items():
+                for _, plugin in self._plugins.items():
                     plugin.parseEvent(b3.events.Event(self.getEventID('EVT_STOP'), ''))
                 if self._cron:
                     self.bot('Stopping cron')
