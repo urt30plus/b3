@@ -75,3 +75,11 @@ class Test_MessageLoop(unittest.TestCase):
         ml.items = ['f00', 'bar']
         ml.clear()
         self.assertEqual([], ml.items)
+
+    def test_truthiness(self):
+        ml = MessageLoop()
+        self.assertFalse(ml)
+        ml.put("an item")
+        self.assertTrue(ml)
+        ml.clear()
+        self.assertFalse(ml)

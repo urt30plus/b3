@@ -31,11 +31,9 @@ import time
 import b3
 import b3.cron
 import b3.plugin
-from b3.config import NoOptionError
 
 
-class MessageLoop(object):
-    items = None
+class MessageLoop:
 
     def __init__(self):
         self.items = []
@@ -94,74 +92,61 @@ class MessageLoop(object):
         """
         self.items = []
 
+    def __len__(self):
+        return len(self.items)
+
 
 class AdvPlugin(b3.plugin.Plugin):
-    _adminPlugin = None
-    _xlrstatsPlugin = None
-    _cronTab = None
-    _msg = None
-    _fileName = None
-    _rate = '2'
-    _replay = 0
 
-    def onStartup(self):
-        """
-        Initialize the plugin
-        """
-        if self._adminPlugin:
-            self._adminPlugin.registerCommand(self, 'advadd', 100, self.cmd_advadd)
-            self._adminPlugin.registerCommand(self, 'advrate', 100, self.cmd_advrate)
-            self._adminPlugin.registerCommand(self, 'advlist', 100, self.cmd_advlist)
-            self._adminPlugin.registerCommand(self, 'advload', 100, self.cmd_advload)
-            self._adminPlugin.registerCommand(self, 'advrem', 100, self.cmd_advrem)
-            if self._fileName:
-                self._adminPlugin.registerCommand(self, 'advsave', 100, self.cmd_advsave)
-
-        self._xlrstatsPlugin = self.console.getPlugin('xlrstats')
-        if not self._xlrstatsPlugin:
-            self.debug('XLRstats not installed: @topstats not available!')
-        else:
-            self.debug('XLRstats found: @topstats available!')
+    def __init__(self, console, config=None):
+        super().__init__(console, config)
+        self._admin_plugin = self.console.getPlugin('admin')
+        self._xlrstats_plugin = self.console.getPlugin('xlrstats')
+        self._crontab = None
+        self._msg = MessageLoop()
+        self._file_name = None
+        self._rate = '2'
+        self._replay = 0
 
     def onLoadConfig(self):
         """
         Load plugin configuration
         """
-        self._adminPlugin = self.console.getPlugin('admin')
-        self._msg = MessageLoop()
-
-        try:
-            self._rate = self.config.get('settings', 'rate')
-            self.debug('loaded settings/rate: %s' % self._rate)
-        except NoOptionError:
-            self.warning('could not find settings/max_level in config file, using default: 2')
+        self._rate = self.getSetting("settings", "rate", default=self._rate)
 
         if self.config.has_option('settings', 'ads'):
-            self._fileName = b3.getAbsolutePath(self.config.get('settings', 'ads'), False)
-            self.load_from_file(self._fileName)
+            self._file_name = self.getSetting("settings", "ads", b3.PATH)
+            self.load_from_file(self._file_name)
         else:
-            self._fileName = None
+            self._file_name = None
             self.load_from_config()
 
-        if self._cronTab:
-            # remove existing crontab
-            self.console.cron - self._cronTab
+        if self._crontab:
+            self.console.cron - self._crontab
 
         (m, s) = self._get_rate_minsec(self._rate)
-        self._cronTab = b3.cron.PluginCronTab(self, self.adv, second=s, minute=m)
-        self.console.cron + self._cronTab
+        self._crontab = b3.cron.PluginCronTab(self, self.adv, second=s, minute=m)
+        self.console.cron + self._crontab
+
+    def onStartup(self):
+        """
+        Initialize the plugin
+        """
+        if not self._xlrstats_plugin:
+            self.debug('XLRstats not installed: @topstats not available!')
+
+        self.register_commands_from_config()
 
     def save(self):
         """
         Save the current advertisements list.
         """
-        if self._fileName:
-            with open(self._fileName, 'w') as f:
+        if self._file_name:
+            with open(self._file_name, 'w') as f:
                 for msg in self._msg.items:
                     if msg:
                         f.write(msg + "\n")
         else:
-            self.verbose('save to XML config not supported')
             raise Exception('save to XML config not supported')
 
     def load_from_file(self, filename):
@@ -179,25 +164,22 @@ class AdvPlugin(b3.plugin.Plugin):
         """
         Load advertisement from the plugin configuration file.
         """
-        items = []
-        for e in self.config.get('ads/ad'):
-            items.append(e.text)
-
-        self.load(items)
+        self.load([e.text for e in self.config.get("ads/ad")])
 
     def load(self, items=None):
         """
         Load an advertisement message.
         """
-        if items is None:
-            items = []
-
         self._msg.clear()
+
+        if items is None:
+            return
+
         for w in items:
             w = w.strip()
             if len(w) > 1:
                 if w[:6] == '/spam#':
-                    w = self._adminPlugin.getSpam(w[6:])
+                    w = self._admin_plugin.getSpam(w[6:])
                 self._msg.put(w)
 
     def adv(self, first_try=True):
@@ -217,8 +199,8 @@ class AdvPlugin(b3.plugin.Plugin):
             elif ad == "@time":
                 ad = "^2Time: ^3" + self.console.formatTime(time.time())
             elif ad == "@topstats":
-                if self._xlrstatsPlugin:
-                    self._xlrstatsPlugin.cmd_xlrtopstats(data='3', client=None, cmd=None, ext=True)
+                if self._xlrstats_plugin:
+                    self._xlrstats_plugin.cmd_xlrtopstats(data='3', client=None, cmd=None, ext=True)
                     if first_try:
                         # try another ad
                         self.adv(first_try=False)
@@ -230,7 +212,7 @@ class AdvPlugin(b3.plugin.Plugin):
                     ad = '@topstats not available: XLRstats is not installed!'
             elif ad == "@admins":
                 try:
-                    command = self._adminPlugin._commands['admins']
+                    command = self._admin_plugin._commands['admins']
                     command.executeLoud(data=None, client=None)
                     ad = None
                 except Exception as err:
@@ -243,7 +225,7 @@ class AdvPlugin(b3.plugin.Plugin):
                         ad = None
             elif ad == "@regulars":
                 try:
-                    command = self._adminPlugin._commands['regulars']
+                    command = self._admin_plugin._commands['regulars']
                     command.executeLoud(data=None, client=None)
                     ad = None
                 except Exception as err:
@@ -271,10 +253,10 @@ class AdvPlugin(b3.plugin.Plugin):
             s = rate[:-1]
             if int(s) > 59:
                 s = 59
-            seconds = '*/%s' % s
+            seconds = f'*/{s}'
         else:
-            minutes = '*/%s' % rate
-        self.debug('%s -> (%s,%s)' % (rate, minutes, seconds))
+            minutes = f'*/{rate}'
+        self.debug('%s -> (%s,%s)', rate, minutes, seconds)
         return minutes, seconds
 
     def cmd_advadd(self, data, client=None, cmd=None):
@@ -285,8 +267,8 @@ class AdvPlugin(b3.plugin.Plugin):
             client.message('Missing data, try !help advadd')
         else:
             self._msg.put(data)
-            client.message('^3Adv: ^7"%s^7" added' % data)
-            if self._fileName:
+            client.message(f'^3Adv: ^7"{data}^7" added')
+            if self._file_name:
                 self.save()
 
     def cmd_advsave(self, data, client=None, cmd=None):
@@ -295,16 +277,16 @@ class AdvPlugin(b3.plugin.Plugin):
         """
         try:
             self.save()
-            client.message('^3Adv: ^7saved %s messages' % len(self._msg.items))
+            client.message(f'^3Adv: ^7saved {len(self._msg)} messages')
         except Exception as e:
-            client.message('^3Adv: ^7error saving: %s' % e)
+            client.message(f'^3Adv: ^7error saving: {e}')
 
     def cmd_advload(self, data, client=None, cmd=None):
         """
         Reload adv plugin configuration.
         """
         self.onLoadConfig()
-        client.message('^3Adv: ^7loaded %s messages' % len(self._msg.items))
+        client.message(f'^3Adv: ^7loaded {len(self._msg)} messages')
 
     def cmd_advrate(self, data, client=None, cmd=None):
         """
@@ -312,18 +294,18 @@ class AdvPlugin(b3.plugin.Plugin):
         """
         if not data:
             if self._rate[-1] == 's':
-                client.message('Current rate is every %s seconds' % self._rate[:-1])
+                client.message(f'Current rate is every {self._rate[:-1]} seconds')
             else:
-                client.message('Current rate is every %s minutes' % self._rate)
+                client.message(f'Current rate is every {self._rate} minutes')
         else:
             self._rate = data
             (m, s) = self._get_rate_minsec(self._rate)
-            self._cronTab.minute = m
-            self._cronTab.second = s
+            self._crontab.minute = m
+            self._crontab.second = s
             if self._rate[-1] == 's':
-                client.message('^3Adv: ^7rate set to %s seconds' % self._rate[:-1])
+                client.message(f'^3Adv: ^7rate set to {self._rate[:-1]} seconds')
             else:
-                client.message('^3Adv: ^7rate set to %s minutes' % self._rate)
+                client.message(f'^3Adv: ^7rate set to {self._rate} minutes')
 
     def cmd_advrem(self, data, client=None, cmd=None):
         """
@@ -338,27 +320,25 @@ class AdvPlugin(b3.plugin.Plugin):
             except ValueError:
                 client.message("Invalid data, use the !advlist command to list valid items numbers")
             else:
-                if not 0 <= item_index < len(self._msg.items):
+                if not 0 <= item_index < len(self._msg):
                     client.message("Invalid data, use the !advlist command to list valid items numbers")
                 else:
                     item = self._msg.getitem(item_index)
 
                     if item:
                         self._msg.remove(int(data) - 1)
-                        if self._fileName:
+                        if self._file_name:
                             self.save()
-                        client.message('^3Adv: ^7removed item: %s' % item)
+                        client.message(f'^3Adv: ^7removed item: {item}')
                     else:
-                        client.message('^3Adv: ^7item %s not found' % data)
+                        client.message(f'^3Adv: ^7item {data} not found')
 
     def cmd_advlist(self, data, client=None, cmd=None):
         """
         List advertisement messages
         """
-        if len(self._msg.items) > 0:
-            i = 0
-            for msg in self._msg.items:
-                i += 1
-                client.message('^3Adv: ^7[^2%s^7] %s' % (i, msg))
+        if self._msg.items:
+            for i, msg in enumerate(self._msg.items, start=1):
+                client.message(f'^3Adv: ^7[^2{i}^7] {msg}')
         else:
             client.message('^3Adv: ^7no ads loaded')

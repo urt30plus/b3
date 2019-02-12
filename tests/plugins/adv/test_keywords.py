@@ -39,7 +39,7 @@ class Test_keywords(AdvTestCase):
         # GIVEN
         when(self.p._msg).getnext().thenReturn("@admins")
         joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=128)
-        when(self.p._adminPlugin).getAdmins().thenReturn([joe])
+        when(self.p._admin_plugin).getAdmins().thenReturn([joe])
         with patch.object(self.console, "say") as say_mock:
             # WHEN
             self.p.adv()
@@ -50,7 +50,7 @@ class Test_keywords(AdvTestCase):
         # GIVEN
         when(self.p._msg).getnext().thenReturn("@regulars")
         joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=2)
-        when(self.p._adminPlugin).getRegulars().thenReturn([joe])
+        when(self.p._admin_plugin).getRegulars().thenReturn([joe])
         with patch.object(self.console, "say") as say_mock:
             # WHEN
             self.p.adv()
@@ -59,8 +59,8 @@ class Test_keywords(AdvTestCase):
 
     def test_topstats(self):
         when(self.p._msg).getnext().thenReturn("@topstats")
-        self.p._xlrstatsPlugin = Mock()
-        with patch.object(self.p._xlrstatsPlugin, "cmd_xlrtopstats") as xlrtopstats_mock:
+        self.p._xlrstats_plugin = Mock()
+        with patch.object(self.p._xlrstats_plugin, "cmd_xlrtopstats") as xlrtopstats_mock:
             self.p.adv()
             xlrtopstats_mock.assert_has_calls([call(ext=True, cmd=None, data='3', client=None)])
 
