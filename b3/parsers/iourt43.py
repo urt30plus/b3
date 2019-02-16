@@ -545,6 +545,7 @@ class Iourt43Parser(AbstractParser):
         24: UT_MOD_BENELLI,
         25: UT_MOD_P90,
         26: UT_MOD_MAGNUM,
+        27: UT_MOD_TOD50,
         29: UT_MOD_KICKED,
         30: UT_MOD_KNIFE_THROWN,
     }
