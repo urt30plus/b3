@@ -192,6 +192,7 @@ class Parser:
         self.__init_storage()
         self.__init_gamelog()
         self.__init_rcon()
+        self.__init_rcon_test()
         self.loadEvents()
         self.screen.write(f'Loading events   : {len(self._events)} events loaded\n')
         self.clients = Clients(self)
