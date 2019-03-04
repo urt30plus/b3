@@ -60,20 +60,6 @@ class Rcon(object):
         b3.functions.start_daemon_thread(self._writelines)
         self.console.bot('Game name is: %s', self.console.gameName)
 
-    def encode_data(self, data, source):
-        """
-        Encode data before sending them onto the socket.
-        :param data: The string to be encoded
-        :param source: Who requested the encoding
-        """
-        try:
-            data = data.encode(self.console.encoding, 'replace')
-        except Exception as msg:
-            self.console.warning('%s: error encoding data: %r', source, msg)
-            data = 'Encoding error'
-
-        return data
-
     def send_rcon(self, data, maxRetries=None, socketTimeout=None):
         """
         Send an RCON command.
