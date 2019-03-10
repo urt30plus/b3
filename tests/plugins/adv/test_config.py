@@ -41,7 +41,7 @@ class Test_config(AdvTestCase):
             '^2Public Teamspeak 3 server: ts3.urt-30plus.org.',
             '^2Type !register to register as a user.',
             '^2Type !fa in chat to forgive team damage!',
-            '^2Send demos to admin@urt-30plus.org',
+            '^2Send demos to urt30plus@gmail.com',
             '^3Rule #8: No profanity or offensive language (in any language)',
             '@nextmap',
             '^2Type !help for commands.',
