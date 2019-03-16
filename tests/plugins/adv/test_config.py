@@ -37,15 +37,15 @@ class Test_config(AdvTestCase):
                                self.p._crontab.day, self.p._crontab.month, self.p._crontab.dow))
         self.assertEqual(9, len(self.p._msg.items))
         self.assertListEqual([
-            '^2Visit us at www.urt-30plus.org.',
-            '^2Public Teamspeak 3 server: ts3.urt-30plus.org.',
-            '^2Type !register to register as a user.',
-            '^2Type !fa in chat to forgive team damage!',
+            '^2Visit us at www.urt-30plus.org',
+            '^2Public Teamspeak 3 server: ts3urt30.ts.nfoservers.com',
+            '^2Type !register to register as a user',
+            '^2Type !fa in chat to forgive team damage',
             '^2Send demos to urt30plus@gmail.com',
             '^3Rule #8: No profanity or offensive language (in any language)',
             '@nextmap',
-            '^2Type !help for commands.',
-            '^2Type !xlrstats for statistics.'
+            '^2Type !help for commands',
+            '^2Type !xlrstats for statistics'
         ], self.p._msg.items)
 
     def test_empty(self):

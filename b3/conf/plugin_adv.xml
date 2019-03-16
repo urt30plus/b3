@@ -45,14 +45,14 @@
           @admins - connected admins' names. You can change the message format in your admin plugin config
           @regulars - connected players from the regular grout. You can change the message format in your admin plugin config
         -->
-        <ad>^2Visit us at www.urt-30plus.org.</ad>
-        <ad>^2Public Teamspeak 3 server: ts3.urt-30plus.org.</ad>
-        <ad>^2Type !register to register as a user.</ad>
-        <ad>^2Type !fa in chat to forgive team damage!</ad>
+        <ad>^2Visit us at www.urt-30plus.org</ad>
+        <ad>^2Public Teamspeak 3 server: ts3urt30.ts.nfoservers.com</ad>
+        <ad>^2Type !register to register as a user</ad>
+        <ad>^2Type !fa in chat to forgive team damage</ad>
         <ad>^2Send demos to urt30plus@gmail.com</ad>
         <ad>/spam#rule8</ad>
         <ad>@nextmap</ad>
-        <ad>^2Type !help for commands.</ad>
-        <ad>^2Type !xlrstats for statistics.</ad>
+        <ad>^2Type !help for commands</ad>
+        <ad>^2Type !xlrstats for statistics</ad>
     </ads>
 </configuration>
