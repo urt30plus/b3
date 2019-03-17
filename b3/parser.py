@@ -80,6 +80,7 @@ class Parser:
     _handlers = defaultdict(list)  # event handlers
     _lineTime = re.compile(r'^(?P<minutes>[0-9]+):(?P<seconds>[0-9]+).*')  # used to track log file time changes
     _lineFormat = re.compile('^([a-z ]+): (.*?)', re.IGNORECASE)
+    _lineClear = re.compile(r'^(?:[0-9:]+\s?)?')
     _line_color_prefix = ''  # a color code prefix to be added to every line resulting from getWrap
     _line_length = 80  # max wrap length
     _messages = {}  # message template cache
@@ -108,9 +109,9 @@ class Parser:
     logTime = 0  # time in seconds of epoch of game log
     name = 'b3'  # bot name
     output = None  # used to send data to the game server (default to b3.parsers.q3a.rcon.Rcon)
-    privateMsg = False  # will be set to True if the game supports private messages
+    privateMsg = True  # will be set to True if the game supports private messages
     queue = None  # event queue
-    rconTest = False  # whether to perform RCON testing or not
+    rconTest = True  # whether to perform RCON testing or not
     screen = None
     storage = None  # storage module instance
     type = None

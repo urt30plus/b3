@@ -36,18 +36,9 @@ import b3.events
 import b3.functions
 import b3.parser
 from b3.functions import prefixText
-from b3.parsers.q3a import rcon
 
 
 class AbstractParser(b3.parser.Parser):
-    """
-    An abstract base class to help with developing q3a parsers.
-    """
-    gameName = None
-    privateMsg = True
-    rconTest = True
-    OutputClass = rcon.Rcon
-
     _clientConnectID = None
     _logSync = 2
 
@@ -67,40 +58,7 @@ class AbstractParser(b3.parser.Parser):
         # 'shutdowngame': b3.events.EVT_GAME_ROUND_END
     }
 
-    # remove the time off of the line
-    _lineTime = re.compile(r'^(?P<minutes>[0-9]+):(?P<seconds>[0-9]+).*')
-    _lineClear = re.compile(r'^(?:[0-9:]+\s?)?')
-
-    _lineFormats = (
-        # 1579:03ConnectInfo: 0: E24F9B2702B9E4A1223E905BF597FA92: ^w[^2AS^w]^2Lead: 3: 3: 24.153.180.106:2794
-        re.compile(r'^(?P<action>[a-z]+):\s*'
-                   r'(?P<data>(?P<cid>[0-9]+):\s*'
-                   r'(?P<pbid>[0-9A-Z]{32}):\s*'
-                   r'(?P<name>[^:]+):\s*'
-                   r'(?P<num1>[0-9]+):\s*'
-                   r'(?P<num2>[0-9]+):\s*'
-                   r'(?P<ip>[0-9.]+):(?P<port>[0-9]+))$', re.IGNORECASE),
-
-        # 1536:17sayc: 0: ^w[^2AS^w]^2Lead:  sorry...
-        # 1536:34sayteamc: 17: ^1[^7DP^1]^4Timekiller: ^4ammo ^2here !!!!!
-        re.compile(r'^(?P<action>[a-z]+):\s*'
-                   r'(?P<data>'
-                   r'(?P<cid>[0-9]+):\s*'
-                   r'(?P<name>.+):\s+'
-                   r'(?P<text>.*))$', re.IGNORECASE),
-
-        # 1536:37Kill: 1 18 9: ^1klaus killed ^1[pura]fox.nl by MOD_MP40
-        re.compile(r'^(?P<action>[a-z]+):\s*'
-                   r'(?P<data>'
-                   r'(?P<cid>[0-9]+)\s'
-                   r'(?P<acid>[0-9]+)\s'
-                   r'(?P<aweap>[0-9]+):\s*'
-                   r'(?P<text>.*))$', re.IGNORECASE),
-
-        re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>(?P<cid>[0-9]+):\s*(?P<text>.*))$', re.IGNORECASE),
-        re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>(?P<cid>[0-9]+)\s(?P<text>.*))$', re.IGNORECASE),
-        re.compile(r'^(?P<action>[a-z]+):\s*(?P<data>.*)$', re.IGNORECASE)
-    )
+    _lineFormats = ()
 
     # num score ping guid   name            lastmsg address               qport rate
     # --- ----- ---- ------ --------------- ------- --------------------- ----- -----

@@ -86,8 +86,6 @@ class Iourt43Parser(AbstractParser):
         'tempban': 'kick %(cid)s "%(reason)s"',
         'banByIp': 'addip %(ip)s',
         'unbanByIp': 'removeip %(ip)s',
-        'auth-permban': 'auth-ban %(cid)s 0 0 0',
-        'auth-tempban': 'auth-ban %(cid)s %(days)s %(hours)s %(minutes)s',
         'slap': 'slap %(cid)s',
         'nuke': 'nuke %(cid)s',
         'mute': 'mute %(cid)s %(seconds)s',
@@ -106,8 +104,6 @@ class Iourt43Parser(AbstractParser):
         "free": b3.TEAM_FREE, "f": b3.TEAM_FREE, "0": b3.TEAM_FREE,
     }
 
-    # remove the time off of the line
-    _lineClear = re.compile(r'^(?:[0-9:]+\s?)?')
     _line_length = 90
 
     _lineFormats = (
