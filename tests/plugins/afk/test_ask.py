@@ -27,6 +27,7 @@ from time import sleep
 
 from mock import call, Mock
 
+from b3.functions import getPlatform
 from tests.plugins.afk import *
 
 
@@ -79,6 +80,8 @@ def test_no_response(plugin, joe):
     assert [call("Joe is AFK, kicking in 0.005s")] == plugin.console.say.mock_calls
     # WHEN
     sleep(.01)
+    if getPlatform() == "nt":
+        sleep(1.5)
     # THEN
     assert [call(joe)] == plugin.kick_client.mock_calls
 
@@ -97,6 +100,8 @@ def test_response(plugin, joe):
     joe.says("hi")
     assert joe not in plugin.kick_timers
     sleep(.01)
+    if getPlatform() == "nt":
+        sleep(1.5)
     # THEN
     assert [] == plugin.kick_client.mock_calls
     assert joe not in plugin.kick_timers
@@ -116,6 +121,8 @@ def test_make_kill(plugin, joe):
     joe.kills(joe)
     assert joe not in plugin.kick_timers
     sleep(.01)
+    if getPlatform() == "nt":
+        sleep(1.5)
     assert [] == plugin.kick_client.mock_calls
 
 
