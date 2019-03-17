@@ -99,6 +99,13 @@ class Iourt43Parser(AbstractParser):
         # 'shutdowngame' : b3.events.EVT_GAME_ROUND_END
     }
 
+    _team_map = {
+        "red": b3.TEAM_RED, "r": b3.TEAM_RED, "1": b3.TEAM_RED,
+        "blue": b3.TEAM_BLUE, "b": b3.TEAM_BLUE, "2": b3.TEAM_BLUE,
+        "spectator": b3.TEAM_SPEC, "spec": b3.TEAM_SPEC, "s": b3.TEAM_SPEC, "3": b3.TEAM_SPEC,
+        "free": b3.TEAM_FREE, "f": b3.TEAM_FREE, "0": b3.TEAM_FREE,
+    }
+
     # remove the time off of the line
     _lineClear = re.compile(r'^(?:[0-9:]+\s?)?')
     _line_length = 90
@@ -1629,26 +1636,10 @@ class Iourt43Parser(AbstractParser):
         Return a B3 team given the team value.
         :param team: The team value
         """
-        if str(team).lower() == 'red':
-            team = 1
-        elif str(team).lower() == 'blue':
-            team = 2
-        elif str(team).lower() == 'spectator':
-            team = 3
-        elif str(team).lower() == 'free':
-            team = -1  # will fall back to b3.TEAM_UNKNOWN
-
-        team = int(team)
-        if team == 1:
-            result = b3.TEAM_RED
-        elif team == 2:
-            result = b3.TEAM_BLUE
-        elif team == 3:
-            result = b3.TEAM_SPEC
-        else:
-            result = b3.TEAM_UNKNOWN
-
-        return result
+        b3_team = self._team_map.get(str(team).lower(), b3.TEAM_UNKNOWN)
+        if b3_team in {b3.TEAM_UNKNOWN, b3.TEAM_FREE}:
+            self.warning("getTeam(%s) is FREE or UNKNOWN", team)
+        return b3_team
 
     def getNextMap(self):
         """
