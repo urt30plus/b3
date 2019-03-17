@@ -251,6 +251,9 @@ class FakeConsole(b3.parser.Parser):
         c = Cvar(name=key, value=value)
         self.cvars[key] = c
 
+    def queryClientFrozenSandAccount(self, cid):
+        return {}
+
 
 class FakeClient(b3.clients.Client):
     """

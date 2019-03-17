@@ -788,31 +788,64 @@ class Client:
             self.authorizing = True
 
             name = self.name
+            pbid = self.pbid
+            guid = self.guid
             ip = self.ip
-            try:
-                inStorage = self.console.storage.getClient(self)
-            except KeyError as msg:
-                self.console.debug('Client not found %s: %s', self.guid, msg)
-                inStorage = False
-            except Exception as e:
-                self.console.error('Auth self.console.storage.getClient(client) - %s\n%s', e,
-                                   traceback.extract_tb(sys.exc_info()[2]))
-                self.authorizing = False
-                return False
 
-            if inStorage:
-                self.console.bot('Client found in storage %s: welcome back %s', str(self.id), self.name)
-                self.lastVisit = self.timeEdit
+            if not pbid and self.cid:
+                fsa_info = self.console.queryClientFrozenSandAccount(self.cid)
+                self.pbid = pbid = fsa_info.get('login', None)
+
+            self.console.verbose("Auth with %r", {'name': name, 'ip': ip, 'pbid': pbid, 'guid': guid})
+
+            # FSA will be found in pbid
+            if not self.pbid:
+                # auth with cl_guid only
+                try:
+                    in_storage = self.auth_by_guid()
+                    # fix up corrupted data due to bug #162
+                    if in_storage and in_storage.pbid == 'None':
+                        in_storage.pbid = None
+                except Exception as e:
+                    self.console.error("Auth by guid failed", exc_info=e)
+                    self.authorizing = False
+                    return False
             else:
-                self.console.bot('Client not found in the storage %s: create new', str(self.guid))
+                # auth with FSA
+                try:
+                    in_storage = self.auth_by_pbid()
+                except Exception as e:
+                    self.console.error("Auth by FSA failed", exc_info=e)
+                    self.authorizing = False
+                    return False
+
+                if not in_storage:
+                    # fallback on auth with cl_guid only
+                    try:
+                        in_storage = self.auth_by_guid()
+                    except Exception as e:
+                        self.console.error("Auth by guid failed (when no known FSA)", exc_info=e)
+                        self.authorizing = False
+                        return False
+
+            if in_storage:
+                self.lastVisit = self.timeEdit
+                self.console.bot("Client found in the storage @%s: welcome back %s [FSA: '%s']", self.id, self.name,
+                                 self.pbid)
+            else:
+                self.console.bot("Client not found in the storage %s [FSA: '%s'], create new", str(self.guid),
+                                 self.pbid)
 
             self.connections = int(self.connections) + 1
             self.name = name
             self.ip = ip
+            if pbid:
+                self.pbid = pbid
             self.save()
             self.authed = True
 
-            self.console.debug('Client authorized: [%s] %s - %s', self.cid, self.name, self.guid)
+            self.console.debug("Client authorized: %s [@%s] [GUID: '%s'] [FSA: '%s']", self.name, self.id, self.guid,
+                               self.pbid)
 
             # check for bans
             if self.numBans > 0:
@@ -827,6 +860,57 @@ class Client:
             self.authorizing = False
             return self.authed
         else:
+            return False
+
+    def auth_by_guid(self):
+        """
+        Authorize this client using his GUID.
+        """
+        self.console.debug("Auth by guid: %r", self.guid)
+        try:
+            return self.console.storage.getClient(self)
+        except KeyError as msg:
+            self.console.debug('User not found %s: %s', self.guid, msg)
+            return False
+
+    def auth_by_pbid(self):
+        """
+        Authorize this client using his PBID.
+        """
+        self.console.debug("Auth by FSA: %r", self.pbid)
+        clients_matching_pbid = self.console.storage.getClientsMatching(dict(pbid=self.pbid))
+        if len(clients_matching_pbid) > 1:
+            self.console.warning("Found %s client having FSA '%s'", len(clients_matching_pbid), self.pbid)
+            return self.auth_by_pbid_and_guid()
+        elif len(clients_matching_pbid) == 1:
+            self.id = clients_matching_pbid[0].id
+            # we may have a second client entry in database with current guid.
+            # we want to update our current client guid only if it is not the case.
+            try:
+                client_by_guid = self.console.storage.getClient(Client(guid=self.guid))
+            except KeyError:
+                pass
+            else:
+                if client_by_guid.id != self.id:
+                    # so storage.getClient is able to overwrite the value which will make
+                    # it remain unchanged in database when .save() will be called later on
+                    self._guid = None
+            return self.console.storage.getClient(self)
+        else:
+            self.console.debug('Frozen Sand account [%s] unknown in database', self.pbid)
+            return False
+
+    def auth_by_pbid_and_guid(self):
+        """
+        Authorize this client using both his PBID and GUID.
+        """
+        self.console.debug("Auth by both guid and FSA: %r, %r", self.guid, self.pbid)
+        clients_matching_pbid = self.console.storage.getClientsMatching({'pbid': self.pbid, 'guid': self.guid})
+        if len(clients_matching_pbid):
+            self.id = clients_matching_pbid[0].id
+            return self.console.storage.getClient(self)
+        else:
+            self.console.debug("Frozen Sand account [%s] with guid '%s' unknown in database", self.pbid, self.guid)
             return False
 
     def __str__(self):
@@ -1332,7 +1416,6 @@ class Clients(dict):
         """
         handle = handle.strip()
         if re.match(r'^[0-9]+$', handle):
-            # seems to be a client id
             client = self.getByCID(handle)
             if client:
                 return [client]
@@ -1345,7 +1428,13 @@ class Clients(dict):
                 return [c]
             return []
         else:
-            return self.getClientsByName(handle)
+            clients = []
+            needle = re.sub(r'\s', '', handle.lower())
+            for cid, c in self.items():
+                cleanname = re.sub(r'\s', '', c.name.lower())
+                if not c.hide and (needle in cleanname or needle in c.pbid) and not c in clients:
+                    clients.append(c)
+            return clients
 
     def getByGUID(self, guid):
         """

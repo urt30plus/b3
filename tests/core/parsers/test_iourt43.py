@@ -29,40 +29,16 @@ from mock import Mock, call, patch
 from mockito import mock, when, unstub, any as anything
 
 import b3
-from b3.clients import Clients, Client
+from b3.clients import Client
 from b3.config import XmlConfigParser
 from b3.events import Event
-from b3.fake import FakeClient as original_FakeClient
+from b3.fake import FakeClient
 from b3.output import VERBOSE2
-from b3.parsers.iourt43 import Iourt43Client, Iourt43Parser
+from b3.parsers.iourt43 import Iourt43Parser
 from tests import logging_disabled
 
 log = logging.getLogger("test")
 log.setLevel(logging.INFO)
-
-# make sure to unpatch the Clients.newClient method and FakeClient
-original_newClient = Clients.newClient
-
-
-def tearDownModule():
-    Clients.newClient = original_newClient
-
-
-# We need our own FakeClient class to use the new auth() method from the Iourt43Client class
-class FakeClient(original_FakeClient, Iourt43Client):
-    # Python resolution rule for multiple inheritance will try to find the called methods in original_FakeClient class
-    # first ; second from the b3.clients.Client class (which is inherited from the original_FakeClient class) ; third
-    # from the Iourt42Client class ; and fourth from the b3.clients.Client class (which is inherited from the
-    # Iourt42Client class).
-    #
-    # We want to have the methods from the original FakeClient class called preferably over the ones from
-    # the Client Iourt42Client class, expected for the auth() method which has to be the one implemented in the
-    # Iourt42Client class.
-    #
-    # So we have to keep the Iourt42Client class in second position and we overwrite the auth() method here to
-    # control what code will be called in the end.
-    def auth(self):
-        return Iourt43Client.auth(self)
 
 
 class Iourt43TestCase(unittest.TestCase):

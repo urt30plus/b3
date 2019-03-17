@@ -1493,6 +1493,9 @@ class Parser:
         """
         pass
 
+    def queryClientFrozenSandAccount(self, cid):
+        pass
+
 
 class StubParser:
     """
