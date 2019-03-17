@@ -211,8 +211,6 @@ class Iourt43Parser(AbstractParser):
 
     _logSync = 2
 
-    _permban_with_frozensand = False
-    _tempban_with_frozensand = False
     _allow_userinfo_overflow = False
 
     IpsOnly = False
@@ -613,7 +611,6 @@ class Iourt43Parser(AbstractParser):
         self.__setup_maps()
         self.__setup_log_sync()
         self.__setup_gamepaths()
-        self.load_conf_frozensand_ban_settings()
         self.load_conf_userinfo_overflow()
 
     def is_valid_game(self, gamename):
@@ -621,68 +618,6 @@ class Iourt43Parser(AbstractParser):
 
     def pluginsStarted(self):
         self.__setup_connected_players()
-
-    def load_conf_frozensand_ban_settings(self):
-        """
-        Load ban settings according to auth system cvars.
-        """
-        try:
-            frozensand_auth_available = self.is_frozensand_auth_available()
-        except Exception as e:
-            self.warning("Could not query server for cvar auth", exc_info=e)
-            frozensand_auth_available = False
-        self.info("Frozen Sand auth system enabled : %s" % ('yes' if frozensand_auth_available else 'no'))
-
-        try:
-            cvar = self.getCvar('auth_owners')
-            if cvar:
-                frozensand_auth_owners = cvar.getString()
-            else:
-                frozensand_auth_owners = None
-        except Exception as e:
-            self.warning("Could not query server for cvar auth_owners", exc_info=e)
-            frozensand_auth_owners = ""
-
-        yn = ('yes - %s' % frozensand_auth_available) if frozensand_auth_owners else 'no'
-        self.info("Frozen Sand auth_owners set : %s" % yn)
-
-        if frozensand_auth_available and frozensand_auth_owners:
-            self.load_conf_permban_with_frozensand()
-            self.load_conf_tempban_with_frozensand()
-            if self._permban_with_frozensand or self._tempban_with_frozensand:
-                self.info("NOTE: when banning with the Frozen Sand auth system, B3 cannot remove "
-                          "the bans on the urbanterror.info website. To unban a player you will "
-                          "have to first unban him on B3 and then also unban him on the official Frozen Sand "
-                          "website : http://www.urbanterror.info/groups/list/all/?search=%s" % frozensand_auth_owners)
-        else:
-            self.info("Ignoring settings about banning with Frozen Sand auth system as the "
-                      "auth system is not enabled or auth_owners not set")
-
-    def load_conf_permban_with_frozensand(self):
-        """
-        Load permban configuration from b3.xml.
-        """
-        self._permban_with_frozensand = False
-        if self.config.has_option('server', 'permban_with_frozensand'):
-            try:
-                self._permban_with_frozensand = self.config.getboolean('server', 'permban_with_frozensand')
-            except ValueError as err:
-                self.warning(err)
-
-        self.info("Send permbans to Frozen Sand : %s" % ('yes' if self._permban_with_frozensand else 'no'))
-
-    def load_conf_tempban_with_frozensand(self):
-        """
-        Load tempban configuration from b3.xml.
-        """
-        self._tempban_with_frozensand = False
-        if self.config.has_option('server', 'tempban_with_frozensand'):
-            try:
-                self._tempban_with_frozensand = self.config.getboolean('server', 'tempban_with_frozensand')
-            except ValueError as err:
-                self.warning(err)
-
-        self.info("Send temporary bans to Frozen Sand : %s" % ('yes' if self._tempban_with_frozensand else 'no'))
 
     def load_conf_userinfo_overflow(self):
         """
@@ -1586,20 +1521,6 @@ class Iourt43Parser(AbstractParser):
             # ban by cid
             self.debug('EFFECTIVE BAN : %s', self.getCommand('ban', cid=client.cid, reason=reason))
 
-            if self._permban_with_frozensand:
-                cmd = self.getCommand('auth-permban', cid=client.cid)
-                self.info('Sending ban to Frozen Sand : %s' % cmd)
-                rv = self.write(cmd)
-                if rv:
-                    if rv == "Auth services disabled" or rv.startswith("auth: not banlist available."):
-                        self.warning(rv)
-                    elif rv.startswith("auth: sending ban"):
-                        self.info(rv)
-                        time.sleep(.250)
-                    else:
-                        self.warning(rv)
-                        time.sleep(.250)
-
             if client.connected:
                 cmd = self.getCommand('ban', cid=client.cid, reason=reason)
                 self.info('Sending ban to server : %s' % cmd)
@@ -1642,29 +1563,6 @@ class Iourt43Parser(AbstractParser):
             variables = self.getMessageVariables(client=client, reason=reason, banduration=banduration)
             fullreason = self.getMessage('temp_banned', variables)
 
-        if self._tempban_with_frozensand:
-            minutes = duration
-            days = hours = 0
-            while minutes >= 60:
-                hours += 1
-                minutes -= 60
-            while hours >= 24:
-                days += 1
-                hours -= 24
-
-            cmd = self.getCommand('auth-tempban', cid=client.cid, days=days, hours=hours, minutes=int(minutes))
-            self.info('Sending ban to Frozen Sand : %s' % cmd)
-            rv = self.write(cmd)
-            if rv:
-                if rv == "Auth services disabled" or rv.startswith("auth: not banlist available."):
-                    self.warning(rv)
-                elif rv.startswith("auth: sending ban"):
-                    self.info(rv)
-                    time.sleep(.250)
-                else:
-                    self.warning(rv)
-                    time.sleep(.250)
-
         if client.connected:
             cmd = self.getCommand('tempban', cid=client.cid, reason=reason)
             self.info('Sending ban to server : %s' % cmd)
@@ -1703,29 +1601,6 @@ class Iourt43Parser(AbstractParser):
             return m.groupdict()
         else:
             return {}
-
-    def queryAllFrozenSandAccount(self, max_retries=None):
-        """
-        Query the accounts of all the online clients.
-        """
-        data = self.write('auth-whois all', maxRetries=max_retries)
-        if not data:
-            return {}
-        players = {}
-        for m in re.finditer(self._re_authwhois, data):
-            players[m.group('cid')] = m.groupdict()
-        return players
-
-    def is_frozensand_auth_available(self):
-        """
-        Check whether the auth system is available.
-        """
-        cvar = self.getCvar('auth')
-        if cvar:
-            auth = cvar.getInt()
-            return auth != 0
-        else:
-            return False
 
     def defineGameType(self, gametype_int):
         gametype = str(gametype_int)
