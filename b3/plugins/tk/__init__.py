@@ -139,6 +139,7 @@ class TkInfo(object):
 
 
 class TkPlugin(b3.plugin.Plugin):
+
     loadAfterPlugins = ['spawnkill']
 
     def __init__(self, console, config=None):
@@ -151,12 +152,7 @@ class TkPlugin(b3.plugin.Plugin):
         self._adminPlugin = self.console.getPlugin('admin')
 
         # game types that have no team based game play and for which there should be no tk detected
-        self._ffa = ['dm', 'ffa', 'syc-ffa', 'lms']
-
-        # games for which the plugin will have all tk points on EVT_GAME_ROUND_END events
-        # instead of on EVT_GAME_EXIT events
-        self._round_end_games = ['bf3']
-        self._use_round_end = False
+        self._ffa = ['dm', 'ffa', 'syc-ffa', 'lms', 'gungame']
 
         self._default_messages = {
             'ban': '^7team damage over limit',
@@ -221,12 +217,6 @@ class TkPlugin(b3.plugin.Plugin):
 
         self._maxLevel = max(self._levels.keys())
         self.debug('teamkill max level is %s', self._maxLevel)
-
-        if self.console.gameName in self._round_end_games:
-            self._use_round_end = True
-            self.debug('using ROUND_END event to halve TK points')
-        else:
-            self.debug('using GAME_EXIT event to halve TK points')
 
     def load_config_for_levels(self):
         """
@@ -353,8 +343,7 @@ class TkPlugin(b3.plugin.Plugin):
             self.forgiveAll(event.data)
             return
 
-        elif (event.type == self.console.getEventID('EVT_GAME_EXIT') and not self._use_round_end) or \
-                (event.type == self.console.getEventID('EVT_GAME_ROUND_END') and self._use_round_end):
+        elif event.type == self.console.getEventID('EVT_GAME_EXIT'):
             if self._cronTab_tkhalflife:
                 # remove existing crontab
                 self.console.cron - self._cronTab_tkhalflife
