@@ -101,7 +101,6 @@ class Iourt43Parser(AbstractParser):
         "red": b3.TEAM_RED, "r": b3.TEAM_RED, "1": b3.TEAM_RED,
         "blue": b3.TEAM_BLUE, "b": b3.TEAM_BLUE, "2": b3.TEAM_BLUE,
         "spectator": b3.TEAM_SPEC, "spec": b3.TEAM_SPEC, "s": b3.TEAM_SPEC, "3": b3.TEAM_SPEC,
-        "free": b3.TEAM_FREE, "f": b3.TEAM_FREE, "0": b3.TEAM_FREE,
     }
 
     _line_length = 90
@@ -1632,10 +1631,8 @@ class Iourt43Parser(AbstractParser):
         Return a B3 team given the team value.
         :param team: The team value
         """
-        b3_team = self._team_map.get(str(team).lower(), b3.TEAM_UNKNOWN)
-        if b3_team in {b3.TEAM_UNKNOWN, b3.TEAM_FREE}:
-            self.warning("getTeam(%s) is FREE or UNKNOWN", team)
-        return b3_team
+        self.debug("getTeam(%s)", team)
+        return self._team_map.get(str(team).lower(), b3.TEAM_UNKNOWN)
 
     def getNextMap(self):
         """
