@@ -363,7 +363,7 @@ class Parser:
         except ValueError as err:
             queuesize = 50
             self.warning(err)
-        self.debug("Creating the event queue with size %s", queuesize)
+        self.info("Creating the event queue with size %s", queuesize)
         self.queue = queue.Queue(queuesize)
 
     def _dumpEventsStats(self):
@@ -832,7 +832,7 @@ class Parser:
         Disable all plugins except for 'admin'
         """
         for plugin_name, plugin in self._plugins.items():
-            if plugin_name not in 'admin':
+            if plugin_name != 'admin':
                 self.bot('Disabling plugin: %s', plugin_name)
                 plugin.disable()
 
@@ -841,7 +841,7 @@ class Parser:
         Enable all plugins except for 'admin'
         """
         for plugin_name, plugin in self._plugins.items():
-            if plugin_name not in 'admin':
+            if plugin_name != 'admin':
                 self.bot('Enabling plugin: %s', plugin_name)
                 plugin.enable()
 
