@@ -23,14 +23,10 @@
 # ################################################################### #
 
 import re
-import sys
 import threading
 import time
-import traceback
 
 import b3
-import b3.events
-from b3 import functions
 
 
 class ClientVar:
@@ -622,7 +618,7 @@ class Client:
         :param silent: Whether or not to announce this tempban
         :param data: Extra data to add to the penalty
         """
-        duration = functions.time2minutes(duration)
+        duration = b3.functions.time2minutes(duration)
         self.console.tempban(self, reason, duration, admin, silent)
 
         if self.id:
@@ -659,7 +655,7 @@ class Client:
         :param data: Extra data to add to the penalty
         """
         if self.id:
-            duration = functions.time2minutes(duration)
+            duration = b3.functions.time2minutes(duration)
             warn = ClientWarning()
 
             if admin:
@@ -976,7 +972,7 @@ class Penalty(Struct):
     clientId = property(_get_client_id, _set_client_id)
 
     def _set_duration(self, v):
-        self._duration = functions.time2minutes(v)
+        self._duration = b3.functions.time2minutes(v)
 
     def _get_duration(self):
         return self._duration
@@ -1131,7 +1127,7 @@ class Alias(Struct):
 
     def __str__(self):
         return "Alias(id=%s, alias=\"%s\", clientId=%s, numUsed=%s)" % (
-        self.id, self.alias, self.clientId, self.numUsed)
+            self.id, self.alias, self.clientId, self.numUsed)
 
 
 class IpAlias(Struct):
@@ -1449,7 +1445,7 @@ class Clients(dict):
                 if c.guid and c.guid == guid:
                     self._guidIndex[guid] = c.cid
                     return c
-                elif functions.fuzzyGuidMatch(c.guid, guid):
+                elif b3.functions.fuzzyGuidMatch(c.guid, guid):
                     # found by fuzzy matching: don't index
                     return c
 
@@ -1479,7 +1475,7 @@ class Clients(dict):
         if c and not c.hide:
             return [c]
 
-        name = functions.escape_string(name)
+        name = b3.functions.escape_string(name)
 
         sclient = self.console.storage.getClientsMatching({'%name%': name})
 
