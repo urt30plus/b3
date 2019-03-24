@@ -27,6 +27,7 @@ import threading
 import time
 
 import b3
+import b3.functions
 
 
 class ClientVar:
