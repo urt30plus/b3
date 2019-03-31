@@ -962,12 +962,12 @@ class Parser:
             self._tz_offset = tz_offset = 0
         else:
             local_dt = datetime.datetime.now().astimezone()
-            tz_offset = local_dt.utcoffset().total_seconds() / 3600
+            tz_offset = int(local_dt.utcoffset().total_seconds() / 3600)
             tz_name = local_dt.strftime("%Z")
             if " " in tz_name:
                 tz_name = "".join([x[:1] for x in tz_name.split()])
             self._tz_name = tz_name
-            self._tz_offset = int(tz_offset)
+            self._tz_offset = tz_offset
 
         self.info("Using timezone: %s : %s", tz_offset, tz_name)
         return tz_offset, tz_name
