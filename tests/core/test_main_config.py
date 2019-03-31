@@ -43,7 +43,7 @@ class CommonDefaultTestMethodsMixin:
         self.assertEqual('b3', self.conf.get('b3', 'bot_name'))
         self.assertEqual('^0(^2b3^0)^7:', self.conf.get('b3', 'bot_prefix'))
         self.assertEqual('%I:%M%p %Z %m/%d/%y', self.conf.get('b3', 'time_format'))
-        self.assertEqual('CST', self.conf.get('b3', 'time_zone'))
+        self.assertEqual('LOCAL', self.conf.get('b3', 'time_zone'))
         self.assertEqual('9', self.conf.get('b3', 'log_level'))
         self.assertEqual('b3.log', self.conf.get('b3', 'logfile'))
 

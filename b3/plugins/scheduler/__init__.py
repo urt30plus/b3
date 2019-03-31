@@ -28,7 +28,6 @@ __author__ = 'Courgette'
 import b3
 import b3.cron
 import b3.plugin
-import b3.timezones
 import threading
 
 
@@ -46,9 +45,7 @@ class SchedulerPlugin(b3.plugin.Plugin):
             for t in self._tasks:
                 t.cancel()
 
-        # get time_zone from main B3 config
-        tzName = self.console.config.get('b3', 'time_zone').upper()
-        self._tzOffset = b3.timezones.timezones[tzName]
+        self._tzOffset, _ = self.console.tz_offset_and_name()
 
         # load cron tasks from config
         self._tasks = []

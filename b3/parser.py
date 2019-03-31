@@ -40,8 +40,6 @@ from collections import defaultdict, OrderedDict
 from textwrap import TextWrapper
 from traceback import extract_tb
 
-import dateutil.tz
-
 import b3
 import b3.config
 import b3.cron
@@ -50,7 +48,6 @@ import b3.game
 import b3.output
 import b3.parsers.q3a.rcon
 import b3.storage
-import b3.timezones
 from b3 import __version__ as currentVersion
 from b3.clients import Clients
 from b3.clients import Group
@@ -77,6 +74,7 @@ class Parser:
     _cron = None  # cron instance
     _events = {}  # available events (K=>EVENT)
     _eventsStats_cronTab = None  # crontab used to log event statistics
+    _timezone_crontab = None # force recache of timezone info
     _handlers = defaultdict(list)  # event handlers
     _lineTime = re.compile(r'^(?P<minutes>[0-9]+):(?P<seconds>[0-9]+).*')  # used to track log file time changes
     _lineFormat = re.compile('^([a-z ]+): (.*?)', re.IGNORECASE)
@@ -96,6 +94,8 @@ class Parser:
     _rconPassword = ''  # the rcon password set on the server
     _reColor = re.compile(r'\^[0-9a-z]')  # regex used to strip out color codes from a given string
     _timeStart = None  # timestamp when B3 has first started
+    _tz_offset = None
+    _tz_name = None
     _use_color_codes = True  # whether the game supports color codes or not
 
     clients = None
@@ -372,6 +372,11 @@ class Parser:
         """
         self._eventsStats.dumpStats()
 
+    def _reset_timezone_info(self):
+        """Causes the timezone offset and name to be re-cached"""
+        self._tz_offset = None
+        self._tz_name = None
+
     def start(self):
         """
         Start B3
@@ -384,6 +389,11 @@ class Parser:
         self.startPlugins()
         self._eventsStats_cronTab = b3.cron.CronTab(self._dumpEventsStats)
         self.cron.add(self._eventsStats_cronTab)
+        tz_offset, _ = self.tz_offset_and_name()
+        utc_hour = (2 - tz_offset) % 24
+        self._timezone_crontab = b3.cron.CronTab(self._reset_timezone_info, minute=1, hour=utc_hour)
+        self.bot("Timezone reset scheduled daily at UTC %s:%s", utc_hour, "01")
+        self.cron.add(self._timezone_crontab)
         self.bot("All plugins started")
         self.pluginsStarted()
         self.bot("Starting event dispatching thread")
@@ -932,31 +942,35 @@ class Parser:
         group = self.getGroup(data)
         return group.level
 
-    def getTzOffsetFromName(self, tz_name=None):
+    def tz_offset_and_name(self):
         """
-        Returns the timezone offset given its name.
-        :param tz_name: The timezone name
-        :return: tuple
+        Returns the timezone offset and name configured for this console
+        :return: tuple(tzoffset, tzname)
         """
-        if tz_name:
-            if tz_name not in b3.timezones.timezones:
-                self.warning("Unknown timezone name [%s]: "
-                             "falling back to auto-detection mode.", tz_name)
-            else:
-                self.info("Using timezone: %s : %s",
-                          tz_name, b3.timezones.timezones[tz_name])
-                return b3.timezones.timezones[tz_name], tz_name
+        tz_offset = self._tz_offset
+        tz_name = self._tz_name
+        if all((tz_offset, tz_name)):
+            return tz_offset, tz_name
 
-        # AUTO-DETECT TZ NAME/OFFSET
-        self.debug("Auto detecting timezone information...")
+        if self.config.has_option("b3", "time_zone"):
+            tz_name = self.config.get("b3", "time_zone").strip().upper()
+        else:
+            tz_name = "LOCAL"
 
-        # this will compute the timezone offset from from UTC
-        tz_local = dateutil.tz.tzlocal()
-        tz_info = tz_local.utcoffset(datetime.datetime.now(tz_local)).total_seconds() / 3600, \
-                  tz_local.tzname(datetime.datetime.now(tz_local))
+        if tz_name in ("UTC", "GMT"):
+            self._tz_name = tz_name = "UTC"
+            self._tz_offset = tz_offset = 0
+        else:
+            local_dt = datetime.datetime.now().astimezone()
+            tz_offset = local_dt.utcoffset().total_seconds() / 3600
+            tz_name = local_dt.strftime("%Z")
+            if " " in tz_name:
+                tz_name = "".join([x[:1] for x in tz_name.split()])
+            self._tz_name = tz_name
+            self._tz_offset = int(tz_offset)
 
-        self.info("Using timezone: %s : %s", tz_info[1], tz_info[0])
-        return tz_info
+        self.info("Using timezone: %s : %s", tz_offset, tz_name)
+        return tz_offset, tz_name
 
     def formatTime(self, gmttime, tz_name=None):
         """
@@ -969,18 +983,14 @@ class Parser:
             tz_name = str(tz_name).strip().upper()
             try:
                 # used when the user manually specifies the offset (i.e: !time +4)
-                tz_offset = float(tz_name) * 3600
+                tz_offset = float(tz_name)
             except ValueError:
                 # treat it as a timezone name (can potentially fallback to autodetection mode)
-                tz_offset, tz_name = self.getTzOffsetFromName(tz_name)
+                tz_offset, tz_name = self.tz_offset_and_name()
         else:
             # use the timezone name specified in b3 main configuration file (if specified),
-            # or make use of the timezone offset autodetection implemented in getTzOffsetFromName
-            tz_name = None
-            if self.config.has_option('b3', 'time_zone'):
-                tz_name = self.config.get('b3', 'time_zone').strip().upper()
-                tz_name = tz_name if tz_name and tz_name != 'AUTO' else None
-            tz_offset, tz_name = self.getTzOffsetFromName(tz_name)
+            # or make use of the timezone offset autodetection
+            tz_offset, tz_name = self.tz_offset_and_name()
 
         time_format = self.config.get('b3', 'time_format').replace('%Z', tz_name).replace('%z', tz_name)
         self.debug('Formatting time with timezone [%s], tzOffset : %s', tz_name, tz_offset)

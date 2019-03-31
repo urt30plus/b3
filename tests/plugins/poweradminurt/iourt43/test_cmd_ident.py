@@ -42,7 +42,7 @@ paident_full_level: 40
         """)
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
-        self.parser_conf._settings.update({'b3': {"time_zone": "GMT", "time_format": "%I:%M%p %Z %m/%d/%y"}})
+        self.parser_conf._settings.update({'b3': {"time_zone": "UTC", "time_format": "%I:%M%p %Z %m/%d/%y"}})
         self.p.onLoadConfig()
         self.p.onStartup()
 
@@ -72,7 +72,7 @@ paident_full_level: 40
         with patch('time.time', return_value=0.0) as time_mock:
             self.moderator.says("!id joe")
         # THEN
-        self.assertListEqual(['12:00AM GMT 01/01/70 @3 Joe'], self.moderator.message_history)
+        self.assertListEqual(['12:00AM UTC 01/01/70 @3 Joe'], self.moderator.message_history)
 
     def test_nominal_above_full_level(self):
         # GIVEN
@@ -84,5 +84,5 @@ paident_full_level: 40
         with patch('time.time', return_value=180 * 60.0):
             self.superadmin.says("!id joe")
         # THEN
-        self.assertListEqual(['03:00AM GMT 01/01/70 @3 Joe  [joe_pbid] since 01:30AM GMT 01/01/70'],
+        self.assertListEqual(['03:00AM UTC 01/01/70 @3 Joe  [joe_pbid] since 01:30AM UTC 01/01/70'],
                              self.superadmin.message_history)

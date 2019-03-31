@@ -35,7 +35,6 @@ import b3
 import b3.cron
 import b3.events
 import b3.plugin
-import b3.timezones
 
 from b3.config import NoOptionError
 from b3.functions import escape, right_cut, start_daemon_thread
@@ -1814,8 +1813,7 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         # define a shortcut to the storage.query function
         self.query = self.console.storage.query
         # purge crontab
-        tzName = self.console.config.get('b3', 'time_zone').upper()
-        tzOffest = b3.timezones.timezones[tzName]
+        tzOffest, tzName = self.console.tz_offset_and_name()
         hoursGMT = (self._hours - tzOffest) % 24
         self.debug(u'%02d:%02d %s => %02d:%02d UTC' % (self._hours, self._minutes, tzName, hoursGMT, self._minutes))
         self.info(u'everyday at %2d:%2d %s, history info older than %s months and %s weeks will be deleted' % (
@@ -1955,8 +1953,7 @@ class CtimePlugin(b3.plugin.Plugin):
         self.ctime_table = cTimeTable
         # define a shortcut to the storage.query function
         self.query = self.console.storage.query
-        tzName = self.console.config.get('b3', 'time_zone').upper()
-        tzOffest = b3.timezones.timezones[tzName]
+        tzOffest, tzName = self.console.tz_offset_and_name()
         hoursGMT = (self._hours - tzOffest) % 24
         self.debug(u'%02d:%02d %s => %02d:%02d UTC' % (self._hours, self._minutes, tzName, hoursGMT, self._minutes))
         self.info(u'everyday at %2d:%2d %s, connection info older than %s days will be deleted' % (self._hours,

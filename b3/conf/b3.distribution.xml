@@ -33,8 +33,8 @@
         <set name="bot_prefix">^0(^2b3^0)^7:</set>
         <!-- Time format to use to format time strings (also used by the !time command of the Admin Plugin -->
         <set name="time_format">%I:%M%p %Z %m/%d/%y</set>
-        <!-- The timezone your bot is in -->
-        <set name="time_zone">CST</set>
+        <!-- The timezone option to use, LOCAL or UTC -->
+        <set name="time_zone">LOCAL</set>
         <!-- How much detail in the b3 logfile: 9 = verbose, 10 = debug, 21 = bot, 22 = console -->
         <set name="log_level">9</set>
         <!-- Name of the logfile the bot will generate -->

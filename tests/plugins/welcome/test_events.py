@@ -52,7 +52,7 @@ class Test_welcome(Welcome_functional_test):
 
     def Test_get_client_info(self):
         self.parser_conf.add_section('b3')
-        self.parser_conf.set('b3', 'time_zone', 'CET')
+        self.parser_conf.set('b3', 'time_zone', 'UTC')
         self.parser_conf.set('b3', 'time_format', '%I:%M%p %Z %m/%d/%y')
         self.assertDictEqual({'connections': '1',
                               'group': 'Super Admin',
