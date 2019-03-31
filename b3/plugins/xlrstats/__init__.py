@@ -46,7 +46,7 @@ ASSISTER = "assister"
 
 class XlrstatsPlugin(b3.plugin.Plugin):
     _world_clientid = None
-    _ffa = ['dm', 'ffa', 'syc-ffa']
+    _ffa = ['dm', 'ffa', 'syc-ffa', 'gungame']
 
     # on damage_able_games we'll only count assists when damage is 50 points or more
     _damage_able_games = ['cod4', 'cod5', 'cod6', 'cod7', 'cod8']
@@ -59,11 +59,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
     _cronTabWeek = None
     _cronTabMonth = None
     _cronTabKillBonus = None
-
-    # webfront variables
-    webfront_version = 2  # maintain backward compatibility
-    webfront_url = ''
-    webfront_config_nr = 0
 
     _minKills = 100
     _minRounds = 10
@@ -190,7 +185,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         if sclient is not None:
             self._world_clientid = sclient.id
             self.debug('got client id for B3: %s; %s' % (self._world_clientid, sclient.name))
-            # make sure its hidden in the webfront
+            # make sure its hidden
             player = self.get_PlayerStats(sclient)
             if player:
                 player.hide = 1
@@ -216,13 +211,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             self._xlrstatsHistoryPlugin = XlrstatshistoryPlugin(self.console, self.history_weekly_table,
                                                                 self.history_monthly_table, self.playerstats_table)
             self._xlrstatsHistoryPlugin.onStartup()
-
-        # let's try and get some variables from our webfront installation
-        if self.webfront_url and self.webfront_url != '':
-            self.debug('webfront set to: %s' % self.webfront_url)
-            start_daemon_thread(target=self.getWebsiteVariables)
-        else:
-            self.debug('no webfront url available: using default')
 
         # Analyze the ELO pool of points
         self.correctStats()
@@ -274,10 +262,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         self.hide_bots = self.getSetting('settings', 'hide_bots', b3.BOOL, self.hide_bots)
         self.exclude_bots = self.getSetting('settings', 'exclude_bots', b3.BOOL, self.exclude_bots)
         self.min_players = self.getSetting('settings', 'minplayers', b3.INT, self.min_players, lambda x: int(max(x, 0)))
-        self.webfront_version = self.getSetting('settings', 'webfrontversion', b3.STR, self.webfront_version)
-        self.webfront_url = self.getSetting('settings', 'webfronturl', b3.STR, self.webfront_url)
-        self.webfront_config_nr = self.getSetting('settings', 'servernumber', b3.INT, self.webfront_config_nr,
-                                                  validate_server_nr)
         self.keep_history = self.getSetting('settings', 'keep_history', b3.BOOL, self.keep_history)
         self.onemaponly = self.getSetting('settings', 'onemaponly', b3.BOOL, self.onemaponly)
         self.minlevel = self.getSetting('settings', 'minlevel', b3.LEVEL, self.minlevel, lambda x: int(max(x, 0)))
@@ -410,28 +394,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         """
         if self._xlrstats_active:
             self.action(event.client, event.data)
-
-    def getWebsiteVariables(self):
-        """
-        Thread that polls for XLRstats webfront variables
-        """
-        if self.webfront_version == 2:
-            req = str(self.webfront_url.rstrip('/')) + '/?config=' + str(self.webfront_config_nr) + '&func=pluginreq'
-        else:
-            req = str(self.webfront_url.rstrip('/')) + '/' + str(self.webfront_config_nr) + '/pluginreq/index'
-        try:
-            f = urllib.request.urlopen(req)
-            res = f.readline().split(',')
-            # Our webfront will present us 3 values ie.: 200,20,30 -> minKills,minRounds,maxDays
-            if len(res) == 3:
-                # Force the collected strings to their final type. If an error occurs they will fail the try statement.
-                self._minKills = int(res[0])
-                self._minRounds = int(res[1])
-                self._maxDays = int(res[2])
-                self.debug('successfuly retrieved webfront variables: minkills: %i, minrounds: %i, maxdays: %i' % (
-                    self._minKills, self._minRounds, self._maxDays))
-        except Exception:
-            self.debug('couldn\'t retrieve webfront variables: using defaults')
 
     def checkMinPlayers(self, _roundstart=False):
         """
@@ -2149,7 +2111,7 @@ class PlayerStats(StatObject):
 
     # the following fields are used only by the PHP presentation code
     fixed_name = ""
-    id_token = ""  # player identification token for webfront v3
+    id_token = ""  # player identification token
 
     def _insertquery(self):
         q = """INSERT INTO %s (client_id, kills, deaths, teamkills, teamdeaths, suicides, ratio, skill, assists,

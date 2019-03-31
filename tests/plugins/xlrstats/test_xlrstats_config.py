@@ -71,8 +71,6 @@ class Test_conf(XlrstatsTestCase):
         self.assertTrue(self.p.hide_bots)
         self.assertTrue(self.p.exclude_bots)
         self.assertEqual(3, self.p.min_players)
-        self.assertEqual('', self.p.webfront_url)
-        self.assertEqual(0, self.p.webfront_config_nr)
         self.assertTrue(self.p.keep_history)
         self.assertFalse(self.p.onemaponly)
         self.assertEqual(0, self.p.minlevel)
@@ -117,8 +115,6 @@ class Test_conf(XlrstatsTestCase):
         self.assertTrue(self.p.hide_bots)
         self.assertTrue(self.p.exclude_bots)
         self.assertEqual(3, self.p.min_players)
-        self.assertEqual('', self.p.webfront_url)
-        self.assertEqual(0, self.p.webfront_config_nr)
         self.assertTrue(self.p.keep_history)
         self.assertFalse(self.p.onemaponly)
         self.assertEqual(0, self.p.minlevel)
@@ -423,85 +419,6 @@ class Test_conf_settings_minPlayers(Conf_settings_test_case):
         self.init('minplayers: 0.5')
         # THEN
         self.assertEqual(self.DEFAULT_VALUE, self.p.min_players)
-
-
-class Test_conf_settings_webfronturl(Conf_settings_test_case):
-
-    def test_missing(self):
-        # WHEN
-        self.init('')
-        # THEN
-        self.assertEqual('', self.p.webfront_url)
-
-    def test_empty(self):
-        # WHEN
-        self.init('webfronturl: ')
-        # THEN
-        self.assertEqual('', self.p.webfront_url)
-
-    def test_junk(self):
-        # WHEN
-        self.init('webfronturl: f00')
-        # THEN
-        self.assertEqual('f00', self.p.webfront_url)
-
-    def test_nominal(self):
-        # WHEN
-        self.init('webfronturl: http://somewhere.com')
-        # THEN
-        self.assertEqual("http://somewhere.com", self.p.webfront_url)
-
-
-class Test_conf_settings_servernumber(Conf_settings_test_case):
-    DEFAULT_VALUE = 0
-
-    def test_missing(self):
-        # WHEN
-        self.init('')
-        # THEN
-        self.assertEqual(self.DEFAULT_VALUE, self.p.webfront_config_nr)
-
-    def test_empty(self):
-        # WHEN
-        self.init('servernumber: ')
-        # THEN
-        self.assertEqual(self.DEFAULT_VALUE, self.p.webfront_config_nr)
-
-    def test_junk(self):
-        # WHEN
-        self.init('servernumber: f00')
-        # THEN
-        self.assertEqual(self.DEFAULT_VALUE, self.p.webfront_config_nr)
-
-    def test_negative(self):
-        # WHEN
-        self.init('servernumber: -5')
-        # THEN
-        self.assertEqual(self.DEFAULT_VALUE, self.p.webfront_config_nr)
-
-    def test_0(self):
-        # WHEN
-        self.init('servernumber: 0')
-        # THEN
-        self.assertEqual(0, self.p.webfront_config_nr)
-
-    def test_1(self):
-        # WHEN
-        self.init('servernumber: 1')
-        # THEN
-        self.assertEqual(1, self.p.webfront_config_nr)
-
-    def test_8(self):
-        # WHEN
-        self.init('servernumber: 8')
-        # THEN
-        self.assertEqual(8, self.p.webfront_config_nr)
-
-    def test_float(self):
-        # WHEN
-        self.init('servernumber: 0.5')
-        # THEN
-        self.assertEqual(self.DEFAULT_VALUE, self.p.webfront_config_nr)
 
 
 class Test_conf_settings_keep_history(Conf_settings_test_case):
