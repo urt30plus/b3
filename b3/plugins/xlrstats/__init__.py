@@ -1851,18 +1851,24 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         # purge the tables on startup
         self.purge()
 
+    @staticmethod
+    def __date_parts():
+        now = datetime.datetime.now()
+        now_week = time.strftime("%V", now.timetuple())
+        return now.year, now.month, now_week, now.day
+
     def snapshot_month(self):
         """
         Create the monthly snapshot.
         """
-        sql = """INSERT INTO %s (client_id, kills, deaths, teamkills, teamdeaths, suicides, ratio,
+        sql = """INSERT INTO {0} (client_id, kills, deaths, teamkills, teamdeaths, suicides, ratio,
                  skill, assists, assistskill, winstreak, losestreak, rounds, year, month, week, day)
                  SELECT client_id, kills, deaths, teamkills, teamdeaths, suicides, ratio, skill, assists,
-                 assistskill, winstreak, losestreak, rounds, YEAR(NOW()), MONTH(NOW()), WEEK(NOW(),3), DAY(NOW())
-                 FROM %s""" % (self.history_monthly_table, self.playerstats_table)
+                 assistskill, winstreak, losestreak, rounds, {2}, {3}, {4}, {5}
+                 FROM {1}""".format(self.history_monthly_table, self.playerstats_table, *self.__date_parts())
+        self.info("snapshot_month QUERY: %s", sql)
         try:
             self.query(sql)
-            self.verbose('monthly XLRstats snapshot created')
         except Exception as msg:
             self.error('creating history snapshot failed: %s' % msg)
 
@@ -1870,14 +1876,14 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         """
         Create the weekly snapshot.
         """
-        sql = """INSERT INTO %s (client_id , kills, deaths, teamkills, teamdeaths, suicides, ratio,
+        sql = """INSERT INTO {0} (client_id , kills, deaths, teamkills, teamdeaths, suicides, ratio,
                  skill, assists, assistskill, winstreak, losestreak, rounds, year, month, week, day)
                  SELECT client_id, kills, deaths, teamkills, teamdeaths, suicides, ratio, skill, assists,
-                 assistskill, winstreak, losestreak, rounds, YEAR(NOW()), MONTH(NOW()), WEEK(NOW(),3), DAY(NOW())
-                 FROM %s""" % (self.history_weekly_table, self.playerstats_table)
+                 assistskill, winstreak, losestreak, rounds, {2}, {3}, {4}, {5}
+                 FROM {1}""".format(self.history_weekly_table, self.playerstats_table, *self.__date_parts())
+        self.info("snapshot_week QUERY: %s", sql)
         try:
             self.query(sql)
-            self.verbose('weekly XLRstats snapshot created')
         except Exception as msg:
             self.error('creating history snapshot failed: %s', msg)
 
@@ -1900,7 +1906,7 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
             _yearPrev = int(_year)
         q = """DELETE FROM %s WHERE (month < %s AND year <= %s) OR year < %s""" % (
         self.history_monthly_table, _month, _year, _yearPrev)
-        self.debug(u'QUERY: %s ' % q)
+        self.info(u'QUERY: %s ' % q)
         self.console.storage.query(q)
         # purge the weeks table
         if not self._max_weeks or self._max_weeks == 0:
@@ -1917,7 +1923,7 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
             _yearPrev = int(_year)
         q = """DELETE FROM %s WHERE (week < %s AND year <= %s) OR year < %s""" % (
         self.history_weekly_table, _week, _year, _yearPrev)
-        self.debug(u'QUERY: %s ' % q)
+        self.info(u'QUERY: %s ' % q)
         self.console.storage.query(q)
 
 
@@ -2030,7 +2036,6 @@ class CtimePlugin(b3.plugin.Plugin):
 
             self.debug(u'CTIME LEFT: player: %s played this time: %s sec', ts.client.exactName, diff)
             self.debug(u'CTIME LEFT: player: %s played this time: %s', ts.client.exactName, self.formatTD(diff))
-            # INSERT INTO `ctime` (`guid`, `came`, `left`) VALUES ("6fcc4f6d9d8eb8d8457fd72d38bb1ed2", 1198187868, 1226081506)
             q = """INSERT INTO %s (guid, came, gone, nick) VALUES (\"%s\", \"%s\", \"%s\", \"%s\")""" % (
             self.ctime_table,
             ts.client.guid, int(time.mktime(ts.came.timetuple())), int(time.mktime(ts.left.timetuple())),
@@ -2424,24 +2429,3 @@ class PlayerBattles(StatObject):
     actions = 0
     weapon_kills = {}
     favorite_weapon_id = 0
-
-
-if __name__ == '__main__':
-    print('\nThis is version ' + __version__ + ' by ' + __author__ + ' for BigBrotherBot.\n')
-
-"""
-Crontab:
-*  *  *  *  *  command to be executed
--  -  -  -  -
-|  |  |  |  |
-|  |  |  |  +----- day of week (0 - 6) (Sunday=0)
-|  |  |  +------- month (1 - 12)
-|  |  +--------- day of month (1 - 31)
-|  +----------- hour (0 - 23)
-+------------- min (0 - 59)
-
-Query:
-INSERT INTO xlr_history_weekly (`client_id` , `kills` , `deaths` , `teamkills` , `teamdeaths` , `suicides` , `ratio` , `skill` , `winstreak` , `losestreak` , `rounds`, `year`, `month`, `week`, `day`) 
-  SELECT `client_id` , `kills` , `deaths` , `teamkills` , `teamdeaths` , `suicides` , `ratio` , `skill` , `winstreak` , `losestreak` , `rounds`, YEAR(NOW()), MONTH(NOW()), WEEK(NOW(),3), DAY(NOW()) 
-  FROM `xlr_playerstats`
-"""
