@@ -25,6 +25,7 @@
 __author__ = 'ThorN, Courgette'
 __version__ = '1.5'
 
+import enum
 import re
 import sys
 import threading
@@ -32,6 +33,20 @@ import time
 import traceback
 
 import b3.functions
+
+
+class DayOfWeek(enum.IntEnum):
+    MONDAY = 0,
+    TUESDAY = 1,
+    WEDNESDAY = 2,
+    THURSDAY = 3,
+    FRIDAY = 4,
+    SATURDAY = 5,
+    SUNDAY = 6
+
+    @staticmethod
+    def range(*args):
+        return ",".join([str(x.value) for x in args])
 
 
 class ReMatcher:

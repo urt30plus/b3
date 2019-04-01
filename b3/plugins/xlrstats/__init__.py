@@ -29,7 +29,6 @@ import datetime
 import re
 import os
 import time
-import urllib
 
 import b3
 import b3.cron
@@ -1775,11 +1774,10 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         # define a shortcut to the storage.query function
         self.query = self.console.storage.query
         # purge crontab
-        tzOffest, tzName = self.console.tz_offset_and_name()
-        hoursGMT = (self._hours - tzOffest) % 24
-        self.debug(u'%02d:%02d %s => %02d:%02d UTC' % (self._hours, self._minutes, tzName, hoursGMT, self._minutes))
-        self.info(u'everyday at %2d:%2d %s, history info older than %s months and %s weeks will be deleted' % (
-            self._hours, self._minutes, tzName, self._max_months, self._max_weeks))
+        hoursGMT = self.console.to_utc_hour(self._hours)
+        self.debug(u'%02d:%02d => %02d:%02d UTC' % (self._hours, self._minutes, hoursGMT, self._minutes))
+        self.info(u'everyday at %2d:%2d, history info older than %s months and %s weeks will be deleted' % (
+            self._hours, self._minutes, self._max_months, self._max_weeks))
         self._cronTab = b3.cron.PluginCronTab(self, self.purge, 0, self._minutes, hoursGMT, '*', '*', '*')
         self.console.cron + self._cronTab
 
@@ -1800,15 +1798,18 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         except:
             pass
         try:
-            # install crontabs
-            self._cronTabMonth = b3.cron.PluginCronTab(self, self.snapshot_month, 0, 0, 0, 1, '*', '*')
+            hour = self.console.to_utc_hour(0) # adjust to zero hour (midnight) local time
+            self._cronTabMonth = b3.cron.PluginCronTab(self, self.snapshot_month,
+                                                       0, 0, hour, 1, '*', '*')
             self.console.cron + self._cronTabMonth
-            self._cronTabWeek = b3.cron.PluginCronTab(self, self.snapshot_week, 0, 0, 0, '*', '*', 1)  # day 1 is monday
+            self._cronTabWeek = b3.cron.PluginCronTab(self, self.snapshot_week,
+                                                      0, 0, hour,
+                                                      '*', '*',
+                                                      b3.cron.DayOfWeek.MONDAY)
             self.console.cron + self._cronTabWeek
         except Exception as msg:
             self.error('unable to install history crontabs: %s', msg)
 
-        # purge the tables on startup
         self.purge()
 
     @staticmethod
@@ -1915,12 +1916,10 @@ class CtimePlugin(b3.plugin.Plugin):
         self.ctime_table = cTimeTable
         # define a shortcut to the storage.query function
         self.query = self.console.storage.query
-        tzOffest, tzName = self.console.tz_offset_and_name()
-        hoursGMT = (self._hours - tzOffest) % 24
-        self.debug(u'%02d:%02d %s => %02d:%02d UTC' % (self._hours, self._minutes, tzName, hoursGMT, self._minutes))
-        self.info(u'everyday at %2d:%2d %s, connection info older than %s days will be deleted' % (self._hours,
+        hoursGMT = self.console.to_utc_hour(self._hours)
+        self.debug(u'%02d:%02d => %02d:%02d UTC' % (self._hours, self._minutes, hoursGMT, self._minutes))
+        self.info(u'everyday at %2d:%2d, connection info older than %s days will be deleted' % (self._hours,
                                                                                                    self._minutes,
-                                                                                                   tzName,
                                                                                                    self._max_age_in_days))
         self._cronTab = b3.cron.PluginCronTab(self, self.purge, 0, self._minutes, hoursGMT, '*', '*', '*')
         self.console.cron + self._cronTab

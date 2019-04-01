@@ -387,19 +387,25 @@ class Parser:
         self.call_plugins_onLoadConfig()
         self.bot("Starting plugins")
         self.startPlugins()
-        self._eventsStats_cronTab = b3.cron.CronTab(self._dumpEventsStats)
-        self.cron.add(self._eventsStats_cronTab)
-        tz_offset, _ = self.tz_offset_and_name()
-        utc_hour = (2 - tz_offset) % 24
-        self._timezone_crontab = b3.cron.CronTab(self._reset_timezone_info, minute=1, hour=utc_hour)
-        self.bot("Timezone reset scheduled daily at UTC %s:%s", utc_hour, "01")
-        self.cron.add(self._timezone_crontab)
+        self.schedule_cron_tasks()
         self.bot("All plugins started")
         self.pluginsStarted()
         self.bot("Starting event dispatching thread")
         start_daemon_thread(self.handleEvents)
         self.bot("Start reading game events")
         self.run()
+
+    def schedule_cron_tasks(self):
+        if self.log.isEnabledFor(b3.output.DEBUG):
+            self._eventsStats_cronTab = b3.cron.CronTab(self._dumpEventsStats)
+            self.cron.add(self._eventsStats_cronTab)
+
+        tz_offset, tz_name = self.tz_offset_and_name()
+        if tz_name != "UTC":
+            hour = self.to_utc_hour(2)
+            self._timezone_crontab = b3.cron.CronTab(self._reset_timezone_info, minute=1, hour=hour)
+            self.bot("Timezone reset scheduled daily at UTC %s:%s", hour, "01")
+            self.cron.add(self._timezone_crontab)
 
     def die(self):
         """
@@ -941,6 +947,14 @@ class Parser:
         """
         group = self.getGroup(data)
         return group.level
+
+    def to_utc_hour(self, hour):
+        """
+        :param hour: an hour (0-23)
+        :return: hour adjusted to UTC using detected timezone offset
+        """
+        tz_offset, _ = self.tz_offset_and_name()
+        return (hour - tz_offset) % 24
 
     def tz_offset_and_name(self):
         """

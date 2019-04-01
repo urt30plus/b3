@@ -27,7 +27,7 @@ import unittest
 
 from mock import sentinel, Mock
 
-from b3.cron import CronTab, OneTimeCronTab, PluginCronTab, Cron
+from b3.cron import CronTab, DayOfWeek, OneTimeCronTab, PluginCronTab, Cron
 from tests import B3TestCase
 
 
@@ -56,31 +56,34 @@ class Test_Crontab(unittest.TestCase):
         self.assertEqual(5, tab.month)
         self.assertEqual(1, tab.dow)
 
+        tab = CronTab(command, second=1, minute=2, hour=3, day=4, month=5, dow=DayOfWeek.TUESDAY)
+        self.assertEqual(1, tab.dow)
+
     def test_dow(self):
         tab = CronTab(None)
 
         tab.dow = '*'  # any day
         self.assertEqual(-1, tab.dow)
 
-        tab.dow = 0  # sunday
+        tab.dow = DayOfWeek.MONDAY
         self.assertEqual(0, tab.dow)
 
-        tab.dow = 1  # monday
+        tab.dow = DayOfWeek.TUESDAY
         self.assertEqual(1, tab.dow)
 
-        tab.dow = 2  # tuesday
+        tab.dow = DayOfWeek.WEDNESDAY
         self.assertEqual(2, tab.dow)
 
-        tab.dow = 3  # wednesday
+        tab.dow = DayOfWeek.THURSDAY
         self.assertEqual(3, tab.dow)
 
-        tab.dow = 4  # thursday
+        tab.dow = DayOfWeek.FRIDAY
         self.assertEqual(4, tab.dow)
 
-        tab.dow = 5  # friday
+        tab.dow = DayOfWeek.SATURDAY
         self.assertEqual(5, tab.dow)
 
-        tab.dow = 6  # saturday
+        tab.dow = DayOfWeek.SUNDAY
         self.assertEqual(6, tab.dow)
 
         try:
@@ -109,6 +112,13 @@ class Test_Crontab(unittest.TestCase):
         self.assertTrue(tab.match(time.gmtime()))
 
         tab = CronTab(None, second='*', minute='*', hour='*', day='*', month='*', dow='0,1,2,3,4,5,6')
+        self.assertTrue(tab.match(time.gmtime()))
+
+        days = DayOfWeek.range(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
+                               DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY,
+                               DayOfWeek.FRIDAY, DayOfWeek.SATURDAY,
+                               DayOfWeek.SUNDAY)
+        tab = CronTab(None, second='*', minute='*', hour='*', day='*', month='*', dow=days)
         self.assertTrue(tab.match(time.gmtime()))
 
 
