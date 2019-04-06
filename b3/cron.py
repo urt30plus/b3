@@ -226,7 +226,7 @@ class CronTab:
 
     @staticmethod
     def _match(unit, value):
-        if type(unit) == int:
+        if isinstance(unit, int):
             if unit == -1 or unit == value:
                 return True
         elif value in unit:
