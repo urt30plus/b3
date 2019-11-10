@@ -1,9 +1,9 @@
+import functools
 import re
 import time
 from collections import deque
 from logging import DEBUG
 
-from b3.decorators import Memoize
 from b3.functions import meanstdv
 from b3.output import VERBOSE
 
@@ -114,7 +114,7 @@ class Events:
             return int(key)
         return self._events.get(key)
 
-    @Memoize
+    @functools.lru_cache(maxsize=None)
     def getKey(self, event_id):
         """
         Get the key of a given event ID.

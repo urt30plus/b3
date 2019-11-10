@@ -1,5 +1,6 @@
 import atexit
 import datetime
+import functools
 import glob
 import imp
 import os
@@ -24,7 +25,6 @@ import b3.storage
 from b3 import __version__ as currentVersion
 from b3.clients import Clients
 from b3.clients import Group
-from b3.decorators import Memoize
 from b3.exceptions import MissingRequirement, NoOptionError
 from b3.functions import getModule
 from b3.functions import splitDSN
@@ -902,7 +902,7 @@ class Parser:
         if cmd:
             return cmd % kwargs
 
-    @Memoize
+    @functools.lru_cache(maxsize=None)
     def getGroup(self, data):
         """
         Return a valid Group from storage.
