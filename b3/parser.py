@@ -1077,21 +1077,16 @@ class Parser:
                 handlers.remove(event_handler)
 
     def queueEvent(self, event, expire=10):
-        """
-        QueEvents.gevent for processing.
-        """
-        if not hasattr(event, 'type'):
-            return False
-        elif event.type in self._handlers:  # queue only if there are handlers to listen for this event
-            self.verbose('Queueing event %s : %s', self.getEventName(event.type), event.data)
-            try:
+        try:
+            if event.type in self._handlers:
+                self.verbose('Queueing event %s : %s', self.getEventName(event.type), event.data)
                 time.sleep(0.001)  # wait a bit so event doesnt get jumbled
                 self.queue.put((self.time(), self.time() + expire, event), True, 2)
                 return True
-            except queue.Full:
-                self.error('**** Event queue was full (%s)', self.queue.qsize())
-                return False
-
+        except queue.Full:
+            self.error('**** Event queue was full (%s)', self.queue.qsize())
+        except AttributeError:
+            self.error('*** Event has no type: %s', event)
         return False
 
     def handleEvents(self):
