@@ -10,7 +10,7 @@ from tempfile import TemporaryFile
 import b3.pkg_handler
 
 __author__ = 'ThorN'
-__version__ = '3.31.3'
+__version__ = '3.31.4'
 
 modulePath = b3.pkg_handler.resource_directory(__name__)
 
