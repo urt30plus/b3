@@ -13,9 +13,7 @@ __version__ = '1.11'
 
 class Rcon(object):
     socket_timeout = 0.80
-    rconsendstring = '\377\377\377\377rcon "{password}" {data}\n'
-    rconreplystring = '\377\377\377\377print\n'
-    rcon_encoding = "latin-1"
+    rconreplystring = b'\377\377\377\377print\n'
 
     def __init__(self, console, host, password):
         """
@@ -25,7 +23,9 @@ class Rcon(object):
         """
         self.console = console
         self.host = host
-        self.password = password
+        self.rconsendstring = f'\377\377\377\377rcon "{password}" '.encode(
+            self.console.encoding
+        )
         self.queue = queue.Queue()
         self.socket = socket.socket(type=socket.SOCK_DGRAM)
         self.socket.settimeout(2)
@@ -35,7 +35,7 @@ class Rcon(object):
         b3.functions.start_daemon_thread(self._writelines)
         self.console.bot('Game name is: %s', self.console.gameName)
 
-    def send_rcon(self, data, maxRetries=None, socketTimeout=None):
+    def send_rcon(self, data, maxRetries=2, socketTimeout=None):
         """
         Send an RCON command.
         :param data: The string to be sent
@@ -44,8 +44,6 @@ class Rcon(object):
         """
         if socketTimeout is None:
             socketTimeout = self.socket_timeout
-        if maxRetries is None:
-            maxRetries = 2
 
         data = data.strip()
 
@@ -53,6 +51,7 @@ class Rcon(object):
         start_time = time.time()
 
         retries = 0
+        payload = self.rconsendstring + data.encode(self.console.encoding) + b'\n'
         while time.time() - start_time < 5:
             readables, writeables, errors = select.select([], [self.socket], [self.socket], socketTimeout)
 
@@ -60,8 +59,6 @@ class Rcon(object):
                 self.console.warning('RCON: %s', str(errors))
             elif writeables:
                 try:
-                    payload = self.rconsendstring.format(password=self.password, data=data)
-                    payload = payload.encode(encoding=self.rcon_encoding)
                     writeables[0].send(payload)
                 except Exception as msg:
                     self.console.warning('RCON: error sending: %r', msg)
@@ -86,10 +83,10 @@ class Rcon(object):
             retries += 1
 
             if retries >= maxRetries:
-                self.console.error('RCON: too many tries: aborting (%r)', data.strip())
+                self.console.error('RCON: too many tries: aborting (%r)', data)
                 break
 
-            self.console.verbose('RCON: retry sending %r (%s/%s)...', data.strip(), retries, maxRetries)
+            self.console.verbose('RCON: retry sending %r (%s/%s)...', data, retries, maxRetries)
 
         self.console.debug('RCON: did not send any data')
         return ''
@@ -134,22 +131,21 @@ class Rcon(object):
         if socketTimeout is None:
             socketTimeout = self.socket_timeout
 
-        data = ''
         readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
         if not readables:
             self.console.verbose('No readable socket')
             return ''
 
+        data = b''
         while readables:
             payload = sock.recv(size)
-            d = payload.decode(encoding=self.rcon_encoding)
-            if d:
+            if payload:
                 # remove rcon header
-                data += d.replace(self.rconreplystring, '')
+                data += payload.replace(self.rconreplystring, b'')
             readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
-        return data
+        return data.decode(encoding=self.console.encoding)
 
     def stop(self):
         """
