@@ -1,30 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# ################################################################### #
-#                                                                     #
-#  BigBrotherBot(B3) (www.bigbrotherbot.net)                          #
-#  Copyright (C) 2005 Michael "ThorN" Thornton                        #
-#                                                                     #
-#  This program is free software; you can redistribute it and/or      #
-#  modify it under the terms of the GNU General Public License        #
-#  as published by the Free Software Foundation; either version 2     #
-#  of the License, or (at your option) any later version.             #
-#                                                                     #
-#  This program is distributed in the hope that it will be useful,    #
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of     #
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the       #
-#  GNU General Public License for more details.                       #
-#                                                                     #
-#  You should have received a copy of the GNU General Public License  #
-#  along with this program; if not, write to the Free Software        #
-#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA      #
-#  02110-1301, USA.                                                   #
-#                                                                     #
-# ################################################################### #
-
-__author__ = 'ThorN, xlr8or, courgette'
-__version__ = '1.23'
-
 import collections
 import importlib
 import os
@@ -37,6 +10,9 @@ from hashlib import md5
 
 from b3 import getPlatform
 from b3.exceptions import ProgrammingError
+
+__author__ = 'ThorN, xlr8or, courgette'
+__version__ = '1.23'
 
 
 def getModule(name):
