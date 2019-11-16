@@ -1,16 +1,16 @@
 import importlib
 import os
-import platform
 import re
 import signal
 import sys
 import traceback
 from tempfile import TemporaryFile
 
+import b3.functions
 import b3.pkg_handler
 
 __author__ = 'ThorN'
-__version__ = '3.31.4'
+__version__ = '3.31.5'
 
 modulePath = b3.pkg_handler.resource_directory(__name__)
 
@@ -44,19 +44,18 @@ PATH = 7  # b3.getAbsolutePath path conversion
 TEMPLATE = 8  # b3.functions.vars2printf conversion
 LIST = 9  # string split into list of tokens
 
+HOMEDIR = b3.functions.get_home_path()
 
-def getHomePath():
+
+def decode_text(text):
     """
-    Return the path to the B3 home directory.
+    Return a copy of text decoded using the default system encoding.
+    :param text: the text to decode
+    :return: string
     """
-    path = os.path.normpath(os.path.expanduser('~/.b3'))
-    if not os.path.isdir(path):
-        os.mkdir(path)
-    return path
-
-
-# APP HOME DIRECTORY
-HOMEDIR = getHomePath()
+    if hasattr(text, 'decode'):
+        return text.decode(sys.getfilesystemencoding())
+    return text
 
 
 def getB3Path(decode=False):
@@ -67,7 +66,7 @@ def getB3Path(decode=False):
     path = modulePath
     if not decode:
         return os.path.normpath(os.path.expanduser(path))
-    return decode_(os.path.normpath(os.path.expanduser(path)))
+    return decode_text(os.path.normpath(os.path.expanduser(path)))
 
 
 def getConfPath(decode=False, conf=None):
@@ -92,7 +91,7 @@ def getConfPath(decode=False, conf=None):
 
     if not decode:
         return path
-    return decode_(path)
+    return decode_text(path)
 
 
 def getAbsolutePath(path, decode=False, conf=None):
@@ -110,33 +109,7 @@ def getAbsolutePath(path, decode=False, conf=None):
         path = os.path.join(HOMEDIR, path[6:])
     if not decode:
         return os.path.normpath(os.path.expanduser(path))
-    return decode_(os.path.normpath(os.path.expanduser(path)))
-
-
-def getPlatform():
-    """
-    Return the current platform name.
-    :return: nt || darwin || linux
-    """
-    if sys.platform in ('win32', 'win64'):
-        # Windows family
-        return 'nt'
-    elif sys.platform in ('darwin', 'mac'):
-        # OS X faimily
-        return 'darwin'
-    else:
-        # Fallback linux distro
-        return 'linux'
-
-
-def getB3versionInfo():
-    """
-    Returns a tuple with B3 version information.
-    :return: version, platform, architecture :type: tuple
-    """
-    return __version__, \
-           getPlatform(), \
-           right_cut(platform.architecture()[0], 'bit')
+    return decode_text(os.path.normpath(os.path.expanduser(path)))
 
 
 def getB3versionString():
@@ -218,7 +191,7 @@ def start(mainconfig, options):
     :param mainconfig: The B3 configuration file instance :type: b3.config.MainConfig
     :param options: command line options
     """
-    clearscreen()
+    b3.functions.clearscreen()
     global confdir
     confdir = os.path.dirname(mainconfig.fileName)
 
@@ -265,6 +238,3 @@ def start(mainconfig, options):
 
 
 from b3.config import XmlConfigParser, CfgConfigParser, MainConfig
-from b3.functions import clearscreen
-from b3.functions import decode as decode_
-from b3.functions import right_cut

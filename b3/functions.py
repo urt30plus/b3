@@ -2,17 +2,21 @@ import collections
 import importlib
 import os
 import re
-import shutil
 import sys
 import threading
-import zipfile
-from hashlib import md5
 
-from b3 import getPlatform
 from b3.exceptions import ProgrammingError
 
 __author__ = 'ThorN, xlr8or, courgette'
 __version__ = '1.23'
+
+
+def is_windows():
+    return sys.platform.startswith('win')
+
+
+def is_posix():
+    return not is_windows()
 
 
 def getModule(name):
@@ -171,17 +175,6 @@ def escape(text, esc):
     return text.replace(esc, '\\%s' % esc)
 
 
-def decode(text):
-    """
-    Return a copy of text decoded using the default system encoding.
-    :param text: the text to decode
-    :return: string
-    """
-    if hasattr(text, 'decode'):
-        return text.decode(sys.getfilesystemencoding())
-    return text
-
-
 def clamp(value, minv=None, maxv=None):
     """
     Clamp a value so it's bounded within min and max
@@ -210,7 +203,7 @@ def clearscreen():
     """
     Clear the current shell screen according to the OS being used.
     """
-    if getPlatform() == 'nt':
+    if is_windows():
         os.system('cls')
     else:
         os.system('clear')
@@ -375,22 +368,6 @@ def getStuffSoundingLike(stuff, expected_stuff):
     return list(match_set.keys())
 
 
-def hash_password(password):
-    """
-    Calculate the MD5 digest of a given string.
-    """
-    return md5(password).hexdigest()
-
-
-def hash_file(filepath):
-    """
-    Calculate the MD5 digest of a given file.
-    """
-    with open(filepath, 'rb') as f:
-        digest = md5(f.read()).hexdigest()
-    return digest
-
-
 def corrent_spell(c_word, wordbook):
     """
     Simplified spell checker from Peter Norvig.
@@ -490,65 +467,6 @@ def left_cut(text, cut):
     return text
 
 
-def copy_file(src, dst):
-    """
-    Copy the file src to the file or directory dst.
-    If dst is a directory, a file with the same basename as src is created (or overwritten) in the directory specified.
-    """
-    if os.path.isfile(src):
-        shutil.copy2(src, dst)
-
-
-def rm_file(filepath):
-    """
-    Remove a file from the filesystem.
-    :raise: OSError if the file can't be removed.
-    """
-    if os.path.isfile(filepath):
-        os.remove(filepath)
-
-
-def rm_dir(directory):
-    """
-    Delete an entire directory tree.
-    :raise: OSError if the directory can't be removed.
-    """
-    if os.path.isdir(directory):
-        shutil.rmtree(directory, False)
-
-
-def mkdir(directory):
-    """
-    Create a directory (if it doesn't exists).
-    """
-    if not os.path.isdir(directory):
-        os.mkdir(directory)
-
-
-def split_extension(filename):
-    """
-    Remove the extension from the given filename and construct a Tuple containing
-    the filename (without the extension) and the file extension itself.
-    :return: A Tuple with filename and file extension separated
-    """
-    r = re.compile(r'''^(?P<filename>.+)\.(?P<extension>.*)$''')
-    m = r.match(filename)
-    return m.group('filename'), m.group('extension') if m else filename, None
-
-
-def unzip(filepath, directory):
-    """
-    Unzip a file in the specified directory. Will create the directory
-    where to store zip content if such directory does not exists.
-    :raise: OSError if the directory can't be created.
-    """
-    if os.path.isfile(filepath):
-        if not os.path.isdir(directory):
-            mkdir(directory)
-        with zipfile.ZipFile(filepath, 'r') as z:
-            z.extractall(directory)
-
-
 def getBytes(size):
     """
     Convert the given size in the correspondent amount of bytes.
@@ -646,3 +564,13 @@ def escape_string(value):
     Source - https://github.com/PyMySQL/PyMySQL/blob/40f6a706144a9b65baa123e6d5d89d23558646ac/pymysql/converters.py
     """
     return value.translate(_escape_table)
+
+
+def get_home_path():
+    """
+    Return the path to the B3 home directory.
+    """
+    path = os.path.normpath(os.path.expanduser('~/.b3'))
+    if not os.path.isdir(path):
+        os.mkdir(path)
+    return path
