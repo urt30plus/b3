@@ -997,46 +997,47 @@ class Parser:
 
         log_time_start = None
         log_time_last = 0
+
         while self.working:
             if self._paused:
                 if not self._pauseNotice:
                     self.bot('PAUSED - not parsing any lines: B3 will be out of sync')
                     self._pauseNotice = True
-            else:
-                lines = self.read()
-                if lines:
-                    for line in lines:
-                        line = str(line).strip()
-                        if line:
-                            # Track the log file time changes. This is mostly for
-                            # parsing old log files for testing and to have time increase
-                            # predictably
-                            m = self._lineTime.match(line)
-                            if m:
-                                log_time_current = (int(m.group('minutes')) * 60) + int(m.group('seconds'))
-                                if log_time_start and log_time_current - log_time_start < log_time_last:
-                                    # Time in log has reset
-                                    log_time_start = log_time_current
-                                    log_time_last = 0
-                                    self.debug('log time reset %d', log_time_current)
-                                elif not log_time_start:
-                                    log_time_start = log_time_current
+                time.sleep(self.delay)
+                continue
+            for line in self.read():
+                line = str(line).strip()
+                if not line:
+                    continue
+                # Track the log file time changes. This is mostly for
+                # parsing old log files for testing and to have time increase
+                # predictably
+                m = self._lineTime.match(line)
+                if m:
+                    log_time_current = (int(m.group('minutes')) * 60) + int(m.group('seconds'))
+                    if log_time_start and log_time_current - log_time_start < log_time_last:
+                        # Time in log has reset
+                        log_time_start = log_time_current
+                        log_time_last = 0
+                        self.debug('log time reset %d', log_time_current)
+                    elif not log_time_start:
+                        log_time_start = log_time_current
 
-                                # Remove starting offset, we want the first line to be at 0 seconds
-                                log_time_current -= log_time_start
-                                self.logTime += log_time_current - log_time_last
-                                log_time_last = log_time_current
+                    # Remove starting offset, we want the first line to be at 0 seconds
+                    log_time_current -= log_time_start
+                    self.logTime += log_time_current - log_time_last
+                    log_time_last = log_time_current
 
-                            self.console(line)
+                self.console(line)
 
-                            try:
-                                self.parseLine(line)
-                            except SystemExit:
-                                raise
-                            except Exception as msg:
-                                self.error('Could not parse line %s: %s', msg, extract_tb(sys.exc_info()[2]))
+                try:
+                    self.parseLine(line)
+                except SystemExit:
+                    raise
+                except Exception as msg:
+                    self.error('Could not parse line %s: %s', msg, extract_tb(sys.exc_info()[2]))
 
-                            time.sleep(self.delay2)
+                time.sleep(self.delay2)
 
             time.sleep(self.delay)
 
