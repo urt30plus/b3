@@ -34,11 +34,6 @@ from b3.functions import vars2printf
 from b3.plugin import PluginData
 from b3.update import B3version
 
-try:
-    from xml.etree import cElementTree as ElementTree
-except ImportError:
-    from xml.etree import ElementTree
-
 __author__ = 'ThorN, Courgette, xlr8or, Bakes, Ozon, Fenix'
 __version__ = '1.43.6'
 
@@ -159,11 +154,13 @@ class Parser:
             print('CRITICAL ERROR : COULD NOT LOAD CONFIG')
             raise SystemExit(220)
 
-        self.__init_encoding()
+        if self.config.has_option('server', 'encoding'):
+            self.encoding = self.config.get('server', 'encoding')
         self.__init_logging()
         self.__init_ipaddress()
         self.__init_print_startmessage()
-        self.__init_events()
+        self.Events = b3.events.eventManager
+        self._eventsStats = b3.events.EventsStats(self)
         self.__init_bot()
         self.__init_serverconfig()
         self.__init_storage()
@@ -177,10 +174,6 @@ class Parser:
         self.game = b3.game.Game(self, self.gameName)
         self.__init_eventqueue()
         atexit.register(self.shutdown)
-
-    def __init_encoding(self):
-        if self.config.has_option('server', 'encoding'):
-            self.encoding = self.config.get('server', 'encoding')
 
     def __init_logging(self):
         logfile = self.config.getpath('b3', 'logfile')
@@ -199,10 +192,6 @@ class Parser:
         self.screen.flush()
         sys.stdout = b3.output.STDOutLogger(self.log)
         sys.stderr = b3.output.STDErrLogger(self.log)
-
-    def __init_events(self):
-        self.Events = b3.events.eventManager
-        self._eventsStats = b3.events.EventsStats(self)
 
     def __init_print_startmessage(self):
         self.bot('%s', b3.getB3versionString())
@@ -1094,21 +1083,21 @@ class Parser:
         """
         Event handler thread.
         """
+        stop_events = (self.getEventID('EVT_EXIT'), self.getEventID('EVT_STOP'))
         while self.working:
             added, expire, event = self.queue.get(True)
-            if event.type == self.getEventID('EVT_EXIT') or event.type == self.getEventID('EVT_STOP'):
+            if event.type in stop_events:
                 self.working = False
-
             event_name = self.getEventName(event.type)
-            self._eventsStats.add_event_wait((self.time() - added) * 1000)
-            if self.time() >= expire:  # events can only sit in the queue until expire time
+            current_time = self.time()
+            self._eventsStats.add_event_wait((current_time - added) * 1000)
+            if current_time >= expire:  # events can only sit in the queue until expire time
                 self.error('**** Event sat in queue too long: %s %s',
-                           event_name, self.time() - expire)
+                           event_name, current_time - expire)
             else:
                 for hfunc in self._handlers[event.type]:
                     if not hfunc.isEnabled():
                         continue
-
                     self.verbose('Parsing event: %s: %s',
                                  event_name, hfunc.__class__.__name__)
                     timer_plugin_begin = time.clock()
@@ -1133,8 +1122,6 @@ class Parser:
                                                             event_name, elapsed * 1000)
 
         self.bot('Shutting down event handler')
-
-        # releasing lock if it was set by self.shutdown() for instance
         if self.exiting.locked():
             self.exiting.release()
 
