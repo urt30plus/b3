@@ -995,7 +995,7 @@ class Parser:
                 time.sleep(self.delay)
                 continue
             for line in self.read():
-                line = str(line).strip()
+                line = line.strip()
                 if not line:
                     continue
                 # Track the log file time changes. This is mostly for
