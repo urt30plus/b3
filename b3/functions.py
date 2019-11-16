@@ -574,3 +574,19 @@ def get_home_path():
     if not os.path.isdir(path):
         os.mkdir(path)
     return path
+
+
+try:
+    import pkg_resources
+except ImportError:
+    def resource_directory(module):
+        """
+        Use this if pkg_resources is NOT installed
+        """
+        return os.path.dirname(sys.modules[module].__file__)
+else:
+    def resource_directory(module):
+        """
+        Use this if pkg_resources is installed
+        """
+        return pkg_resources.resource_filename(module, '')

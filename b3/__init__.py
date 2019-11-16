@@ -7,12 +7,11 @@ import traceback
 from tempfile import TemporaryFile
 
 import b3.functions
-import b3.pkg_handler
 
 __author__ = 'ThorN'
 __version__ = '3.31.5'
 
-modulePath = b3.pkg_handler.resource_directory(__name__)
+modulePath = b3.functions.resource_directory(__name__)
 
 versionEdition = "WindyCity"
 versionId = f'v{__version__}'

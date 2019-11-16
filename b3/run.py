@@ -6,15 +6,13 @@ from time import sleep
 
 import b3
 import b3.config
-import b3.pkg_handler
-from b3 import HOMEDIR
-from b3.functions import console_exit
-from b3.update import DBUpdate
+import b3.functions
+import b3.update
 
 __author__ = 'ThorN'
 __version__ = '1.8'
 
-modulePath = b3.pkg_handler.resource_directory(__name__)
+modulePath = b3.functions.resource_directory(__name__)
 
 
 def run_update(config=None):
@@ -22,7 +20,7 @@ def run_update(config=None):
     Run the B3 update.
     :param config: The B3 configuration file instance
     """
-    update = DBUpdate(config)
+    update = b3.update.DBUpdate(config)
     update.run()
 
 
@@ -38,12 +36,12 @@ def run(options):
         if options.config:
             config = b3.getAbsolutePath(options.config, True)
             if not os.path.isfile(config):
-                console_exit(f'ERROR: configuration file not found ({config}).')
+                b3.functions.console_exit(f'ERROR: configuration file not found ({config}).')
         else:
             config = None
             for p in ('b3.%s', 'conf/b3.%s', 'b3/conf/b3.%s',
-                      os.path.join(HOMEDIR, 'b3.%s'), os.path.join(HOMEDIR, 'conf', 'b3.%s'),
-                      os.path.join(HOMEDIR, 'b3', 'conf', 'b3.%s'), '@b3/conf/b3.%s'):
+                      os.path.join(b3.HOMEDIR, 'b3.%s'), os.path.join(b3.HOMEDIR, 'conf', 'b3.%s'),
+                      os.path.join(b3.HOMEDIR, 'b3', 'conf', 'b3.%s'), '@b3/conf/b3.%s'):
                 for e in ('ini', 'cfg', 'xml'):
                     path = b3.getAbsolutePath(p % e, True)
                     if os.path.isfile(path):
@@ -53,7 +51,7 @@ def run(options):
                         break
 
             if not config:
-                console_exit('ERROR: could not find any valid configuration file.')
+                b3.functions.console_exit('ERROR: could not find any valid configuration file.')
 
         main_config = b3.config.MainConfig(b3.config.load(config))
         analysis = main_config.analyze()
