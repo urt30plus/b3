@@ -5,8 +5,6 @@ import re
 import sys
 import threading
 
-from b3.exceptions import ProgrammingError
-
 __author__ = 'ThorN, xlr8or, courgette'
 __version__ = '1.23'
 
@@ -529,8 +527,7 @@ def topological_sort(source):
                 yield name
                 emitted.append(name)  # <-- not required, but helps preserve original ordering
                 next_emitted.append(name)  # remember what we emitted for difference_update() in next pass
-        if not next_emitted:  # all entries have unmet deps, one of two things is wrong...
-            raise ProgrammingError("cyclic or missing dependancy detected: %r" % (next_pending,))
+        assert next_emitted, f"cyclic or missing dependancy detected: {next_pending!r}"
         pending = next_pending
         emitted = next_emitted
 
