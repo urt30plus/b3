@@ -9,7 +9,7 @@ import re
 import sys
 
 from b3 import __version__ as currentVersion
-from b3.exceptions import MissingRequirement
+from b3.config import MissingRequirement
 from b3.functions import topological_sort
 from b3.plugin import PluginData
 from b3.update import B3version
@@ -242,7 +242,7 @@ class PluginmanagerPlugin(b3.plugin.Plugin):
                     # changes if a plugin in the dependency tree fails to load/start
                     rollback.append(p.name)
 
-            except b3.exceptions.MissingRequirement:
+            except MissingRequirement:
                 # here we do not have to rollback
                 client.message('^7Plugin ^1%s can\'t be loaded due to unmet dependencies' % name)
                 client.message('^7Please inspect your b3 log file for more information')

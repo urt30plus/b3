@@ -3,8 +3,8 @@ import time
 from mock import patch, call
 from mockito import when
 
+from b3.clients import Cvar
 from b3.config import CfgConfigParser
-from b3.cvar import Cvar
 from b3.plugins.poweradminurt import PoweradminurtPlugin
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 

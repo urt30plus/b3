@@ -9,7 +9,7 @@ import b3.events
 import b3.plugin
 import b3.plugins.admin
 from b3.config import XmlConfigParser, NoSectionError
-from b3.querybuilder import QueryBuilder
+from b3.storage.common import QueryBuilder
 
 __author__ = 'Fenix'
 __version__ = '1.4'

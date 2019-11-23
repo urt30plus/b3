@@ -4,7 +4,6 @@ import time
 
 import b3
 import b3.clients
-import b3.cvar
 import b3.events
 import b3.functions
 import b3.parser
@@ -646,7 +645,7 @@ class AbstractParser(b3.parser.Parser):
                         default_value = m.group('default')
                     except IndexError:
                         default_value = None
-                    return b3.cvar.Cvar(m.group('cvar'), value=m.group('value'), default=default_value)
+                    return b3.clients.Cvar(m.group('cvar'), value=m.group('value'), default=default_value)
             else:
                 return None
 

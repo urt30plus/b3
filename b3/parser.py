@@ -25,7 +25,6 @@ import b3.storage
 from b3 import __version__ as currentVersion
 from b3.clients import Clients
 from b3.clients import Group
-from b3.exceptions import MissingRequirement, NoOptionError
 from b3.functions import getModule
 from b3.functions import splitDSN
 from b3.functions import start_daemon_thread
@@ -183,7 +182,7 @@ class Parser:
         log_level = self.config.getint('b3', 'log_level')
         try:
             logsize = b3.functions.getBytes(self.config.get('b3', 'logsize'))
-        except (TypeError, NoOptionError):
+        except (TypeError, b3.config.NoOptionError):
             logsize = b3.functions.getBytes('10MB')
         self.log = b3.output.getInstance(logfile, log_level, logsize, log2console)
         self.screen = sys.stdout
@@ -323,7 +322,7 @@ class Parser:
     def __init_eventqueue(self):
         try:
             queuesize = self.config.getint('b3', 'event_queue_size')
-        except NoOptionError:
+        except b3.config.NoOptionError:
             queuesize = 50
         except ValueError as err:
             queuesize = 50
@@ -632,20 +631,20 @@ class Parser:
 
                 # check for correct B3 version
                 if p_data.clazz.requiresVersion and B3version(p_data.clazz.requiresVersion) > B3version(currentVersion):
-                    raise MissingRequirement(f'plugin {p_data.name} requires B3 version '
+                    raise b3.config.MissingRequirement(f'plugin {p_data.name} requires B3 version '
                                              f'{p_data.clazz.requiresVersion} (you have version {currentVersion}) '
                                              ': please update your B3 if you want to run this plugin')
 
                 # check if the current game support this plugin (this may actually exclude more than one plugin
                 # in case a plugin is built on top of an incompatible one, due to plugin dependencies)
                 if p_data.clazz.requiresParsers and self.gameName not in p_data.clazz.requiresParsers:
-                    raise MissingRequirement(f'plugin {p_data.name} is not compatible with '
+                    raise b3.config.MissingRequirement(f'plugin {p_data.name} is not compatible with '
                                              f'{self.gameName} parser : supported games are :'
                                              f' {", ".join(p_data.clazz.requiresParsers)}')
 
                 # check if the plugin needs a particular storage protocol to work
                 if p_data.clazz.requiresStorage and self.storage.protocol not in p_data.clazz.requiresStorage:
-                    raise MissingRequirement(
+                    raise b3.config.MissingRequirement(
                         f'plugin {p_data.name} is not compatible with the storage protocol being used ({self.storage.protocol}) : '
                         f'supported protocols are : {", ".join(p_data.clazz.requiresStorage)}')
 
@@ -662,7 +661,7 @@ class Parser:
                                 collection += _get_plugin_data(PluginData(name=r))
                                 self.debug('Plugin %s dependency satisfied: %s', p_data.name, r)
                             except Exception as ex:
-                                raise MissingRequirement(
+                                raise b3.config.MissingRequirement(
                                     f'missing required plugin: {r} : {extract_tb(sys.exc_info()[2])}', ex)
 
                     return collection
@@ -685,7 +684,7 @@ class Parser:
         for plugin_name, plugin_data in plugins.items():
             try:
                 plugin_list += _get_plugin_data(plugin_data)
-            except MissingRequirement as err:
+            except b3.config.MissingRequirement as err:
                 self.error('Could not load plugin %s', plugin_name, exc_info=err)
 
         plugin_dict = {x.name: x for x in plugin_list}  # dict(str, PluginData)
@@ -1071,7 +1070,8 @@ class Parser:
             if event.type in self._handlers:
                 self.verbose('Queueing event %s : %s', self.getEventName(event.type), event.data)
                 time.sleep(0.001)  # wait a bit so event doesnt get jumbled
-                self.queue.put((self.time(), self.time() + expire, event), True, 2)
+                current_time = self.time()
+                self.queue.put((current_time, current_time + expire, event), timeout=2)
                 return True
         except queue.Full:
             self.error('**** Event queue was full (%s)', self.queue.qsize())
@@ -1085,7 +1085,7 @@ class Parser:
         """
         stop_events = (self.getEventID('EVT_EXIT'), self.getEventID('EVT_STOP'))
         while self.working:
-            added, expire, event = self.queue.get(True)
+            added, expire, event = self.queue.get()
             if event.type in stop_events:
                 self.working = False
             event_name = self.getEventName(event.type)
@@ -1155,7 +1155,7 @@ class Parser:
             filestats = os.fstat(self.input.fileno())
             if self.input.tell() > filestats.st_size:
                 self.debug('Parser: game log is suddenly smaller than it was '
-                           f'before ({str(self.input.tell())} bytes, now {str(filestats.st_size)}), '
+                           f'before ({self.input.tell()} bytes, now {filestats.st_size}), '
                            'the log was probably either rotated or emptied. B3 will now re-adjust to '
                            'the new size of the log')
                 self.input.seek(0, os.SEEK_END)
@@ -1336,7 +1336,7 @@ class Parser:
         """
         if self.config.has_section('autodoc'):
             try:
-                from b3.tools.documentationBuilder import DocBuilder
+                from b3.tools import DocBuilder
                 docbuilder = DocBuilder(self)
                 docbuilder.save()
             except Exception as err:

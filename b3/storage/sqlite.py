@@ -90,12 +90,12 @@ class SqliteStorage(DatabaseStorage):
         current_tables = self.getTables()
         if isinstance(table, tuple) or isinstance(table, list):
             for v in table:
-                if not v in current_tables:
+                if v not in current_tables:
                     raise KeyError(f"could not find table '{v}' in the database")
                 self.query(f"DELETE FROM {v};")
                 self.query(f"DELETE FROM sqlite_sequence WHERE name='{v}';")
         else:
-            if not table in current_tables:
+            if table not in current_tables:
                 raise KeyError(f"could not find table '{table}' in the database")
             self.query(f"DELETE FROM {table};")
             self.query(f"DELETE FROM sqlite_sequence WHERE name='{table}';")

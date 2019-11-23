@@ -161,7 +161,6 @@ class MysqlStorage(DatabaseStorage):
                     cls.__driver = mysqldriver
                     # new inheritance: MysqlStorage -> MySQLdbStorage -> DatabaseStorage -> Storage
                 except ImportError:
-                    mysqldriver = None
                     # re-raise ImportError with a custom message since it will be logged and it may
                     # help end users in fixing the problem by themselves (installing libraries)
                     raise ImportError("missing MySQL connector driver. You need to install one of the following MySQL "
@@ -276,11 +275,11 @@ class MysqlStorage(DatabaseStorage):
             current_tables = self.getTables()
             if isinstance(table, tuple) or isinstance(table, list):
                 for v in table:
-                    if not v in current_tables:
+                    if v not in current_tables:
                         raise KeyError("could not find table '%s' in the database" % v)
                     self.query("TRUNCATE TABLE %s;" % v)
             else:
-                if not table in current_tables:
+                if table not in current_tables:
                     raise KeyError("could not find table '%s' in the database" % table)
                 self.query("TRUNCATE TABLE %s;" % table)
         finally:

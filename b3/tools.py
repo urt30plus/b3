@@ -2,19 +2,13 @@
 This module will generate a user documentation depending
 on current config
 """
-
-from __future__ import print_function, absolute_import
-
 import datetime
 import os
 import re
 import time
-from cgi import escape
-from ftplib import FTP
+from html import escape
 from functools import cmp_to_key
 from xml.dom.minidom import Document
-
-from io import StringIO
 
 from b3 import getConfPath, getB3Path, getWritableFilePath
 from b3.functions import splitDSN
@@ -48,7 +42,7 @@ class DocBuilder:
                 if dest is None:
                     self._console.warning('AUTODOC: destination found but empty: using default')
                 else:
-                    if dest.startswith('ftp://') or dest.startswith('file://'):
+                    if dest.startswith('file://'):
                         self._outputUrl = dest
                     else:
                         # assume file
@@ -263,15 +257,7 @@ class DocBuilder:
             self._console.warning('AUTODOC: nothing to write')
 
         dsn = splitDSN(self._outputUrl)
-        if dsn['protocol'] == 'ftp':
-            self._console.debug('AUTODOC: uploading to FTP server %s' % dsn['host'])
-            ftp = FTP(dsn['host'], dsn['user'], passwd=dsn['password'])
-            ftp.cwd(os.path.dirname(dsn['path']))
-            ftpfile = StringIO.StringIO()
-            ftpfile.write(text)
-            ftpfile.seek(0)
-            ftp.storbinary('STOR ' + os.path.basename(dsn['path']), ftpfile)
-        elif dsn['protocol'] == 'file':
+        if dsn['protocol'] == 'file':
             path = getWritableFilePath(dsn['path'], True)
             self._console.debug('AUTODOC: writing to %s', path)
             with open(path, 'w') as f:

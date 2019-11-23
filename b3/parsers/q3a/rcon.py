@@ -95,8 +95,8 @@ class Rcon(object):
         """
         Write multiple RCON commands on the socket.
         """
-        while not self._stopEvent.isSet():
-            lines = self.queue.get(True)
+        while not self._stopEvent.is_set():
+            lines = self.queue.get()
             for cmd in lines:
                 if not cmd:
                     continue
@@ -157,4 +157,5 @@ class Rcon(object):
         pass
 
     def close(self):
-        pass
+        self.stop()
+        self.socket.close()

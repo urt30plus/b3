@@ -13,10 +13,6 @@ def is_windows():
     return sys.platform.startswith('win')
 
 
-def is_posix():
-    return not is_windows()
-
-
 def getModule(name):
     """
     Return a module given its name.
