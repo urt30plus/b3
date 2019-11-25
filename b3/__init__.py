@@ -9,7 +9,7 @@ from tempfile import TemporaryFile
 import b3.functions
 
 __author__ = 'ThorN'
-__version__ = '3.31.6'
+__version__ = '3.31.7'
 
 modulePath = b3.functions.resource_directory(__name__)
 

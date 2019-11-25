@@ -1345,13 +1345,8 @@ class Parser:
         else:
             self.info('No user documentation generated: to enable update your configuration file')
 
-    ####################################################################################################################
-    #                                                                                                                  #
-    #   INHERITING CLASSES MUST IMPLEMENTS THE FOLLOWING METHODS                                                       #
-    #   PLUGINS THAT ARE GAME INDEPENDANT ASSUME THOSE METHODS EXIST                                                   #
-    #                                                                                                                  #
-    ####################################################################################################################
-
+    # INHERITING CLASSES MUST IMPLEMENTS THE FOLLOWING METHODS
+    # PLUGINS THAT ARE GAME INDEPENDENT ASSUME THESE METHODS EXIST
     def getPlayerList(self):
         """
         Query the game server for connected players.

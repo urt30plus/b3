@@ -106,6 +106,7 @@ class Plugin:
 
         self.registerEvent('EVT_STOP', self.onStop)
         self.registerEvent('EVT_EXIT', self.onExit)
+        self._stop_events = (console.getEventID('EVT_EXIT'), console.getEventID('EVT_STOP'))
 
     def start(self):
         """
@@ -398,7 +399,7 @@ class Plugin:
             except TypeError as e:
                 self.error('could not parse event %s: %s', self.console.getEventName(event.type), e)
 
-        if event.type == self.console.getEventID('EVT_EXIT') or event.type == self.console.getEventID('EVT_STOP'):
+        if event.type in self._stop_events:
             self.working = False
 
     def register_commands_from_config(self):

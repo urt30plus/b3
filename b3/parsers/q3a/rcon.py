@@ -44,6 +44,8 @@ class Rcon(object):
         """
         if socketTimeout is None:
             socketTimeout = self.socket_timeout
+        if maxRetries is None:
+            maxRetries = 2
 
         data = data.strip()
 
