@@ -1100,7 +1100,7 @@ class Parser:
                         continue
                     self.verbose('Parsing event: %s: %s',
                                  event_name, hfunc.__class__.__name__)
-                    timer_plugin_begin = time.clock()
+                    timer_plugin_begin = time.perf_counter()
                     try:
                         hfunc.parseEvent(event)
                         time.sleep(0.001)
@@ -1117,7 +1117,7 @@ class Parser:
                                    msg,
                                    extract_tb(sys.exc_info()[2]))
                     finally:
-                        elapsed = time.clock() - timer_plugin_begin
+                        elapsed = time.perf_counter() - timer_plugin_begin
                         self._eventsStats.add_event_handled(hfunc.__class__.__name__,
                                                             event_name, elapsed * 1000)
 
