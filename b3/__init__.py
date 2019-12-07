@@ -62,10 +62,8 @@ def getB3Path(decode=False):
     Return the path to the main B3 directory.
     :param decode: if True will decode the path string using the default file system encoding before returning it
     """
-    path = modulePath
-    if not decode:
-        return os.path.normpath(os.path.expanduser(path))
-    return decode_text(os.path.normpath(os.path.expanduser(path)))
+    path = os.path.normpath(os.path.expanduser(modulePath))
+    return path if not decode else decode_text(path)
 
 
 def getConfPath(decode=False, conf=None):
@@ -88,9 +86,7 @@ def getConfPath(decode=False, conf=None):
     else:
         path = confdir or os.path.dirname(console.config.fileName)
 
-    if not decode:
-        return path
-    return decode_text(path)
+    return path if not decode else decode_text(path)
 
 
 def getAbsolutePath(path, decode=False, conf=None):
@@ -100,23 +96,22 @@ def getAbsolutePath(path, decode=False, conf=None):
     :param decode: if True will decode the path string using the default file system encoding before returning it
     :param conf: the current configuration being used :type XmlConfigParser|CfgConfigParser|MainConfig|str:
     """
-    if path[0:4] == '@b3\\' or path[0:4] == '@b3/':
-        path = os.path.join(getB3Path(decode=False), path[4:])
-    elif path[0:6] == '@conf\\' or path[0:6] == '@conf/':
-        path = os.path.join(getConfPath(decode=False, conf=conf), path[6:])
-    elif path[0:6] == '@home\\' or path[0:6] == '@home/':
-        path = os.path.join(HOMEDIR, path[6:])
-    if not decode:
-        return os.path.normpath(os.path.expanduser(path))
-    return decode_text(os.path.normpath(os.path.expanduser(path)))
+    if path.startswith('@'):
+        if path[1:4] in ('b3\\', 'b3/'):
+            path = os.path.join(getB3Path(decode=False), path[4:])
+        elif path[1:6] in ('conf\\', 'conf/'):
+            path = os.path.join(getConfPath(decode=False, conf=conf), path[6:])
+        elif path[1:6] in ('home\\', 'home/'):
+            path = os.path.join(HOMEDIR, path[6:])
+    path = os.path.normpath(os.path.expanduser(path))
+    return path if not decode else decode_text(path)
 
 
 def getB3versionString():
     """
     Return the B3 version as a string.
     """
-    sversion = re.sub(r'\^[0-9a-z]', '', version)
-    return sversion
+    return re.sub(r'\^[0-9a-z]', '', version)
 
 
 def getWritableFilePath(filepath, decode=False):
@@ -131,13 +126,12 @@ def getWritableFilePath(filepath, decode=False):
     filepath = getAbsolutePath(filepath, decode)
     if not filepath.startswith(HOMEDIR):
         try:
-            tmp = TemporaryFile(dir=os.path.dirname(filepath))
+            with TemporaryFile(dir=os.path.dirname(filepath)) as tf:
+                pass
         except (OSError, IOError):
             # no need to decode again since HOMEDIR is already decoded
             # and os.path.join will handle everything itself
             filepath = os.path.join(HOMEDIR, os.path.basename(filepath))
-        else:
-            tmp.close()
     return filepath
 
 
