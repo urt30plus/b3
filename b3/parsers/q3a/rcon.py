@@ -26,13 +26,12 @@ class Rcon(object):
         self.rconsendstring = f'\377\377\377\377rcon "{password}" '.encode(
             self.console.encoding
         )
-        self.queue = queue.Queue()
         self.socket = socket.socket(type=socket.SOCK_DGRAM)
         self.socket.settimeout(2)
         self.socket.connect(self.host)
         self.lock = threading.Lock()
-        self._stopEvent = threading.Event()
-        b3.functions.start_daemon_thread(self._writelines)
+        self.queue = None
+        self._stopEvent = object()
         self.console.bot('Game name is: %s', self.console.gameName)
 
     def send_rcon(self, data, maxRetries=2, socketTimeout=None):
@@ -97,8 +96,10 @@ class Rcon(object):
         """
         Write multiple RCON commands on the socket.
         """
-        while not self._stopEvent.is_set():
+        while 1:
             lines = self.queue.get()
+            if lines is self._stopEvent:
+                break
             for cmd in lines:
                 if not cmd:
                     continue
@@ -110,6 +111,10 @@ class Rcon(object):
         Enqueue multiple RCON commands for later processing.
         :param lines: A list of RCON commands.
         """
+        if not self.queue:
+            self.queue = queue.Queue()
+            b3.functions.start_daemon_thread(self._writelines)
+
         self.queue.put(lines)
 
     def write(self, cmd, maxRetries=None, socketTimeout=None):
@@ -153,7 +158,8 @@ class Rcon(object):
         """
         Stop the rcon writelines queue.
         """
-        self._stopEvent.set()
+        if self.queue:
+            self.queue.put(self._stopEvent)
 
     def flush(self):
         pass
