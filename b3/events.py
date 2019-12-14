@@ -1,7 +1,7 @@
 import functools
 import re
 import time
-from collections import deque
+from collections import defaultdict, deque
 from logging import DEBUG
 
 from b3.functions import meanstdv
@@ -178,9 +178,10 @@ class EventsStats:
         :param max_samples: The size of the event queue
         """
         self.console = console
-        self._max_samples = max_samples
-        self._handling_timers = {}
-        self._queue_wait = deque(maxlen=max_samples)
+        deque_with_max = functools.partial(deque, maxlen=max_samples)
+        dict_deque = functools.partial(defaultdict, deque_with_max)
+        self._handling_timers = defaultdict(dict_deque)
+        self._queue_wait = deque_with_max()
 
     def add_event_handled(self, plugin_name, event_name, milliseconds_elapsed):
         """
@@ -189,10 +190,6 @@ class EventsStats:
         :param event_name: The event name
         :param milliseconds_elapsed: The amount of milliseconds necessary to handle the event
         """
-        if plugin_name not in self._handling_timers:
-            self._handling_timers[plugin_name] = {}
-        if event_name not in self._handling_timers[plugin_name]:
-            self._handling_timers[plugin_name][event_name] = deque(maxlen=self._max_samples)
         self._handling_timers[plugin_name][event_name].append(milliseconds_elapsed)
         self.console.verbose2("%s event handled by %s in %0.3f ms", event_name, plugin_name, milliseconds_elapsed)
 
@@ -203,24 +200,26 @@ class EventsStats:
         """
         self._queue_wait.append(milliseconds_wait)
 
-    def dumpStats(self):
+    def dump_stats(self, *, warn=False):
         """
         Print event stats in the log file.
         """
-        if self.console.log.isEnabledFor(VERBOSE):
+        if self.console.log.isEnabledFor(DEBUG) or warn:
+            if self._queue_wait:
+                mean, stdv = meanstdv(self._queue_wait)
+                output = self.console.warning if warn else self.console.debug
+                output("Events waiting in queue stats : (ms) min(%0.1f), max(%0.1f), mean(%0.1f), "
+                                   "stddev(%0.1f)", min(self._queue_wait), max(self._queue_wait), mean, stdv)
+
+        if self.console.log.isEnabledFor(VERBOSE) or warn:
+            output = self.console.warning if warn else self.console.verbose
             for plugin_name, plugin_timers in self._handling_timers.items():
                 for event_name, event_timers in plugin_timers.items():
-                    mean, stdv = meanstdv(event_timers)
-                    if len(event_timers):
-                        self.console.verbose("%s %s : (ms) min(%0.1f), max(%0.1f), mean(%0.1f), "
-                                             "stddev(%0.1f)", plugin_name, event_name, min(event_timers),
-                                             max(event_timers), mean, stdv)
-
-        if self.console.log.isEnabledFor(DEBUG):
-            mean, stdv = meanstdv(self._queue_wait)
-            if len(self._queue_wait):
-                self.console.debug("Events waiting in queue stats : (ms) min(%0.1f), max(%0.1f), mean(%0.1f), "
-                                   "stddev(%0.1f)", min(self._queue_wait), max(self._queue_wait), mean, stdv)
+                    if event_timers:
+                        mean, stdv = meanstdv(event_timers)
+                        output("%s %s : (ms) min(%0.1f), max(%0.1f), mean(%0.1f), "
+                               "stddev(%0.1f)", plugin_name, event_name, min(event_timers),
+                               max(event_timers), mean, stdv)
 
 
 class VetoEvent(Exception):

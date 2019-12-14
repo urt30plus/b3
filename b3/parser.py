@@ -334,7 +334,7 @@ class Parser:
         """
         Dump event statistics into the B3 log file.
         """
-        self._eventsStats.dumpStats()
+        self._eventsStats.dump_stats()
 
     def _reset_timezone_info(self):
         """Causes the timezone offset and name to be re-cached"""
@@ -361,7 +361,7 @@ class Parser:
 
     def schedule_cron_tasks(self):
         if self.log.isEnabledFor(b3.output.DEBUG):
-            self._eventsStats_cronTab = b3.cron.CronTab(self._dumpEventsStats)
+            self._eventsStats_cronTab = b3.cron.CronTab(self._eventsStats.dump_stats())
             self.cron.add(self._eventsStats_cronTab)
 
         tz_offset, tz_name = self.tz_offset_and_name()
@@ -1094,6 +1094,7 @@ class Parser:
             if current_time >= expire:  # events can only sit in the queue until expire time
                 self.error('**** Event sat in queue too long: %s %s',
                            event_name, current_time - expire)
+                self._eventsStats.dump_stats(warn=True)
             else:
                 for hfunc in self._handlers[event.type]:
                     if not hfunc.isEnabled():
