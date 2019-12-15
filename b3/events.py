@@ -204,20 +204,20 @@ class EventsStats:
         """
         Print event stats in the log file.
         """
-        if self.console.log.isEnabledFor(DEBUG):
-            if self._queue_wait:
-                mean, stdv = meanstdv(self._queue_wait)
-                self.console.debug("Events waiting in queue stats : (ms) min(%0.1f), max(%0.1f), mean(%0.1f), "
-                                   "stddev(%0.1f)", min(self._queue_wait), max(self._queue_wait), mean, stdv)
+        self.console.debug('***** Event Stats *****')
 
-        if self.console.log.isEnabledFor(VERBOSE):
-            for plugin_name, plugin_timers in self._handling_timers.items():
-                for event_name, event_timers in plugin_timers.items():
-                    if event_timers:
-                        mean, stdv = meanstdv(event_timers)
-                        self.console.verbose("%s %s : (ms) min(%0.1f), max(%0.1f), mean(%0.1f), "
-                                             "stddev(%0.1f)", plugin_name, event_name, min(event_timers),
-                                             max(event_timers), mean, stdv)
+        if self._queue_wait:
+            mean, stdv = meanstdv(self._queue_wait)
+            self.console.debug("Events waiting in queue stats : (ms) min(%0.4f), max(%0.4f), mean(%0.4f), "
+                               "stddev(%0.4f)", min(self._queue_wait), max(self._queue_wait), mean, stdv)
+
+        for plugin_name, plugin_timers in self._handling_timers.items():
+            for event_name, event_timers in plugin_timers.items():
+                if event_timers:
+                    mean, stdv = meanstdv(event_timers)
+                    self.console.verbose("%s %s : (ms) min(%0.4f), max(%0.4f), mean(%0.4f), "
+                                         "stddev(%0.4f)", plugin_name, event_name, min(event_timers),
+                                         max(event_timers), mean, stdv)
 
 
 class VetoEvent(Exception):
