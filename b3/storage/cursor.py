@@ -13,7 +13,8 @@ class Cursor:
         self._conn = conn
         self.rowcount = self._cursor.rowcount
         self.lastrowid = self._cursor.lastrowid
-
+        self.columns = None
+        self.fields = None
         try:
             self.EOF = self.moveNext()
         except Exception:
@@ -49,22 +50,18 @@ class Cursor:
         :return The result set row or an empty dict if there are no more records in this result set.
         """
         if self.EOF:
-            return dict()
-        d = dict()
-        desc = self._cursor.description
-        for i in range(0, len(self.fields)):
-            d[desc[i][0]] = self.fields[i]
-        return d
+            return {}
+        fields = self.fields
+        if not self.columns:
+            self.columns = [x[0] for x in self._cursor.description]
+        return {col: fields[i] for i, col in enumerate(self.columns)}
 
     def getValue(self, key, default=None):
         """
         Return a value from the current result set row.
         :return The value extracted from the result set or default if the the given key doesn't match any field.
         """
-        row = self.getRow()
-        if key in row:
-            return row[key]
-        return default
+        return self.getRow().get(key, default)
 
     def close(self):
         """
@@ -74,3 +71,18 @@ class Cursor:
             self._cursor.close()
         self._cursor = None
         self.EOF = True
+
+    def __iter__(self):
+        while not self.EOF:
+            yield self.getRow()
+            self.moveNext()
+        return StopIteration
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def __bool__(self):
+        return not self.EOF

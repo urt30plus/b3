@@ -71,15 +71,8 @@ class SqliteStorage(DatabaseStorage):
         List the tables of the current database.
         :return: List of strings.
         """
-        tables = []
-        cursor = self.query("SELECT tbl_name FROM sqlite_master WHERE type='table'")
-        if cursor and not cursor.EOF:
-            while not cursor.EOF:
-                row = cursor.getRow()
-                tables.append(row["tbl_name"])
-                cursor.moveNext()
-        cursor.close()
-        return tables
+        with self.query("SELECT tbl_name FROM sqlite_master WHERE type='table'") as cursor:
+            return [row['tbl_name'] for row in cursor]
 
     def truncateTable(self, table):
         """
@@ -88,17 +81,17 @@ class SqliteStorage(DatabaseStorage):
         :raise KeyError: If the table is not present in the database
         """
         current_tables = self.getTables()
-        if isinstance(table, tuple) or isinstance(table, list):
+        if isinstance(table, (tuple, list)):
             for v in table:
                 if v not in current_tables:
                     raise KeyError(f"could not find table '{v}' in the database")
                 self.query(f"DELETE FROM {v};")
-                self.query(f"DELETE FROM sqlite_sequence WHERE name='{v}';")
+                self.query(f"DELETE FROM sqlite_sequence WHERE name='{v}'")
         else:
             if table not in current_tables:
                 raise KeyError(f"could not find table '{table}' in the database")
-            self.query(f"DELETE FROM {table};")
-            self.query(f"DELETE FROM sqlite_sequence WHERE name='{table}';")
+            self.query(f"DELETE FROM {table}")
+            self.query(f"DELETE FROM sqlite_sequence WHERE name='{table}'")
 
     def status(self):
         """

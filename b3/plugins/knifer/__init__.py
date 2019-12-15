@@ -432,18 +432,16 @@ class KniferPlugin(b3.plugin.Plugin):
     def getRecord(self):
         RecordHolder = ''
         RecordValue = '-1'
-        q = """SELECT * FROM plugin_hof WHERE plugin_name='%s' and map_name='%s'""" % (
-            self._hof_plugin_name, self.console.game.mapName
-        )
-        self.debug('getRecord : %s' % q)
+        q = f"SELECT * FROM plugin_hof WHERE plugin_name='{self._hof_plugin_name}' and map_name='{self.console.game.mapName}'"
+        self.debug('getRecord : %s', q)
         try:
             cursor = self.query(q)
         except:
             self.error('Can\'t execute query : %s' % q)
             return (RecordHolder, RecordValue)
 
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        r = cursor.getOneRow()
+        if r:
             # clients:899 -> m = re.match(r'^@([0-9]+)$', id) -> add @
             id = '@' + str(r['player_id'])
             clientList = self.console.clients.getByDB(id)

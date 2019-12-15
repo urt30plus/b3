@@ -409,10 +409,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         else:
             client_id = client.id
 
-        q = """SELECT * from %s WHERE client_id = %s LIMIT 1""" % (self.playerstats_table, client_id)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.playerstats_table} WHERE client_id = {client_id} LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s = PlayerStats()
             s.id = r['id']
             s.client_id = r['client_id']
@@ -452,10 +451,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
     def get_WeaponStats(self, name):
         s = WeaponStats()
-        q = """SELECT * from %s WHERE name = '%s' LIMIT 1""" % (self.weaponstats_table, name)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.weaponstats_table} WHERE name = '{name}' LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.name = r['name']
             s.kills = r['kills']
@@ -469,10 +467,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
     def get_Bodypart(self, name):
         s = Bodyparts()
-        q = """SELECT * from %s WHERE name = '%s' LIMIT 1""" % (self.bodyparts_table, name)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.bodyparts_table} WHERE name = '{name}' LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.name = r['name']
             s.kills = r['kills']
@@ -487,10 +484,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
     def get_MapStats(self, name):
         assert name is not None
         s = MapStats()
-        q = """SELECT * from %s WHERE name = '%s' LIMIT 1""" % (self.mapstats_table, name)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.mapstats_table} WHERE name = '{name}' LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.name = r['name']
             s.kills = r['kills']
@@ -505,11 +501,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
     def get_WeaponUsage(self, weaponid, playerid):
         s = WeaponUsage()
-        q = """SELECT * from %s WHERE weapon_id = %s AND player_id = %s LIMIT 1""" % (
-        self.weaponusage_table, weaponid, playerid)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.weaponusage_table} WHERE weapon_id = {weaponid} AND player_id = {playerid} LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.player_id = r['player_id']
             s.weapon_id = r['weapon_id']
@@ -527,11 +521,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
     def get_Opponent(self, killerid, targetid):
         s = Opponents()
-        q = """SELECT * from %s WHERE killer_id = %s AND target_id = %s LIMIT 1""" % (
-        self.opponents_table, killerid, targetid)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.opponents_table} WHERE killer_id = {killerid} AND target_id = {targetid} LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.killer_id = r['killer_id']
             s.target_id = r['target_id']
@@ -546,11 +538,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
     def get_PlayerBody(self, playerid, bodypartid):
         s = PlayerBody()
-        q = """SELECT * from %s WHERE bodypart_id = %s AND player_id = %s LIMIT 1""" % (
-        self.playerbody_table, bodypartid, playerid)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.playerbody_table} WHERE bodypart_id = {bodypartid} AND player_id = {playerid} LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.player_id = r['player_id']
             s.bodypart_id = r['bodypart_id']
@@ -575,16 +565,14 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                     self.save_Stat(mapstats)
                 self.verbose('map %s successfully initialised', mapstats.name)
                 mapid = mapstats.id
-                assert mapid is not None, "failed to get mapid from database for %s" % self.console.game.mapName
+                assert mapid is not None, f"failed to get mapid from database for {self.console.game.mapName}"
             else:
                 return None
 
         s = PlayerMaps()
-        q = """SELECT * from %s WHERE map_id = %s AND player_id = %s LIMIT 1""" % (
-        self.playermaps_table, mapid, playerid)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.playermaps_table} WHERE map_id = {mapid} AND player_id = {playerid} LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.player_id = r['player_id']
             s.map_id = r['map_id']
@@ -603,10 +591,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
     def get_ActionStats(self, name):
         s = ActionStats()
-        q = """SELECT * from %s WHERE name = '%s' LIMIT 1""" % (self.actionstats_table, name)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.actionstats_table} WHERE name = '{name}' LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.name = r['name']
             s.count = r['count']
@@ -618,11 +605,9 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
     def get_PlayerActions(self, playerid, actionid):
         s = PlayerActions()
-        q = """SELECT * from %s WHERE action_id = %s AND player_id = %s LIMIT 1""" % (
-        self.playeractions_table, actionid, playerid)
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            r = cursor.getRow()
+        q = f"SELECT * from {self.playeractions_table} WHERE action_id = {actionid} AND player_id = {playerid} LIMIT 1"
+        r = self.query(q).getOneRow()
+        if r:
             s.id = r['id']
             s.player_id = r['player_id']
             s.action_id = r['action_id']
@@ -1402,8 +1387,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             self.clients_table, self.playerstats_table,
             int(time.time()), self.clients_table, seconds
         )
-        cursor = self.query(q)
-        r = cursor.getRow()
+        r = self.query(q).getRow()
         _max = r['max_skill']
         if _max is None:
             _max = self.defaultskill
@@ -1443,9 +1427,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                self.playerstats_table, self.playerstats_table, self.Kswitch_confrontations,
                int(time.time()), self.clients_table, _seconds)
 
-        cursor = self.query(q)
-        # self.verbose(q)
-        r = cursor.getRow()
+        r = self.query(q).getRow()
 
         if r['cnt'] == 0:
             return None
@@ -1503,17 +1485,15 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             self.clients_table, self.playerstats_table, self.clients_table, self.playerstats_table,
             int(time.time()), self.clients_table, _seconds)
 
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            while not cursor.EOF:
-                r = cursor.getRow()
+        with self.query(q) as cursor:
+            for r in cursor:
+                player_id = r['player_id']
                 self.verbose(r)
-                self.purgePlayerStats(r['player_id'])
-                self.purgeAssociated(self.playeractions_table, r['player_id'])
-                self.purgeAssociated(self.playerbody_table, r['player_id'])
-                self.purgeAssociated(self.playermaps_table, r['player_id'])
-                self.purgeAssociated(self.weaponusage_table, r['player_id'])
-                cursor.moveNext()
+                self.purgePlayerStats(player_id)
+                self.purgeAssociated(self.playeractions_table, player_id)
+                self.purgeAssociated(self.playerbody_table, player_id)
+                self.purgeAssociated(self.playermaps_table, player_id)
+                self.purgeAssociated(self.weaponusage_table, player_id)
 
     def purgePlayerStats(self, _id):
         self.query("""DELETE FROM %s WHERE id = %s""" % (self.playerstats_table, _id))
@@ -1595,35 +1575,33 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             int(time.time()),
             self.playerstats_table, limit)
 
-        cursor = self.query(q)
-        if cursor and not cursor.EOF:
-            message = '^3XLR Stats Top %s Players:' % limit
-            if ext:
-                self.console.say(message)
-            else:
-                cmd.sayLoudOrPM(client, message)
-            c = 1
-            while not cursor.EOF:
-                r = cursor.getRow()
-                message = self.getMessage('cmd_xlrtopstats',
-                                          {'number': c, 'name': r['name'], 'skill': '%1.02f' % r['skill'],
-                                           'ratio': '%1.02f' % r['ratio'], 'kills': r['kills']})
+        with self.query(q) as cursor:
+            if cursor:
+                message = f'^3XLR Stats Top {limit} Players:'
                 if ext:
                     self.console.say(message)
                 else:
                     cmd.sayLoudOrPM(client, message)
+                c = 1
+                for r in cursor:
+                    message = self.getMessage('cmd_xlrtopstats',
+                                              {'number': c, 'name': r['name'], 'skill': '%1.02f' % r['skill'],
+                                               'ratio': '%1.02f' % r['ratio'], 'kills': r['kills']})
+                    if ext:
+                        self.console.say(message)
+                    else:
+                        cmd.sayLoudOrPM(client, message)
 
-                cursor.moveNext()
-                c += 1
-                time.sleep(1)
-        else:
-            self.debug('no players qualified for the toplist yet...')
-            message = 'Qualify for the toplist by making at least %i kills and playing %i rounds!' % (
-                self._minKills, self._minRounds)
-            if ext:
-                self.console.say(message)
+                    c += 1
+                    time.sleep(1)
             else:
-                cmd.sayLoudOrPM(client, message)
+                self.debug('no players qualified for the toplist yet...')
+                message = f'Qualify for the toplist by making at least %i kills and playing %i rounds!' % (
+                    self._minKills, self._minRounds)
+                if ext:
+                    self.console.say(message)
+                else:
+                    cmd.sayLoudOrPM(client, message)
 
     def cmd_xlrhide(self, data, client, cmd=None):
         """

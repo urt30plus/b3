@@ -2,7 +2,6 @@ import os
 import re
 import sys
 import threading
-from contextlib import contextmanager
 from time import time
 
 import b3
@@ -36,7 +35,8 @@ class QueryBuilder(object):
         elif word is None:
             return '"None"'
         else:
-            return '"%s"' % word.replace('"', '\\"')
+            escaped = word.replace('"', '\\"')
+            return f'"{escaped}"'
 
     def quoteArgs(self, args):
         """
@@ -45,23 +45,20 @@ class QueryBuilder(object):
         """
         if type(args[0]) is tuple or type(args[0]) is list:
             args = args[0]
-        nargs = []
-        for a in args:
-            nargs.append(self.escape(a))
-        return tuple(nargs)
+        return tuple(map(self.escape, args))
 
     def fieldStr(self, fields):
         """
         Return a list of fields whose keywords are surrounded by backticks.
         :param fields: The list of fields to format.
         """
-        if isinstance(fields, tuple) or isinstance(fields, list):
+        if isinstance(fields, (tuple, list)):
             return "`%s`" % "`, `".join(fields)
         elif isinstance(fields, str):
             if fields == "*":
                 return fields
             else:
-                return "`%s`" % fields
+                return f"`{fields}`"
         else:
             raise TypeError('field must be a tuple, list, or string')
 
@@ -73,11 +70,8 @@ class QueryBuilder(object):
         """
         field = field.strip()
 
-        if type(value) == list or type(value) == tuple:
-            values = []
-            for v in value:
-                values.append(self.escape(v))
-            return "`" + field + "` IN(" + ",".join(values) + ")"
+        if type(value) in (list, tuple):
+            return "`" + field + "` IN(" + ",".join(map(self.escape, value)) + ")"
         elif value is None:
             value = self.escape('')
         else:
@@ -122,7 +116,7 @@ class QueryBuilder(object):
             elif not isinstance(fields[1], tuple):
                 values = (str(fields[1]),)
 
-            if isinstance(fields[0], tuple) or isinstance(fields[0], list):
+            if isinstance(fields[0], (tuple, list)):
                 fields = tuple(fields[0])
             elif not isinstance(fields[0], tuple):
                 fields = (str(fields[0]),)
@@ -137,7 +131,6 @@ class QueryBuilder(object):
             if len(fields) == 1 and len(values) == 1:
                 sql.append(self.FieldClause(fields[0], values[0]))
             else:
-                print(fields)
                 for k, field in enumerate(fields):
                     v = values[k]
                     sql.append(self.FieldClause(field, v))
@@ -181,16 +174,16 @@ class QueryBuilder(object):
         :param having: The HAVING clause for this select statement.
         :param keywords: Unused at the moment.
         """
-        sql = ['SELECT %s FROM %s' % (self.fieldStr(fields), table)]
+        sql = [f'SELECT {self.fieldStr(fields)} FROM {table}']
 
         if where:
-            sql.append("WHERE %s" % self.WhereClause(where))
+            sql.append(f"WHERE {self.WhereClause(where)}")
         if groupby:
-            sql.append("GROUP BY %s" % orderby)
+            sql.append(f"GROUP BY {orderby}")
         if having:
-            sql.append("HAVING %s" % having)
+            sql.append(f"HAVING {having}")
         if orderby:
-            sql.append("ORDER BY %s" % orderby)
+            sql.append(f"ORDER BY {orderby}")
         if limit:
             sql.append("LIMIT")
         if offset:
@@ -209,19 +202,12 @@ class QueryBuilder(object):
         :param delayed: Whether to add the DELAYED clause to the query.
         """
         sql = "UPDATE "
-
         if delayed:
             sql += "DELAYED "
-
         sql += table + " SET "
-
-        sets = []
-        for k, v in data.items():
-            sets.append(self.FieldClause(k, v))
-
+        sets = [self.FieldClause(k, v) for k, v in data.items()]
         sql += ", ".join(sets)
         sql += " WHERE " + self.WhereClause(where)
-
         return sql
 
     def InsertQuery(self, data, table, delayed=None):
@@ -232,20 +218,15 @@ class QueryBuilder(object):
         :param delayed: Whether to add the DELAYED clause to the query.
         """
         sql = "INSERT "
-
         if delayed:
             sql += "DELAYED "
-
         sql += "INTO " + table
-
         keys = []
         values = []
         for k, v in data.items():
             keys.append(k)
             values.append(self.escape(v))
-
         sql += "(" + self.fieldStr(keys) + ") VALUES (" + ", ".join(values) + ")"
-
         return sql
 
     def ReplaceQuery(self, data, table, delayed=None):
@@ -256,20 +237,15 @@ class QueryBuilder(object):
         :param delayed: Whether to add the DELAYED clause to the query.
         """
         sql = "REPLACE "
-
         if delayed:
             sql += "DELAYED "
-
         sql += "INTO " + table
-
         keys = []
         values = []
         for k, v in data.items():
             keys.append(k)
             values.append(self.escape(v))
-
         sql += "(" + self.fieldStr(keys) + ") VALUES (" + ", ".join(values) + ")"
-
         return sql
 
 
@@ -324,17 +300,14 @@ class DatabaseStorage(Storage):
         Return a dictionary containing the number of clients, Bans, Kicks, Warnings and Tempbans.
         """
         counts = {'clients': 0, 'Bans': 0, 'Kicks': 0, 'Warnings': 0, 'TempBans': 0}
-        cursor = self.query("""SELECT COUNT(id) total FROM clients""")
-        if cursor.rowcount:
-            counts['clients'] = int(cursor.getValue('total'))
 
-        cursor = self.query("""SELECT COUNT(id) total, type FROM penalties GROUP BY type""")
-        while not cursor.EOF:
-            r = cursor.getRow()
-            counts[r['type'] + 's'] = int(r['total'])
-            cursor.moveNext()
+        with self.query('SELECT COUNT(id) total FROM clients') as cursor:
+            counts['clients'] = int(cursor.getValue('total', 0))
 
-        cursor.close()
+        with self.query('SELECT COUNT(id) total, type FROM penalties GROUP BY type') as cursor:
+            for r in cursor:
+                counts[r['type'] + 's'] = int(r['total'])
+
         return counts
 
     def getClient(self, client):
@@ -346,16 +319,12 @@ class DatabaseStorage(Storage):
         where = {'id': client.id} if client.id > 0 else {'guid': client.guid}
 
         try:
-
             cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'clients', where, None, 1))
             if not cursor.rowcount:
                 raise KeyError(f'no client matching guid {client.guid}')
 
             found = False
             for k, v in cursor.getRow().items():
-                # if hasattr(client, k) and getattr(client, k):
-                #    # don't set already set items
-                #    continue
                 setattr(client, self.getVar(k), v)
                 found = True
 
@@ -384,18 +353,18 @@ class DatabaseStorage(Storage):
         :param match: The data to match clients against.
         """
         self.console.debug('Storage: getClientsMatching %s', match)
-        cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'clients', match, 'time_edit DESC', 5))
+        stmt = QueryBuilder(self.db).SelectQuery(
+            '*', 'clients', match, 'time_edit DESC', 5
+        )
 
         clients = []
-        while not cursor.EOF:
-            g = cursor.getRow()
-            client = Client()
-            for k, v in g.items():
-                setattr(client, self.getVar(k), v)
-            clients.append(client)
-            cursor.moveNext()
+        with self.query(stmt) as cursor:
+            for row in cursor:
+                client = Client()
+                for k, v in row.items():
+                    setattr(client, self.getVar(k), v)
+                clients.append(client)
 
-        cursor.close()
         return clients
 
     def setClient(self, client):
@@ -419,9 +388,8 @@ class DatabaseStorage(Storage):
         if client.id > 0:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'clients', {'id': client.id}))
         else:
-            cursor = self.query(QueryBuilder(self.db).InsertQuery(data, 'clients'))
-            client.id = cursor.lastrowid
-            cursor.close()
+            with self.query(QueryBuilder(self.db).InsertQuery(data, 'clients')) as cursor:
+                client.id = cursor.lastrowid
 
         return client.id
 
@@ -443,9 +411,8 @@ class DatabaseStorage(Storage):
         if alias.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'aliases', {'id': alias.id}))
         else:
-            cursor = self.query(QueryBuilder(self.db).InsertQuery(data, 'aliases'))
-            alias.id = cursor.lastrowid
-            cursor.close()
+            with self.query(QueryBuilder(self.db).InsertQuery(data, 'aliases')) as cursor:
+                alias.id = cursor.lastrowid
 
         return alias.id
 
@@ -464,12 +431,9 @@ class DatabaseStorage(Storage):
         else:
             raise KeyError(f'no alias found matching {alias}')
 
-        cursor = self.query(query)
-        if cursor.EOF:
-            cursor.close()
+        row = self.query(query).getOneRow()
+        if not row:
             raise KeyError(f'no alias found matching {alias}')
-
-        row = cursor.getOneRow()
         alias.id = int(row['id'])
         alias.alias = row['alias']
         alias.timeAdd = int(row['time_add'])
@@ -486,22 +450,22 @@ class DatabaseStorage(Storage):
         :return: List of b3.clients.Alias instances.
         """
         self.console.debug('Storage: getClientAliases %s', client)
-        cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'aliases', {'client_id': client.id}, 'id'))
+        stmt = QueryBuilder(self.db).SelectQuery(
+            '*', 'aliases', {'client_id': client.id}, 'id'
+        )
 
         aliases = []
-        while not cursor.EOF:
-            g = cursor.getRow()
-            alias = b3.clients.Alias()
-            alias.id = int(g['id'])
-            alias.alias = g['alias']
-            alias.timeAdd = int(g['time_add'])
-            alias.timeEdit = int(g['time_edit'])
-            alias.clientId = int(g['client_id'])
-            alias.numUsed = int(g['num_used'])
-            aliases.append(alias)
-            cursor.moveNext()
+        with self.query(stmt) as cursor:
+            for g in cursor:
+                alias = b3.clients.Alias()
+                alias.id = int(g['id'])
+                alias.alias = g['alias']
+                alias.timeAdd = int(g['time_add'])
+                alias.timeEdit = int(g['time_edit'])
+                alias.clientId = int(g['client_id'])
+                alias.numUsed = int(g['num_used'])
+                aliases.append(alias)
 
-        cursor.close()
         return aliases
 
     def setClientIpAddress(self, ipalias):
@@ -521,9 +485,8 @@ class DatabaseStorage(Storage):
         if ipalias.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'ipaliases', {'id': ipalias.id}))
         else:
-            cursor = self.query(QueryBuilder(self.db).InsertQuery(data, 'ipaliases'))
-            ipalias.id = cursor.lastrowid
-            cursor.close()
+            with self.query(QueryBuilder(self.db).InsertQuery(data, 'ipaliases')) as cursor:
+                ipalias.id = cursor.lastrowid
 
         return ipalias.id
 
@@ -542,12 +505,9 @@ class DatabaseStorage(Storage):
         else:
             raise KeyError(f'no ip found matching {ipalias}')
 
-        cursor = self.query(query)
-        if cursor.EOF:
-            cursor.close()
+        row = self.query(query).getOneRow()
+        if not row:
             raise KeyError(f'no ip found matching {ipalias}')
-
-        row = cursor.getOneRow()
         ipalias.id = int(row['id'])
         ipalias.ip = row['ip']
         ipalias.timeAdd = int(row['time_add'])
@@ -564,22 +524,22 @@ class DatabaseStorage(Storage):
         :return: List of b3.clients.IpAlias instances
         """
         self.console.debug('Storage: getClientIpAddresses %s', client)
-        cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'client_id': client.id}, 'id'))
+        stmt = QueryBuilder(self.db).SelectQuery(
+            '*', 'ipaliases', {'client_id': client.id}, 'id'
+        )
 
         aliases = []
-        while not cursor.EOF:
-            row = cursor.getRow()
-            ip = b3.clients.IpAlias()
-            ip.id = int(row['id'])
-            ip.ip = row['ip']
-            ip.timeAdd = int(row['time_add'])
-            ip.timeEdit = int(row['time_edit'])
-            ip.clientId = int(row['client_id'])
-            ip.numUsed = int(row['num_used'])
-            aliases.append(ip)
-            cursor.moveNext()
+        with self.query(stmt) as cursor:
+            for row in cursor:
+                ip = b3.clients.IpAlias()
+                ip.id = int(row['id'])
+                ip.ip = row['ip']
+                ip.timeAdd = int(row['time_add'])
+                ip.timeEdit = int(row['time_edit'])
+                ip.clientId = int(row['client_id'])
+                ip.numUsed = int(row['num_used'])
+                aliases.append(ip)
 
-        cursor.close()
         return aliases
 
     def getLastPenalties(self, types='Ban', num=5):
@@ -588,16 +548,19 @@ class DatabaseStorage(Storage):
         :param types: The penalties type.
         :param num: The amount of penalties to retrieve.
         """
-        penalties = []
         where = QueryBuilder(self.db).WhereClause({'type': types, 'inactive': 0})
-        where += ' AND (time_expire = -1 OR time_expire > %s)' % int(time())
-        cursor = self.query(QueryBuilder(self.db).SelectQuery(fields='*', table='penalties', where=where,
-                                                              orderby='time_add DESC, id DESC', limit=num))
-        while not cursor.EOF and len(penalties) < num:
-            penalties.append(self._createPenaltyFromRow(cursor.getRow()))
-            cursor.moveNext()
+        where += f' AND (time_expire = -1 OR time_expire > {int(time())})'
+        stmt = QueryBuilder(self.db).SelectQuery(
+            fields='*', table='penalties', where=where,
+            orderby='time_add DESC, id DESC', limit=num
+        )
 
-        cursor.close()
+        penalties = []
+        with self.query(stmt) as cursor:
+            while not cursor.EOF and len(penalties) < num:
+                penalties.append(self._createPenaltyFromRow(cursor.getRow()))
+                cursor.moveNext()
+
         return penalties
 
     def setClientPenalty(self, penalty):
@@ -623,9 +586,8 @@ class DatabaseStorage(Storage):
         if penalty.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'penalties', {'id': penalty.id}))
         else:
-            cursor = self.query(QueryBuilder(self.db).InsertQuery(data, 'penalties'))
-            penalty.id = cursor.lastrowid
-            cursor.close()
+            with self.query(QueryBuilder(self.db).InsertQuery(data, 'penalties')) as cursor:
+                penalty.id = cursor.lastrowid
 
         return penalty.id
 
@@ -636,11 +598,12 @@ class DatabaseStorage(Storage):
         :return: The penalty given as input with all the fields set.
         """
         self.console.debug('Storage: getClientPenalty %s', penalty)
-        cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'penalties', {'id': penalty.id}, None, 1))
-        if cursor.EOF:
-            cursor.close()
+        stmt = QueryBuilder(self.db).SelectQuery(
+            '*', 'penalties', {'id': penalty.id}, None, 1
+        )
+        row = self.query(stmt).getOneRow()
+        if not row:
             raise KeyError(f'no penalty matching id {penalty.id}')
-        row = cursor.getOneRow()
         return self._createPenaltyFromRow(row)
 
     def getClientPenalties(self, client, type='Ban'):
@@ -652,16 +615,12 @@ class DatabaseStorage(Storage):
         """
         self.console.debug('Storage: getClientPenalties %s', client)
         where = QueryBuilder(self.db).WhereClause({'type': type, 'client_id': client.id, 'inactive': 0})
-        where += ' AND (time_expire = -1 OR time_expire > %s)' % int(time())
-        cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'penalties', where, 'time_add DESC'))
-
-        penalties = []
-        while not cursor.EOF:
-            penalties.append(self._createPenaltyFromRow(cursor.getRow()))
-            cursor.moveNext()
-
-        cursor.close()
-        return penalties
+        where += f' AND (time_expire = -1 OR time_expire > {int(time())})'
+        stmt = QueryBuilder(self.db).SelectQuery(
+            '*', 'penalties', where, 'time_add DESC'
+        )
+        with self.query(stmt) as cursor:
+            return [self._createPenaltyFromRow(row) for row in cursor]
 
     def getClientLastPenalty(self, client, type='Ban'):
         """
@@ -671,13 +630,13 @@ class DatabaseStorage(Storage):
         :return: The last penalty added for the given client
         """
         where = QueryBuilder(self.db).WhereClause({'type': type, 'client_id': client.id, 'inactive': 0})
-        where += ' AND (time_expire = -1 OR time_expire > %s)' % int(time())
-        cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'penalties', where, 'time_add DESC', 1))
-
-        row = cursor.getOneRow()
+        where += f' AND (time_expire = -1 OR time_expire > {int(time())})'
+        stmt = QueryBuilder(self.db).SelectQuery(
+            '*', 'penalties', where, 'time_add DESC', 1
+        )
+        row = self.query(stmt).getOneRow()
         if not row:
             return None
-
         return self._createPenaltyFromRow(row)
 
     def getClientFirstPenalty(self, client, type='Ban'):
@@ -688,13 +647,13 @@ class DatabaseStorage(Storage):
         :return: The first penalty added for the given client.
         """
         where = QueryBuilder(self.db).WhereClause({'type': type, 'client_id': client.id, 'inactive': 0})
-        where += ' AND (time_expire = -1 OR time_expire > %s)' % int(time())
-        cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'penalties', where,
-                                                              'time_expire DESC, time_add ASC', 1))
-        row = cursor.getOneRow()
+        where += f' AND (time_expire = -1 OR time_expire > {int(time())})'
+        stmt = QueryBuilder(self.db).SelectQuery(
+            '*', 'penalties', where, 'time_expire DESC, time_add ASC', 1
+        )
+        row = self.query(stmt).getOneRow()
         if not row:
             return None
-
         return self._createPenaltyFromRow(row)
 
     def disableClientPenalties(self, client, type='Ban'):
@@ -714,10 +673,9 @@ class DatabaseStorage(Storage):
         :return The number of penalties.
         """
         where = QueryBuilder(self.db).WhereClause({'type': type, 'client_id': client.id, 'inactive': 0})
-        where += ' AND (time_expire = -1 OR time_expire > %s)' % int(time())
-        cursor = self.query("""SELECT COUNT(id) total FROM penalties WHERE %s""" % where)
-        value = int(cursor.getValue('total', 0))
-        cursor.close()
+        where += f' AND (time_expire = -1 OR time_expire > {int(time())})'
+        with self.query(f"""SELECT COUNT(id) total FROM penalties WHERE {where}""") as cursor:
+            value = int(cursor.getValue('total', 0))
         return value
 
     _groups = None
@@ -727,20 +685,18 @@ class DatabaseStorage(Storage):
         Return a list of available client groups.
         """
         if not self._groups:
-            cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'groups', None, 'level'))
-            self._groups = []
-            while not cursor.EOF:
-                row = cursor.getRow()
-                group = b3.clients.Group()
-                group.id = int(row['id'])
-                group.name = row['name']
-                group.keyword = row['keyword']
-                group.level = int(row['level'])
-                group.timeAdd = int(row['time_add'])
-                group.timeEdit = int(row['time_edit'])
-                self._groups.append(group)
-                cursor.moveNext()
-            cursor.close()
+            stmt = QueryBuilder(self.db).SelectQuery('*', 'groups', None, 'level')
+            with self.query(stmt) as cursor:
+                self._groups = []
+                for row in cursor:
+                    group = b3.clients.Group()
+                    group.id = int(row['id'])
+                    group.name = row['name']
+                    group.keyword = row['keyword']
+                    group.level = int(row['level'])
+                    group.timeAdd = int(row['time_add'])
+                    group.timeEdit = int(row['time_edit'])
+                    self._groups.append(group)
 
         return self._groups
 
@@ -753,16 +709,14 @@ class DatabaseStorage(Storage):
         if hasattr(group, 'keyword') and group.keyword:
             query = QueryBuilder(self.db).SelectQuery('*', 'groups', dict(keyword=group.keyword), None, 1)
             self.console.verbose2(query)
-            cursor = self.query(query)
-            row = cursor.getOneRow()
+            row = self.query(query).getOneRow()
             if not row:
                 raise KeyError(f'no group matching keyword: {group.keyword}')
 
         elif hasattr(group, 'level') and group.level >= 0:
             query = QueryBuilder(self.db).SelectQuery('*', 'groups', dict(level=group.level), None, 1)
             self.console.verbose2(query)
-            cursor = self.query(query)
-            row = cursor.getOneRow()
+            row = self.query(query).getOneRow()
             if not row:
                 raise KeyError(f'no group matching level: {group.level}')
         else:
@@ -799,16 +753,13 @@ class DatabaseStorage(Storage):
         :param bindata: Data to bind to the given query.
         :raise Exception: If the query cannot be evaluated.
         """
-        self._lock.acquire()
-        try:
+        with self._lock:
             cursor = self.db.cursor()
             if bindata is None:
                 cursor.execute(query)
             else:
                 cursor.execute(query, bindata)
             dbcursor = DBCursor(cursor, self.db)
-        finally:
-            self._lock.release()
         return dbcursor
 
     def query(self, query, bindata=None):
@@ -830,30 +781,6 @@ class DatabaseStorage(Storage):
             # log so we can inspect the issue and raise again
             self.console.error('Query failed [%s] %r: %s', query, bindata, e)
             raise e
-
-    @contextmanager
-    def query2(self, query, bindata=None):
-        """
-        Alias for query method which make use of the python 'with' statement.
-        The contextmanager approach ensures that the generated cursor object instance
-        is always closed whenever the execution goes out of the 'with' statement block.
-        Example:
-
-        >> with self.console.storage.query(query) as cursor:
-        >>     if not cursor.EOF:
-        >>         cursor.getRow()
-        >>         ...
-
-        :param query: The query to execute.
-        :param bindata: Data to bind to the given query.
-        """
-        cursor = None
-        try:
-            cursor = self.query(query, bindata)
-            yield cursor
-        finally:
-            if cursor:
-                cursor.close()
 
     def queryFromFile(self, fp, silent=False):
         """

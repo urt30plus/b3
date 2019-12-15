@@ -254,15 +254,8 @@ class MysqlStorage(DatabaseStorage):
         List the tables of the current database.
         :return: list of strings.
         """
-        tables = []
-        cursor = self.query("SHOW TABLES")
-        if cursor and not cursor.EOF:
-            while not cursor.EOF:
-                row = cursor.getRow()
-                tables.append(list(row.values())[0])
-                cursor.moveNext()
-        cursor.close()
-        return tables
+        with self.query("SHOW TABLES") as cursor:
+            return [list(row.values())[0] for row in cursor]
 
     def truncateTable(self, table):
         """
@@ -273,14 +266,14 @@ class MysqlStorage(DatabaseStorage):
         try:
             self.query("""SET FOREIGN_KEY_CHECKS=0;""")
             current_tables = self.getTables()
-            if isinstance(table, tuple) or isinstance(table, list):
+            if isinstance(table, (tuple, list)):
                 for v in table:
                     if v not in current_tables:
-                        raise KeyError("could not find table '%s' in the database" % v)
-                    self.query("TRUNCATE TABLE %s;" % v)
+                        raise KeyError(f"could not find table '{v}' in the database")
+                    self.query(f"TRUNCATE TABLE {v}")
             else:
                 if table not in current_tables:
-                    raise KeyError("could not find table '%s' in the database" % table)
-                self.query("TRUNCATE TABLE %s;" % table)
+                    raise KeyError(f"could not find table '{table}' in the database")
+                self.query(f"TRUNCATE TABLE {table}")
         finally:
             self.query("""SET FOREIGN_KEY_CHECKS=1;""")

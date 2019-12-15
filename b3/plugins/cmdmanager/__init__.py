@@ -68,12 +68,10 @@ class CmdmanagerPlugin(b3.plugin.Plugin):
         try:
             query = QueryBuilder(self.console.storage.db).SelectQuery(('id', 'commands'), 'cmdgrants',
                                                                       {'id': client.id})
-            cursor = self.console.storage.query(query)
-            if cursor.EOF:
+            row = self.console.storage.query(query).getOneRow()
+            if not row:
                 self.debug('no command grant found for %s [@%s]', client.name, client.id)
                 return
-
-            row = cursor.getOneRow()
             # this is to prevent to have empty strings in our set: may happen when we remove all
             # the command grants from a client and the storage layer will save an empty string
             grantlist = set([x for x in row['commands'].split(GRANT_SET_JOIN) if x != ''])
@@ -88,29 +86,24 @@ class CmdmanagerPlugin(b3.plugin.Plugin):
         :param client: The client whose command grants needs to be stored
         """
         if not hasattr(client, GRANT_SET_ATTR):
-            self.debug('not storing command grants for %s [@%s]: no command grant found in client object', client.name,
-                       client.id)
+            self.debug('not storing command grants for %s [@%s]: no command grant found in client object',
+                       client.name, client.id)
             return
-
-        cursor = None
 
         try:
             grantlist = GRANT_SET_JOIN.join(getattr(client, GRANT_SET_ATTR))
             data = {'id': client.id, 'commands': grantlist}
             query = QueryBuilder(self.console.storage.db).SelectQuery(('id', 'commands'), 'cmdgrants',
                                                                       {'id': client.id})
-            cursor = self.console.storage.query(query)
-            if cursor.EOF:
-                self.console.storage.query(QueryBuilder(self.console.storage.db).InsertQuery(data, 'cmdgrants'))
-            else:
-                self.console.storage.query(
-                    QueryBuilder(self.console.storage.db).UpdateQuery(data, 'cmdgrants', {'id': client.id}))
-            self.debug('stored command grants for %s [@%s]', client.name, client.id)
+            with self.console.storage.query(query) as cursor:
+                if not cursor:
+                    self.console.storage.query(QueryBuilder(self.console.storage.db).InsertQuery(data, 'cmdgrants'))
+                else:
+                    self.console.storage.query(
+                        QueryBuilder(self.console.storage.db).UpdateQuery(data, 'cmdgrants', {'id': client.id}))
+                self.debug('stored command grants for %s [@%s]', client.name, client.id)
         except Exception as e:
             self.error('could not store command grants for %s [@%s]: %s', client.name, client.id, e)
-        finally:
-            if cursor:
-                cursor.close()
 
     def write_ini_config_file(self, command, data):
         """
