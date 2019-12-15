@@ -1537,7 +1537,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         """
         [<#>] - list the top # players of the last 14 days.
         """
-        b3.functions.start_daemon_thread(self.doTopList, (data, client, cmd, ext))
+        b3.functions.start_daemon_thread(target=self.doTopList, args=(data, client, cmd, ext), name='xlr-stats')
 
     def doTopList(self, data, client, cmd=None, ext=False):
         """

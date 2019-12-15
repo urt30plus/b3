@@ -103,7 +103,7 @@ class KniferPlugin(b3.plugin.Plugin):
 
     def on_round_end(self, event):
         self.displayScores(0)
-        start_daemon_thread(self.updateHallOfFame, (self._cutKillers, self.console.game.mapName))
+        start_daemon_thread(target=self.updateHallOfFame, args=(self._cutKillers, self.console.game.mapName), name='knifer-hof')
         self.resetScores()
         try:
             self._challengeThread.cancel()

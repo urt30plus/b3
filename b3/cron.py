@@ -4,6 +4,7 @@ import sys
 import threading
 import time
 import traceback
+from collections import deque
 
 import b3.functions
 
@@ -67,12 +68,22 @@ class CronTab:
         self.month = month
         self.dow = dow
         self.command = command
+        self.run_stats = deque(maxlen=20)
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}(command={self.command.__qualname__}, "
+            f"second={self.second}, minute={self.minute}, hour={self.hour}, "
+            f"day={self.day}, month={self.month}, dow={self.dow})"
+        )
 
     def run(self):
         """
         Execute the command saved in this crontab.
         """
+        start_tick = time.perf_counter()
         self.command()
+        self.run_stats.append(time.perf_counter() - start_tick)
 
     @property
     def second(self):
@@ -286,11 +297,13 @@ class Cron:
         """
         Add a CronTab to the list of active cron tabs.
         """
-        self._tabs[id(tab)] = tab
-        self.console.verbose('Added crontab %s (%s) - %ss %sm %sh %sd %sM %sDOW' % (tab.command, id(tab), tab.second,
-                                                                                    tab.minute, tab.hour, tab.day,
-                                                                                    tab.month, tab.dow))
-        return id(tab)
+        tab_id = id(tab)
+        self._tabs[tab_id] = tab
+        self.console.verbose('Added crontab %s', tab)
+        return tab_id
+
+    def entries(self):
+        return list(self._tabs.values())
 
     def cancel(self, tab_id):
         """
@@ -298,9 +311,9 @@ class Cron:
         """
         try:
             del self._tabs[tab_id]
-            self.console.verbose('Removed crontab %s' % tab_id)
+            self.console.verbose('Removed crontab %s', tab_id)
         except KeyError:
-            self.console.verbose('Crontab %s not found' % tab_id)
+            self.console.verbose('Crontab %s not found', tab_id)
 
     def __add__(self, tab):
         self.add(tab)
@@ -312,7 +325,7 @@ class Cron:
         """
         Start the cron scheduler in a separate thread.
         """
-        b3.functions.start_daemon_thread(self.run)
+        b3.functions.start_daemon_thread(target=self.run, name='crontab')
 
     @staticmethod
     def time():
@@ -355,8 +368,9 @@ class Cron:
                         try:
                             c.run()
                         except Exception as msg:
-                            self.console.error('Exception raised while executing crontab %s: %s\n%s', c.command,
-                                               msg, traceback.extract_tb(sys.exc_info()[2]))
+                            self.console.error('Exception raised while executing crontab %s: %s\n%s',
+                                               c, msg, traceback.extract_tb(sys.exc_info()[2]))
+
             nexttime += 1
 
         self.console.info("Cron scheduler ended")

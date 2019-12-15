@@ -44,6 +44,8 @@ class Parser:
     _cron = None  # cron instance
     _events = {}  # available events (K=>EVENT)
     _eventsStats_cronTab = None  # crontab used to log event statistics
+    _cron_stats_crontab = None # crontab used to log cron run statistics
+    _cron_stats_threads = None # crontab used to log thread statistics
     _timezone_crontab = None # force recache of timezone info
     _handlers = defaultdict(list)  # event handlers
     _lineTime = re.compile(r'^(?P<minutes>[0-9]+):(?P<seconds>[0-9]+).*')  # used to track log file time changes
@@ -330,12 +332,6 @@ class Parser:
         self.info("Creating the event queue with size %s", queuesize)
         self.queue = queue.Queue(queuesize)
 
-    def _dumpEventsStats(self):
-        """
-        Dump event statistics into the B3 log file.
-        """
-        self._eventsStats.dump_stats()
-
     def _reset_timezone_info(self):
         """Causes the timezone offset and name to be re-cached"""
         self._tz_offset = None
@@ -355,14 +351,42 @@ class Parser:
         self.bot("All plugins started")
         self.pluginsStarted()
         self.bot("Starting event dispatching thread")
-        start_daemon_thread(self.handleEvents)
+        start_daemon_thread(target=self.handleEvents, name='event_handler')
         self.bot("Start reading game events")
         self.run()
 
+    def _dump_events_stats(self):
+        """
+        Dump event statistics into the B3 log file.
+        """
+        self._eventsStats.dump_stats()
+
+    def _dump_cron_stats(self):
+        self.debug('***** CronTab Stats *****')
+        for tab in self.cron.entries():
+            stats = tab.run_stats
+            if stats:
+                mean, stdv = b3.functions.meanstdv(stats)
+                self.debug('%s: (secs) min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
+                           tab, min(stats), max(stats), mean, stdv, len(stats))
+            else:
+                self.debug('%s: no stats available', tab)
+
+    def _dump_thread_info(self):
+        self.debug('***** Thread Stats *****')
+        for t in threading.enumerate():
+            self.debug('%s(%s)', t.name, t.__dict__)
+
     def schedule_cron_tasks(self):
         if self.log.isEnabledFor(b3.output.DEBUG):
-            self._eventsStats_cronTab = b3.cron.CronTab(self._eventsStats.dump_stats())
+            self._eventsStats_cronTab = b3.cron.CronTab(self._dump_events_stats, minute='*/5')
             self.cron.add(self._eventsStats_cronTab)
+
+            self._cron_stats_crontab = b3.cron.CronTab(self._dump_cron_stats, minute='*/5')
+            self.cron.add(self._cron_stats_crontab)
+
+            self._cron_stats_threads = b3.cron.CronTab(self._dump_thread_info, minute='*/10')
+            self.cron.add(self._cron_stats_threads)
 
         tz_offset, tz_name = self.tz_offset_and_name()
         if tz_name != "UTC":
@@ -1094,7 +1118,6 @@ class Parser:
             if current_time >= expire:  # events can only sit in the queue until expire time
                 self.error('**** Event sat in queue too long: %s %s',
                            event_name, current_time - expire)
-                self._eventsStats.dump_stats(warn=True)
             else:
                 for hfunc in self._handlers[event.type]:
                     if not hfunc.isEnabled():

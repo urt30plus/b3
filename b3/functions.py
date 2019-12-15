@@ -528,10 +528,17 @@ def topological_sort(source):
         emitted = next_emitted
 
 
-def start_daemon_thread(target, args=(), kwargs=None):
+def start_daemon_thread(target, args=(), kwargs=None, name=None):
     """Start a new daemon thread"""
-    t = threading.Thread(target=target, args=args, kwargs=kwargs)
-    t.setDaemon(True)
+    opts = {
+        'target': target,
+        'daemon': True,
+        'args': args,
+        'kwargs': kwargs,
+    }
+    if name:
+        opts['name'] = name
+    t = threading.Thread(**opts)
     t.start()
     return t
 

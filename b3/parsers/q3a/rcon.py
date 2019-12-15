@@ -113,7 +113,7 @@ class Rcon(object):
         """
         if not self.queue:
             self.queue = queue.Queue()
-            b3.functions.start_daemon_thread(self._writelines)
+            b3.functions.start_daemon_thread(target=self._writelines, name='rcon')
 
         self.queue.put(lines)
 

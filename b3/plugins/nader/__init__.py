@@ -104,7 +104,7 @@ class NaderPlugin(b3.plugin.Plugin):
 
     def on_round_end(self, event):
         self.displayScores(0)
-        start_daemon_thread(self.updateHallOfFame, (self._nadeKillers, self.console.game.mapName))
+        start_daemon_thread(target=self.updateHallOfFame, args=(self._nadeKillers, self.console.game.mapName), name='nader-hof')
         self.resetScores()
         try:
             self._challengeThread.cancel()

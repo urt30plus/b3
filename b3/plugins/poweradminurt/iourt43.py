@@ -1054,7 +1054,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 return
 
             if x in range(1, 26):
-                start_daemon_thread(self.multipunish, (x, sclient, client, 'slap'))
+                start_daemon_thread(target=self.multipunish, args=(x, sclient, client, 'slap'), name='paurt43-slap')
             else:
                 client.message('^7Number of punishments out of range, must be 1 to 25')
         else:
@@ -1088,7 +1088,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 return
 
             if x in range(1, 26):
-                start_daemon_thread(self.multipunish, (x, sclient, client, 'nuke'))
+                start_daemon_thread(target=self.multipunish, args=(x, sclient, client, 'nuke'), name='paurt43-nuke')
             else:
                 client.message('^7Number of punishments out of range, must be 1 to 25')
         else:

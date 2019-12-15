@@ -527,92 +527,22 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         Handle EVT_CLIENT_SAY
         """
-        self.debug('OnSay handle %s:"%s"', event.type, event.data)
+        event_data = event.data
+        cmd_prefixes = (self.cmdPrefix, self.cmdPrefixLoud,
+                        self.cmdPrefixBig, self.cmdPrefixPrivate)
 
-        if len(event.data) >= 3 and event.data[:1] == '#':
-            if self.console.debug:
-                if event.data[1:] == 'clients':
+        self.debug('OnSay handle %s:"%s"', event.type, event_data)
 
-                    self.debug('clients:')
-                    for k, c in self.console.clients.items():
-                        self.debug('client %s (#%i id: %s cid: %s level: %s group: %s) obj: %s',
-                                   c.name, id(c), c.id, c.cid, c.maxLevel, c.groupBits, c)
+        if len(event_data) >= 2 and event_data[:1] in cmd_prefixes:
 
-                elif event.data[1:] == 'groups':
+            self.debug('handle command %s', event_data)
 
-                    self.debug('groups for %s:', event.client.name)
-                    for g in event.client.groups:
-                        self.debug('group (id: %s, name: %s, level: %s)', g.id, g.name, g.level)
-
-                elif event.data[1:5] == 'vars':
-
-                    try:
-                        data = event.data[7:].strip()
-                        if data:
-                            sclient = self.findClientPrompt(data, event.client)
-                            if not sclient:
-                                return
-                        else:
-                            sclient = event.client
-                    except Exception:
-                        sclient = event.client
-
-                    self.debug('vars for %s:', sclient.name)
-
-                    try:
-                        for k, v in sclient._pluginData.items():
-                            self.debug('\tplugin %s:', k)
-                            for kk, vv in v.items():
-                                self.debug('\t\t%s = %s', kk, str(vv.value))
-                    except Exception as e:
-                        self.debug('error getting vars: %s', e)
-
-                    self.debug('end of vars')
-
-                elif event.data[1:7] == 'tkinfo':
-
-                    try:
-                        data = event.data[9:].strip()
-                        if data:
-                            sclient = self.findClientPrompt(data, event.client)
-                            if not sclient:
-                                return
-                        else:
-                            sclient = event.client
-                    except Exception:
-                        sclient = event.client
-
-                    self.debug('teamkill info for %s:', sclient.name)
-
-                    try:
-                        for k, v in sclient._pluginData.items():
-
-                            for kk, vv in v.items():
-                                if kk == 'tkinfo':
-                                    self.debug('\tplugin %s:', k)
-                                    tkinfo = vv.value
-                                    self.debug('\t\tcid = %s', tkinfo.cid)
-                                    self.debug('\t\tattackers = %s', str(tkinfo.attackers))
-                                    self.debug('\t\tattacked = %s', str(tkinfo.attacked))
-                                    self.debug('\t\tpoints = %s', tkinfo.points)
-                                    self.debug('\t\t_grudged = %s', str(tkinfo._grudged))
-                                    self.debug('\t\tlastAttacker = %s', tkinfo.lastAttacker)
-                    except Exception as e:
-                        self.debug('error getting teamkill info: %s', e)
-
-                    self.debug('end of teamkill info')
-
-        elif len(event.data) >= 2 and event.data[:1] in (self.cmdPrefix, self.cmdPrefixLoud,
-                                                         self.cmdPrefixBig, self.cmdPrefixPrivate):
-
-            self.debug('handle command %s', event.data)
-
-            if event.data[1:2] in (self.cmdPrefix, self.cmdPrefixLoud, self.cmdPrefixBig, self.cmdPrefixPrivate):
+            if event_data[1:2] in cmd_prefixes:
                 # self.is the alias for say
                 cmd = 'say'
-                data = event.data[2:]
+                data = event_data[2:]
             else:
-                cmd = event.data[1:].split(' ', 1)
+                cmd = event_data[1:].split(' ', 1)
 
                 if len(cmd) == 2:
                     cmd, data = cmd
@@ -620,13 +550,14 @@ class AdminPlugin(b3.plugin.Plugin):
                     cmd = cmd[0]
                     data = ''
 
+            cmd_lower = cmd.lower()
             try:
-                command = self._commands[cmd.lower()]
+                command = self._commands[cmd_lower]
             except KeyError:
                 spell_check = self.get_cmdSoundingLike(cmd, event.client)
                 _msg = self.getMessage('unknown_command', cmd)
                 if spell_check:
-                    _msg += '. Did you mean %s%s?' % (event.data[:1], spell_check)
+                    _msg += '. Did you mean %s%s?' % (event_data[:1], spell_check)
                 event.client.message(_msg)
                 if event.client.maxLevel < self._admins_level and self._warn_command_abusers and event.client.authed:
                     event.client.var(self, 'fakeCommand', 0).value += 1
@@ -635,7 +566,7 @@ class AdminPlugin(b3.plugin.Plugin):
                         self.warnClient(event.client, 'fakecmd', None, False)
                 return
 
-            cmd = cmd.lower()
+            cmd = cmd_lower
 
             if not command.plugin.isEnabled():
                 try:
@@ -657,11 +588,11 @@ class AdminPlugin(b3.plugin.Plugin):
             if command.canUse(event.client):
 
                 try:
-                    if event.data[:1] == self.cmdPrefixLoud and event.client.maxLevel >= 9:
+                    if event_data[:1] == self.cmdPrefixLoud and event.client.maxLevel >= 9:
                         results = command.executeLoud(data, event.client)
-                    elif event.data[:1] == self.cmdPrefixBig and event.client.maxLevel >= 9:
+                    elif event_data[:1] == self.cmdPrefixBig and event.client.maxLevel >= 9:
                         results = command.executeBig(data, event.client)
-                    elif event.data[:1] == self.cmdPrefixPrivate and event.client.maxLevel >= 9:
+                    elif event_data[:1] == self.cmdPrefixPrivate and event.client.maxLevel >= 9:
                         results = command.executePrivate(data, event.client)
                     else:
                         results = command.execute(data, event.client)
@@ -697,7 +628,7 @@ class AdminPlugin(b3.plugin.Plugin):
                     except Exception as e:
                         # fallback to default one if we errors shows up (mostly invalid command level/group specified
                         # in the configuration file thus we fail in retrieving the group from the storage)
-                        self.warning("could not format 'cmd_not_enough_access' message (using default): %s" % e)
+                        self.warning("could not format 'cmd_not_enough_access' message (using default): %s", e)
                         event.client.message('^7You do not have sufficient access to use %s%s' % (self.cmdPrefix, cmd))
 
     def aquireCmdLock(self, cmd, client, delay, all=True):
@@ -1339,13 +1270,13 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         - list all connected players
         """
-        functions.start_daemon_thread(self.doList, (client, cmd))
+        functions.start_daemon_thread(target=self.doList, args=(client, cmd), name='admin-list')
 
     def cmd_longlist(self, data, client, cmd=None):
         """
         - list all connected players one line at a time, helps find 'funny' unicode names
         """
-        functions.start_daemon_thread(self.doLonglist, (client, cmd))
+        functions.start_daemon_thread(target=self.doLonglist, args=(client, cmd), name='admin-longlist')
 
     def cmd_regulars(self, data, client, cmd=None):
         """
@@ -1638,7 +1569,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <message> - yell a message to all player
         """
-        functions.start_daemon_thread(self.sayMany, (data, 5, 1))
+        functions.start_daemon_thread(target=self.sayMany, args=(data, 5, 1), name='admin-scream')
 
     def cmd_find(self, data, client=None, cmd=None):
         """
@@ -2224,14 +2155,14 @@ class AdminPlugin(b3.plugin.Plugin):
                             client.message('%s ^7already knows the rules' % sclient.exactName)
                         else:
                             client.message('^7Sir, Yes Sir!, spamming rules to %s' % sclient.exactName)
-                            functions.start_daemon_thread(self._sendRules, (), {'sclient': sclient})
+                            functions.start_daemon_thread(target=self._sendRules, args=(), kwargs={'sclient': sclient}, name='admin-rules-spam')
                 else:
                     client.message('^7Stop trying to spam other players')
             else:
                 if cmd.loud or cmd.big:
-                    functions.start_daemon_thread(self._sendRules, (), {'sclient': None, 'big': cmd.big})
+                    functions.start_daemon_thread(target=self._sendRules, args=(), kwargs={'sclient': None, 'big': cmd.big}, name='admin-rules-loud')
                 else:
-                    functions.start_daemon_thread(self._sendRules, (), {'sclient': client})
+                    functions.start_daemon_thread(target=self._sendRules, args=(), kwargs={'sclient': client}, name='admin-rules')
 
     def cmd_spams(self, data, client=None, cmd=None):
         """

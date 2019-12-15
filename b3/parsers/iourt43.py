@@ -1259,7 +1259,7 @@ class Iourt43Parser(AbstractParser):
         self.verbose('...self.console.game.gameType: %s' % self.game.gameType)
         self.game.startMap()
         self.game.rounds = 0
-        start_daemon_thread(self.clients.sync)
+        start_daemon_thread(target=self.clients.sync, name='iourt43-syncinit')
         return self.getEvent('EVT_GAME_ROUND_START', data=self.game)
 
     def OnWarmup(self, action, data=None, match=None):
@@ -1288,7 +1288,7 @@ class Iourt43Parser(AbstractParser):
         self.verbose('...self.console.game.gameType: %s' % self.game.gameType)
         self.game.startMap()
         self.game.rounds = 0
-        start_daemon_thread(self.clients.sync)
+        start_daemon_thread(target=self.clients.sync, name='iourt43-roundsync')
         return self.getEvent('EVT_GAME_ROUND_START', data=self.game)
 
     def broadcast(self, text):
