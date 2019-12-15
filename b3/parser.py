@@ -367,7 +367,7 @@ class Parser:
             stats = tab.run_stats
             if stats:
                 mean, stdv = b3.functions.meanstdv(stats)
-                self.info('%s: (secs) min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
+                self.info('%s: (ms) min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
                            tab, min(stats), max(stats), mean, stdv, len(stats))
             else:
                 self.info('%s: no stats available', tab)
