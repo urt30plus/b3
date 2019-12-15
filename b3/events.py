@@ -204,20 +204,20 @@ class EventsStats:
         """
         Print event stats in the log file.
         """
-        self.console.debug('***** Event Stats *****')
+        self.console.info('***** Event Stats *****')
 
         if self._queue_wait:
             mean, stdv = meanstdv(self._queue_wait)
-            self.console.debug("Events waiting in queue stats : (ms) min(%0.4f), max(%0.4f), mean(%0.4f), "
+            self.console.info("Events waiting in queue stats : (ms) min(%0.4f), max(%0.4f), mean(%0.4f), "
                                "stddev(%0.4f)", min(self._queue_wait), max(self._queue_wait), mean, stdv)
 
         for plugin_name, plugin_timers in self._handling_timers.items():
             for event_name, event_timers in plugin_timers.items():
                 if event_timers:
                     mean, stdv = meanstdv(event_timers)
-                    self.console.verbose("%s %s : (ms) min(%0.4f), max(%0.4f), mean(%0.4f), "
-                                         "stddev(%0.4f)", plugin_name, event_name, min(event_timers),
-                                         max(event_timers), mean, stdv)
+                    self.console.info("%s %s : (ms) min(%0.4f), max(%0.4f), mean(%0.4f), "
+                                      "stddev(%0.4f)", plugin_name, event_name, min(event_timers),
+                                      max(event_timers), mean, stdv)
 
 
 class VetoEvent(Exception):

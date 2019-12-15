@@ -362,23 +362,23 @@ class Parser:
         self._eventsStats.dump_stats()
 
     def _dump_cron_stats(self):
-        self.debug('***** CronTab Stats *****')
+        self.info('***** CronTab Stats *****')
         for tab in self.cron.entries():
             stats = tab.run_stats
             if stats:
                 mean, stdv = b3.functions.meanstdv(stats)
-                self.debug('%s: (secs) min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
+                self.info('%s: (secs) min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
                            tab, min(stats), max(stats), mean, stdv, len(stats))
             else:
-                self.debug('%s: no stats available', tab)
+                self.info('%s: no stats available', tab)
 
     def _dump_thread_info(self):
-        self.debug('***** Thread Stats *****')
+        self.info('***** Thread Stats *****')
         for t in threading.enumerate():
-            self.debug('%s(%s)', t.name, t.__dict__)
+            self.info('%s(%s)', t.name, t.__dict__)
 
     def schedule_cron_tasks(self):
-        if self.log.isEnabledFor(b3.output.DEBUG):
+        if self.log.isEnabledFor(b3.output.INFO):
             self._eventsStats_cronTab = b3.cron.CronTab(self._dump_events_stats, minute='*/5')
             self.cron.add(self._eventsStats_cronTab)
 
