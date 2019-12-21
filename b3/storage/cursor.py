@@ -13,13 +13,16 @@ class Cursor:
         self._conn = conn
         self.rowcount = self._cursor.rowcount
         self.lastrowid = self._cursor.lastrowid
-        self.columns = None
         self.fields = None
         try:
             self.EOF = self.moveNext()
         except Exception:
             # not a select statement
             self.EOF = not self.fields or self.rowcount <= 0 or not self._cursor
+        if self.fields:
+            self.columns = [x[0] for x in self._cursor.description]
+        else:
+            self.columns = None
 
     def moveNext(self):
         """
@@ -52,9 +55,8 @@ class Cursor:
         if self.EOF:
             return {}
         fields = self.fields
-        if not self.columns:
-            self.columns = [x[0] for x in self._cursor.description]
-        return {col: fields[i] for i, col in enumerate(self.columns)}
+        columns = self.columns
+        return dict(zip(columns, fields))
 
     def getValue(self, key, default=None):
         """
@@ -76,7 +78,6 @@ class Cursor:
         while not self.EOF:
             yield self.getRow()
             self.moveNext()
-        return StopIteration
 
     def __enter__(self):
         return self
