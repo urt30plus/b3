@@ -58,7 +58,7 @@ class Test_Plugin_getMessage(B3TestCase):
         # THEN
         with patch.object(p, "warning") as warning_mock:
             self.assertRaises(NoOptionError, p.getMessage, 'f00')
-        self.assertListEqual([call("config file is missing 'f00' in section 'messages'")], warning_mock.mock_calls)
+        self.assertListEqual([call("config file is missing %r in section 'messages'", 'f00')], warning_mock.mock_calls)
 
     def test_no_message(self):
         # GIVEN
@@ -75,7 +75,7 @@ class Test_Plugin_getMessage(B3TestCase):
             msg = p.getMessage('f00')
         # THEN
         self.assertEqual('bar', msg)
-        self.assertListEqual([call("config file is missing 'f00' in section 'messages'")], warning_mock.mock_calls)
+        self.assertListEqual([call("config file is missing %r in section 'messages'", 'f00')], warning_mock.mock_calls)
         self.assertIn('f00', p._messages)
         self.assertEqual('bar', p._messages['f00'])
 
