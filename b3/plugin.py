@@ -90,8 +90,7 @@ class Plugin:
         self._enabled = True
         self.working = True
         self.config = None
-        if isinstance(config, b3.config.XmlConfigParser) or isinstance(config, b3.config.CfgConfigParser):
-            # this will be used by default from the Parser class since B3 1.10dev
+        if isinstance(config, (b3.config.XmlConfigParser, b3.config.CfgConfigParser)):
             self.config = config
         else:
             if config is not None:
@@ -99,7 +98,7 @@ class Plugin:
                 try:
                     self.loadConfig(config)
                 except b3.config.ConfigFileNotValid as e:
-                    self.critical("The configuration file syntax is broken: %s" % e)
+                    self.critical("The configuration file syntax is broken: %s", e)
                     self.critical("TIP: make use of a text editor with syntax highlighting to "
                                   "modify your config files: it makes easy to spot errors")
                     raise e
@@ -221,7 +220,7 @@ class Plugin:
             elif x in ('no', '0', 'off', 'false'):
                 return False
             else:
-                raise ValueError('%s is not a boolean value' % x)
+                raise ValueError(f'{x} is not a boolean value')
 
         def _get_float(value):
             """convert the given value to float"""
@@ -264,14 +263,15 @@ class Plugin:
         }
 
         if not self.config:
-            self.warning('could not find %s::%s : no configuration file loaded, using default : %s', section, option,
-                         default)
+            self.warning('could not find %s::%s : no configuration file loaded, using default : %s',
+                         section, option, default)
             return default
 
         try:
             val = self.config.get(section, option, value_type == b3.TEMPLATE)
         except b3.config.NoOptionError:
-            self.warning('could not find %s::%s in configuration file, using default : %s', section, option, default)
+            self.warning('could not find %s::%s in configuration file, using default : %s',
+                         section, option, default)
             val = default
         else:
             try:
@@ -285,19 +285,20 @@ class Plugin:
                 try:
                     val = func(val)
                 except (ValueError, KeyError) as e:
-                    self.warning('could not convert %s::%s (%s) : %s, using default : %s', section, option, val, e,
-                                 default)
+                    self.warning('could not convert %s::%s (%s) : %s, using default : %s',
+                                 section, option, val, e, default)
                     val = default
 
         if validate:
             try:
                 val = validate(val)
             except ValueError as e:
-                self.warning('invalid value specified for %s::%s (%s) : %s,  using default : %s', section, option, val,
-                             e, default)
+                self.warning('invalid value specified for %s::%s (%s) : %s,  using default : %s',
+                             section, option, val, e, default)
                 val = default
 
-        self.debug('loaded value from configuration file : %s::%s = %s', section, option, val)
+        self.debug('loaded value from configuration file : %s::%s = %s',
+                   section, option, val)
         return val
 
     def getMessage(self, msg, *args):
@@ -312,7 +313,7 @@ class Plugin:
             try:
                 self._messages[msg] = self.config.getTextTemplate('messages', msg)
             except b3.config.NoOptionError:
-                self.warning("config file is missing %r in section 'messages'" % msg)
+                self.warning("config file is missing %r in section 'messages'", msg)
                 if msg in self._default_messages:
                     self._messages[msg] = b3.functions.vars2printf(self._default_messages[msg]).strip()
                 else:
@@ -372,12 +373,14 @@ class Plugin:
                 try:
                     self.registerEventHook(event_id, hook)
                 except (AssertionError, AttributeError) as e:
-                    self.error('could not create mapping for event %s: %s', event_name, e)
+                    self.error('could not create mapping for event %s: %s',
+                               event_name, e)
         else:
             try:
                 self.registerEventHook(event_id, self.onEvent)
             except (AssertionError, AttributeError) as e:
-                self.error('could not create mapping for event %s: %s', event_name, e)
+                self.error('could not create mapping for event %s: %s',
+                           event_name, e)
 
     def createEvent(self, key, name):
         """
@@ -397,7 +400,8 @@ class Plugin:
             try:
                 func(event)
             except TypeError as e:
-                self.error('could not parse event %s: %s', self.console.getEventName(event.type), e)
+                self.error('could not parse event %s: %s',
+                           self.console.getEventName(event.type), e)
 
         if event.type in self._stop_events:
             self.working = False
