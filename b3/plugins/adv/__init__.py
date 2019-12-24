@@ -53,14 +53,7 @@ class MessageLoop:
         Remove an element from the list.
         :param index: The element index
         """
-        i = 0
-        items = []
-        for item in self.items:
-            if i != index:
-                items.append(item)
-            i += 1
-
-        self.items = items
+        self.items = [item for i, item in enumerate(self.items) if i != index]
 
     def clear(self):
         """
