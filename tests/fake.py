@@ -9,9 +9,8 @@ import sys
 import time
 import traceback
 from collections import defaultdict
-from sys import stdout
-
 from io import StringIO
+from sys import stdout
 
 import b3.events
 import b3.output
@@ -46,7 +45,7 @@ class FakeConsole(b3.parser.Parser):
         self.log = logging.getLogger('output')
         self.config = config
 
-        if isinstance(config, b3.config.XmlConfigParser) or isinstance(config, b3.config.CfgConfigParser):
+        if isinstance(config, (b3.config.XmlConfigParser, b3.config.CfgConfigParser)):
             self.config = b3.config.MainConfig(config)
         elif isinstance(config, b3.config.MainConfig):
             self.config = config
@@ -157,7 +156,6 @@ class FakeConsole(b3.parser.Parser):
         if type(msg) == str:
             print("### %s" % re.sub(re.compile(r'\^[0-9]'), '', msg).strip())
         else:
-            # which happens for BFBC2
             print("### %s" % msg)
 
     def writelines(self, lines):
@@ -243,7 +241,7 @@ class FakeClient(b3.clients.Client):
         """
         self.console = console
         self.message_history = []  # this allows unittests to check if a message was sent to the client
-        b3.clients.Client.__init__(self, **kwargs)
+        super().__init__(**kwargs)
 
     def clearMessageHistory(self):
         self.message_history = []
@@ -253,15 +251,10 @@ class FakeClient(b3.clients.Client):
         for m in self.message_history:
             if clean_needle in m:
                 return m
-        return None
 
     def getAllMessageHistoryLike(self, needle):
-        result = []
         clean_needle = re.sub(re.compile(r'\^[0-9]'), '', needle).strip()
-        for m in self.message_history:
-            if clean_needle in m:
-                result.append(m)
-        return result
+        return [m for m in self.message_history if clean_needle in m]
 
     def message(self, msg, *args):
         msg = msg % args
@@ -270,7 +263,7 @@ class FakeClient(b3.clients.Client):
         print("sending msg to %s: %s" % (self.name, cleanmsg))
 
     def warn(self, duration, warning, keyword=None, admin=None, data=''):
-        w = b3.clients.Client.warn(self, duration, warning, keyword=None, admin=None, data='')
+        w = super().warn(duration, warning, keyword=None, admin=None, data='')
         print(">>>>%s gets a warning : %s" % (self, w))
 
     def connects(self, cid):
@@ -293,7 +286,7 @@ class FakeClient(b3.clients.Client):
             clients._authorizeClients()
 
     def disconnects(self):
-        print("\n%s disconnects from slot #%s" % (self.name, self.cid))
+        print(f"\n{self.name} disconnects from slot #{self.cid}")
         self.console.clients.disconnect(self)
         self.cid = None
         self.authed = False
@@ -301,23 +294,23 @@ class FakeClient(b3.clients.Client):
         self.state = b3.STATE_UNKNOWN
 
     def says(self, msg):
-        print("\n%s says \"%s\"" % (self.name, msg))
+        print(f"\n{self.name} says \"{msg}\"")
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_SAY', data=msg, client=self))
 
     def says2team(self, msg):
-        print("\n%s says to team \"%s\"" % (self.name, msg))
+        print(f"\n{self.name} says to team \"{msg}\"")
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_TEAM_SAY', data=msg, client=self))
 
     def says2squad(self, msg):
-        print("\n%s says to squad \"%s\"" % (self.name, msg))
+        print(f"\n{self.name} says to squad \"{msg}\"")
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_SQUAD_SAY', data=msg, client=self))
 
     def says2private(self, msg):
-        print("\n%s says privately \"%s\"" % (self.name, msg))
+        print(f"\n{self.name} says privately \"{msg}\"")
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_PRIVATE_SAY', data=msg, client=self, target=self))
 
     def damages(self, victim, points=34.0):
-        print("\n%s damages %s for %s points" % (self.name, victim.name, points))
+        print(f"\n{self.name} damages {victim.name} for {points} points")
         if self == victim:
             eventkey = 'EVT_CLIENT_DAMAGE_SELF'
         elif self.team != b3.TEAM_UNKNOWN and self.team == victim.team:
@@ -329,7 +322,7 @@ class FakeClient(b3.clients.Client):
         self.console.queueEvent(self.console.getEvent(eventkey, data=data, client=self, target=victim))
 
     def kills(self, victim, weapon=1, hit_location=1):
-        print("\n%s kills %s" % (self.name, victim.name))
+        print(f"\n{self.name} kills {victim.name}")
         if self == victim:
             self.suicides()
             return
@@ -342,7 +335,7 @@ class FakeClient(b3.clients.Client):
         self.console.queueEvent(self.console.getEvent(eventkey, data=data, client=self, target=victim))
 
     def suicides(self):
-        print("\n%s kills himself" % self.name)
+        print(f"\n{self.name} kills himself")
         data = (100, 1, 1, 1)
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_SUICIDE', data=data, client=self, target=self))
 
@@ -350,7 +343,7 @@ class FakeClient(b3.clients.Client):
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_ACTION', data=actiontype, client=self))
 
     def trigger_event(self, type, data, target=None):
-        print("\n%s trigger event %s" % (self.name, type))
+        print(f"\n{self.name} trigger event {type}")
         self.console.queueEvent(b3.events.Event(type, data, self, target))
 
 

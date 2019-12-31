@@ -101,7 +101,7 @@ class B3TestCase(unittest.TestCase):
                 self.client.team = 24
         """
         event_type_name = self.console.getEventName(event_type)
-        self.assertIsNotNone(event_type_name, "could not find event with name '%s'" % event_type)
+        self.assertIsNotNone(event_type_name, f"could not find event with name '{event_type}'")
 
         with patch.object(self.console, 'queueEvent') as queueEvent:
             yield
