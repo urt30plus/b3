@@ -65,7 +65,7 @@ class B3TestCase(unittest.TestCase):
         self.parser_conf = MainConfig(CfgConfigParser(allow_no_value=True))
         self.parser_conf.loadFromString(r"""""")
         with logging_disabled():
-            from b3.fake import FakeConsole
+            from tests.fake import FakeConsole
             self.console = FakeConsole(self.parser_conf)
 
         self.console.screen = Mock()

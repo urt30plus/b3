@@ -9,11 +9,11 @@ from b3 import TEAM_BLUE
 from b3 import TEAM_RED
 from b3 import __file__ as b3_module__file__
 from b3.config import CfgConfigParser
-from b3.fake import FakeClient
 from b3.plugins.admin import AdminPlugin
 from b3.plugins.xlrstats import XlrstatsPlugin
 from tests import B3TestCase
 from tests import logging_disabled
+from tests.fake import FakeClient
 
 DEFAULT_XLRSTATS_CONFIG_FILE = os.path.normpath(
     os.path.join(os.path.dirname(b3_module__file__), "conf", "plugin_xlrstats.ini"))

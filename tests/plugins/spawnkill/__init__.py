@@ -19,7 +19,7 @@ class SpawnkillTestCase(unittest.TestCase):
     def setUpClass(cls):
         with logging_disabled():
             from b3.parsers.q3a.abstractParser import AbstractParser
-            from b3.fake import FakeConsole
+            from tests.fake import FakeConsole
             AbstractParser.__bases__ = (FakeConsole,)
             # Now parser inheritance hierarchy is :
             # Iourt43Parser -> abstractParser -> FakeConsole -> Parser
@@ -72,7 +72,7 @@ class SpawnkillTestCase(unittest.TestCase):
         when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
 
         with logging_disabled():
-            from b3.fake import FakeClient
+            from tests.fake import FakeClient
 
         # create some clients
         self.mike = FakeClient(console=self.console, name="Mike", guid="mikeguid", team=TEAM_RED, groupBits=1)

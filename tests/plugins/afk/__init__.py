@@ -15,7 +15,7 @@ DEFAULT_PLUGIN_CONFIG_FILE = os.path.join(os.path.dirname(__file__), '../../../b
 @pytest.fixture
 def console():
     with logging_disabled():
-        from b3.fake import FakeConsole
+        from tests.fake import FakeConsole
         fake_console = FakeConsole('@b3/conf/b3.distribution.xml')
         admin_plugin_conf_file = '@b3/conf/plugin_admin.ini'
         admin_plugin = AdminPlugin(fake_console, admin_plugin_conf_file)
@@ -42,7 +42,7 @@ def plugin_maker_ini(console_obj, conf_content):
 @pytest.fixture
 def superadmin(console):
     with logging_disabled():
-        from b3.fake import FakeClient
+        from tests.fake import FakeClient
     client = FakeClient(console, name="Superadmin", guid="superadmin_guid", groupBits=128, team=TEAM_UNKNOWN)
     client.clearMessageHistory()
     return client
@@ -51,7 +51,7 @@ def superadmin(console):
 @pytest.fixture
 def joe(console):
     with logging_disabled():
-        from b3.fake import FakeClient
+        from tests.fake import FakeClient
     client = FakeClient(console, name="Joe", guid="joe_guid", groupBits=1, team=TEAM_UNKNOWN)
     client.clearMessageHistory()
     return client
@@ -60,7 +60,7 @@ def joe(console):
 @pytest.fixture
 def jack(console):
     with logging_disabled():
-        from b3.fake import FakeClient
+        from tests.fake import FakeClient
     client = FakeClient(console, name="Jack", guid="jack_guid", groupBits=1, team=TEAM_UNKNOWN)
     client.clearMessageHistory()
     return client
@@ -69,7 +69,7 @@ def jack(console):
 @pytest.fixture
 def bot(console):
     with logging_disabled():
-        from b3.fake import FakeClient
+        from tests.fake import FakeClient
     client = FakeClient(console, name="Bot", guid="bot_guid", groupBits=1, team=TEAM_UNKNOWN, bot=True)
     client.clearMessageHistory()
     return client

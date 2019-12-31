@@ -8,10 +8,10 @@ import b3
 from b3.clients import Client
 from b3.config import XmlConfigParser
 from b3.events import Event
-from b3.fake import FakeClient
 from b3.output import VERBOSE2
 from b3.parsers.iourt43 import Iourt43Parser
 from tests import logging_disabled
+from tests.fake import FakeClient
 
 log = logging.getLogger("test")
 log.setLevel(logging.INFO)
@@ -25,7 +25,7 @@ class Iourt43TestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         from b3.parsers.q3a.abstractParser import AbstractParser
-        from b3.fake import FakeConsole
+        from tests.fake import FakeConsole
         AbstractParser.__bases__ = (FakeConsole,)
         # Now parser inheritance hierarchy is :
         # Iourt43TestCase -> AbstractParser -> FakeConsole -> Parser
@@ -1104,7 +1104,7 @@ class Test_config(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         from b3.parsers.q3a.abstractParser import AbstractParser
-        from b3.fake import FakeConsole
+        from tests.fake import FakeConsole
         AbstractParser.__bases__ = (FakeConsole,)
         # Now parser inheritance hierarchy is :
         # Iourt43TestCase -> AbstractParser -> FakeConsole -> Parser

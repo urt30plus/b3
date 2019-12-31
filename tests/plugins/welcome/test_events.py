@@ -1,7 +1,7 @@
 from mock import patch, call
 
-from b3.fake import FakeClient
 from b3.plugins.welcome import F_FIRST, F_NEWB, F_ANNOUNCE_USER, F_ANNOUNCE_FIRST, F_USER, F_CUSTOM_GREETING
+from tests.fake import FakeClient
 from tests.plugins.welcome import Welcome_functional_test
 
 

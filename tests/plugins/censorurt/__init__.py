@@ -5,9 +5,9 @@ from mock import Mock, patch
 import b3
 import b3.events
 from b3.config import XmlConfigParser
-from b3.fake import FakeClient
 from b3.plugins.censorurt import CensorurtPlugin
 from tests import B3TestCase
+from tests.fake import FakeClient
 
 
 class CensorurtTestCase(B3TestCase):

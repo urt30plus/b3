@@ -179,7 +179,7 @@ class FakeConsole(b3.parser.Parser):
         """
         Tempban a client.
         """
-        from .functions import minutesStr
+        from b3.functions import minutesStr
         print('>>>tempbanning %s for %s (%s)' % (client.name, reason, minutesStr(duration)))
         data = {'reason': reason, 'duration': duration, 'admin': admin}
         self.queueEvent(self.getEvent('EVT_CLIENT_BAN_TEMP', data=data, client=client))

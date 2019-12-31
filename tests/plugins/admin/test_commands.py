@@ -7,9 +7,9 @@ from mockito import when, any as whatever
 from b3 import TEAM_RED
 from b3.clients import Client, Group, ClientVar, ClientBan, ClientTempBan
 from b3.config import CfgConfigParser
-from b3.fake import FakeClient
 from b3.plugins.admin import Command
 from tests import InstantTimer, InstantThread
+from tests.fake import FakeClient
 from tests.plugins.admin import Admin_TestCase
 from tests.plugins.admin import Admin_functional_test
 

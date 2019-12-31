@@ -4,10 +4,10 @@ from mockito import when
 
 import b3
 from b3.config import CfgConfigParser
-from b3.fake import FakeClient
 from b3.plugins.admin import AdminPlugin
 from b3.plugins.tk import TkPlugin
 from tests import B3TestCase
+from tests.fake import FakeClient
 
 
 class Test_Tk_plugin(B3TestCase):

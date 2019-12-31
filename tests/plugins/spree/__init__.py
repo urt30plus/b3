@@ -19,7 +19,7 @@ class SpreeTestCase(unittest.TestCase):
         self.parser_main_conf = MainConfig(parser_ini_conf)
 
         with logging_disabled():
-            from b3.fake import FakeConsole
+            from tests.fake import FakeConsole
             self.console = FakeConsole(self.parser_main_conf)
 
         with logging_disabled():
@@ -34,7 +34,7 @@ class SpreeTestCase(unittest.TestCase):
         self.p = SpreePlugin(self.console, CfgConfigParser())
 
         with logging_disabled():
-            from b3.fake import FakeClient
+            from tests.fake import FakeClient
 
         self.mike = FakeClient(console=self.console, name="Mike", guid="MIKEGUID", groupBits=1)
         self.bill = FakeClient(console=self.console, name="Bill", guid="BILLGUID", groupBits=1)

@@ -33,7 +33,7 @@ class Test_cmd_balance(Iourt43TestCase):
         self.console.write = Mock()
 
         with logging_disabled():
-            from b3.fake import FakeClient
+            from tests.fake import FakeClient
             self.blue1 = FakeClient(self.console, name="Blue1", guid="zaerezarezar", groupBits=1, team=TEAM_BLUE)
             self.blue2 = FakeClient(self.console, name="Blue2", guid="qsdfdsqfdsqf", groupBits=1, team=TEAM_BLUE)
             self.blue3 = FakeClient(self.console, name="Blue3", guid="qsdfdsqfdsqf33", groupBits=1, team=TEAM_BLUE)

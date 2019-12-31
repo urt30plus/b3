@@ -21,7 +21,7 @@ class Iourt43TestCase(unittest.TestCase):
     def setUpClass(cls):
         with logging_disabled():
             from b3.parsers.q3a.abstractParser import AbstractParser
-            from b3.fake import FakeConsole
+            from tests.fake import FakeConsole
             AbstractParser.__bases__ = (FakeConsole,)
 
     def setUp(self):
@@ -47,7 +47,7 @@ class Iourt43TestCase(unittest.TestCase):
             when(self.console).queryClientFrozenSandAccount(...).thenReturn({})
 
             # prepare a few players
-            from b3.fake import FakeClient
+            from tests.fake import FakeClient
             self.joe = FakeClient(self.console, name="Joe", exactName="Joe", guid="zaerezarezar", groupBits=1,
                                   team=TEAM_UNKNOWN, teamId=0, squad=0)
             self.simon = FakeClient(self.console, name="Simon", exactName="Simon", guid="qsdfdsqfdsqf", groupBits=0,

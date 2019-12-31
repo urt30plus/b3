@@ -2,8 +2,8 @@ from mock import Mock
 from mockito import when
 
 import b3
-from b3.fake import FakeClient
 from b3.plugins.admin import AdminPlugin
+from tests.fake import FakeClient
 from tests.plugins.spamcontrol import SpamcontrolTestCase
 
 

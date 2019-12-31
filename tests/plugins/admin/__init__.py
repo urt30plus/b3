@@ -2,9 +2,9 @@ import b3
 from b3 import TEAM_BLUE
 from b3 import TEAM_RED
 from b3.config import CfgConfigParser
-from b3.fake import FakeClient
 from b3.plugins.admin import AdminPlugin
 from tests import B3TestCase
+from tests.fake import FakeClient
 
 
 class Admin_TestCase(B3TestCase):

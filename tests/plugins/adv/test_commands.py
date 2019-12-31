@@ -1,4 +1,4 @@
-from b3.fake import FakeClient
+from tests.fake import FakeClient
 from tests.plugins.adv import AdvTestCase
 
 

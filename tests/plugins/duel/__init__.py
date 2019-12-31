@@ -16,7 +16,7 @@ class DuelTestCase(unittest.TestCase):
         self.console_main_conf = MainConfig(console_conf)
 
         with logging_disabled():
-            from b3.fake import FakeConsole
+            from tests.fake import FakeConsole
             self.console = FakeConsole(self.console_main_conf)
 
         with logging_disabled():
@@ -32,7 +32,7 @@ class DuelTestCase(unittest.TestCase):
         self.p.onStartup()
 
         with logging_disabled():
-            from b3.fake import FakeClient
+            from tests.fake import FakeClient
 
         self.mike = FakeClient(console=self.console, name="Mike", guid="MIKEGUID", groupBits=1)
         self.bill = FakeClient(console=self.console, name="Bill", guid="BILLGUID", groupBits=1)

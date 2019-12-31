@@ -3,9 +3,9 @@ from mockito import when, unstub
 
 import b3
 import b3.cron
-from b3.fake import FakeClient
 from b3.plugin import Plugin
 from b3.plugins.admin import Command
+from tests.fake import FakeClient
 from tests.plugins.pluginmanager import PluginmanagerTestCase
 
 

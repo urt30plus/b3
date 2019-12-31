@@ -20,7 +20,7 @@ class KniferPluginTestCase(unittest.TestCase):
     def setUpClass(cls):
         with logging_disabled():
             from b3.parsers.q3a.abstractParser import AbstractParser
-            from b3.fake import FakeConsole
+            from tests.fake import FakeConsole
             AbstractParser.__bases__ = (FakeConsole,)
             # Now parser inheritance hierarchy is :
             # Iourt43Parser -> abstractParser -> FakeConsole -> Parser
@@ -75,7 +75,7 @@ class KniferPluginTestCase(unittest.TestCase):
         self.p.onStartup()
 
         with logging_disabled():
-            from b3.fake import FakeClient
+            from tests.fake import FakeClient
 
         # create some clients
         self.mike = FakeClient(console=self.console, name="Mike", guid="mikeguid", team=TEAM_BLUE, groupBits=1)
