@@ -62,12 +62,10 @@ class CommonDefaultTestMethodsMixin:
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'disabled': False, 'path': None},
             {'name': 'adv', 'conf': '@b3/conf/plugin_adv.xml', 'disabled': False, 'path': None},
             {'name': 'censor', 'conf': '@b3/conf/plugin_censor.xml', 'disabled': False, 'path': None},
-            {'name': 'cmdmanager', 'conf': '@b3/conf/plugin_cmdmanager.ini', 'disabled': False, 'path': None},
             {'name': 'pingwatch', 'conf': '@b3/conf/plugin_pingwatch.ini', 'disabled': False, 'path': None},
             {'name': 'pluginmanager', 'conf': '@b3/conf/plugin_pluginmanager.ini', 'disabled': False, 'path': None},
             {'name': 'spamcontrol', 'conf': '@b3/conf/plugin_spamcontrol.ini', 'disabled': False, 'path': None},
             {'name': 'stats', 'conf': '@b3/conf/plugin_stats.ini', 'disabled': False, 'path': None},
-            {'name': 'status', 'conf': '@b3/conf/plugin_status.ini', 'disabled': False, 'path': None},
             {'name': 'tk', 'conf': '@b3/conf/plugin_tk.ini', 'disabled': False, 'path': None},
             {'name': 'welcome', 'conf': '@b3/conf/plugin_welcome.ini', 'disabled': False, 'path': None},
         ], self.conf.get_plugins())
@@ -85,8 +83,8 @@ class Test_XmlMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
         Vefify that the plugins are return in the same order as found in the config file
         """
         self.assertListEqual(
-            ['admin', 'adv', 'censor', 'cmdmanager', 'pingwatch', 'pluginmanager', 'spamcontrol', 'stats',
-             'status', 'tk', 'welcome'],
+            ['admin', 'adv', 'censor', 'pingwatch', 'pluginmanager', 'spamcontrol', 'stats',
+             'tk', 'welcome'],
             list([x.get('name') for x in self.conf._config_parser.get('plugins/plugin')]))
 
 
@@ -102,8 +100,8 @@ class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
         Vefify that the plugins are return in the same order as found in the config file
         """
         self.assertListEqual(
-            ['admin', 'adv', 'censor', 'cmdmanager', 'pingwatch', 'pluginmanager', 'spamcontrol', 'stats',
-             'status', 'tk', 'welcome'], self.conf._config_parser.options('plugins'))
+            ['admin', 'adv', 'censor', 'pingwatch', 'pluginmanager', 'spamcontrol', 'stats',
+             'tk', 'welcome'], self.conf._config_parser.options('plugins'))
 
 
 class TestConfig(unittest.TestCase):
