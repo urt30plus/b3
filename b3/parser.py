@@ -2,7 +2,7 @@ import atexit
 import datetime
 import functools
 import glob
-import imp
+import importlib
 import os
 import queue
 import re
@@ -782,29 +782,25 @@ class Parser:
         :param name: The plugin name
         :param path: The path to the plugin
         """
-        if path is not None:
+        if path:
             # import error is being handled in loadPlugins already
             self.info('Loading plugin from specified path: %s', path)
-            fp, pathname, description = imp.find_module(name, [path])
-            try:
-                return imp.load_module(name, fp, pathname, description)
-            finally:
-                if fp:
-                    fp.close()
-
-        fp = None
+            if path not in sys.path:
+                self.warning('Appending path %s to sys.path', path)
+                sys.path.append(path)
+            return importlib.import_module(name)
 
         try:
-            fp, pathname, description = imp.find_module(name, [os.path.join(b3.getB3Path(True), 'plugins')])
-            return imp.load_module(name, fp, pathname, description)
+            return importlib.import_module(f'b3.plugins.{name}')
         except ImportError as m:
-            self.verbose('%s is not a built-in plugin (%s)', name.title(), m)
-            self.verbose('Trying external plugin directory : %s', self.config.get_external_plugins_dir())
-            fp, pathname, description = imp.find_module(name, [self.config.get_external_plugins_dir()])
-            return imp.load_module(name, fp, pathname, description)
-        finally:
-            if fp:
-                fp.close()
+            ext_plugin_dir = self.config.get_external_plugins_dir()
+            self.info('%s is not a built-in plugin (%s)', name.title(), m)
+            self.info('Trying external plugin directory : %s', ext_plugin_dir)
+            if ext_plugin_dir not in sys.path:
+                self.warning('Appending external directory %s to sys.path',
+                             ext_plugin_dir)
+                sys.path.append(ext_plugin_dir)
+            return importlib.import_module(name)
 
     def startPlugins(self):
         """

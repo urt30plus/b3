@@ -1,5 +1,5 @@
 import logging
-import imp
+import importlib
 import os
 from textwrap import dedent
 
@@ -371,22 +371,12 @@ class Test_Plugin_requiresParser(B3TestCase):
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'path': None, 'disabled': False},
         ]
 
-        fp, pathname, description = imp.find_module('testplugin1', [
-            os.path.join(b3.getB3Path(True), '..', 'tests', 'plugins', 'fakeplugins')])
-        pluginModule1 = imp.load_module('testplugin1', fp, pathname, description)
-        if fp:
-            fp.close()
 
-        fp, pathname, description = imp.find_module('testplugin2', [
-            os.path.join(b3.getB3Path(True), '..', 'tests', 'plugins', 'fakeplugins')])
-        pluginModule2 = imp.load_module('testplugin2', fp, pathname, description)
-        if fp:
-            fp.close()
+        pluginModule1 = importlib.import_module('tests.plugins.fakeplugins.testplugin1')
 
-        fp, pathname, description = imp.find_module('admin', [os.path.join(b3.getB3Path(True), 'plugins')])
-        adminModule = imp.load_module('admin', fp, pathname, description)
-        if fp:
-            fp.close()
+        pluginModule2 = importlib.import_module('tests.plugins.fakeplugins.testplugin2')
+
+        adminModule = importlib.import_module('b3.plugins.admin')
 
         mockito.when(self.console.config).get_plugins().thenReturn(self.plugin_list)
         mockito.when(self.console).pluginImport('admin', mockito.ANY).thenReturn(adminModule)
@@ -501,22 +491,11 @@ class Test_Plugin_requiresStorage(B3TestCase):
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'path': None, 'disabled': False},
         ]
 
-        fp, pathname, description = imp.find_module('testplugin1', [
-            os.path.join(b3.getB3Path(True), '..', 'tests', 'plugins', 'fakeplugins')])
-        pluginModule1 = imp.load_module('testplugin1', fp, pathname, description)
-        if fp:
-            fp.close()
+        pluginModule1 = importlib.import_module('tests.plugins.fakeplugins.testplugin1')
 
-        fp, pathname, description = imp.find_module('testplugin3', [
-            os.path.join(b3.getB3Path(True), '..', 'tests', 'plugins', 'fakeplugins')])
-        pluginModule3 = imp.load_module('testplugin3', fp, pathname, description)
-        if fp:
-            fp.close()
+        pluginModule3 = importlib.import_module('tests.plugins.fakeplugins.testplugin3')
 
-        fp, pathname, description = imp.find_module('admin', [os.path.join(b3.getB3Path(True), 'plugins')])
-        adminModule = imp.load_module('admin', fp, pathname, description)
-        if fp:
-            fp.close()
+        adminModule = importlib.import_module('b3.plugins.admin')
 
         mockito.when(self.console.config).get_plugins().thenReturn(self.plugin_list)
         mockito.when(self.console).pluginImport('admin', mockito.ANY).thenReturn(adminModule)
