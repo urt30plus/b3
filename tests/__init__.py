@@ -6,6 +6,8 @@ import unittest
 from contextlib import contextmanager
 from unittest.mock import Mock, patch
 
+from mockito import unstub
+
 from b3.config import CfgConfigParser
 from b3.config import MainConfig
 from b3.events import Event
@@ -76,6 +78,7 @@ class B3TestCase(unittest.TestCase):
 
     def tearDown(self):
         flush_console_streams()
+        unstub()
         testcase_lock.release()
 
     @contextmanager
