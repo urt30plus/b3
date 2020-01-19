@@ -2,10 +2,8 @@ import functools
 import re
 import time
 from collections import defaultdict, deque
-from logging import DEBUG
 
 from b3.functions import meanstdv
-from b3.output import VERBOSE
 
 __author__ = 'ThorN, xlr8or, Courgette'
 __version__ = '1.8.2'
