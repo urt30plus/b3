@@ -1,7 +1,9 @@
 from unittest.mock import Mock, patch
 
 import b3
-from b3.clients import Clients, Client
+import b3.events
+from b3.clients import Client
+from b3.clients import Clients
 from tests import B3TestCase
 
 

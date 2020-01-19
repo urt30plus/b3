@@ -195,7 +195,7 @@ class DuelError(Exception):
     pass
 
 
-class Duel(object):
+class Duel:
     """
     How does it work ?
     

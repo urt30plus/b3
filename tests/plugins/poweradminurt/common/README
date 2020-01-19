@@ -11,7 +11,7 @@ inheriting from test.iourt41.Iourt41TestCase and the other one from test.iourt42
 Example
 -------
 
-class mixin_foo(object):
+class mixin_foo:
     def setUp(self):
         super(mixin_cmd_nuke, self).setUp()
 

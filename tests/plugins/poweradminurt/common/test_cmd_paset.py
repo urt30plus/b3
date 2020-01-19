@@ -6,7 +6,7 @@ from b3.plugins.poweradminurt import PoweradminurtPlugin
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
-class mixin_cmd_paset(object):
+class mixin_cmd_paset:
     def setUp(self):
         super(mixin_cmd_paset, self).setUp()
         self.conf = CfgConfigParser()

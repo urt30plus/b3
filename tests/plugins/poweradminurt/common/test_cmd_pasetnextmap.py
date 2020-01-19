@@ -8,7 +8,7 @@ from b3.plugins.poweradminurt import PoweradminurtPlugin
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
-class mixin_cmd_pasetnextmap(object):
+class mixin_cmd_pasetnextmap:
     def setUp(self):
         super(mixin_cmd_pasetnextmap, self).setUp()
         self.conf = CfgConfigParser()

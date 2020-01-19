@@ -7,7 +7,7 @@ from b3.clients import IpAlias
 from b3.clients import Penalty
 
 
-class StorageAPITest(object):
+class StorageAPITest:
     storage = None
 
     def test_setClient(self):

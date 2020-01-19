@@ -1842,7 +1842,7 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         self.console.storage.query(q)
 
 
-class TimeStats(object):
+class TimeStats:
     came = None
     left = None
     client = None
@@ -2026,7 +2026,7 @@ class BattlestatsPlugin(b3.plugin.Plugin):
         self.clientsLog = {}
 
 
-class StatObject(object):
+class StatObject:
     _table = None
 
     def _insertquery(self):

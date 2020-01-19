@@ -2120,7 +2120,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         [player] <message> - spam a predefined message to all players or a given player
         """
-        m = re.match('^((?P<player>\w+)\s+)?(?P<keyword>\w{2,})$', data)
+        m = re.match(r'^((?P<player>\w+)\s+)?(?P<keyword>\w{2,})$', data)
         if not m:
             client.message(self.getMessage('invalid_parameters'))
         else:
@@ -2185,7 +2185,7 @@ class AdminPlugin(b3.plugin.Plugin):
             return
 
         cid = m[0]
-        m = re.match('^([0-9]+[dwhsm]*)(?:\s(.+))?$', m[1], re.I)
+        m = re.match(r'^([0-9]+[dwhsm]*)(?:\s(.+))?$', m[1], re.I)
         if not m:
             client.message(self.getMessage('invalid_parameters'))
             return
@@ -2238,7 +2238,7 @@ class AdminPlugin(b3.plugin.Plugin):
                     self.console.say('^7%s %s^7!' % (message, sclient.exactName))
 
 
-class Command(object):
+class Command:
     command = ''
     alias = ''
     help = ''

@@ -12,7 +12,7 @@ __version__ = '1.5'
 __author__ = 'ThorN, mindriot, Courgette, xlr8or, SGT, 82ndab-Bravo17, ozon, Fenix'
 
 
-class TkInfo(object):
+class TkInfo:
 
     def __init__(self, plugin, cid):
         self._attackers = {}

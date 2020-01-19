@@ -7,7 +7,7 @@ from tests.fake import FakeClient
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
-class mixin_name_checker(object):
+class mixin_name_checker:
 
     def setUp(self):
         super(mixin_name_checker, self).setUp()

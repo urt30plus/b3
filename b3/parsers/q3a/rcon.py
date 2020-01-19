@@ -11,7 +11,7 @@ __author__ = 'ThorN'
 __version__ = '1.11'
 
 
-class Rcon(object):
+class Rcon:
     socket_timeout = 0.80
     rconreplystring = b'\377\377\377\377print\n'
 

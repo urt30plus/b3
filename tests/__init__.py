@@ -19,7 +19,7 @@ log.setLevel(logging.WARNING)
 testcase_lock = threading.Lock()  # together with flush_console_streams, helps getting logging output related to the
 
 
-class logging_disabled(object):
+class logging_disabled:
     """
     context manager that temporarily disable logging.
 
@@ -123,7 +123,7 @@ class B3TestCase(unittest.TestCase):
             }))
 
 
-class InstantTimer(object):
+class InstantTimer:
     """Makes threading.Timer behave synchronously
 
     Usage:

@@ -7,7 +7,7 @@ __version__ = '1.26'
 __author__ = 'xlr8or, courgette'
 
 
-class PoweradminurtPlugin(object):
+class PoweradminurtPlugin:
     requiresConfigFile = True
     requiresPlugins = []
     loadAfterPlugins = []

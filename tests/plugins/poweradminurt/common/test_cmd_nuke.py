@@ -7,7 +7,7 @@ from tests import InstantThread
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
-class mixin_cmd_nuke(object):
+class mixin_cmd_nuke:
 
     def setUp(self):
         super(mixin_cmd_nuke, self).setUp()

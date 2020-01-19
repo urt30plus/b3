@@ -128,7 +128,7 @@ $''', re.VERBOSE)
             return b3.functions.cmp(self.build_num, other.build_num)
 
 
-class DBUpdate(object):
+class DBUpdate:
     """
     Console database update procedure.
     """

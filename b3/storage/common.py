@@ -16,7 +16,7 @@ from b3.storage import Storage
 from b3.storage.cursor import Cursor as DBCursor
 
 
-class QueryBuilder(object):
+class QueryBuilder:
 
     def __init__(self, db=None):
         """

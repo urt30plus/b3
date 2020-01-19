@@ -7,7 +7,7 @@ from b3.plugins.poweradminurt import __version__ as plugin_version, __author__ a
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
-class mixin_cmd_version(object):
+class mixin_cmd_version:
     def setUp(self):
         super(mixin_cmd_version, self).setUp()
         self.conf = CfgConfigParser()

@@ -5,7 +5,7 @@ from b3.plugins.poweradminurt import PoweradminurtPlugin
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
-class mixin_conf(object):
+class mixin_conf:
 
     def setUp(self):
         super(mixin_conf, self).setUp()

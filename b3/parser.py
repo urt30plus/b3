@@ -1505,7 +1505,7 @@ class StubParser:
     screen = sys.stdout
 
     def __init__(self):
-        class StubSTDOut(object):
+        class StubSTDOut:
             def write(self, *args, **kwargs):
                 pass
 
