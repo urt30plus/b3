@@ -1,6 +1,5 @@
 from textwrap import dedent
-
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 from b3 import TEAM_BLUE, TEAM_RED
 from b3.config import CfgConfigParser

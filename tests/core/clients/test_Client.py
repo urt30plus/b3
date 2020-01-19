@@ -1,7 +1,6 @@
 import operator
 import unittest
-
-from mock import Mock, patch, ANY
+from unittest.mock import Mock, patch, ANY
 
 from b3 import TEAM_UNKNOWN, TEAM_RED, TEAM_BLUE
 from b3.clients import Alias, IpAlias

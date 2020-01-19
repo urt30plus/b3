@@ -1,6 +1,6 @@
 import logging
+from unittest.mock import patch
 
-from mock import patch
 from mockito import unstub
 
 from b3.config import CfgConfigParser

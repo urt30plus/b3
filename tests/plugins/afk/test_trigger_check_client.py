@@ -1,6 +1,5 @@
 from textwrap import dedent
-
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 from b3 import TEAM_SPEC
 from b3.events import Event

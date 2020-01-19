@@ -1,6 +1,5 @@
 # Python modules needed to run the B3 test suite
 mockito
-mock>=0.8
 pylint
 pytest
 pymysql>=0.9.3

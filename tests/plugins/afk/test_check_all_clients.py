@@ -1,7 +1,6 @@
 from textwrap import dedent
 from time import time
-
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 # This test suite makes sure `check_all_clients` is called appropriately
 from tests.fake import FakeClient

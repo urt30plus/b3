@@ -1,9 +1,9 @@
 import os
 import unittest
+from unittest.mock import Mock
+from unittest.mock import patch
+from unittest.mock import sentinel
 
-from mock import Mock
-from mock import patch
-from mock import sentinel
 from mockito import any as ANY
 from mockito import when
 

@@ -1,8 +1,8 @@
 import logging
 import os
 import unittest
+from unittest.mock import patch, Mock
 
-from mock import patch, Mock
 from mockito import when, unstub
 
 from b3 import __file__ as b3_module__file__

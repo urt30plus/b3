@@ -1,6 +1,6 @@
 import time
+from unittest.mock import patch, call
 
-from mock import patch, call
 from mockito import when
 
 from b3.clients import Cvar

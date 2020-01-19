@@ -1,4 +1,4 @@
-from mock import Mock
+from unittest.mock import Mock
 
 import b3
 from tests.plugins.censor import Detection_TestCase

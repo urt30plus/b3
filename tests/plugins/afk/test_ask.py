@@ -1,7 +1,6 @@
 from textwrap import dedent
 from time import sleep
-
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 from b3.functions import is_windows
 from tests.plugins.afk import *

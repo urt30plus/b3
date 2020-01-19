@@ -1,4 +1,4 @@
-from mock import Mock
+from unittest.mock import Mock
 
 from b3.clients import Alias
 from b3.clients import Client

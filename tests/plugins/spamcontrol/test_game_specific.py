@@ -1,6 +1,6 @@
 from types import MethodType
+from unittest.mock import Mock
 
-from mock import Mock
 from mockito import when
 
 import b3

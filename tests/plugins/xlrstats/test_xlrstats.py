@@ -1,8 +1,8 @@
 import logging
 import os
 from textwrap import dedent
+from unittest.mock import Mock, patch
 
-from mock import Mock, patch
 from mockito import when
 
 from b3 import TEAM_BLUE

@@ -2,11 +2,9 @@ import logging
 import importlib
 import os
 from textwrap import dedent
+from unittest.mock import ANY, call, patch
 
 import mockito
-from mock import ANY
-from mock import call
-from mock import patch
 
 import b3
 from b3.config import CfgConfigParser, NoOptionError

@@ -1,4 +1,4 @@
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 from b3 import TEAM_BLUE
 from b3 import TEAM_RED

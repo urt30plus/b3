@@ -4,9 +4,7 @@ import threading
 import time
 import unittest
 from contextlib import contextmanager
-
-from mock import Mock, patch
-from mockito import unstub
+from unittest.mock import Mock, patch
 
 from b3.config import CfgConfigParser
 from b3.config import MainConfig
@@ -17,9 +15,6 @@ log = logging.getLogger('output')
 log.setLevel(logging.WARNING)
 
 testcase_lock = threading.Lock()  # together with flush_console_streams, helps getting logging output related to the
-
-
-# correct test in test runners such as the one in PyCharm IDE.
 
 
 class logging_disabled(object):
@@ -74,14 +69,13 @@ class B3TestCase(unittest.TestCase):
 
         self.console.cron.stop()
 
-        def myError(msg, *args, **kwargs):
+        def mock_error(msg, *args, **kwargs):
             print(("ERROR: %s" % msg) % args)
 
-        self.console.error = myError
+        self.console.error = mock_error
 
     def tearDown(self):
         flush_console_streams()
-        unstub()
         testcase_lock.release()
 
     @contextmanager

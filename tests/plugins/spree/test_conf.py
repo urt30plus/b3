@@ -1,6 +1,5 @@
 from textwrap import dedent
-
-from mock import Mock, call
+from unittest.mock import Mock, call
 
 from tests.plugins.spree import SpreeTestCase
 

@@ -1,4 +1,5 @@
-from mock import patch, call, Mock
+from unittest.mock import patch, call, Mock
+
 from mockito import when, any as ANY
 
 from tests.fake import FakeClient

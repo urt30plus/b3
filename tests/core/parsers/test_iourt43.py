@@ -1,7 +1,7 @@
 import logging
 import unittest
+from unittest.mock import Mock, call, patch
 
-from mock import Mock, call, patch
 from mockito import mock, when, unstub, any as anything
 
 import b3

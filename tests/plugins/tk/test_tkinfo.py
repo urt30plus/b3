@@ -1,4 +1,4 @@
-from mock import Mock, sentinel
+from unittest.mock import Mock, sentinel
 
 from b3.plugins.tk import TkInfo
 from tests.plugins.tk import Tk_functional_test

@@ -1,4 +1,4 @@
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin

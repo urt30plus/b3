@@ -1,7 +1,6 @@
 import logging
 import sys
-
-from mock import patch, call, Mock
+from unittest.mock import patch, call, Mock
 
 import b3
 from tests.plugins.admin import Admin_TestCase, Admin_functional_test

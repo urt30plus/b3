@@ -1,7 +1,7 @@
 import sys
 import time
+from unittest.mock import Mock, patch, call, ANY
 
-from mock import Mock, patch, call, ANY
 from mockito import when, any as whatever
 
 from b3 import TEAM_RED

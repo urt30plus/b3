@@ -1,4 +1,4 @@
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 import b3
 from tests.plugins.tk import Tk_functional_test

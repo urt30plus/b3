@@ -1,6 +1,6 @@
 import time
+from unittest.mock import patch, Mock
 
-from mock import patch, Mock
 from mockito import when, verify
 
 from b3.config import CfgConfigParser

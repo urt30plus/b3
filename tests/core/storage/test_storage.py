@@ -1,6 +1,5 @@
 import unittest
-
-from mock import Mock
+from unittest.mock import Mock
 
 from b3.functions import splitDSN
 from b3.storage import Storage

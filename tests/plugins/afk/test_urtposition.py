@@ -1,7 +1,6 @@
 from textwrap import dedent
 from types import MethodType
-
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 from tests.plugins.afk import *
 

@@ -1,7 +1,6 @@
 from textwrap import dedent
 from time import time
-
-from mock import call, Mock
+from unittest.mock import call, Mock
 
 from b3.events import Event
 from tests.plugins.afk import *

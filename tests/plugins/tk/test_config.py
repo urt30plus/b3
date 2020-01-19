@@ -1,6 +1,5 @@
 from textwrap import dedent
-
-from mock import patch, call
+from unittest.mock import patch, call
 
 import b3
 from b3.config import CfgConfigParser, NoOptionError

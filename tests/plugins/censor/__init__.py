@@ -1,6 +1,5 @@
 import logging
-
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 import b3
 import b3.events

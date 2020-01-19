@@ -1,6 +1,6 @@
 import sys
+from unittest.mock import Mock, call
 
-from mock import Mock, call
 from mockito import when
 
 from b3.config import CfgConfigParser
