@@ -17,7 +17,7 @@ releases/*
 b3/docs/user_documentation/_build/*
 b3.test.xml
 b3.database.sqlite
-venv/
+venv*/
 b3_doc.htm
 scratch.py
 .pytest_cache
@@ -25,3 +25,4 @@ scratch.py
 b3/conf/b3.xml
 b3/conf/b3.ini
 b3/conf/status.xml
+.venv*/
