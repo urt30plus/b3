@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS `plugin_gunmoney` (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `client_id` INTEGER NOT NULL DEFAULT '0',
+  `balance` INTEGER NOT NULL DEFAULT '0',
+  `time_add` INTEGER(10) NOT NULL DEFAULT '0',
+  `time_edit` INTEGER(10) NOT NULL DEFAULT '0',
+  CONSTRAINT `alias` UNIQUE (`client_id`)
+);
