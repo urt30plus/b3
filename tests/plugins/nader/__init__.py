@@ -19,9 +19,9 @@ class NaderPluginTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         with logging_disabled():
-            from b3.parsers.q3a.abstractParser import AbstractParser
+            from b3.parsers.iourt43 import Iourt43Parser
             from tests.fake import FakeConsole
-            AbstractParser.__bases__ = (FakeConsole,)
+            Iourt43Parser.__bases__ = (FakeConsole,)
             # Now parser inheritance hierarchy is :
             # Iourt43Parser -> abstractParser -> FakeConsole -> Parser
 

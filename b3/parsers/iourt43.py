@@ -1,4 +1,5 @@
 import re
+import string
 import time
 
 import b3
@@ -10,13 +11,12 @@ from b3.functions import getStuffSoundingLike
 from b3.functions import prefixText
 from b3.functions import start_daemon_thread
 from b3.functions import time2minutes
-from b3.parsers.q3a.abstractParser import AbstractParser
 
 __author__ = 'xlr8or, Courgette, Fenix'
 __version__ = '4.34'
 
 
-class Iourt43Parser(AbstractParser):
+class Iourt43Parser(b3.parser.Parser):
     """This parser is meant to serve as the new base parser for
     all UrT version from 4.3 on.
     """
@@ -49,6 +49,8 @@ class Iourt43Parser(AbstractParser):
 
     _maplist = None
     _empty_name_default = 'EmptyNameDefault'
+
+    _clientConnectID = None
 
     _commands = {
         'broadcast': '%(message)s',
@@ -291,6 +293,31 @@ class Iourt43Parser(AbstractParser):
                                r'notoriety: (?P<notoriety>.+?) - '
                                r'level: (?P<level>-?\d+?)(?:\s+- (?P<extra>.*))?\s*$', re.MULTILINE)
 
+    _regPlayerShort = re.compile(r'\s+(?P<slot>[0-9]+)\s+'
+                                 r'(?P<score>[0-9]+)\s+'
+                                 r'(?P<ping>[0-9]+)\s+'
+                                 r'(?P<name>.*)\^7\s+', re.IGNORECASE)
+
+    _reCvarName = re.compile(r'^[a-z0-9_.]+$', re.IGNORECASE)
+
+    _reCvar = (
+        # "sv_maxclients" is:"16^7" default:"8^7"
+        # latched: "12"
+        re.compile(r'^"(?P<cvar>[a-z0-9_.]+)"\s+is:\s*'
+                   r'"(?P<value>.*?)(\^7)?"\s+default:\s*'
+                   r'"(?P<default>.*?)(\^7)?"$', re.IGNORECASE | re.MULTILINE),
+
+        # "g_maxGameClients" is:"0^7", the default
+        # latched: "1"
+        re.compile(r'^"(?P<cvar>[a-z0-9_.]+)"\s+is:\s*'
+                   r'"(?P<default>(?P<value>.*?))(\^7)?",\s+the\sdefault$', re.IGNORECASE | re.MULTILINE),
+
+        # "mapname" is:"ut4_abbey^7"
+        re.compile(r'^"(?P<cvar>[a-z0-9_.]+)"\s+is:\s*"(?P<value>.*?)(\^7)?"$', re.IGNORECASE | re.MULTILINE),
+    )
+
+    _reMapNameFromStatus = re.compile(r'^map:\s+(?P<map>.+)$', re.IGNORECASE)
+
     ## kill modes
     MOD_WATER = '1'
     MOD_LAVA = '3'
@@ -476,7 +503,7 @@ class Iourt43Parser(AbstractParser):
         """
         self.pluginsStarted()  # so we get teams refreshed
         self.clients.sync()
-        b3.parser.Parser.unpause(self)
+        super().unpause()
 
     def getLineParts(self, line):
         """
@@ -500,6 +527,29 @@ class Iourt43Parser(AbstractParser):
             return m, m.group('action').lower(), data, client, target
         elif '------' not in line:
             self.verbose('Line did not match format: %s' % line)
+
+    def parseLine(self, line):
+        """
+        Parse a log line creating necessary events.
+        :param line: The log line to be parsed
+        """
+        m = self.getLineParts(line)
+        if not m:
+            return False
+
+        match, action, data, client, target = m
+        func_name = 'On%s' % string.capwords(action).replace(' ', '')
+
+        func = getattr(self, func_name, None)
+        if func:
+            event = func(action, data, match)
+            if event:
+                self.queueEvent(event)
+        elif action in self._eventMap:
+            self.queueEvent(self.getEvent(self._eventMap[action], data=data, client=client, target=target))
+        else:
+            data = str(action) + ': ' + str(data)
+            self.queueEvent(self.getEvent('EVT_UNKNOWN', data=data, client=client, target=target))
 
     def parseUserInfo(self, info):
         """
@@ -525,8 +575,6 @@ class Iourt43Parser(AbstractParser):
 
     def OnClientconnect(self, action, data, match=None):
         self.debug('Client connected: ready to parse userinfo line')
-        # client = self.clients.getByCID(data)
-        # return b3.events.Event(b3.events.EVT_CLIENT_JOIN, None, client)
 
     def OnClientbegin(self, action, data, match=None):
         # we get user info in two parts:
@@ -1934,3 +1982,221 @@ class Iourt43Parser(AbstractParser):
                 if newteam != client.team:
                     self.debug('Fixing client team for %s : %s is now %s' % (client.name, client.team, newteam))
                     setattr(client, 'team', newteam)
+
+    def getPlayerScores(self):
+        """
+        Returns a dict having players' id for keys and players' scores for values.
+        """
+        data = self.write('status')
+        if not data:
+            return {}
+
+        players = {}
+        for line in data.split('\n'):
+            # self.debug('Line: ' + line + "-")
+            m = re.match(self._regPlayerShort, line)
+            if not m:
+                m = re.match(self._regPlayer, line.strip())
+
+            if m:
+                players[str(m.group('slot'))] = int(m.group('score'))
+            # elif '------' not in line and 'map: ' not in line and 'num score ping' not in line:
+            # self.verbose('getPlayerScores() = Line did not match format: %s' % line)
+
+        return players
+
+    def getPlayerList(self, maxRetries=None):
+        """
+        Query the game server for connected players.
+        Return a dict having players' id for keys and players' data as another dict for values.
+        """
+        data = self.write('status', maxRetries=maxRetries)
+        if not data:
+            return {}
+
+        players = {}
+        lastslot = -1
+        for line in data.split('\n')[3:]:
+            m = re.match(self._regPlayer, line.strip())
+            if m:
+                d = m.groupdict()
+                if int(m.group('slot')) > lastslot:
+                    lastslot = int(m.group('slot'))
+                    d['pbid'] = None
+                    players[str(m.group('slot'))] = d
+
+                else:
+                    self.debug('Duplicate or incorrect slot number - '
+                               'client ignored %s last slot %s' % (m.group('slot'), lastslot))
+
+        return players
+
+    def getCvar(self, cvar_name):
+        """
+        Return a CVAR from the server.
+        :param cvar_name: The CVAR name.
+        """
+        if self._reCvarName.match(cvar_name):
+            val = self.write(cvar_name)
+            self.debug('Get cvar %s = [%s]', cvar_name, val)
+
+            m = None
+            for f in self._reCvar:
+                m = re.match(f, val)
+                if m:
+                    break
+
+            if m:
+                if m.group('cvar').lower() == cvar_name.lower():
+                    try:
+                        default_value = m.group('default')
+                    except IndexError:
+                        default_value = None
+                    return b3.clients.Cvar(m.group('cvar'), value=m.group('value'), default=default_value)
+            else:
+                return None
+
+    def setCvar(self, cvar_name, value):
+        """
+        Set a CVAR on the server.
+        :param cvar_name: The CVAR name
+        :param value: The CVAR value
+        """
+        if re.match('^[a-z0-9_.]+$', cvar_name, re.IGNORECASE):
+            self.debug('Set cvar %s = [%s]', cvar_name, value)
+            self.write(self.getCommand('set', name=cvar_name, value=value))
+        else:
+            self.error('%s is not a valid cvar name', cvar_name)
+
+    def set(self, cvar_name, value):
+        """
+        Set a CVAR on the server.
+        :param cvar_name: The CVAR name
+        :param value: The CVAR value
+        """
+        self.warning('Use of deprecated method: set(): please use: setCvar()')
+        self.setCvar(cvar_name, value)
+
+    def getMap(self):
+        """
+        Return the current map/level name.
+        """
+        data = self.write('status')
+        if not data:
+            return None
+
+        line = data.split('\n')[0]
+        m = re.match(self._reMapNameFromStatus, line.strip())
+        if m:
+            return str(m.group('map'))
+
+        return None
+
+    def OnExit(self, action, data, match=None):
+        self.game.mapEnd()
+        return self.getEvent('EVT_GAME_EXIT', None)
+
+    def OnUserinfo(self, action, data, match=None):
+        _id = self._clientConnectID
+        self._clientConnectID = None
+
+        if not _id:
+            self.error('OnUserinfo called without a ClientConnect ID')
+            return None
+
+        return self.OnClientuserinfo(action, '%s %s' % (_id, data), match)
+
+    def getClient(self, match=None, attacker=None, victim=None):
+        """
+        Get a client object using the best available data.
+        :param match: The match group extracted from the log line parsing
+        :param attacker: The attacker group extracted from the log line parsing
+        :param victim: The victim group extracted from the log line parsing
+        """
+        if attacker:
+            return self.clients.getByCID(attacker.group('acid'))
+        elif victim:
+            return self.clients.getByCID(victim.group('cid'))
+        elif match:
+            return self.clients.getByCID(match.group('cid'))
+
+    def message(self, client, text, *args):
+        """
+        Send a private message to a client.
+        :param client: The client to who send the message.
+        :param text: The message to be sent.
+        """
+        if client is None:
+            # do a normal say
+            self.say(text)
+            return
+
+        if client.cid is None:
+            # skip this message
+            return
+
+        lines = []
+        message = prefixText([self.msgPrefix, self.pmPrefix], text)
+        message = message.strip()
+        for line in self.getWrap(message):
+            lines.append(self.getCommand('message', cid=client.cid, message=line))
+        self.writelines(lines)
+
+    def say(self, text, *args):
+        """
+        Broadcast a message to all players.
+        :param text: The message to be broadcasted
+        """
+        lines = []
+        message = prefixText([self.msgPrefix], text)
+        message = message.strip()
+        for line in self.getWrap(message):
+            lines.append(self.getCommand('say', message=line))
+        self.writelines(lines)
+
+    def kick(self, client, reason='', admin=None, silent=False, *kwargs):
+        """
+        Kick a given client.
+        :param client: The client to kick
+        :param reason: The reason for this kick
+        :param admin: The admin who performed the kick
+        :param silent: Whether or not to announce this kick
+        """
+        if isinstance(client, str) and re.match('^[0-9]+$', client):
+            self.write(self.getCommand('kick', cid=client, reason=reason))
+            return
+
+        self.write(self.getCommand('kick', cid=client.cid, reason=reason))
+
+        if admin:
+            variables = self.getMessageVariables(client=client, reason=reason, admin=admin)
+            fullreason = self.getMessage('kicked_by', variables)
+        else:
+            variables = self.getMessageVariables(client=client, reason=reason)
+            fullreason = self.getMessage('kicked', variables)
+
+        if not silent and fullreason != '':
+            self.say(fullreason)
+
+        self.queueEvent(self.getEvent('EVT_CLIENT_KICK', {'reason': reason, 'admin': admin}, client))
+        client.disconnect()
+
+    def kickbyfullname(self, client, reason='', admin=None, silent=False, *kwargs):
+        """
+        Kick the client matching the given name.
+        We get here if a name was given, and the name was not found as
+        a client: this will allow the kicking of non authenticated players
+        :param client: The client name
+        :param reason: The reason for this kick
+        :param admin: The admin who performed the kick
+        :param silent: Whether or not to announce this kick
+        """
+        # We get here if a name was given, and the name was not found as a client
+        # This will allow the kicking of non authenticated players
+        if 'kickbyfullname' in self._commands:
+            self.debug('Trying kick by full name: %s for %s' % (client, reason))
+            result = self.write(self.getCommand('kickbyfullname', name=client))
+            if result.endswith('is not on the server\n'):
+                admin.message('^7You need to use the full exact name to kick this player')
+            elif result.endswith('was kicked.\n'):
+                admin.message('^7Player kicked using full exact name')

@@ -169,7 +169,6 @@ class DBUpdate:
         """
         Run the DB update
         """
-        clearscreen()
         print("""
                         _\|/_
                         (o o)    {:>32}
@@ -205,11 +204,11 @@ class DBUpdate:
         from b3.parser import StubParser
         database = getStorage(dsn, dsndict, StubParser())
 
-        # _update_database(database, '3.30.99')
+        _update_database(database, '3.99.99')
 
         console_exit('B3 database update completed!')
 
 
 from b3 import HOMEDIR
-from b3.functions import console_exit, splitDSN, clearscreen
+from b3.functions import console_exit, splitDSN
 from b3.storage import getStorage

@@ -2,11 +2,7 @@ desktop.ini
 .idea/*
 *.pyc
 *.log
-*.log.1
-*.log.2
-*.log.3
-*.log.4
-*.log.5
+*.log.?
 *.orig
 *.patch
 *.lnk
@@ -14,11 +10,9 @@ b3.egg-info
 build
 dist
 releases/*
-b3/docs/user_documentation/_build/*
 b3.test.xml
 b3.database.sqlite
 venv*/
-b3_doc.htm
 scratch.py
 .pytest_cache
 .tox

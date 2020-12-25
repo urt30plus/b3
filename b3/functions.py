@@ -193,16 +193,6 @@ def console_exit(message=''):
     raise SystemExit(message)
 
 
-def clearscreen():
-    """
-    Clear the current shell screen according to the OS being used.
-    """
-    if is_windows():
-        os.system('cls')
-    else:
-        os.system('clear')
-
-
 def levenshteinDistance(a, b):
     """
     Return the levenshtein distance between 2 strings.

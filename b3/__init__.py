@@ -9,7 +9,7 @@ from tempfile import TemporaryFile
 import b3.functions
 
 __author__ = 'ThorN'
-__version__ = '3.31.13'
+__version__ = '3.31.14'
 
 modulePath = b3.functions.resource_directory(__name__)
 
@@ -184,7 +184,6 @@ def start(mainconfig, options):
     :param mainconfig: The B3 configuration file instance :type: b3.config.MainConfig
     :param options: command line options
     """
-    b3.functions.clearscreen()
     global confdir
     confdir = os.path.dirname(mainconfig.fileName)
 

@@ -20,7 +20,7 @@ import b3.cron
 import b3.events
 import b3.game
 import b3.output
-import b3.parsers.q3a.rcon
+import b3.rcon
 import b3.storage
 from b3 import __version__ as currentVersion
 from b3.clients import Clients
@@ -38,7 +38,7 @@ __version__ = '1.43.6'
 
 
 class Parser:
-    OutputClass = b3.parsers.q3a.rcon.Rcon  # default output class set to the q3a rcon class
+    OutputClass = b3.rcon.Rcon  # default output class set to the q3a rcon class
 
     _commands = {}  # will hold RCON commands for the current game
     _cron = None  # cron instance
@@ -64,7 +64,7 @@ class Parser:
     _rconIp = ''  # the ip address where to forward RCON commands
     _rconPort = None  # the virtual port where to forward RCON commands
     _rconPassword = ''  # the rcon password set on the server
-    _reColor = re.compile(r'\^[0-9a-z]')  # regex used to strip out color codes from a given string
+    _reColor = re.compile(r'(\^[0-9a-z])|[\x80-\xff]')
     _timeStart = None  # timestamp when B3 has first started
     _tz_offset = None
     _tz_name = None
@@ -519,7 +519,6 @@ class Parser:
         for plugin_name, plugin in self._plugins.items():
             self.bot('Reload configuration file for plugin %s', plugin_name)
             plugin.loadConfig()
-        self.updateDocumentation()
 
     def loadPlugins(self):
         """
@@ -1001,7 +1000,6 @@ class Parser:
         self.screen.write('Startup complete : B3 is running! Let\'s get to work!\n\n')
         self.screen.write('If you run into problems check your B3 log file for more information\n')
         self.screen.flush()
-        self.updateDocumentation()
 
         log_time_start = None
         log_time_last = 0
@@ -1349,21 +1347,6 @@ class Parser:
         :return: str
         """
         return re.sub(self._reColor, '', text).strip()
-
-    def updateDocumentation(self):
-        """
-        Create a documentation for all available commands.
-        """
-        if self.config.has_section('autodoc'):
-            try:
-                from b3.tools import DocBuilder
-                docbuilder = DocBuilder(self)
-                docbuilder.save()
-            except Exception as err:
-                self.error("Failed to generate user documentation")
-                self.exception(err)
-        else:
-            self.info('No user documentation generated: to enable update your configuration file')
 
     # INHERITING CLASSES MUST IMPLEMENTS THE FOLLOWING METHODS
     # PLUGINS THAT ARE GAME INDEPENDENT ASSUME THESE METHODS EXIST
