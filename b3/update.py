@@ -1,14 +1,15 @@
+import distutils.version
 import os
 import re
-from distutils import version
-from time import sleep
+import time
 
 import b3
 import b3.config
 import b3.functions
+import b3.storage
 
 
-class B3version(version.StrictVersion):
+class B3version(distutils.version.StrictVersion):
     """
     Version numbering for BigBrotherBot.
     Compared to version.StrictVersion this class allows version numbers such as :
@@ -111,7 +112,7 @@ $''', re.VERBOSE)
             return 1
         elif self.prerelease and other.prerelease:
             return b3.functions.cmp((self.prerelease_order[self.prerelease[0]], self.prerelease[1]),
-                       (self.prerelease_order[other.prerelease[0]], other.prerelease[1]))
+                                    (self.prerelease_order[other.prerelease[0]], other.prerelease[1]))
 
     def __cmp_build(self, other):
         # case 1: neither has build_num; they're equal
@@ -138,38 +139,23 @@ class DBUpdate:
         Object constructor.
         :param config: The B3 configuration file path
         """
-        if config:
-            # use the specified configuration file
-            config = b3.getAbsolutePath(config, True)
-            if not os.path.isfile(config):
-                console_exit(f'ERROR: configuration file not found ({config}).')
-        else:
-            # search a configuration file
-            for p in ('b3.%s', 'conf/b3.%s', 'b3/conf/b3.%s',
-                      os.path.join(HOMEDIR, 'b3.%s'), os.path.join(HOMEDIR, 'conf', 'b3.%s'),
-                      os.path.join(HOMEDIR, 'b3', 'conf', 'b3.%s'), '@b3/conf/b3.%s'):
-                for e in ('ini', 'cfg', 'xml'):
-                    path = b3.getAbsolutePath(p % e, True)
-                    if os.path.isfile(path):
-                        print(f"Using configuration file: {path}")
-                        config = path
-                        sleep(3)
-                        break
-
-            if not config:
-                console_exit('ERROR: could not find any valid configuration file.')
         try:
-            self.config = b3.config.MainConfig(b3.config.load(config))
-            if self.config.analyze():
-                raise b3.config.ConfigFileNotValid
-        except b3.config.ConfigFileNotValid:
-            console_exit(f'ERROR: configuration file not valid ({config})')
+            self.config = b3.config.get_main_config(config)
+            analysis = self.config.analyze()
+            if analysis:
+                raise b3.config.ConfigFileNotValid(
+                    'Invalid configuration file specified: ' +
+                    '\n >>> '.join(analysis)
+                )
+        except b3.config.ConfigFileNotValid as cerr:
+            print(cerr)
+            b3.functions.console_exit(f'ERROR: configuration file not valid ({config})')
 
     def run(self):
         """
         Run the DB update
         """
-        print("""
+        print(r"""
                         _\|/_
                         (o o)    {:>32}
                 +----oOO---OOo----------------------------------+
@@ -189,26 +175,21 @@ class DBUpdate:
             :param update_version: the update version
             """
             if B3version(b3.__version__) >= update_version:
-                sql = b3.getAbsolutePath(f'@b3/sql/{storage.protocol}/b3-update-{update_version}.sql')
+                sql = b3.functions.getAbsolutePath(f'@b3/sql/{storage.protocol}/b3-update-{update_version}.sql')
                 if os.path.isfile(sql):
                     try:
                         print(f'>>> updating database to version {update_version}')
-                        sleep(.5)
+                        time.sleep(.5)
                         storage.queryFromFile(sql)
                     except Exception as err:
                         print(f'WARNING: could not update database properly: {err}')
-                        sleep(3)
+                        time.sleep(3)
 
         dsn = self.config.get('b3', 'database')
-        dsndict = splitDSN(dsn)
+        dsndict = b3.functions.splitDSN(dsn)
         from b3.parser import StubParser
-        database = getStorage(dsn, dsndict, StubParser())
+        database = b3.storage.getStorage(dsn, dsndict, StubParser())
 
         _update_database(database, '3.99.99')
 
-        console_exit('B3 database update completed!')
-
-
-from b3 import HOMEDIR
-from b3.functions import console_exit, splitDSN
-from b3.storage import getStorage
+        b3.functions.console_exit('B3 database update completed!')

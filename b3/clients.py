@@ -1487,7 +1487,7 @@ class Clients(dict):
             needle = re.sub(r'\s', '', handle.lower())
             for cid, c in self.items():
                 cleanname = re.sub(r'\s', '', c.name.lower())
-                if not c.hide and (needle in cleanname or needle in c.pbid) and not c in clients:
+                if not c.hide and (needle in cleanname or needle in c.pbid) and c not in clients:
                     clients.append(c)
             return clients
 

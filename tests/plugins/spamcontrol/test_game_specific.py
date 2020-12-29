@@ -3,8 +3,8 @@ from unittest.mock import Mock
 
 from mockito import when
 
-import b3
 from b3.events import Event
+from b3.functions import getAbsolutePath
 from tests.fake import FakeClient
 from tests.plugins.spamcontrol import SpamcontrolTestCase
 
@@ -14,7 +14,7 @@ class Test_game_specific_spam(SpamcontrolTestCase):
     def setUp(self):
         SpamcontrolTestCase.setUp(self)
 
-        with open(b3.getAbsolutePath('@b3/conf/plugin_spamcontrol.ini')) as default_conf:
+        with open(getAbsolutePath('@b3/conf/plugin_spamcontrol.ini')) as default_conf:
             self.init_plugin(default_conf.read())
 
         self.joe = FakeClient(self.console, name="Joe", exactName="Joe", guid="zaerezarezar", groupBits=1)

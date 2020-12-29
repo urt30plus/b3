@@ -1,8 +1,8 @@
 import argparse
 import os
+import signal
 import sys
 import traceback
-from time import sleep
 
 import b3
 import b3.config
@@ -12,7 +12,60 @@ import b3.update
 __author__ = 'ThorN'
 __version__ = '1.8'
 
-modulePath = b3.functions.resource_directory(__name__)
+
+def stdout_write(message, flush=True):
+    sys.stdout.write(message)
+    if flush:
+        sys.stdout.flush()
+
+
+def start(mainconfig, options):
+    """
+    Main B3 startup.
+    :param mainconfig: The B3 configuration file instance :type: b3.config.MainConfig
+    :param options: command line options
+    """
+    b3.confdir = os.path.dirname(mainconfig.fileName)
+
+    stdout_write(f'Starting B3      : {b3.getB3versionString()}\n')
+
+    # not real loading but the user will get what's configuration he is using
+    stdout_write(f'Loading config   : {b3.functions.getShortPath(mainconfig.fileName, True)}\n')
+
+    parsertype = mainconfig.get('b3', 'parser')
+    stdout_write(f'Loading parser   : {parsertype}\n')
+
+    parser = b3.functions.loadParser(parsertype)
+    b3.console = parser(mainconfig, options)
+
+    def termSignalHandler(signum, frame):
+        """
+        Define the signal handler so to handle B3 shutdown properly.
+        """
+        b3.console.bot("TERM signal received: shutting down")
+        b3.console.shutdown()
+        raise SystemExit(0)
+
+    try:
+        # necessary if using the functions profiler,
+        # because signal.signal cannot be used in threads
+        signal.signal(signal.SIGTERM, termSignalHandler)
+    except Exception:
+        pass
+
+    try:
+        b3.console.start()
+    except KeyboardInterrupt:
+        b3.console.shutdown()
+        print('Goodbye')
+        return
+    except SystemExit as msg:
+        print(f'EXITING: {msg}')
+        raise
+    except Exception as msg:
+        print(f'ERROR: {msg}')
+        traceback.print_exc()
+        sys.exit(223)
 
 
 def run_update(config=None):
@@ -29,44 +82,19 @@ def run(options):
     Run B3 in console.
     :param options: command line options
     """
-    analysis = None
-
     try:
-
-        if options.config:
-            config = b3.getAbsolutePath(options.config, True)
-            if not os.path.isfile(config):
-                b3.functions.console_exit(f'ERROR: configuration file not found ({config}).')
-        else:
-            config = None
-            for p in ('b3.%s', 'conf/b3.%s', 'b3/conf/b3.%s',
-                      os.path.join(b3.HOMEDIR, 'b3.%s'), os.path.join(b3.HOMEDIR, 'conf', 'b3.%s'),
-                      os.path.join(b3.HOMEDIR, 'b3', 'conf', 'b3.%s'), '@b3/conf/b3.%s'):
-                for e in ('ini', 'cfg', 'xml'):
-                    path = b3.getAbsolutePath(p % e, True)
-                    if os.path.isfile(path):
-                        print(f"Using configuration file: {path}")
-                        config = path
-                        sleep(3)
-                        break
-
-            if not config:
-                b3.functions.console_exit('ERROR: could not find any valid configuration file.')
-
-        main_config = b3.config.MainConfig(b3.config.load(config))
+        main_config = b3.config.get_main_config(options.config)
         analysis = main_config.analyze()
         if analysis:
-            raise b3.config.ConfigFileNotValid('Invalid configuration file specified')
+            raise b3.config.ConfigFileNotValid(
+                'Invalid configuration file specified: ' +
+                '\n >>> '.join(analysis)
+            )
 
-        b3.start(main_config, options)
+        start(main_config, options)
 
-    except b3.config.ConfigFileNotValid:
-        if analysis:
-            print('CRITICAL: invalid configuration file specified:\n')
-            for problem in analysis:
-                print(f"  >>> {problem}\n")
-        else:
-            print('CRITICAL: invalid configuration file specified')
+    except b3.config.ConfigFileNotValid as cerr:
+        print(cerr)
         raise SystemExit(1)
     except SystemExit:
         raise

@@ -371,7 +371,7 @@ class Test_Tk_default_config(B3TestCase):
         super(Test_Tk_default_config, self).setUp()
         self.console.gameName = 'f00'
         self.conf = CfgConfigParser()
-        self.conf.load(b3.getAbsolutePath('@b3/conf/plugin_tk.ini'))
+        self.conf.load(b3.functions.getAbsolutePath('@b3/conf/plugin_tk.ini'))
         self.p = TkPlugin(self.console, self.conf)
         self.p.onLoadConfig()
 

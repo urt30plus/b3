@@ -22,7 +22,7 @@ class Admin_TestCase(B3TestCase):
         Optionally specify a config for the plugin. If called with no parameter, then the default config is loaded.
         """
         if config_content is None:
-            self.conf.load(b3.getAbsolutePath("@b3/conf/plugin_admin.ini"))
+            self.conf.load(b3.functions.getAbsolutePath("@b3/conf/plugin_admin.ini"))
         else:
             self.conf.loadFromString(config_content)
         self.p.onLoadConfig()
@@ -40,7 +40,7 @@ class Admin_functional_test(B3TestCase):
     def init(self, config_content=None):
         """ optionally specify a config for the plugin. If called with no parameter, then the default config is loaded """
         if config_content is None:
-            self.conf.load(b3.getAbsolutePath("@b3/conf/plugin_admin.ini"))
+            self.conf.load(b3.functions.getAbsolutePath("@b3/conf/plugin_admin.ini"))
         else:
             self.conf.loadFromString(config_content)
 

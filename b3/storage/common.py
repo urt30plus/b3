@@ -4,7 +4,7 @@ import sys
 import threading
 from time import time
 
-import b3
+import b3.functions
 from b3.clients import Client
 from b3.clients import ClientBan
 from b3.clients import ClientKick
@@ -786,7 +786,7 @@ class DatabaseStorage(Storage):
         """
         This method executes an external sql file on the current database.
         :param fp: The filepath of the file containing the SQL statements.
-        :param silent: Whether or not to silence MySQL warnings.
+        :param silent: Whether or not to silence warnings.
         :raise Exception: If the query cannot be evaluated or if the given path cannot be resolved.
         """
         # use existing connection or create a new one
@@ -799,10 +799,10 @@ class DatabaseStorage(Storage):
         # save standard error output
         orig_stderr = sys.stderr
         if silent:
-            # silence mysql warnings and such
+            # silence warnings and such
             sys.stderr = open(os.devnull, 'w')
 
-        path = b3.getAbsolutePath(fp)
+        path = b3.functions.getAbsolutePath(fp)
         if not os.path.exists(path):
             raise Exception(f'SQL file does not exist: {path}')
 

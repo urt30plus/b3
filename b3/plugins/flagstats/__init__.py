@@ -1,4 +1,6 @@
-import b3, time
+import time
+
+import b3
 import b3.events
 import b3.plugin
 
@@ -6,7 +8,7 @@ __version__ = '0.6.9'
 __author__ = 'Beber888, GrosBedo'
 
 
-class TeamData():
+class TeamData:
     name = 'UnknownTeam'
     maxFlag = 0
     maxFlagClients = None

@@ -51,7 +51,7 @@ class Plugin:
     requiresParsers = []
     """:type: list"""
 
-    # List of storage protocols supported by your plugin ('mysql', 'sqlite'): if no value is specified
+    # List of storage protocols supported by your plugin ('sqlite'): if no value is specified
     # B3 will load the plugin no matter the type of storage module being used (so it will assume that your plugin will
     # not use the storage layer at all, or that your plugin is capable of handling all of them).
     # NOTE: B3 will not generate the database schema: you would have to handle this yourself in plugin onStartup()
@@ -238,9 +238,9 @@ class Plugin:
             return b3.functions.time2minutes(str(value).strip())
 
         def _get_path(value):
-            """convert the given path using b3.getAbsolutePath"""
+            """convert the given path using b3.functions.getAbsolutePath"""
             self.verbose('trying to convert value to absolute path : %s', value)
-            return b3.getAbsolutePath(str(value), decode=True)
+            return b3.functions.getAbsolutePath(str(value), decode=True)
 
         def _get_template(value):
             """process the given value using b3.functions.vars2printf"""

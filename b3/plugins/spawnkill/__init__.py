@@ -124,7 +124,7 @@ class SpawnkillPlugin(b3.plugin.Plugin):
         if self.console.time() - target.var(self, 'spawntime').toInt() < self.settings['kill']['delay']:
             func = self.penalties[self.settings['kill']['penalty']]
             func('kill', client)
-            ## EVENT: produce an event so other plugins can perform other actions
+            # EVENT: produce an event so other plugins can perform other actions
             self.console.queueEvent(self.console.getEvent('EVT_CLIENT_SPAWNKILL', client=client, target=target))
 
     def onKillTeam(self, event):
@@ -135,7 +135,7 @@ class SpawnkillPlugin(b3.plugin.Plugin):
         target = event.target
 
         if client.maxLevel < self.settings['kill']['maxlevel'] and target.isvar(self, 'spawntime'):
-            ## EVENT: produce an event so other plugins can perform other actions
+            # EVENT: produce an event so other plugins can perform other actions
             self.console.queueEvent(self.console.getEvent('EVT_CLIENT_SPAWNKILL_TEAM', client=client, target=target))
 
     def warn_client(self, index, client):

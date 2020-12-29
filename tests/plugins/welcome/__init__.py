@@ -34,7 +34,7 @@ class Welcome_functional_test(B3TestCase):
         load the given config content, or the default config if config_content is None.
         """
         if config_content is None:
-            self.conf.load(b3.getAbsolutePath('@b3/conf/plugin_welcome.ini'))
+            self.conf.load(b3.functions.getAbsolutePath('@b3/conf/plugin_welcome.ini'))
         else:
             self.conf.loadFromString(config_content)
         self.p.onLoadConfig()

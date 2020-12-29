@@ -3,10 +3,37 @@ import importlib
 import os
 import re
 import sys
+import tempfile
 import threading
 
 __author__ = 'ThorN, xlr8or, courgette'
 __version__ = '1.23'
+
+try:
+    import pkg_resources
+except ImportError:
+    def resource_directory(module):
+        """
+        Use this if pkg_resources is NOT installed
+        """
+        return os.path.dirname(sys.modules[module].__file__)
+else:
+    def resource_directory(module):
+        """
+        Use this if pkg_resources is installed
+        """
+        return pkg_resources.resource_filename(module, '')
+
+
+def decode_text(text):
+    """
+    Return a copy of text decoded using the default system encoding.
+    :param text: the text to decode
+    :return: string
+    """
+    if hasattr(text, 'decode'):
+        return text.decode(sys.getfilesystemencoding())
+    return text
 
 
 def is_windows():
@@ -67,9 +94,6 @@ def splitDSN(url):
         elif g['host']:
             g['path'] = g['host']
             g['host'] = None
-    elif g['protocol'] == 'mysql':
-        if g['password'] is None:
-            g['password'] = ''
 
     if g['port']:
         g['port'] = int(g['port'])
@@ -77,8 +101,6 @@ def splitDSN(url):
         g['port'] = 21
     elif g['protocol'] == 'sftp':
         g['port'] = 22
-    elif g['protocol'] == 'mysql':
-        g['port'] = 3306
     return g
 
 
@@ -292,13 +314,6 @@ def fuzzyGuidMatch(a, b):
             return True
 
     return False
-
-
-def sanitizeMe(s):
-    """
-    Remove unprintable characters from a given string.
-    """
-    return re.sub(r'[\x00-\x1F]|[\x7F-\xff]', '?', s) if s else ''
 
 
 def getStuffSoundingLike(stuff, expected_stuff):
@@ -551,32 +566,106 @@ def escape_string(value):
     """
     escape_string escapes *value* but not surround it with quotes.
     Value should be bytes or unicode.
-    Source - https://github.com/PyMySQL/PyMySQL/blob/40f6a706144a9b65baa123e6d5d89d23558646ac/pymysql/converters.py
     """
     return value.translate(_escape_table)
 
 
-def get_home_path():
+def loadParser(pname):
+    """
+    Load the parser module given it's name.
+    :param pname: The parser name
+    :return The parser module
+    """
+    mod = getModule(f'b3.parsers.{pname}')
+    return getattr(mod, f'{pname.title()}Parser')
+
+
+def get_home_path(create=True):
     """
     Return the path to the B3 home directory.
     """
     path = os.path.normpath(os.path.expanduser('~/.b3'))
-    if not os.path.isdir(path):
+    if create and not os.path.isdir(path):
         os.mkdir(path)
     return path
 
 
-try:
-    import pkg_resources
-except ImportError:
-    def resource_directory(module):
-        """
-        Use this if pkg_resources is NOT installed
-        """
-        return os.path.dirname(sys.modules[module].__file__)
-else:
-    def resource_directory(module):
-        """
-        Use this if pkg_resources is installed
-        """
-        return pkg_resources.resource_filename(module, '')
+def getB3Path(decode=False):
+    """
+    Return the path to the main B3 directory.
+    :param decode: if True will decode the path string using the default file system encoding before returning it
+    """
+    modulePath = resource_directory(__name__)
+    path = os.path.normpath(os.path.expanduser(modulePath))
+    return path if not decode else decode_text(path)
+
+
+def getAbsolutePath(path, decode=False, conf=None):
+    """
+    Return an absolute path name and expand the user prefix (~).
+    :param path: the relative path we want to expand
+    :param decode: if True will decode the path string using the default file system encoding before returning it
+    :param conf: the current configuration being used :type XmlConfigParser|CfgConfigParser|MainConfig|str:
+    """
+    if path.startswith('@'):
+        if path[1:4] in ('b3\\', 'b3/'):
+            path = os.path.join(getB3Path(decode=False), path[4:])
+        elif path[1:6] in ('conf\\', 'conf/'):
+            import b3.config
+            path = os.path.join(b3.config.getConfPath(decode=False, conf=conf), path[6:])
+        elif path[1:6] in ('home\\', 'home/'):
+            home_dir = get_home_path(create=True)
+            path = os.path.join(home_dir, path[6:])
+    path = os.path.normpath(os.path.expanduser(path))
+    return path if not decode else decode_text(path)
+
+
+def getWritableFilePath(filepath, decode=False):
+    """
+    Return an absolute file path making sure the current user can write it.
+    If the given path is not writable by the current user, the path will be converted
+    into an absolute path pointing inside the B3 home directory (defined in the `get_home_path`
+    which is assumed to be writable.
+
+    :param filepath: the relative path we want to expand
+    :param decode: if True will decode the path string using the default file system encoding before returning it
+    """
+    filepath = getAbsolutePath(filepath, decode)
+    home_dir = get_home_path(create=False)
+    if not filepath.startswith(home_dir):
+        try:
+            with tempfile.TemporaryFile(dir=os.path.dirname(filepath)) as tf:
+                pass
+        except (OSError, IOError):
+            # no need to decode again since home_dir is already decoded
+            # and os.path.join will handle everything itself
+            home_dir = get_home_path(create=True)
+            filepath = os.path.join(home_dir, os.path.basename(filepath))
+    return filepath
+
+
+def getShortPath(filepath, decode=False, first_time=True):
+    """
+    Convert the given absolute path into a short path.
+    Will replace path string with proper tokens (such as @b3, @conf, ~, ...)
+    :param filepath: the path to convert
+    :param decode: if True will decode the path string using the default file system encoding before returning it
+    :param first_time: whether this is the first function call attempt or not
+    :return: string
+    """
+    # NOTE: make sure to have os.path.sep at the end otherwise also files starting with 'b3' will be matched
+    homepath = getAbsolutePath('@home/', decode) + os.path.sep
+    if filepath.startswith(homepath):
+        return filepath.replace(homepath, '@home' + os.path.sep)
+    confpath = getAbsolutePath('@conf/', decode) + os.path.sep
+    if filepath.startswith(confpath):
+        return filepath.replace(confpath, '@conf' + os.path.sep)
+    b3path = getAbsolutePath('@b3/', decode) + os.path.sep
+    if filepath.startswith(b3path):
+        return filepath.replace(b3path, '@b3' + os.path.sep)
+    userpath = getAbsolutePath('~', decode) + os.path.sep
+    if filepath.startswith(userpath):
+        return filepath.replace(userpath, '~' + os.path.sep)
+    if first_time:
+        return getShortPath(filepath, not decode, False)
+    return filepath

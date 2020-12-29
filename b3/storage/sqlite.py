@@ -1,6 +1,6 @@
 import os
 
-import b3
+import b3.functions
 from b3.storage.common import DatabaseStorage
 
 
@@ -24,7 +24,7 @@ class SqliteStorage(DatabaseStorage):
         """
         try:
             import sqlite3
-            path = b3.getWritableFilePath(self.dsn[9:])
+            path = b3.functions.getWritableFilePath(self.dsn[9:])
             self.console.bot("Using database file: %s", path)
             is_new_database = not os.path.isfile(path)
             self.db = sqlite3.connect(path, check_same_thread=False)
@@ -38,7 +38,7 @@ class SqliteStorage(DatabaseStorage):
         else:
             # import SQL script if necessary
             if path == ':memory:' or is_new_database:
-                self.console.info("Importing SQL file: %s...", b3.getAbsolutePath("@b3/sql/sqlite/b3.sql"))
+                self.console.info("Importing SQL file: %s...", b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql"))
                 self.queryFromFile("@b3/sql/sqlite/b3.sql")
 
             if self._consoleNotice:

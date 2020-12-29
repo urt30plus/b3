@@ -198,7 +198,7 @@ class AdminPlugin(b3.plugin.Plugin):
 
         try:
             msg = self.config.getTextTemplate('messages', 'regme_confirmation')
-            if not '%s' in msg:
+            if '%s' not in msg:
                 raise ValueError("message regme_confirmation must have a placeholder '%%s' for the group name")
             self._messages['regme_confirmation'] = msg
         except NoOptionError:
@@ -328,7 +328,7 @@ class AdminPlugin(b3.plugin.Plugin):
         def load_mandatory_warn_reason(key, default_duration, default_reason):
             if self.config.has_option('warn_reasons', key):
                 self.warn_reasons[key] = load_warn_reason(key, self.config.getTextTemplate('warn_reasons', key))
-            if not key in self.warn_reasons or self.warn_reasons[key] is None:
+            if key not in self.warn_reasons or self.warn_reasons[key] is None:
                 self.warning("no valid option '%s' in section 'warn_reasons': falling back on default value" % key)
                 self.warn_reasons[key] = functions.time2minutes(default_duration), default_reason
             self.info("warn reason '%s': %s" % (key, self.warn_reasons[key]))
@@ -420,13 +420,13 @@ class AdminPlugin(b3.plugin.Plugin):
                 self.critical('seems your groups table in the database is empty: please recreate your database using '
                               'the proper sql syntax. To do so you can import in your database the following SQL '
                               'script: %s - (%s)' % (
-                                  b3.getAbsolutePath("@b3/sql/%s/b3.sql" % self.console.storage.dsnDict['protocol']),
+                                  b3.functions.getAbsolutePath("@b3/sql/%s/b3.sql" % self.console.storage.dsnDict['protocol']),
                                   msg))
 
             if 'iamgod' in self._commands and \
                     self._commands['iamgod'].level is not None and \
                     self._commands['iamgod'].level[0] >= 0:
-                ## here the config file for the admin plugin explicitly enables the iamgod command
+                # here the config file for the admin plugin explicitly enables the iamgod command
                 if len(superadmins) == 0:
                     self.verbose('!iamgod command enabled by config file: be sure to disable it after typing !iamgod.')
                 else:

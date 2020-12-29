@@ -13,47 +13,6 @@ class TestSplitDSN(unittest.TestCase):
                             {'protocol': 'sqlite', 'host': 'c|', 'user': None,
                              'path': '/mydatabase/test.db', 'password': None, 'port': None})
 
-    def test_ftp(self):
-        self.assertDsnEqual('ftp://username@domain.com/index.html',
-                            {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username',
-                             'path': '/index.html', 'password': None, 'port': 21})
-
-    def test_ftp2(self):
-        self.assertDsnEqual('ftp://username:password@domain.com/index.html',
-                            {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username',
-                             'path': '/index.html', 'password': 'password', 'port': 21})
-
-    def test_ftp3(self):
-        self.assertDsnEqual('ftp://username@domain.com:password@domain.com/index.html',
-                            {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username@domain.com',
-                             'path': '/index.html', 'password': 'password', 'port': 21})
-
-    def test_ftp4(self):
-        self.assertDsnEqual('ftp://username@domain.com:password@domain.com:2121/index.html',
-                            {'protocol': 'ftp', 'host': 'domain.com', 'user': 'username@domain.com',
-                             'path': '/index.html', 'password': 'password', 'port': 2121})
-
-    def test_mysql(self):
-        self.assertDsnEqual('mysql://b3:password@localhost/b3',
-                            {'protocol': 'mysql', 'host': 'localhost', 'user': 'b3',
-                             'path': '/b3', 'password': 'password', 'port': 3306})
-        self.assertDsnEqual('mysql://b3:password@localhost:3406/b3',
-                            {'protocol': 'mysql', 'host': 'localhost', 'user': 'b3',
-                             'path': '/b3', 'password': 'password', 'port': 3406})
-        self.assertDsnEqual("mysql://someuser:somepasswd@somehost:3326/",
-                            {'protocol': 'mysql', 'host': 'somehost', 'user': 'someuser',
-                             'path': '/', 'password': 'somepasswd', 'port': 3326})
-
-    def test_mysql_empty_password(self):
-        self.assertDsnEqual('mysql://b3:@localhost/b3',
-                            {'protocol': 'mysql', 'host': 'localhost', 'user': 'b3',
-                             'path': '/b3', 'password': '', 'port': 3306})
-
-    def test_mysql_no_password(self):
-        self.assertDsnEqual('mysql://b3@localhost:3406/b3',
-                            {'protocol': 'mysql', 'host': 'localhost', 'user': 'b3',
-                             'path': '/b3', 'password': '', 'port': 3406})
-
 
 class TestFuzziGuidMatch(unittest.TestCase):
     def test_1(self):

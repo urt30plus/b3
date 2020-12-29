@@ -341,7 +341,7 @@ class Test_config(Admin_functional_test):
 
         # load the default plugin_admin.ini file after having remove the 'generic' setting from section 'warn_reasons'
         new_config_content = ""
-        with open(b3.getAbsolutePath('@b3/conf/plugin_admin.ini')) as config_file:
+        with open(b3.functions.getAbsolutePath('@b3/conf/plugin_admin.ini')) as config_file:
             is_in_warn_reasons_section = False
             for line in config_file:
                 if line == '[warn_reasons]':

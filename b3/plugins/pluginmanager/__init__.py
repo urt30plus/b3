@@ -96,7 +96,7 @@ class PluginmanagerPlugin(b3.plugin.Plugin):
                 :param match: The plugin name
                 """
                 # first look in the built-in plugins directory
-                search = '%s%s*%s*' % (b3.getAbsolutePath('@b3\\conf'), os.path.sep, match)
+                search = '%s%s*%s*' % (b3.functions.getAbsolutePath('@b3\\conf'), os.path.sep, match)
                 self.debug('searching for configuration file(s) matching: %s' % search)
                 collection = glob.glob(search)
                 if len(collection) > 0:
@@ -104,7 +104,7 @@ class PluginmanagerPlugin(b3.plugin.Plugin):
                 # if none is found, then search in the extplugins directory
                 extplugins_dir = self.console.config.get_external_plugins_dir()
                 search = '%s%s*%s*' % (
-                os.path.join(b3.getAbsolutePath(extplugins_dir), match, 'conf'), os.path.sep, match)
+                os.path.join(b3.functions.getAbsolutePath(extplugins_dir), match, 'conf'), os.path.sep, match)
                 self.debug('searching for configuration file(s) matching: %s' % search)
                 collection = glob.glob(search)
                 return collection

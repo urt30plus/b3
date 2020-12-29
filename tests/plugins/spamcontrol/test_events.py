@@ -16,7 +16,7 @@ class Test_plugin(SpamcontrolTestCase):
         self.adminPlugin.onLoadConfig()
         self.adminPlugin.onStartup()
 
-        with open(b3.getAbsolutePath('@b3/conf/plugin_spamcontrol.ini')) as default_conf:
+        with open(b3.functions.getAbsolutePath('@b3/conf/plugin_spamcontrol.ini')) as default_conf:
             self.init_plugin(default_conf.read())
 
         self.joe = FakeClient(self.console, name="Joe", guid="zaerezarezar", groupBits=1)

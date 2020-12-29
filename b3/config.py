@@ -104,7 +104,7 @@ class B3ConfigParserMixin:
         :param section: The configuration file section.
         :param setting: The configuration file setting.
         """
-        return b3.getAbsolutePath(self.get(section, setting), decode=True)
+        return b3.functions.getAbsolutePath(self.get(section, setting), decode=True)
 
     def getTextTemplate(self, section, setting=None, **kwargs):
         """
@@ -441,7 +441,7 @@ def load(filename):
         # allow the use of empty keys to support the new b3.ini configuration file
         config = CfgConfigParser(allow_no_value=True)
 
-    filename = b3.getAbsolutePath(filename, True)
+    filename = b3.functions.getAbsolutePath(filename, True)
 
     # return the config if it can be loaded
     return config if config.load(filename) else None
@@ -598,3 +598,51 @@ class MainConfig(B3ConfigParserMixin):
                 return attr
         else:
             raise AttributeError(name)
+
+
+def getConfPath(decode=False, conf=None):
+    """
+    Return the path to the B3 main configuration directory.
+    :param decode: if True will decode the path string using the default file system encoding before returning it.
+    :param conf: the current configuration being used :type XmlConfigParser|CfgConfigParser|MainConfig|str:
+    """
+    if conf:
+        if isinstance(conf, str):
+            path = os.path.dirname(conf)
+        elif isinstance(conf, XmlConfigParser) or isinstance(conf, CfgConfigParser) or isinstance(conf, MainConfig):
+            path = os.path.dirname(conf.fileName)
+        else:
+            raise TypeError(
+                "Invalid configuration type specified: expected "
+                "str|XmlConfigParser|CfgConfigParser|MainConfig, "
+                f"got {type(conf)} instead"
+            )
+    else:
+        path = b3.confdir or os.path.dirname(b3.console.config.fileName)
+
+    return path if not decode else b3.functions.decode_text(path)
+
+
+def get_main_config(config_path):
+    config = None
+    if config_path:
+        config = b3.functions.getAbsolutePath(config_path, True)
+        if not os.path.isfile(config):
+            b3.functions.console_exit(f'ERROR: configuration file not found ({config}).')
+    else:
+        home_dir = b3.functions.get_home_path(create=False)
+        for p in ('b3.%s', 'conf/b3.%s', 'b3/conf/b3.%s',
+                  os.path.join(home_dir, 'b3.%s'), os.path.join(home_dir, 'conf', 'b3.%s'),
+                  os.path.join(home_dir, 'b3', 'conf', 'b3.%s'), '@b3/conf/b3.%s'):
+            for e in ('ini', 'cfg', 'xml'):
+                path = b3.functions.getAbsolutePath(p % e, True)
+                if os.path.isfile(path):
+                    print(f"Using configuration file: {path}")
+                    config = path
+                    time.sleep(3)
+                    break
+
+    if not config:
+        b3.functions.console_exit('ERROR: could not find any valid configuration file.')
+
+    return b3.config.MainConfig(load(config))

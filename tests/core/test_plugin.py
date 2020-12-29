@@ -448,7 +448,7 @@ class Test_Plugin_getSetting(B3TestCase):
         self.assertEqual(self.p.getSetting('section_foo', 'option_duration1', b3.DURATION), 300)
         self.assertEqual(self.p.getSetting('section_foo', 'option_duration2', b3.DURATION), 180)
         self.assertEqual(self.p.getSetting('section_foo', 'option_path', b3.PATH),
-                         b3.getAbsolutePath('@b3/conf/b3.distribution.ini', decode=True))
+                         b3.functions.getAbsolutePath('@b3/conf/b3.distribution.ini', decode=True))
 
     def test_value_retrieval_invalid(self):
         self.assertEqual(self.p.getSetting('section_foo', 'option_path', b3.INTEGER, 40), 40)
@@ -529,7 +529,7 @@ class Test_Plugin_requiresStorage(B3TestCase):
 
     def test_wrong_storage(self):
         # GIVEN
-        self.console.storage.protocol = 'mysql'
+        self.console.storage.protocol = 'postgres'
         self.plugin_list.append(
             {'name': 'testplugin3', 'conf': None, 'path': external_plugins_dir, 'disabled': False}
         )

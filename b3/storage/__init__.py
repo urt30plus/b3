@@ -1,7 +1,7 @@
 __author__ = 'Courgette'
 __version__ = '1.2'
 
-PROTOCOLS = ('mysql', 'sqlite')
+PROTOCOLS = ('sqlite',)
 
 
 class Storage:
@@ -87,7 +87,6 @@ class Storage:
         raise NotImplementedError
 
 
-from .mysql import MysqlStorage
 from .sqlite import SqliteStorage
 
 

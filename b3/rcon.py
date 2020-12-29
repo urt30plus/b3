@@ -161,9 +161,6 @@ class Rcon:
         if self.queue:
             self.queue.put(self._stopEvent)
 
-    def flush(self):
-        pass
-
     def close(self):
         self.stop()
         self.socket.close()

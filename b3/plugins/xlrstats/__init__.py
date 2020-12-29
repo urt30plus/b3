@@ -1,15 +1,14 @@
 import datetime
-import re
 import os
+import re
 import time
 
 import b3
 import b3.cron
 import b3.events
 import b3.plugin
-
 from b3.config import NoOptionError
-from b3.functions import escape, right_cut, start_daemon_thread
+from b3.functions import escape, right_cut
 
 __author__ = 'xlr8or & ttlogic'
 __version__ = '3.0.0-beta.17'
@@ -264,7 +263,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         Build the database schema checking if all the needed tables have been properly created.
         If not, it will attempt to create them automatically
         """
-        sql_main = os.path.join(b3.getAbsolutePath('@b3/plugins/xlrstats/sql'), self.console.storage.protocol)
+        sql_main = os.path.join(b3.functions.getAbsolutePath('@b3/plugins/xlrstats/sql'), self.console.storage.protocol)
         xlr_tables = {x: getattr(self, x) for x in dir(self) if x.endswith('_table')}
         current_tables = self.console.storage.getTables()
 
@@ -1315,7 +1314,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         try:
             self.query("""SELECT %s FROM %s limit 1;""" % (c1, t1))
         except Exception as e:
-            if e[0] == 1054:
+            if e.args[0] == 1054:
                 self.console.debug('column does not yet exist: %s' % e)
                 self.query("""ALTER TABLE %s ADD %s %s ;""" % (t1, c1, specs))
                 self.console.info('created new column `%s` on %s' % (c1, t1))
@@ -1752,7 +1751,7 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         except:
             pass
         try:
-            hour = self.console.to_utc_hour(0) # adjust to zero hour (midnight) local time
+            hour = self.console.to_utc_hour(0)  # adjust to zero hour (midnight) local time
             self._cronTabMonth = b3.cron.PluginCronTab(self, self.snapshot_month,
                                                        0, 0, hour, 1, '*', '*')
             self.console.cron + self._cronTabMonth

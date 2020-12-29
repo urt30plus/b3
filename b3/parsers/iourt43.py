@@ -318,7 +318,7 @@ class Iourt43Parser(b3.parser.Parser):
 
     _reMapNameFromStatus = re.compile(r'^map:\s+(?P<map>.+)$', re.IGNORECASE)
 
-    ## kill modes
+    # kill modes
     MOD_WATER = '1'
     MOD_LAVA = '3'
     MOD_TELEFRAG = '5'
@@ -380,8 +380,8 @@ class Iourt43Parser(b3.parser.Parser):
     # WORLD CID (used for Mr. Sentry detection)
     WORLD = '1022'
 
-    ## weapons id on Hit: lines are different than the one
-    ## on the Kill: lines. Here the translation table
+    # weapons id on Hit: lines are different than the one
+    # on the Kill: lines. Here the translation table
     hitweapon2killweapon = {
         1: UT_MOD_KNIFE,
         2: UT_MOD_BERETTA,
@@ -408,11 +408,11 @@ class Iourt43Parser(b3.parser.Parser):
         30: UT_MOD_KNIFE_THROWN,
     }
 
-    ## damage table
-    ## Fenix: Hit locations start with index 1 (HL_HEAD).
-    ##        Since lists are 0 indexed we'll need to adjust the hit location
-    ##        code to match the index number. Instead of adding random values
-    ##        in the damage table, the adjustment will be made in _getDamagePoints.
+    # damage table
+    # Fenix: Hit locations start with index 1 (HL_HEAD).
+    #        Since lists are 0 indexed we'll need to adjust the hit location
+    #        code to match the index number. Instead of adding random values
+    #        in the damage table, the adjustment will be made in _getDamagePoints.
     damage = {
         MOD_TELEFRAG: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         UT_MOD_KNIFE: [100, 60, 44, 35, 20, 20, 40, 37, 20, 20, 18, 18, 15, 15],
@@ -588,7 +588,7 @@ class Iourt43Parser(b3.parser.Parser):
         # 0 \gear\GMIORAA\team\blue\skill\5.000000\characterfile\bots/ut_chicken_c.c\color\4\sex\male\race\2\snaps\20\..
         bclient = self.parseUserInfo(data)
         bot = False
-        if not 'cl_guid' in bclient and 'skill' in bclient:
+        if 'cl_guid' not in bclient and 'skill' in bclient:
             # must be a bot connecting
             self.bot('Bot connecting!')
             bclient['ip'] = '0.0.0.0'
@@ -1030,7 +1030,7 @@ class Iourt43Parser(b3.parser.Parser):
             self.debug('No weapon')
             return None
 
-        ## Fix attacker
+        # Fix attacker
         if match.group('aweap') in (self.UT_MOD_SLAPPED, self.UT_MOD_NUKED, self.MOD_TELEFRAG):
             self.debug('OnKill: slap/nuke => attacker should be None')
             attacker = self.clients.getByCID('-1')  # make the attacker 'World'
@@ -1041,7 +1041,7 @@ class Iourt43Parser(b3.parser.Parser):
             attacker = victim
         else:
             attacker = self.getByCidOrJoinPlayer(match.group('acid'))
-        ## End fix attacker
+        # End fix attacker
 
         if not attacker:
             # handle the case where Mr.Sentry killed a player

@@ -19,9 +19,9 @@ class KniferPlugin(b3.plugin.Plugin):
     _nbTop = 5
     _msgLevels = set()
     _cutKillers = {}
-    _challengeTarget = None
+    _challenges = {}
+    _max_challenges = 5
     _challengeDuration = 300
-    _challengeThread = None
     _hof_plugin_name = 'knifer'
 
     def onLoadConfig(self):
@@ -93,8 +93,7 @@ class KniferPlugin(b3.plugin.Plugin):
         self.registerEvent('EVT_CLIENT_KILL', self.on_client_kill)
 
     def on_round_start(self, event):
-        if self._challengeThread is not None:
-            self._challengeThread.cancel()
+        self._cancel_challenges()
         for c in self.console.clients.getList():
             prev_kills = c.var(self, 'knifeKills', 0).value
             if prev_kills > 0:
@@ -105,9 +104,20 @@ class KniferPlugin(b3.plugin.Plugin):
         self.displayScores(0)
         start_daemon_thread(target=self.updateHallOfFame, args=(self._cutKillers, self.console.game.mapName), name='knifer-hof')
         self.resetScores()
+        self._cancel_challenges()
+
+    def _cancel_challenges(self):
+        while True:
+            try:
+                _, challenge_thread = self._challenges.popitem()
+                self._cancel_challenge_thread(challenge_thread)
+            except KeyError:
+                break
+
+    def _cancel_challenge_thread(self, challenge_thread):
         try:
-            self._challengeThread.cancel()
-        except:
+            challenge_thread.cancel()
+        except Exception:
             pass
 
     def on_client_kill(self, event):
@@ -180,24 +190,34 @@ class KniferPlugin(b3.plugin.Plugin):
 
     def cmd_challenge(self, data, client, cmd=None):
         """\
-        <player> Challenge someone. The first player to slice him wins the challenge.
+        <player> Challenge someone. The first player to slice them wins the challenge.
         """
         if (not self._knEnabled) or (self._stfu == 1):
             cmd.sayLoudOrPM(client, '^7Knife stats are disabled')
             return
-        if data:
-            m = self._adminPlugin.parseUserCmd(data)
-            if m:
-                sclient = self._adminPlugin.findClientPrompt(m[0], client)
-                if not sclient:
-                    # pass
-                    # cmd.sayLoudOrPM(client, 'No player found')
-                    return
-                else:
-                    self.console.write('bigtext "^7New challenge : try to slice ^3%s"' % (sclient.exactName))
-                    self._challengeTarget = sclient
-        self._challengeThread = threading.Timer(self._challengeDuration, self.challengeEnd)
-        self._challengeThread.start()
+
+        m = self._adminPlugin.parseUserCmd(data)
+        if not m:
+            client.message('^7Invalid data, try !help knchallenge')
+            return
+
+        sclient = self._adminPlugin.findClientPrompt(m[0], client)
+        if not sclient:
+            return
+
+        existing_challenge = self._challenges.get(sclient.cid)
+        if existing_challenge:
+            client.message(f'There is already a challenge underway for {sclient.exactName}')
+            return
+
+        if len(self._challenges) >= self._max_challenges:
+            client.message(f'There are already several challenges underway, try again later')
+            return
+
+        self.console.write('bigtext "^7New challenge : try to slice ^3%s"' % sclient.exactName)
+        challenge_thread = threading.Timer(self._challengeDuration, self.challengeEnd, args=(sclient.cid, sclient.exactName))
+        challenge_thread.start()
+        self._challenges[sclient.cid] = challenge_thread
         self.debug('Starting challenge thread : %d seconds' % self._challengeDuration)
 
     def cmd_allstats(self, data, client, cmd=None):
@@ -226,7 +246,7 @@ class KniferPlugin(b3.plugin.Plugin):
         """\
         <player> Displays the XLR skills points gained when killing a player
         """
-        if self._xlrstatsPlugin == None:
+        if self._xlrstatsPlugin is None:
             client.message('Command unavailable, please try later"')
             return
 
@@ -288,7 +308,7 @@ class KniferPlugin(b3.plugin.Plugin):
         if data[1] == self.console.UT_MOD_KNIFE:
             self._nbKK += 1
             if self._nbKK == 1:
-                self.console.write('bigtext "^3%s ^7: first knife kill"' % (client.exactName))
+                self.console.write('bigtext "^3%s ^7: first knife kill"' % client.exactName)
             numCuts = 1
             if client.cid not in self._cutKillers:
                 client.setvar(self, 'knifeKills', 1)
@@ -303,18 +323,13 @@ class KniferPlugin(b3.plugin.Plugin):
                 msg = self.getMessage('knkills_%d' % numCuts, {'name': client.exactName, 'score': numCuts})
                 self.console.write('bigtext "%s"' % msg)
 
-            if self._challengeTarget != None:
-                self.debug('challengeTarget exists')
-                if target != None:
-                    self.debug('target exists')
-                    if self._challengeTarget.cid == target.cid:
-                        try:
-                            self._challengeThread.cancel()
-                        except:
-                            pass
-                        self.console.write(
-                            'bigtext "^7Good job ^3%s^7, you sliced ^3%s ^7!"' % (client.exactName, target.exactName))
-                        self._challengeTarget = None
+            if self._challenges and target is not None:
+                self.debug('challenges and target exists')
+                challenge_thread = self._challenges.pop(target.cid, None)
+                if challenge_thread:
+                    self._cancel_challenge_thread(challenge_thread)
+                    self.console.write(
+                        'bigtext "^7Good job ^3%s^7, you sliced ^3%s ^7!"' % (client.exactName, target.exactName))
 
     def allStats(self, client, fclient):
         knifeXlrId = self._xlrstatsPlugin.get_WeaponStats(self._knifeId).id
@@ -324,10 +339,13 @@ class KniferPlugin(b3.plugin.Plugin):
         # self.info('Nb of kills = %d' % xlrResult.kills)
         client.message('^7Total knife kills (xlrstats): ^2%d' % xlrResult.kills)
 
-    def challengeEnd(self):
+    def challengeEnd(self, target_id=None, target_name=None):
         self.debug('Challenge has ended')
-        self.console.write('bigtext "^3%s ^7has won the knife challenge!"' % self._challengeTarget.exactName)
-        self._challengeTarget = None
+        self.console.write('bigtext "^3%s ^7has won the knife challenge!"' % target_name)
+        try:
+            del self._challenges[target_id]
+        except KeyError:
+            pass
 
     def testScore(self, client, sclient):
         # for cmd in self._xlrstatsPlugin.config.options('commands'):
@@ -438,7 +456,7 @@ class KniferPlugin(b3.plugin.Plugin):
             cursor = self.query(q)
         except:
             self.error('Can\'t execute query : %s' % q)
-            return (RecordHolder, RecordValue)
+            return RecordHolder, RecordValue
 
         r = cursor.getOneRow()
         if r:
@@ -452,4 +470,4 @@ class KniferPlugin(b3.plugin.Plugin):
         else:
             RecordValue = 0
 
-        return (RecordHolder, str(RecordValue))
+        return RecordHolder, str(RecordValue)

@@ -13,7 +13,7 @@ class Test_config(SpamcontrolTestCase):
     default_falloff_rate = 6.5
 
     def test_default_conf(self):
-        with open(b3.getAbsolutePath('@b3/conf/plugin_spamcontrol.ini')) as default_conf:
+        with open(b3.functions.getAbsolutePath('@b3/conf/plugin_spamcontrol.ini')) as default_conf:
             self.init_plugin(default_conf.read())
         self.assertEqual(self.default_max_spamins, self.p._maxSpamins)
         self.assertEqual(self.default_mod_level, self.p._modLevel)

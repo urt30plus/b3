@@ -21,7 +21,7 @@ class Test_config(CensorTestCase):
         self.assertIsNone(self.p._defaultBadNamePenalty.reason)
 
     def test_default_conf(self):
-        with open(b3.getAbsolutePath('@b3/conf/plugin_censor.xml')) as default_conf:
+        with open(b3.functions.getAbsolutePath('@b3/conf/plugin_censor.xml')) as default_conf:
             self.init_plugin(default_conf.read())
         self.assertEqual(40, self.p._maxLevel)
         self.assertEqual(3, self.p._ignoreLength)

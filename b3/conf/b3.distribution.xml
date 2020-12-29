@@ -26,7 +26,7 @@
         -->
         <set name="parser">changeme</set>
         <!-- Your database info: [protocol]://[db-user]:[db-password]@[db-server[:port]]/[db-name] -->
-        <set name="database">mysql://b3:password@localhost/b3</set>
+        <set name="database">sqlite:///var/b3/b3_db.sqlite</set>
         <!-- Name of the bot -->
         <set name="bot_name">b3</set>
         <!-- Ingame messages are prefixed with this code, you can use colorcodes -->

@@ -3,19 +3,18 @@ import logging
 import unittest
 from textwrap import dedent
 
-import b3
-from b3 import getAbsolutePath
 from b3.config import CfgConfigParser
 from b3.config import MainConfig
 from b3.config import XmlConfigParser
 from b3.config import load
+from b3.functions import getAbsolutePath
 
 
 class CommonDefaultTestMethodsMixin:
 
     def test_b3_section(self):
         self.assertEqual('changeme', self.conf.get('b3', 'parser'))
-        self.assertEqual('mysql://b3:password@localhost/b3', self.conf.get('b3', 'database'))
+        self.assertEqual('sqlite:///var/b3/b3_db.sqlite', self.conf.get('b3', 'database'))
         self.assertEqual('b3', self.conf.get('b3', 'bot_name'))
         self.assertEqual('^0(^2b3^0)^7:', self.conf.get('b3', 'bot_prefix'))
         self.assertEqual('%I:%M%p %Z %m/%d/%y', self.conf.get('b3', 'time_format'))
@@ -74,7 +73,7 @@ class CommonDefaultTestMethodsMixin:
 class Test_XmlMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase):
 
     def setUp(self):
-        self.conf = MainConfig(load(b3.getAbsolutePath('@b3/conf/b3.distribution.xml')))
+        self.conf = MainConfig(load(getAbsolutePath('@b3/conf/b3.distribution.xml')))
         log = logging.getLogger('output')
         log.setLevel(logging.DEBUG)
 
@@ -91,7 +90,7 @@ class Test_XmlMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
 class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase):
 
     def setUp(self):
-        self.conf = MainConfig(load(b3.getAbsolutePath('@b3/conf/b3.distribution.ini')))
+        self.conf = MainConfig(load(getAbsolutePath('@b3/conf/b3.distribution.ini')))
         log = logging.getLogger('output')
         log.setLevel(logging.DEBUG)
 

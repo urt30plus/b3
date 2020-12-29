@@ -86,7 +86,7 @@ class TkInfo:
     lastAttacker = property(_get_lastAttacker)
 
     def grudge(self, cid):
-        if not cid in self._grudged:
+        if cid not in self._grudged:
             self._grudged.append(cid)
 
     def isGrudged(self, cid):

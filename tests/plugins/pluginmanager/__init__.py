@@ -33,7 +33,7 @@ class PluginmanagerTestCase(B3TestCase):
         self.p.onLoadConfig()
         self.p.onStartup()
 
-        when(self.console.config).get_external_plugins_dir().thenReturn(b3.getAbsolutePath('@b3\\extplugins'))
+        when(self.console.config).get_external_plugins_dir().thenReturn(b3.functions.getAbsolutePath('@b3\\extplugins'))
 
         # store them also in the console _plugins dict
         self.console._plugins['admin'] = self.adminPlugin

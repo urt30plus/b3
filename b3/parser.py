@@ -38,15 +38,13 @@ __version__ = '1.43.6'
 
 
 class Parser:
-    OutputClass = b3.rcon.Rcon  # default output class set to the q3a rcon class
-
     _commands = {}  # will hold RCON commands for the current game
     _cron = None  # cron instance
     _events = {}  # available events (K=>EVENT)
     _eventsStats_cronTab = None  # crontab used to log event statistics
-    _cron_stats_crontab = None # crontab used to log cron run statistics
-    _cron_stats_threads = None # crontab used to log thread statistics
-    _timezone_crontab = None # force recache of timezone info
+    _cron_stats_crontab = None  # crontab used to log cron run statistics
+    _cron_stats_threads = None  # crontab used to log thread statistics
+    _timezone_crontab = None  # force recache of timezone info
     _handlers = defaultdict(list)  # event handlers
     _lineTime = re.compile(r'^(?P<minutes>[0-9]+):(?P<seconds>[0-9]+).*')  # used to track log file time changes
     _lineFormat = re.compile('^([a-z ]+): (.*?)', re.IGNORECASE)
@@ -180,7 +178,7 @@ class Parser:
         logfile = self.config.getpath('b3', 'logfile')
         log2console = self.config.has_option('devmode', 'log2console') and \
                       self.config.getboolean('devmode', 'log2console')
-        logfile = b3.getWritableFilePath(logfile, True)
+        logfile = b3.functions.getWritableFilePath(logfile, True)
         log_level = self.config.getint('b3', 'log_level')
         try:
             logsize = b3.functions.getBytes(self.config.get('b3', 'logsize'))
@@ -188,7 +186,7 @@ class Parser:
             logsize = b3.functions.getBytes('10MB')
         self.log = b3.output.getInstance(logfile, log_level, logsize, log2console)
         self.screen = sys.stdout
-        log_short_path = b3.getShortPath(os.path.abspath(b3.getAbsolutePath(logfile, True)))
+        log_short_path = b3.functions.getShortPath(os.path.abspath(b3.functions.getAbsolutePath(logfile, True)))
         self.screen.write(f'Activating log   : {log_short_path}\n')
         self.screen.flush()
         sys.stdout = b3.output.STDOutLogger(self.log)
@@ -269,7 +267,7 @@ class Parser:
             self.bot('Game log is: %s', game_log)
             f = self.config.getpath('server', 'game_log')
             self.bot('Starting bot reading file: %s', os.path.abspath(f))
-            self.screen.write(f'Using gamelog    : {b3.getShortPath(os.path.abspath(f))}\n')
+            self.screen.write(f'Using gamelog    : {b3.functions.getShortPath(os.path.abspath(f))}\n')
             if os.path.isfile(f):
                 self.input = open(f, 'r')
                 if self.config.has_option('server', 'seek'):
@@ -289,7 +287,7 @@ class Parser:
 
     def __init_rcon(self):
         try:
-            self.output = self.OutputClass(self, (self._rconIp, self._rconPort), self._rconPassword)
+            self.output = b3.rcon.Rcon(self, (self._rconIp, self._rconPort), self._rconPassword)
         except Exception as err:
             self.screen.write(f">>> Cannot setup RCON: {err}\n")
             self.screen.flush()
@@ -303,7 +301,6 @@ class Parser:
     def __init_rcon_test(self):
         if self.rconTest:
             res = self.output.write('status')
-            self.output.flush()
             self.screen.write('Testing RCON     : ')
             self.screen.flush()
             if res in ['Bad rconpassword.', 'Invalid password.']:
@@ -544,14 +541,14 @@ class Parser:
                 :param match: The plugin name
                 """
                 # first look in the built-in plugins directory
-                search = '%s%s*%s*' % (b3.getAbsolutePath('@conf\\', decode=True), os.path.sep, match)
+                search = '%s%s*%s*' % (b3.functions.getAbsolutePath('@conf\\', decode=True), os.path.sep, match)
                 self.debug('Searching for configuration file(s) matching: %s', search)
                 collection = glob.glob(search)
                 if len(collection) > 0:
                     return collection
                 # if none is found, then search in the extplugins directory
                 search = '%s%s*%s*' % (
-                    os.path.join(b3.getAbsolutePath(extplugins_dir, decode=True), match, 'conf'), os.path.sep, match)
+                    os.path.join(b3.functions.getAbsolutePath(extplugins_dir, decode=True), match, 'conf'), os.path.sep, match)
                 self.debug('Searching for configuration file(s) matching: %s', search)
                 collection = glob.glob(search)
                 return collection
@@ -584,7 +581,7 @@ class Parser:
                 # configuration file specified: load it if it's found. If we are not able to find the configuration
                 # file, then keep loading the plugin if such a plugin doesn't require a configuration file (optional)
                 # otherwise stop loading the plugin and loag an error message.
-                p_config_absolute_path = b3.getAbsolutePath(p_config_path, decode=True)
+                p_config_absolute_path = b3.functions.getAbsolutePath(p_config_path, decode=True)
                 if os.path.exists(p_config_absolute_path):
                     self.bot('Loading configuration file %s for plugin %s', p_config_absolute_path, p_name)
                     return b3.config.load(p_config_absolute_path)
@@ -1112,32 +1109,33 @@ class Parser:
             if current_time >= expire:  # events can only sit in the queue until expire time
                 self.error('**** Event sat in queue too long: %s %s',
                            event_name, current_time - expire)
-            else:
-                for hfunc in self._handlers[event.type]:
-                    if not hfunc.isEnabled():
-                        continue
-                    self.verbose('Parsing event: %s: %s',
-                                 event_name, hfunc.__class__.__name__)
-                    timer_plugin_begin = time.perf_counter()
-                    try:
-                        hfunc.parseEvent(event)
-                        time.sleep(0.001)
-                    except b3.events.VetoEvent:
-                        # plugin called for a halt to event processing
-                        self.bot('Event %s vetoed by %s', event_name, str(hfunc))
-                        break
-                    except SystemExit as e:
-                        self.exitcode = e.code
-                    except Exception as msg:
-                        self.error('Handler %s could not handle event %s: %s: %s %s',
-                                   hfunc.__class__.__name__,
-                                   event_name, msg.__class__.__name__,
-                                   msg,
-                                   extract_tb(sys.exc_info()[2]))
-                    finally:
-                        elapsed = time.perf_counter() - timer_plugin_begin
-                        self._eventsStats.add_event_handled(hfunc.__class__.__name__,
-                                                            event_name, elapsed * 1000)
+                continue
+
+            for hfunc in self._handlers[event.type]:
+                if not hfunc.isEnabled():
+                    continue
+                self.verbose('Parsing event: %s: %s',
+                             event_name, hfunc.__class__.__name__)
+                timer_plugin_begin = time.perf_counter()
+                try:
+                    hfunc.parseEvent(event)
+                    time.sleep(0.001)
+                except b3.events.VetoEvent:
+                    # plugin called for a halt to event processing
+                    self.bot('Event %s vetoed by %s', event_name, str(hfunc))
+                    break
+                except SystemExit as e:
+                    self.exitcode = e.code
+                except Exception as msg:
+                    self.error('Handler %s could not handle event %s: %s: %s %s',
+                               hfunc.__class__.__name__,
+                               event_name, msg.__class__.__name__,
+                               msg,
+                               extract_tb(sys.exc_info()[2]))
+                finally:
+                    elapsed = time.perf_counter() - timer_plugin_begin
+                    self._eventsStats.add_event_handled(hfunc.__class__.__name__,
+                                                        event_name, elapsed * 1000)
 
         self.bot('Shutting down event handler')
         if self.exiting.locked():
@@ -1148,7 +1146,6 @@ class Parser:
         Write a message to Rcon/Console
         """
         res = self.output.write(msg, maxRetries=maxRetries, socketTimeout=socketTimeout)
-        self.output.flush()
         return res
 
     def writelines(self, msg):
@@ -1158,7 +1155,6 @@ class Parser:
         """
         if msg:
             res = self.output.writelines(msg)
-            self.output.flush()
             return res
 
     def read(self):

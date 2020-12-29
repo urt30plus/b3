@@ -11,7 +11,6 @@ import b3.cron
 import b3.events
 import b3.plugin
 from b3.functions import clamp
-from b3.functions import start_daemon_thread
 from . import __author__
 from . import __version__
 
@@ -1054,7 +1053,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 return
 
             if x in range(1, 26):
-                start_daemon_thread(target=self.multipunish, args=(x, sclient, client, 'slap'), name='paurt43-slap')
+                self.console.writelines([f'slap {sclient.cid}'] * x)
             else:
                 client.message('^7Number of punishments out of range, must be 1 to 25')
         else:
@@ -1088,21 +1087,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 return
 
             if x in range(1, 26):
-                start_daemon_thread(target=self.multipunish, args=(x, sclient, client, 'nuke'), name='paurt43-nuke')
+                self.console.writelines([f'nuke {sclient.cid}'] * x)
             else:
                 client.message('^7Number of punishments out of range, must be 1 to 25')
         else:
             self.debug('Performing single nuke...')
             self.console.write('nuke %s' % sclient.cid)
-
-    def multipunish(self, x, sclient, client, cmd):
-        self.debug('Entering multipunish...')
-        # self.debug('x: %s, sclient.cid: %s, client.cid: %s, cmd: %s' %(x, sclient.cid, client.cid, cmd))
-        c = 0
-        while c < x:
-            self.console.write('%s %s' % (cmd, sclient.cid))
-            time.sleep(1)
-            c += 1
 
     def cmd_paveto(self, data, client, cmd=None):
         """
