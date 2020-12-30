@@ -1516,7 +1516,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self._teamred = 0
             self._teamblue = 0
             data = self.console.write('players')
-            for line in data.split('\n')[3:]:
+            for line in data.splitlines()[3:]:
                 m = re.match(self.console._rePlayerScore, line.strip())
                 if m:
                     if m.group('team').upper() == 'RED':

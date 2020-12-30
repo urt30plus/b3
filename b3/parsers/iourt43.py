@@ -511,22 +511,20 @@ class Iourt43Parser(b3.parser.Parser):
         :param line: The line to be parsed
         """
         line = re.sub(self._lineClear, '', line, 1)
-        m = None
         for f in self._lineFormats:
             m = re.match(f, line)
             if m:
                 break
+        else:
+            if '------' not in line:
+                self.warning('Line did not match format: %s', line)
+            return
 
-        if m is not None:
-            client = None
-            target = None
-            try:
-                data = m.group('data').strip()
-            except:
-                data = None
-            return m, m.group('action').lower(), data, client, target
-        elif '------' not in line:
-            self.verbose('Line did not match format: %s' % line)
+        try:
+            data = m.group('data').strip()
+        except:
+            data = None
+        return m, m.group('action').lower(), data, None, None
 
     def parseLine(self, line):
         """
@@ -1510,10 +1508,10 @@ class Iourt43Parser(b3.parser.Parser):
         """
         data = self.write('status')
         if not data:
-            return dict()
+            return {}
 
-        players = dict()
-        for line in data.split('\n'):
+        players = {}
+        for line in data.splitlines():
             m = re.match(self._regPlayer, line.strip())
             if m:
                 if m.group('ping') == 'ZMBI':
@@ -1599,7 +1597,7 @@ class Iourt43Parser(b3.parser.Parser):
 
         mapregex = re.compile(r'^maps/(?P<map>.+)\.bsp$', re.I)
         maps = []
-        for line in data.split('\n'):
+        for line in data.splitlines():
             m = re.match(mapregex, line.strip())
             if m:
                 if m.group('map'):
@@ -1704,44 +1702,6 @@ class Iourt43Parser(b3.parser.Parser):
             # multiple matches, provide suggestions
             return matches
 
-    def getTeamScores(self):
-        """
-        Return current team scores in a tuple.
-        """
-        data = self.write('players')
-        if not data:
-            return None
-
-        line = data.split('\n')[3]
-        m = re.match(self._reTeamScores, line.strip())
-        if m:
-            return [int(m.group('RedScore')), int(m.group('BlueScore'))]
-        return None
-
-    def getScores(self):
-        """
-        NOTE: this won't work properly if the server has private slots.
-        See http://forums.urbanterror.net/index.php/topic,9356.0.html
-        """
-        data = self.write('players')
-        if not data:
-            return None
-
-        scores = {'red': None, 'blue': None, 'players': {}}
-        line = data.split('\n')[3]
-        m = re.match(self._reTeamScores, line.strip())
-        if m:
-            scores['red'] = int(m.group('RedScore'))
-            scores['blue'] = int(m.group('BlueScore'))
-
-        for line in data.split('\n')[3:]:
-            m = re.match(self._rePlayerScore, line.strip())
-            if m:
-                scores['players'][int(m.group('slot'))] = {'kills': int(m.group('kill')),
-                                                           'deaths': int(m.group('death'))}
-
-        return scores
-
     def queryClientUserInfoByCid(self, cid):
         """
         : dumpuser 5
@@ -1778,13 +1738,15 @@ class Iourt43Parser(b3.parser.Parser):
         if not data:
             return None
 
-        if data.split('\n')[0] != "userinfo":
-            self.debug("dumpuser %s returned : %s" % (cid, data))
-            self.debug('Client %s probably disconnected, but its character is still hanging in game...' % cid)
+        lines = data.splitlines()
+
+        if lines[0] != "userinfo":
+            self.debug("dumpuser %s returned : %s", cid, data)
+            self.debug('Client %s probably disconnected, but its character is still hanging in game...', cid)
             return None
 
-        datatransformed = "%s " % cid
-        for line in data.split('\n'):
+        datatransformed = f"{cid} "
+        for line in lines:
             if line.strip() == "userinfo" or line.strip() == "--------":
                 continue
 
@@ -1839,7 +1801,7 @@ class Iourt43Parser(b3.parser.Parser):
         """
         player_teams = {}
         players_data = self.write('players')
-        for line in players_data.split('\n')[3:]:
+        for line in players_data.splitlines()[3:]:
             self.debug(line.strip())
             m = re.match(self._rePlayerScore, line.strip())
             if m and line.strip() != '0:  FREE k:0 d:0 ping:0':
@@ -1992,16 +1954,13 @@ class Iourt43Parser(b3.parser.Parser):
             return {}
 
         players = {}
-        for line in data.split('\n'):
-            # self.debug('Line: ' + line + "-")
+        for line in data.splitlines():
             m = re.match(self._regPlayerShort, line)
             if not m:
                 m = re.match(self._regPlayer, line.strip())
 
             if m:
                 players[str(m.group('slot'))] = int(m.group('score'))
-            # elif '------' not in line and 'map: ' not in line and 'num score ping' not in line:
-            # self.verbose('getPlayerScores() = Line did not match format: %s' % line)
 
         return players
 
@@ -2016,7 +1975,7 @@ class Iourt43Parser(b3.parser.Parser):
 
         players = {}
         lastslot = -1
-        for line in data.split('\n')[3:]:
+        for line in data.splitlines()[3:]:
             m = re.match(self._regPlayer, line.strip())
             if m:
                 d = m.groupdict()
@@ -2085,7 +2044,7 @@ class Iourt43Parser(b3.parser.Parser):
         if not data:
             return None
 
-        line = data.split('\n')[0]
+        line = data.splitlines()[0]
         m = re.match(self._reMapNameFromStatus, line.strip())
         if m:
             return str(m.group('map'))
@@ -2180,23 +2139,3 @@ class Iourt43Parser(b3.parser.Parser):
 
         self.queueEvent(self.getEvent('EVT_CLIENT_KICK', {'reason': reason, 'admin': admin}, client))
         client.disconnect()
-
-    def kickbyfullname(self, client, reason='', admin=None, silent=False, *kwargs):
-        """
-        Kick the client matching the given name.
-        We get here if a name was given, and the name was not found as
-        a client: this will allow the kicking of non authenticated players
-        :param client: The client name
-        :param reason: The reason for this kick
-        :param admin: The admin who performed the kick
-        :param silent: Whether or not to announce this kick
-        """
-        # We get here if a name was given, and the name was not found as a client
-        # This will allow the kicking of non authenticated players
-        if 'kickbyfullname' in self._commands:
-            self.debug('Trying kick by full name: %s for %s' % (client, reason))
-            result = self.write(self.getCommand('kickbyfullname', name=client))
-            if result.endswith('is not on the server\n'):
-                admin.message('^7You need to use the full exact name to kick this player')
-            elif result.endswith('was kicked.\n'):
-                admin.message('^7Player kicked using full exact name')
