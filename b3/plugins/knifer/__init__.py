@@ -183,7 +183,7 @@ class KniferPlugin(b3.plugin.Plugin):
         if not self._knEnabled:
             client.message('^7Knife stats are disabled')
             return
-        if not len(self._cutKillers):
+        if not self._cutKillers:
             client.message('^7No top knife stats for the moment')
         else:
             self.displayScores(1)
@@ -283,7 +283,7 @@ class KniferPlugin(b3.plugin.Plugin):
         for cid, c in ck.items():
             listKills.append((c, ck[cid].var(self, 'knifeKills', 0).value))
 
-        if len(listKills):
+        if listKills:
             tmplist = [(x[1], x) for x in listKills]
             tmplist.sort(key=operator.itemgetter(0))
             listKills = [x for (key, x) in tmplist]
@@ -393,7 +393,7 @@ class KniferPlugin(b3.plugin.Plugin):
         for cid, c in ck.items():
             listKills.append((c, ck[cid].var(self, 'knifeKills', 0).value))
 
-        if len(listKills):
+        if listKills:
             tmplist = [(x[1], x) for x in listKills]
             tmplist.sort(key=operator.itemgetter(0))
             listKills = [x for (key, x) in tmplist]
@@ -463,7 +463,7 @@ class KniferPlugin(b3.plugin.Plugin):
             # clients:899 -> m = re.match(r'^@([0-9]+)$', id) -> add @
             id = '@' + str(r['player_id'])
             clientList = self.console.clients.getByDB(id)
-            if len(clientList):
+            if clientList:
                 RecordHolder = clientList[0].exactName
                 self.debug('record holder found: %s' % clientList[0].exactName)
             RecordValue = r['score']

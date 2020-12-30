@@ -73,8 +73,7 @@ def run_update(config=None):
     Run the B3 update.
     :param config: The B3 configuration file instance
     """
-    update = b3.update.DBUpdate(config)
-    update.run()
+    b3.update.DBUpdate(config).run()
 
 
 def run(options):
@@ -84,8 +83,7 @@ def run(options):
     """
     try:
         main_config = b3.config.get_main_config(options.config)
-        analysis = main_config.analyze()
-        if analysis:
+        if analysis := main_config.analyze():
             raise b3.config.ConfigFileNotValid(
                 'Invalid configuration file specified: ' +
                 '\n >>> '.join(analysis)
@@ -114,7 +112,7 @@ def main():
     p.add_argument('-v', '--version', action='version', default=False, version=b3.getB3versionString(),
                    help='Show B3 version and exit')
 
-    (options, args) = p.parse_known_args()
+    options, args = p.parse_known_args()
 
     if not options.config and len(args) == 1:
         options.config = args[0]

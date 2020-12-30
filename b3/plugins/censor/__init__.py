@@ -95,7 +95,7 @@ class CensorPlugin(b3.plugin.Plugin):
             self.debug('using default value (%s) for settings/ignore_length' % self._ignoreLength)
 
         default_badwords_penalty_nodes = self.config.get('badwords/penalty')
-        if len(default_badwords_penalty_nodes):
+        if default_badwords_penalty_nodes:
             penalty = default_badwords_penalty_nodes[0]
             self._defaultBadWordPenalty = PenaltyData(type=penalty.get('type'),
                                                       reason=penalty.get('reason'),
@@ -106,7 +106,7 @@ class CensorPlugin(b3.plugin.Plugin):
                          'using default (%s)' % self._defaultBadNamePenalty)
 
         default_badnames_penalty_nodes = self.config.get('badnames/penalty')
-        if len(default_badnames_penalty_nodes):
+        if default_badnames_penalty_nodes:
             penalty = default_badnames_penalty_nodes[0]
             self._defaultBadNamePenalty = PenaltyData(type=penalty.get('type'),
                                                       reason=penalty.get('reason'),

@@ -185,7 +185,7 @@ class NaderPlugin(b3.plugin.Plugin):
         if not self._heEnabled:
             client.message('^7HE grenade stats are disabled')
             return
-        if not len(self._nadeKillers):
+        if not self._nadeKillers:
             client.message('^7No top HE grenade stats for the moment')
         else:
             self.displayScores(1)
@@ -286,7 +286,7 @@ class NaderPlugin(b3.plugin.Plugin):
         for cid, c in he.items():
             listKills.append((c, he[cid].var(self, 'hegrenadeKills', 0).value))
 
-        if len(listKills):
+        if listKills:
             tmplist = [(x[1], x) for x in listKills]
             tmplist.sort(key=operator.itemgetter(0))
             listKills = [x for (key, x) in tmplist]
@@ -396,7 +396,7 @@ class NaderPlugin(b3.plugin.Plugin):
         for cid, c in he.items():
             listKills.append((c, he[cid].var(self, 'hegrenadeKills', 0).value))
 
-        if len(listKills):
+        if listKills:
             tmplist = [(x[1], x) for x in listKills]
             tmplist.sort(key=operator.itemgetter(0))
             listKills = [x for (key, x) in tmplist]
@@ -466,7 +466,7 @@ class NaderPlugin(b3.plugin.Plugin):
             # clients:899 -> m = re.match(r'^@([0-9]+)$', id) -> add @
             id = '@' + str(r['player_id'])
             clientList = self.console.clients.getByDB(id)
-            if len(clientList):
+            if clientList:
                 RecordHolder = clientList[0].exactName
                 self.debug('record holder found: %s' % clientList[0].exactName)
             RecordValue = r['score']

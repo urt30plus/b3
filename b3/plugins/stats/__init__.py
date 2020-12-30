@@ -45,7 +45,7 @@ class StatsPlugin(b3.plugin.Plugin):
             :param cmd_name: The command name
             """
             matching_options = [x for x in commands_options if x.startswith('%s-' % cmd_name)]
-            if len(matching_options):
+            if matching_options:
                 option_name = matching_options[0]
             else:
                 option_name = cmd_name
@@ -377,7 +377,7 @@ class StatsPlugin(b3.plugin.Plugin):
             if c.isvar(self, 'points'):
                 scores.append((c.exactName, round(c.var(self, 'points', self.startPoints).value, 2)))
 
-        if len(scores):
+        if scores:
             tmplist = [(x[1], x) for x in scores]
             tmplist.sort()
             scores = [x for (key, x) in tmplist]
@@ -408,7 +408,7 @@ class StatsPlugin(b3.plugin.Plugin):
             if c.isvar(self, 'experience'):
                 scores.append((c.exactName, round(c.var(self, 'experience', self.startPoints).value, 2)))
 
-        if len(scores):
+        if scores:
             tmplist = [(x[1], x) for x in scores]
             tmplist.sort()
             scores = [x for (key, x) in tmplist]

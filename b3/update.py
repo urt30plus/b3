@@ -47,28 +47,24 @@ $''', re.VERBOSE)
         Parse the version number from a string.
         :param vstring: The version string
         """
-        match = self.version_re.match(vstring)
-        if not match:
+        if not (match := self.version_re.match(vstring)):
             raise ValueError(f"invalid version number '{vstring}'")
 
         major = match.group('major')
         minor = match.group('minor')
 
-        patch = match.group('patch')
-        if patch:
+        if patch := match.group('patch'):
             self.version = tuple(map(int, [major, minor, patch]))
         else:
             self.version = tuple(list(map(int, [major, minor])) + [0])
 
-        prerelease = match.group('tag')
-        prerelease_num = match.group('tag_num')
-        if prerelease:
+        if prerelease := match.group('tag'):
+            prerelease_num = match.group('tag_num')
             self.prerelease = (prerelease, int(prerelease_num if prerelease_num else '0'))
         else:
             self.prerelease = None
 
-        daily_num = match.group('build_num')
-        if daily_num:
+        if daily_num := match.group('build_num'):
             self.build_num = int(daily_num if daily_num else '0')
         else:
             self.build_num = None
@@ -141,8 +137,7 @@ class DBUpdate:
         """
         try:
             self.config = b3.config.get_main_config(config)
-            analysis = self.config.analyze()
-            if analysis:
+            if analysis := self.config.analyze():
                 raise b3.config.ConfigFileNotValid(
                     'Invalid configuration file specified: ' +
                     '\n >>> '.join(analysis)

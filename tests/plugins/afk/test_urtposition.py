@@ -16,7 +16,7 @@ def evt_client_standing(self, client):
     self.console.queueEvent(self.console.getEvent('EVT_CLIENT_STANDING', client=client))
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def plugin(console):
     console.createEvent('EVT_CLIENT_MOVE', 'Event client move')
     console.createEvent('EVT_CLIENT_STANDING', 'Event client standing')

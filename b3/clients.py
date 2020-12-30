@@ -320,7 +320,7 @@ class Client:
 
     def _get_maxLevel(self):
         if self._maxLevel is None:
-            if self.groups and len(self.groups):
+            if self.groups:
                 m = -1
                 for g in self.groups:
                     if g.level > m:
@@ -510,8 +510,7 @@ class Client:
     maskLevel = property(_get_maskLevel, _set_maskLevel)
 
     def _get_maskedLevel(self):
-        group = self.maskedGroup
-        if group:
+        if group := self.maskedGroup:
             return group.level
         else:
             return 0
@@ -961,7 +960,7 @@ class Client:
         """
         self.console.debug("Auth by both guid and FSA: %r, %r", self.guid, self.pbid)
         clients_matching_pbid = self.console.storage.getClientsMatching({'pbid': self.pbid, 'guid': self.guid})
-        if len(clients_matching_pbid):
+        if clients_matching_pbid:
             self.id = clients_matching_pbid[0].id
             return self.console.storage.getClient(self)
         else:
@@ -1438,17 +1437,14 @@ class Clients(dict):
         """
         Return the client matching the given database id.
         """
-        m = re.match(r'^@([0-9]+)$', client_id)
-        if m:
+        if m := re.match(r'^@([0-9]+)$', client_id):
             try:
-                sclient = self.console.storage.getClientsMatching({'id': m.group(1)})
-                if not sclient:
+                if not (sclient := self.console.storage.getClientsMatching({'id': m.group(1)})):
                     return []
 
                 collection = []
                 for c in sclient:
-                    connected_client = self.getByGUID(c.guid)
-                    if connected_client:
+                    if connected_client := self.getByGUID(c.guid):
                         c = connected_client
                     else:
                         c.clients = self
@@ -1536,11 +1532,7 @@ class Clients(dict):
 
         name = b3.functions.escape_string(name)
 
-        sclient = self.console.storage.getClientsMatching({'%name%': name})
-
-        if not sclient:
-            return []
-        else:
+        if sclient := self.console.storage.getClientsMatching({'%name%': name}):
             clients = []
             for c in sclient:
                 c.clients = self
@@ -1549,8 +1541,9 @@ class Clients(dict):
                 clients.append(c)
                 if len(clients) == 5:
                     break
-
             return clients
+
+        return []
 
     def lookupSuperAdmins(self):
         """
@@ -1564,11 +1557,7 @@ class Clients(dict):
             self.console.error('Could not get superadmin group: %s', e)
             return False
 
-        sclient = self.console.storage.getClientsMatching({'&group_bits': group.id})
-
-        if not sclient:
-            return []
-        else:
+        if sclient := self.console.storage.getClientsMatching({'&group_bits': group.id}):
             clients = []
             for c in sclient:
                 c.clients = self
@@ -1577,6 +1566,8 @@ class Clients(dict):
                 clients.append(c)
 
             return clients
+
+        return []
 
     def disconnect(self, client):
         """

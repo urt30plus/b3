@@ -368,7 +368,7 @@ class Plugin:
         event_name = self.console.getEventName(event_id)
         self.events.append(event_id)
         self.console.registerHandler(event_id, self)
-        if len(args) > 0:
+        if args:
             for hook in args:
                 try:
                     self.registerEventHook(event_id, hook)
@@ -433,8 +433,7 @@ class Plugin:
             alias = None
             if len(sp) == 2:
                 cmd, alias = sp
-            func = b3.functions.getCmd(self, cmd)
-            if func:
+            if func := b3.functions.getCmd(self, cmd):
                 admin_plugin.registerCommand(self, cmd, level, func, alias)
 
     def error(self, msg, *args, **kwargs):

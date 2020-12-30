@@ -55,9 +55,7 @@ def getCmd(instance, cmd):
     :param cmd: The command name.
     :return The command function reference.
     """
-    cmd = f"cmd_{cmd}"
-    if hasattr(instance, cmd):
-        return getattr(instance, cmd)
+    return getattr(instance, f"cmd_{cmd}", None)
 
 
 def splitDSN(url):

@@ -619,15 +619,12 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             return s
 
     def save_Stat(self, stat):
-        # self.verbose('*----> XLRstats: saving statistics for %s' % type(stat))
-        # self.verbose('*----> Contents: %s' %stat)
         if hasattr(stat, '_new'):
             q = stat._insertquery()
-            # self.debug('Inserting using: %r', q)
-            cursor = self.query(q)
-            if cursor.rowcount > 0:
-                stat.id = cursor.lastrowid
-                delattr(stat, '_new')
+            with self.query(q) as cursor:
+                if cursor.rowcount > 0:
+                    stat.id = cursor.lastrowid
+                    delattr(stat, '_new')
         else:
             q = stat._updatequery()
             # self.debug('Updating using: %r', q)

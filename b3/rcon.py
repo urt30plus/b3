@@ -34,7 +34,7 @@ class Rcon:
         self._stopEvent = object()
         self.console.bot('Game name is: %s', self.console.gameName)
 
-    def send_rcon(self, data, maxRetries=2, socketTimeout=None):
+    def send_rcon(self, data, maxRetries=None, socketTimeout=None):
         """
         Send an RCON command.
         :param data: The string to be sent
@@ -43,21 +43,22 @@ class Rcon:
         """
         if socketTimeout is None:
             socketTimeout = self.socket_timeout
+
         if maxRetries is None:
             maxRetries = 2
 
         data = data.strip()
-
         self.console.verbose('RCON sending (%s:%s) %r', self.host[0], self.host[1], data)
-        start_time = time.time()
+
+        payload = self.rconsendstring + data.encode(self.console.encoding) + b'\n'
 
         retries = 0
-        payload = self.rconsendstring + data.encode(self.console.encoding) + b'\n'
+        start_time = time.time()
         while time.time() - start_time < 5:
             readables, writeables, errors = select.select([], [self.socket], [self.socket], socketTimeout)
 
             if errors:
-                self.console.warning('RCON: %s', str(errors))
+                self.console.warning('RCON send_rcon: %s', str(errors))
             elif writeables:
                 try:
                     writeables[0].send(payload)
@@ -82,7 +83,6 @@ class Rcon:
             time.sleep(0.05)
 
             retries += 1
-
             if retries >= maxRetries:
                 self.console.error('RCON: too many tries: aborting (%r)', data)
                 break
@@ -91,42 +91,6 @@ class Rcon:
 
         self.console.debug('RCON: did not send any data')
         return ''
-
-    def _writelines(self):
-        """
-        Write multiple RCON commands on the socket.
-        """
-        while 1:
-            lines = self.queue.get()
-            if lines is self._stopEvent:
-                break
-            for cmd in lines:
-                if not cmd:
-                    continue
-                with self.lock:
-                    self.send_rcon(cmd, maxRetries=1)
-
-    def writelines(self, lines):
-        """
-        Enqueue multiple RCON commands for later processing.
-        :param lines: A list of RCON commands.
-        """
-        if not self.queue:
-            self.queue = queue.Queue()
-            b3.functions.start_daemon_thread(target=self._writelines, name='rcon')
-
-        self.queue.put(lines)
-
-    def write(self, cmd, maxRetries=None, socketTimeout=None):
-        """
-        Write a RCON command.
-        :param cmd: The string to be sent
-        :param maxRetries: How many times we have to retry the sending upon failure
-        :param socketTimeout: The socket timeout value
-        """
-        with self.lock:
-            data = self.send_rcon(cmd, maxRetries=maxRetries, socketTimeout=socketTimeout)
-        return data or ''
 
     def read_socket(self, sock, size=4096, socketTimeout=None):
         """
@@ -140,19 +104,56 @@ class Rcon:
 
         readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
+        if errors:
+            self.console.warning('RCON read_socket: %s', str(errors))
+
         if not readables:
             self.console.verbose('No readable socket')
             return ''
 
         data = b''
         while readables:
-            payload = sock.recv(size)
-            if payload:
+            if payload := sock.recv(size):
                 # remove rcon header
                 data += payload.replace(self.rconreplystring, b'')
             readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
         return data.decode(encoding=self.console.encoding)
+
+    def write(self, cmd, maxRetries=None, socketTimeout=None):
+        """
+        Write a RCON command.
+        :param cmd: The string to be sent
+        :param maxRetries: How many times we have to retry the sending upon failure
+        :param socketTimeout: The socket timeout value
+        """
+        with self.lock:
+            data = self.send_rcon(cmd, maxRetries=maxRetries, socketTimeout=socketTimeout)
+        return data or ''
+
+    def writelines(self, lines):
+        """
+        Enqueue multiple RCON commands for later processing.
+        :param lines: A list of RCON commands.
+        """
+        if not self.queue:
+            self.queue = queue.Queue()
+            b3.functions.start_daemon_thread(target=self._writelines, name='rcon')
+
+        self.queue.put(lines)
+
+    def _writelines(self):
+        """
+        Write multiple RCON commands on the socket.
+        """
+        while True:
+            lines = self.queue.get()
+            if lines is self._stopEvent:
+                break
+            for cmd in lines:
+                if cmd:
+                    with self.lock:
+                        self.send_rcon(cmd, maxRetries=1)
 
     def stop(self):
         """

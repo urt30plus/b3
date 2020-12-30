@@ -317,23 +317,17 @@ class DatabaseStorage(Storage):
         """
         self.console.debug('Storage: getClient %s', client)
         where = {'id': client.id} if client.id > 0 else {'guid': client.guid}
-
         try:
-            cursor = self.query(QueryBuilder(self.db).SelectQuery('*', 'clients', where, None, 1))
-            if not cursor.rowcount:
-                raise KeyError(f'no client matching guid {client.guid}')
-
-            found = False
-            for k, v in cursor.getRow().items():
-                setattr(client, self.getVar(k), v)
-                found = True
-
-            cursor.close()
-            if not found:
-                raise KeyError(f'no client matching guid {client.guid}')
-
-            return client
-
+            with self.query(QueryBuilder(self.db).SelectQuery('*', 'clients', where, None, 1)) as cursor:
+                if not cursor:
+                    raise KeyError(f'no client matching guid {client.guid}')
+                found = False
+                for k, v in cursor.getRow().items():
+                    setattr(client, self.getVar(k), v)
+                    found = True
+                if not found:
+                    raise KeyError(f'no client matching guid {client.guid}')
+                return client
         except Exception:
             # query failed, try local cache
             if self.console.config.has_option('admins_cache', client.guid):
@@ -601,8 +595,7 @@ class DatabaseStorage(Storage):
         stmt = QueryBuilder(self.db).SelectQuery(
             '*', 'penalties', {'id': penalty.id}, None, 1
         )
-        row = self.query(stmt).getOneRow()
-        if not row:
+        if not (row := self.query(stmt).getOneRow()):
             raise KeyError(f'no penalty matching id {penalty.id}')
         return self._createPenaltyFromRow(row)
 
@@ -634,8 +627,7 @@ class DatabaseStorage(Storage):
         stmt = QueryBuilder(self.db).SelectQuery(
             '*', 'penalties', where, 'time_add DESC', 1
         )
-        row = self.query(stmt).getOneRow()
-        if not row:
+        if not (row := self.query(stmt).getOneRow()):
             return None
         return self._createPenaltyFromRow(row)
 
@@ -651,8 +643,7 @@ class DatabaseStorage(Storage):
         stmt = QueryBuilder(self.db).SelectQuery(
             '*', 'penalties', where, 'time_expire DESC, time_add ASC', 1
         )
-        row = self.query(stmt).getOneRow()
-        if not row:
+        if not (row := self.query(stmt).getOneRow()):
             return None
         return self._createPenaltyFromRow(row)
 
@@ -709,15 +700,13 @@ class DatabaseStorage(Storage):
         if hasattr(group, 'keyword') and group.keyword:
             query = QueryBuilder(self.db).SelectQuery('*', 'groups', dict(keyword=group.keyword), None, 1)
             self.console.verbose2(query)
-            row = self.query(query).getOneRow()
-            if not row:
+            if not (row := self.query(query).getOneRow()):
                 raise KeyError(f'no group matching keyword: {group.keyword}')
 
         elif hasattr(group, 'level') and group.level >= 0:
             query = QueryBuilder(self.db).SelectQuery('*', 'groups', dict(level=group.level), None, 1)
             self.console.verbose2(query)
-            row = self.query(query).getOneRow()
-            if not row:
+            if not (row := self.query(query).getOneRow()):
                 raise KeyError(f'no group matching level: {group.level}')
         else:
             raise KeyError("cannot find Group as no keyword/level provided")
@@ -792,8 +781,7 @@ class DatabaseStorage(Storage):
         # use existing connection or create a new one
         # duplicate code of query() method which is needed not to spam the database
         # with useless connection attempts (one for each query in the SQL file)
-        connection = self.getConnection()
-        if not connection:
+        if not (connection := self.getConnection()):
             raise Exception('lost connection with the storage layer during query')
 
         # save standard error output

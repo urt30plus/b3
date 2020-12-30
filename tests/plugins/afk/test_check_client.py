@@ -9,7 +9,7 @@ from tests.plugins.afk import *
 # This test suite makes sure `ask_client` is called appropriately when `check_client` is run
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def plugin(console):
     p = plugin_maker_ini(console, dedent("""
         [settings]

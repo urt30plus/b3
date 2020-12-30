@@ -115,7 +115,7 @@ class B3ConfigParserMixin:
         :param kwargs: A dict with variables used for string substitution.
         """
         value = b3.functions.vars2printf(self.get(section, setting, True)).strip()
-        if len(kwargs):
+        if kwargs:
             return value % kwargs
         return value
 
@@ -186,10 +186,7 @@ class XmlConfigParser(B3ConfigParserMixin):
         else:
             try:
                 data = self._settings[section][setting]
-                if data is None:
-                    return ''
-                else:
-                    return data
+                return '' if data is None else data
             except KeyError:
                 raise NoOptionError(setting, section)
 
@@ -353,9 +350,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
                     opts["vars"] = args[1]
         try:
             value = configparser.ConfigParser.get(self, section, option, **opts)
-            if value is None:
-                return ""
-            return value
+            return '' if value is None else value
         except NoSectionError:
             # plugins are used to only catch NoOptionError
             raise NoOptionError(option, section)
@@ -555,8 +550,7 @@ class MainConfig(B3ConfigParserMixin):
 
         # DSN DICT
         if self.has_option('b3', 'database'):
-            dsndict = b3.functions.splitDSN(self.get('b3', 'database'))
-            if not dsndict:
+            if not (dsndict := b3.functions.splitDSN(self.get('b3', 'database'))):
                 analysis.append(
                     'invalid database source name specified in b3::database (%s)' % self.get('b3', 'database'))
             elif dsndict['protocol'] not in b3.storage.PROTOCOLS:

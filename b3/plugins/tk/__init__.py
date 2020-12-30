@@ -100,7 +100,7 @@ class TkInfo:
 
     def _get_points(self):
         points = 0
-        if len(self._attacked):
+        if self._attacked:
             for cid, bol in self._attacked.items():
                 try:
                     client = self.plugin.console.clients.getByCID(cid)
@@ -360,7 +360,7 @@ class TkPlugin(b3.plugin.Plugin):
                         v = self.getClientTkInfo(victim)
                         myvictims.append('%s ^7(^1%s^7)' % (victim.name, v.getAttackerPoints(event.client.cid)))
 
-                    if len(myvictims):
+                    if myvictims:
                         msg += ', ^1Attacked^7: %s' % ', '.join(myvictims)
 
                 self.console.say(self.getMessage('forgive_warning', {'name': event.client.exactName,
@@ -571,7 +571,7 @@ class TkPlugin(b3.plugin.Plugin):
         <name> - grudge a player for team damaging, a grudge player will not be auto-forgiven
         """
         v = self.getClientTkInfo(client)
-        if not len(v.attackers):
+        if not v.attackers:
             client.message(self.getMessage('no_forgive'))
             return
 
@@ -597,7 +597,7 @@ class TkPlugin(b3.plugin.Plugin):
         <name> - forgive a player for team damaging
         """
         v = self.getClientTkInfo(client)
-        if not len(v.attackers):
+        if not v.attackers:
             client.message(self.getMessage('no_forgive'))
             return
 
@@ -653,7 +653,7 @@ class TkPlugin(b3.plugin.Plugin):
                         attacker.message(self.getMessage('forgive_many', {'vname': client.exactName,
                                                                           'attackers': attacker.exactName}))
 
-            if len(forgave):
+            if forgave:
                 if self._private_messages:
                     variables = {'vname': client.exactName, 'attackers': ', '.join(forgave)}
                     client.message(self.getMessage('forgive_many', variables))
@@ -684,7 +684,7 @@ class TkPlugin(b3.plugin.Plugin):
                 else:
                     myattackers.append('^7[^2%s^7] %s ^7[^3%s^7]' % (attacker.cid, attacker.name, points))
 
-            if len(myattackers):
+            if myattackers:
                 client.message(self.getMessage('players', ', '.join(myattackers)))
             else:
                 client.message(self.getMessage('no_forgive'))
@@ -715,7 +715,7 @@ class TkPlugin(b3.plugin.Plugin):
                     v = self.getClientTkInfo(victim)
                     myvictims.append('%s ^7(^1%s^7)' % (victim.name, v.getAttackerPoints(sclient.cid)))
 
-                if len(myvictims):
+                if myvictims:
                     msg += ', ^1Attacked^7: %s' % ', '.join(myvictims)
 
             if len(tkinfo.attackers) > 0:
@@ -730,7 +730,7 @@ class TkPlugin(b3.plugin.Plugin):
                     else:
                         myattackers.append('%s ^7[^3%s^7]' % (attacker.name, points))
 
-                if len(myattackers):
+                if myattackers:
                     msg += ', ^3Attacked By^7: %s' % ', '.join(myattackers)
 
             cmd.sayLoudOrPM(client, self.getMessage('forgive_info', {'name': sclient.exactName,

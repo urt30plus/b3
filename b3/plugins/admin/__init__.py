@@ -711,7 +711,7 @@ class AdminPlugin(b3.plugin.Plugin):
             cid = m.group('cid')
             parms = m.group('parms')
 
-            if req and not (parms and len(parms)):
+            if req and not parms:
                 return None
 
             if cid[:1] == "'" and cid[-1:] == "'":
@@ -1257,7 +1257,7 @@ class AdminPlugin(b3.plugin.Plugin):
                     if cmd.command not in commands:
                         commands.append(cmd.command)
 
-        if not len(commands):
+        if not commands:
             cmd.sayLoudOrPM(client, self.getMessage('help_none'))
         else:
             # remove the !register command if already registered
@@ -1835,7 +1835,7 @@ class AdminPlugin(b3.plugin.Plugin):
             return txt
 
         bans = self.console.storage.getLastPenalties(types=('Ban', 'TempBan'), num=5)
-        if len(bans):
+        if bans:
             for line in map(format_ban, bans):
                 cmd.sayLoudOrPM(client, line)
         else:
@@ -1919,7 +1919,7 @@ class AdminPlugin(b3.plugin.Plugin):
                         myaliases.append(self.getMessage('aliases_more_suffix'))
                         break
 
-                if len(myaliases):
+                if myaliases:
                     cmd.sayLoudOrPM(client, self.getMessage('aliases', sclient.exactName, ', '.join(myaliases)))
                 else:
                     cmd.sayLoudOrPM(client, self.getMessage('no_aliases', sclient.exactName))
@@ -2086,7 +2086,7 @@ class AdminPlugin(b3.plugin.Plugin):
             maps = self.console.getMaps()
             if maps is None:
                 client.message('^7ERROR: could not get map list')
-            elif len(maps):
+            elif maps:
                 cmd.sayLoudOrPM(client, '^7Map Rotation: ^2%s' % '^7, ^2'.join(maps))
             else:
                 cmd.sayLoudOrPM(client, '^7Map Rotation list is empty')
@@ -2169,7 +2169,7 @@ class AdminPlugin(b3.plugin.Plugin):
         - list spam messages
         """
         ws = sorted(self.config.options('spamages'))
-        if len(ws):
+        if ws:
             client.message('^7Spamages: %s' % ', '.join(ws))
         else:
             client.message('^7No spamage message defined')
@@ -2359,7 +2359,7 @@ class Command:
         Parse command data.
         """
         splitdata = self.splitData(data)
-        if not len(args):
+        if not args:
             return splitdata
 
         params = {}
@@ -2438,7 +2438,7 @@ class Command:
                     params.append(buf)
                     buf = ''
                     in_quote = False
-                elif len(buf):
+                elif buf:
                     buf += c
                 else:
                     in_quote = True
@@ -2450,13 +2450,13 @@ class Command:
                     in_dquote = False
                 elif in_quote:
                     buf += c
-                elif len(buf):
+                elif buf:
                     buf += c
                 else:
                     in_dquote = True
                     buf = ''
             elif c.isspace():
-                if len(buf):
+                if buf:
                     if in_dquote or in_quote:
                         if not buf[-1].isspace():
                             buf += c
@@ -2466,7 +2466,7 @@ class Command:
             else:
                 buf += c
 
-        if len(buf):
+        if buf:
             params.append(buf)
 
         return params

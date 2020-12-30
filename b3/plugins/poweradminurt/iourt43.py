@@ -1127,7 +1127,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             client.message('^7Invalid data, try !help paforce')
             return
 
-        if not len(args[1]):
+        if not args[1]:
             client.message('^7Missing data, try !help paforce')
             return
 

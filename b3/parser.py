@@ -218,11 +218,9 @@ class Parser:
 
     def __init_bot(self):
         self.bot('--------------------------------------------')
-        bot_name = self.config.get('b3', 'bot_name')
-        if bot_name:
+        if bot_name := self.config.get('b3', 'bot_name'):
             self.name = bot_name
-        bot_prefix = self.config.get('b3', 'bot_prefix')
-        if bot_prefix:
+        if bot_prefix := self.config.get('b3', 'bot_prefix'):
             self.prefix = bot_prefix
         else:
             self.prefix = ''
@@ -361,8 +359,7 @@ class Parser:
     def _dump_cron_stats(self):
         self.info('***** CronTab Stats *****')
         for tab in self.cron.entries():
-            stats = tab.run_stats
-            if stats:
+            if stats := tab.run_stats:
                 mean, stdv = b3.functions.meanstdv(stats)
                 self.info('%s: (ms) min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
                            tab, min(stats), max(stats), mean, stdv, len(stats))
@@ -854,7 +851,7 @@ class Parser:
                 self.warning("Falling back on default message for '%s': %s", msg, err)
                 msg = vars2printf(self._messages_default.get(msg, '')).strip()
 
-        if len(args):
+        if args:
             if type(args[0]) == dict:
                 return msg % args[0]
             else:
@@ -902,8 +899,7 @@ class Parser:
         """
         Return a reference to a loaded command
         """
-        cmd = self._commands.get(cmd)
-        if cmd:
+        if cmd := self._commands.get(cmd):
             return cmd % kwargs
 
     @functools.lru_cache(maxsize=None)
@@ -925,8 +921,7 @@ class Parser:
         <data> can be either a group keyword or a group level.
         Raises KeyError if group is not found.
         """
-        group = self.getGroup(data)
-        return group.level
+        return self.getGroup(data).level
 
     def to_utc_hour(self, hour):
         """
@@ -1009,14 +1004,12 @@ class Parser:
                 time.sleep(self.delay)
                 continue
             for line in self.read():
-                line = line.strip()
-                if not line:
+                if not (line := line.strip()):
                     continue
                 # Track the log file time changes. This is mostly for
                 # parsing old log files for testing and to have time increase
                 # predictably
-                m = self._lineTime.match(line)
-                if m:
+                if m := self._lineTime.match(line):
                     log_time_current = (int(m.group('minutes')) * 60) + int(m.group('seconds'))
                     if log_time_start and log_time_current - log_time_start < log_time_last:
                         # Time in log has reset
@@ -1057,8 +1050,7 @@ class Parser:
         """
         Parse a single line from the log file
         """
-        m = re.match(self._lineFormat, line)
-        if m:
+        if m := re.match(self._lineFormat, line):
             self.queueEvent(b3.events.Event(self.getEventID('EVT_UNKNOWN'), m.group(2)[:1]))
 
     def registerHandler(self, event_name, event_handler):
@@ -1145,8 +1137,7 @@ class Parser:
         """
         Write a message to Rcon/Console
         """
-        res = self.output.write(msg, maxRetries=maxRetries, socketTimeout=socketTimeout)
-        return res
+        return self.output.write(msg, maxRetries=maxRetries, socketTimeout=socketTimeout)
 
     def writelines(self, msg):
         """
@@ -1154,26 +1145,26 @@ class Parser:
         :param msg: The message to be sent to Rcon/Console.
         """
         if msg:
-            res = self.output.writelines(msg)
-            return res
+            return self.output.writelines(msg)
 
     def read(self):
         """
         Read from game server log file
         """
-        lines = self.input.readlines()
-        if not lines:
-            # Compare the current cursor position against the current file size,
-            # if the cursor is at a number higher than the game log size, then
-            # there's a problem
-            filestats = os.fstat(self.input.fileno())
-            if self.input.tell() > filestats.st_size:
-                self.debug('Parser: game log is suddenly smaller than it was '
-                           f'before ({self.input.tell()} bytes, now {filestats.st_size}), '
-                           'the log was probably either rotated or emptied. B3 will now re-adjust to '
-                           'the new size of the log')
-                self.input.seek(0, os.SEEK_END)
-        return lines
+        if lines := self.input.readlines():
+            return lines
+
+        # No lines found so check to see if we need to reset our position.
+        # Compare the current cursor position against the current file size,
+        # if the cursor is at a number higher than the game log size, then
+        # there's a problem
+        filestats = os.fstat(self.input.fileno())
+        if self.input.tell() > filestats.st_size:
+            self.debug('Parser: game log is suddenly smaller than it was '
+                       f'before ({self.input.tell()} bytes, now {filestats.st_size}), '
+                       'the log was probably either rotated or emptied. B3 will now re-adjust to '
+                       'the new size of the log')
+            self.input.seek(0, os.SEEK_END)
 
     def shutdown(self):
         """

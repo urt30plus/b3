@@ -4,7 +4,7 @@ from unittest.mock import Mock
 from tests.plugins.afk import *
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def plugin(console):
     p = None
     with logging_disabled():
