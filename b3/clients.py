@@ -430,7 +430,7 @@ class Client:
     def _set_guid(self, guid):
         if guid and len(guid) > 2:
             if self._guid and self._guid != guid:
-                self.console.error('Client has guid but its not the same %s <> %s', self._guid, guid)
+                self.console.warning('Client has guid but its not the same %s <> %s', self._guid, guid)
                 self.authed = False
             elif not self._guid:
                 self._guid = guid

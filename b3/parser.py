@@ -1151,20 +1151,21 @@ class Parser:
         """
         Read from game server log file
         """
-        if lines := self.input.readlines():
-            return lines
+        if not (lines := self.input.readlines()):
+            # No lines found so check to see if we need to reset our position.
+            # Compare the current cursor position against the current file size,
+            # if the cursor is at a number higher than the game log size, then
+            # there's a problem
+            filestats = os.fstat(self.input.fileno())
+            if self.input.tell() > filestats.st_size:
+                self.debug('Parser: game log is suddenly smaller than it was '
+                           f'before ({self.input.tell()} bytes, now {filestats.st_size}), '
+                           'the log was probably either rotated or emptied. B3 will now re-adjust to '
+                           'the new size of the log')
+                self.input.seek(0, os.SEEK_END)
+                lines = self.input.readlines()
 
-        # No lines found so check to see if we need to reset our position.
-        # Compare the current cursor position against the current file size,
-        # if the cursor is at a number higher than the game log size, then
-        # there's a problem
-        filestats = os.fstat(self.input.fileno())
-        if self.input.tell() > filestats.st_size:
-            self.debug('Parser: game log is suddenly smaller than it was '
-                       f'before ({self.input.tell()} bytes, now {filestats.st_size}), '
-                       'the log was probably either rotated or emptied. B3 will now re-adjust to '
-                       'the new size of the log')
-            self.input.seek(0, os.SEEK_END)
+        return lines
 
     def shutdown(self):
         """
