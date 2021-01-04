@@ -80,13 +80,11 @@ class FishPlugin(Plugin):
         if fish_command not in self._fish_commands or len(input) != 2:
             client.message("invalid command, type !help fish")
             return
-        sclient = self._adminPlugin.findClientPrompt(input[1], client)
-        if not sclient:
-            return
-        self._fish_cmd = fish_command
-        self._target_name = sclient.name
-        client.message(f"now fishing for {self._target_name} with {self._fish_cmd}")
-        sclient.message(f"Watch out, {client.exactName} is fishing for you")
+        if sclient := self._adminPlugin.findClientPrompt(input[1], client):
+            self._fish_cmd = fish_command
+            self._target_name = sclient.name
+            client.message(f"now fishing for {self._target_name} with {self._fish_cmd}")
+            sclient.message(f"Watch out, {client.exactName} is fishing for you")
 
     def cmd_fishteam(self, data, client, cmd=None):
         """
@@ -122,8 +120,7 @@ class FishPlugin(Plugin):
         client.message(f"now fishing for {input[1]} team with {self._fish_cmd}")
 
     def __team_name(self):
-        team_key = self._target_team
-        if not team_key:
+        if not (team_key := self._target_team):
             return None
         for k, v in self._team_map.items():
             if v == team_key:

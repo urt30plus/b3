@@ -107,14 +107,6 @@ class Test_misc_cmd(Admin_TestCase):
         self.p.cmd_b3(data='', client=mock_client, cmd=mock_command)
         assert mock_command.sayLoudOrPM.called
 
-        for param in ('poke', 'expose', 'stare', 'stab', 'triangulate', 'bite', 'fuck', 'slap', 'fight', 'feed',
-                      'throw', 'furniture', 'indeed', 'flog', 'sexor', 'hate', 'smoke', 'maul', 'procreate',
-                      'shoot'):
-            mock_client.reset_mock()
-            self.p.cmd_b3(data=param, client=mock_client, cmd=mock_command)
-            if not self.console.say.called:
-                self.fail("self.console.say was not called for %r" % param)
-
     def test_rebuild(self):
         mock_client = Mock(spec=Client, name="client")
         mock_client.maxLevel = 0

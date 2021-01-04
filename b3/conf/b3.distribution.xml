@@ -113,25 +113,11 @@
         -->
         <plugin name="admin" config="@b3/conf/plugin_admin.ini" />
         <plugin name="adv" config="@b3/conf/plugin_adv.xml" />
-        <plugin name="censor" config="@b3/conf/plugin_censor.xml" />
-        <plugin name="pingwatch" config="@b3/conf/plugin_pingwatch.ini" />
         <plugin name="pluginmanager" config="@b3/conf/plugin_pluginmanager.ini" />
-        <plugin name="spamcontrol" config="@b3/conf/plugin_spamcontrol.ini" />
+        <plugin name="poweradminurt" config="@b3/conf/plugin_poweradminurt.ini" />
+        <plugin name="spree" config="@b3/conf/plugin_spree.ini" />
         <plugin name="stats" config="@b3/conf/plugin_stats.ini" />
-        <plugin name="tk" config="@b3/conf/plugin_tk.ini" />
         <plugin name="welcome" config="@b3/conf/plugin_welcome.ini" />
-
-        <!-- The following plugins have been included recently in B3 as official plugins. They are disabled by
-             default. You can enable them by removing the surrounding comment symbols. -->
-
-        <!-- <plugin name="afk" config="@b3/conf/plugin_afk.ini" /> -->
-        <!-- <plugin name="censorurt" config="@b3/conf/plugin_censorurt.xml" /> -->
-        <!-- <plugin name="duel" /> -->
-        <!-- <plugin name="firstkill" config="@b3/conf/plugin_firstkill.ini" /> -->
-        <!-- <plugin name="poweradminurt" config="@b3/conf/plugin_poweradminurt.ini" /> -->
-        <!-- <plugin name="spawnkill" config="@b3/conf/plugin_spawnkill.ini" /> -->
-        <!-- <plugin name="spree" config="@b3/conf/plugin_spree.ini" /> -->
-        <!-- <plugin name="xlrstats" config="@b3/conf/plugin_xlrstats.ini" /> -->
-
+        <plugin name="xlrstats" config="@b3/conf/plugin_xlrstats.ini" />
     </plugins>
 </configuration>

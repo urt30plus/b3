@@ -75,7 +75,6 @@ class AdvPlugin(b3.plugin.Plugin):
         self._msg = MessageLoop()
         self._file_name = None
         self._rate = '2'
-        self._replay = 0
 
     def onLoadConfig(self):
         """
@@ -156,59 +155,58 @@ class AdvPlugin(b3.plugin.Plugin):
         Display an advertisement message.
         :param first_try: Whether or not it's the first time we try to display this ad
         """
-        ad = self._msg.getnext()
-        if ad:
-            if ad == "@nextmap":
-                nextmap = self.console.getNextMap()
-                if nextmap:
-                    ad = "^2Next map: ^3" + nextmap
-                else:
-                    self.debug('could not get nextmap')
-                    ad = None
-            elif ad == "@time":
-                ad = "^2Time: ^3" + self.console.formatTime(time.time())
-            elif ad == "@topstats":
-                if self._xlrstats_plugin:
-                    self._xlrstats_plugin.cmd_xlrtopstats(data='3', client=None, cmd=None, ext=True)
-                    if first_try:
-                        # try another ad
-                        self.adv(first_try=False)
-                        return
-                    else:
-                        ad = None
-                else:
-                    self.error('XLRstats not installed! Cannot use @topstats in adv plugin!')
-                    ad = '@topstats not available: XLRstats is not installed!'
-            elif ad == "@admins":
-                try:
-                    command = self._admin_plugin._commands['admins']
-                    command.executeLoud(data=None, client=None)
-                    ad = None
-                except Exception as err:
-                    self.error("could not send adv message @admins", exc_info=err)
-                    if first_try:
-                        # try another ad
-                        self.adv(first_try=False)
-                        return
-                    else:
-                        ad = None
-            elif ad == "@regulars":
-                try:
-                    command = self._admin_plugin._commands['regulars']
-                    command.executeLoud(data=None, client=None)
-                    ad = None
-                except Exception as err:
-                    self.error("could not send adv message @regulars", exc_info=err)
-                    if first_try:
-                        # try another ad
-                        self.adv(first_try=False)
-                        return
-                    else:
-                        ad = None
+        if not (ad := self._msg.getnext()):
+            return
 
-            if ad:
-                self.console.say(ad)
-            self._replay = 0
+        if ad == "@nextmap":
+            if nextmap := self.console.getNextMap():
+                ad = "^2Next map: ^3" + nextmap
+            else:
+                self.debug('could not get nextmap')
+                ad = None
+        elif ad == "@time":
+            ad = "^2Time: ^3" + self.console.formatTime(time.time())
+        elif ad == "@topstats":
+            if self._xlrstats_plugin:
+                self._xlrstats_plugin.cmd_xlrtopstats(data='3', client=None, cmd=None, ext=True)
+                if first_try:
+                    # try another ad
+                    self.adv(first_try=False)
+                    return
+                else:
+                    ad = None
+            else:
+                self.error('XLRstats not installed! Cannot use @topstats in adv plugin!')
+                ad = '@topstats not available: XLRstats is not installed!'
+        elif ad == "@admins":
+            try:
+                command = self._admin_plugin._commands['admins']
+                command.executeLoud(data=None, client=None)
+                ad = None
+            except Exception as err:
+                self.error("could not send adv message @admins", exc_info=err)
+                if first_try:
+                    # try another ad
+                    self.adv(first_try=False)
+                    return
+                else:
+                    ad = None
+        elif ad == "@regulars":
+            try:
+                command = self._admin_plugin._commands['regulars']
+                command.executeLoud(data=None, client=None)
+                ad = None
+            except Exception as err:
+                self.error("could not send adv message @regulars", exc_info=err)
+                if first_try:
+                    # try another ad
+                    self.adv(first_try=False)
+                    return
+                else:
+                    ad = None
+
+        if ad:
+            self.console.say(ad)
 
     def _get_rate_minsec(self, rate):
         """
@@ -292,9 +290,7 @@ class AdvPlugin(b3.plugin.Plugin):
                 if not 0 <= item_index < len(self._msg):
                     client.message("Invalid data, use the !advlist command to list valid items numbers")
                 else:
-                    item = self._msg.getitem(item_index)
-
-                    if item:
+                    if item := self._msg.getitem(item_index):
                         self._msg.remove(int(data) - 1)
                         if self._file_name:
                             self.save()

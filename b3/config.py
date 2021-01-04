@@ -200,7 +200,7 @@ class XmlConfigParser(B3ConfigParserMixin):
         value = self.get(section, setting)
         if value is None:
             raise ValueError("%s.%s : is not an integer" % (section, setting))
-        return int(self.get(section, setting))
+        return int(value)
 
     def getfloat(self, section, setting):
         """
@@ -212,7 +212,7 @@ class XmlConfigParser(B3ConfigParserMixin):
         value = self.get(section, setting)
         if value is None:
             raise ValueError("%s.%s : is not a number" % (section, setting))
-        return float(self.get(section, setting))
+        return float(value)
 
     def sections(self):
         """

@@ -404,8 +404,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 if len(sp) == 2:
                     cmd, alias = sp
 
-                func = getCmd(self, cmd)
-                if func:
+                if func := getCmd(self, cmd):
                     self.registerCommand(self, cmd, level, func, alias)
 
         if not self.console.storage.db:
@@ -705,9 +704,7 @@ class AdminPlugin(b3.plugin.Plugin):
         req: set to True if parameters is required.
         Return None if could cmd is not in the expected format
         """
-        m = re.match(self._parseUserCmdRE, cmd)
-
-        if m:
+        if m := re.match(self._parseUserCmdRE, cmd):
             cid = m.group('cid')
             parms = m.group('parms')
 
@@ -767,8 +764,7 @@ class AdminPlugin(b3.plugin.Plugin):
         if not kword:
             return ''
 
-        r = self.getWarning(kword)
-        if r:
+        if r := self.getWarning(kword):
             return r[1]
         else:
             return kword
@@ -953,8 +949,7 @@ class AdminPlugin(b3.plugin.Plugin):
         elif warnings >= self.warn_alert_kick_num:
             duration = functions.minutesStr(self.warnKickDuration(sclient))
 
-            warn = sclient.lastWarning
-            if warn:
+            if warn := sclient.lastWarning:
                 self.console.say(self.config.getTextTemplate('warn', 'alert', name=sclient.exactName,
                                                              warnings=warnings, duration=duration, reason=warn.reason))
             else:
@@ -1009,8 +1004,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         msg = sclient.numWarnings
         keyword = ''
-        warn = sclient.lastWarning
-        if warn:
+        if warn := sclient.lastWarning:
             msg = warn.reason
             keyword = warn.keyword
 
@@ -1075,8 +1069,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <group> [<name>] - hide level
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
         elif m[1] is None:
@@ -1107,8 +1100,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         [<name>] - un-hide level
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             sclient = client
         else:
             sclient = self.findClientPrompt(m[0], client)
@@ -1126,8 +1118,7 @@ class AdminPlugin(b3.plugin.Plugin):
         [<player>] - clear all tk points and warnings
         """
         if data:
-            sclient = self.findClientPrompt(data, client)
-            if sclient:
+            if sclient := self.findClientPrompt(data, client):
                 self.clearAll(sclient, client)
                 self.console.say(self.getMessage('cleared_warnings', {'admin': client.exactName,
                                                                       'player': sclient.exactName}))
@@ -1157,53 +1148,8 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         - say b3's version info
         """
-        if len(data) > 0 and client.maxLevel >= self._admins_level:
-            data = data.lower().strip()
-            if data == 'poke':
-                self.console.say('^7Do not poke b3 %s^7!' % client.exactName)
-            elif data == 'expose':
-                self.console.say('^7Do expose b3 to sunlight %s^7!' % client.exactName)
-            elif data == 'stare':
-                self.console.say('^7Do not stare at b3 %s^7!' % client.exactName)
-            elif data == 'stab':
-                self.console.say('^7b3 is invincible, %s^7 could not penetrate he hide of b3' % client.exactName)
-            elif data == 'bite':
-                self.console.say('^7b3 breaks %s^7\'s teeth with its metalic frame' % client.exactName)
-            elif data == 'fuck':
-                self.console.say('^7b3 doesn\'t need your hand me out %s^7' % client.exactName)
-            elif data == 'slap':
-                self.console.say('^7%s^7 is not Rick James' % client.exactName)
-            elif data == 'fight':
-                self.console.say('^7%s^7 is knocked out by b3' % client.exactName)
-            elif data == 'feed':
-                self.console.say('^7b3 enjoys your nourishment %s^7' % client.exactName)
-            elif data == 'throw':
-                self.console.say('^7b3 can fly %s^7, and you throw like a sissy' % client.exactName)
-            elif data == 'furniture':
-                self.console.say('^7b3 does make a lovely lamp %s^7' % client.exactName)
-            elif data == 'indeed':
-                self.console.say('^7You WOULD say that %s^7' % client.exactName)
-            elif data == 'flog':
-                self.console.say('^7You are so kinky %s^7' % client.exactName)
-            elif data == 'sexor':
-                self.console.say('^7Mmmmm %s^7' % client.exactName)
-            elif data == 'hate':
-                self.console.say('^7Don\'t hate the player, %s^7, hate the game' % client.exactName)
-            elif data == 'smoke':
-                self.console.say('^7b3 has been known to cause lung cancer when smoked %s^7' % client.exactName)
-            elif data == 'maul':
-                self.console.say('^7b3 casts a spell of invisibility, you can\'t find  %s^7' % client.exactName)
-            elif data == 'procreate':
-                self.console.say('^7b3 2.0 will soon be on the way %s^7' % client.exactName)
-            elif data == 'shoot':
-                self.console.say('^7Your hit detection is off %s^7, b3 is unharmed' % client.exactName)
-            elif data == 'kick':
-                client.kick('^7as requested', '', None)
-            elif data == 'triangulate':
-                self.console.say('^7b3 is at %s' % self.console._publicIp)
-        else:
-            cmd.sayLoudOrPM(client, '%s ^7- uptime: [^2%s^7]' % (
-                b3.version, functions.minutesStr(self.console.upTime() / 60.0)))
+        cmd.sayLoudOrPM(client, '%s ^7- uptime: [^2%s^7]' % (
+            b3.version, functions.minutesStr(self.console.upTime() / 60.0)))
 
     def cmd_register(self, data, client, cmd=None):
         """
@@ -1306,8 +1252,7 @@ class AdminPlugin(b3.plugin.Plugin):
                     nlist.append('%s^7 [^3%s^7]' % (c.exactName, c.maxLevel))
             cmd.sayLoudOrPM(client, self.getMessage('admins', ', '.join(nlist)))
         else:
-            msg = self.getMessage('no_admins')
-            if msg:
+            if msg := self.getMessage('no_admins'):
                 cmd.sayLoudOrPM(client, self.getMessage('no_admins'))
 
     def cmd_rebuild(self, data, client, cmd=None):
@@ -1341,8 +1286,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         [<name>] - display a user's status
         """
-        m = self.parseUserCmd(data)
-        if m:
+        if m := self.parseUserCmd(data):
             sclient = self.findClientPrompt(m[0], client)
         else:
             sclient = client
@@ -1362,8 +1306,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - add a player in the 'regular' group
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -1375,8 +1318,7 @@ class AdminPlugin(b3.plugin.Plugin):
         except Exception:
             client.message('^7Group ^1reg ^7does not exist')
         else:
-            sclient = self.findClientPrompt(cid, client)
-            if sclient:
+            if sclient := self.findClientPrompt(cid, client):
                 if sclient.inGroup(group):
                     client.message(self.getMessage('groups_already_in', sclient.exactName, group.name))
                 elif sclient.maxLevel >= group.level:
@@ -1390,8 +1332,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - remove a player from the 'regular' group
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -1410,8 +1351,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 self.debug(err)
                 client.message("^7Group ^1user ^7does not exist")
             else:
-                sclient = self.findClientPrompt(cid, client)
-                if sclient:
+                if sclient := self.findClientPrompt(cid, client):
                     if sclient.inGroup(group_reg):
                         sclient.remGroup(group_reg)
                         sclient.setGroup(group_user)
@@ -1424,8 +1364,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <client> <group> - add a client to a group
         """
-        m = re.match('^(.{2,}) ([a-z][a-z0-9]+)$', data, re.I)
-        if not m:
+        if not (m := re.match('^(.{2,}) ([a-z][a-z0-9]+)$', data, re.I)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -1440,8 +1379,7 @@ class AdminPlugin(b3.plugin.Plugin):
             if group.level >= client.maxLevel and client.maxLevel < 100:
                 client.message(self.getMessage('group_beyond_reach', {'group_name': group.name}))
             else:
-                sclient = self.findClientPrompt(cid, client)
-                if sclient:
+                if sclient := self.findClientPrompt(cid, client):
                     if sclient.inGroup(group):
                         client.message(self.getMessage('groups_already_in', sclient.exactName, group.name))
                     else:
@@ -1459,8 +1397,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <client> <group> - remove a client from a group
         """
-        m = re.match('^([^ ]{2,}) ([a-z]+)$', cid)
-        if not m:
+        if not (m := re.match('^([^ ]{2,}) ([a-z]+)$', cid)):
             client.message(self.getMessage('invalid_parameters'))
         else:
 
@@ -1472,8 +1409,7 @@ class AdminPlugin(b3.plugin.Plugin):
             except KeyError:
                 client.message(self.getMessage('group_unknown', {'group_name': keyword}))
             else:
-                sclient = self.findClientPrompt(cid, client)
-                if sclient:
+                if sclient := self.findClientPrompt(cid, client):
                     if sclient.inGroup(group):
                         sclient.remGroup(group)
                         sclient.save()
@@ -1525,8 +1461,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - when was a player last seen?
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
         else:
             clients = self.console.clients.lookupByName(m[0])
@@ -1544,8 +1479,7 @@ class AdminPlugin(b3.plugin.Plugin):
         if not self.console.storage.status():
             cmd.sayLoudOrPM(client, '^7Cannot lookup: database appears to be ^1DOWN')
         else:
-            m = re.match('^(.+)$', data)
-            if not m:
+            if not (m := re.match('^(.+)$', data)):
                 client.message(self.getMessage('invalid_parameters'))
             else:
                 clients = self.console.clients.lookupByName(data)
@@ -1575,12 +1509,10 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - test to find a connected player
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
         else:
-            sclient = self.findClientPrompt(m[0], client)
-            if sclient:
+            if sclient := self.findClientPrompt(m[0], client):
                 cmd.sayLoudOrPM(client,
                                 '^7Found player matching %s [^2%s^7] %s' % (m[0], sclient.cid, sclient.exactName))
 
@@ -1588,13 +1520,11 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> <field> - get info about a client
         """
-        m = self.parseUserCmd(data, True)
-        if not m:
+        if not (m := self.parseUserCmd(data, True)):
             client.message(self.getMessage('invalid_parameters'))
         else:
             cid, field = m
-            sclient = self.findClientPrompt(cid, client)
-            if sclient:
+            if sclient := self.findClientPrompt(cid, client):
                 try:
                     cmd.sayLoudOrPM(client, '%s^7: %s^7 is %s' % (sclient.exactName, field, getattr(sclient, field)))
                 except AttributeError:
@@ -1604,8 +1534,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> [<reason>] - kick a player
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             msg = self.getMessage('invalid_parameters')
             client.message(msg)
             return
@@ -1617,8 +1546,7 @@ class AdminPlugin(b3.plugin.Plugin):
             client.message(self.getMessage('error_no_reason'))
             return
 
-        sclient = self.findClientPrompt(cid, client)
-        if sclient:
+        if sclient := self.findClientPrompt(cid, client):
             if sclient.cid == client.cid:
                 self.console.say(self.getMessage('kick_self', client.exactName))
             elif sclient.maxLevel >= client.maxLevel:
@@ -1637,8 +1565,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <pattern> [<reason>] - kick all players matching <pattern>
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
         else:
             cid, keyword = m
@@ -1659,8 +1586,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> [<reason>] - spank a player, naughty boy!
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -1671,8 +1597,7 @@ class AdminPlugin(b3.plugin.Plugin):
             client.message(self.getMessage('error_no_reason'))
             return
 
-        sclient = self.findClientPrompt(cid, client)
-        if sclient:
+        if sclient := self.findClientPrompt(cid, client):
             if sclient.cid == client.cid:
                 self.console.say(self.getMessage('kick_self', client.exactName))
             elif sclient.maxLevel >= client.maxLevel:
@@ -1695,8 +1620,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <pattern> [<reason>] - kick all players matching <pattern>
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -1724,8 +1648,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> [<reason>] - ban a player permanently
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -1736,8 +1659,7 @@ class AdminPlugin(b3.plugin.Plugin):
             client.message(self.getMessage('error_no_reason'))
             return
 
-        sclient = self.findClientPrompt(cid, client)
-        if sclient:
+        if sclient := self.findClientPrompt(cid, client):
             if sclient.cid == client.cid:
                 self.console.say(self.getMessage('ban_self', client.exactName))
             elif sclient.maxLevel >= client.maxLevel:
@@ -1758,8 +1680,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> [<reason>] - ban a player
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -1770,8 +1691,7 @@ class AdminPlugin(b3.plugin.Plugin):
             client.message(self.getMessage('error_no_reason'))
             return
 
-        sclient = self.findClientPrompt(cid, client)
-        if sclient:
+        if sclient := self.findClientPrompt(cid, client):
             if sclient.cid == client.cid:
                 self.console.say(self.getMessage('ban_self', client.exactName))
             elif sclient.maxLevel >= client.maxLevel:
@@ -1794,8 +1714,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <pattern> [<reason>] - ban all players matching <pattern>
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -1834,8 +1753,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 txt += ' %s' % penalty.reason
             return txt
 
-        bans = self.console.storage.getLastPenalties(types=('Ban', 'TempBan'), num=5)
-        if bans:
+        if bans := self.console.storage.getLastPenalties(types=('Ban', 'TempBan'), num=5):
             for line in map(format_ban, bans):
                 cmd.sayLoudOrPM(client, line)
         else:
@@ -1845,15 +1763,12 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - display how many bans a user has
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
-        sclient = self.findClientPrompt(m[0], client)
-        if sclient:
-            bans = sclient.numBans
-            if bans:
+        if sclient := self.findClientPrompt(m[0], client):
+            if bans := sclient.numBans:
                 cmd.sayLoudOrPM(client, self.getMessage('baninfo', {'name': sclient.exactName, 'num_bans': bans}))
             else:
                 cmd.sayLoudOrPM(client, self.getMessage('baninfo_no_bans', {'name': sclient.exactName}))
@@ -1866,24 +1781,21 @@ class AdminPlugin(b3.plugin.Plugin):
         if not m or m[1] == '':
             client.message(self.getMessage('invalid_parameters'))
         else:
-            sclient = self.findClientPrompt(m[0], client)
-            if sclient:
+            if sclient := self.findClientPrompt(m[0], client):
                 self.OnSay(self.console.getEvent('EVT_CLIENT_SAY', m[1], sclient))
 
     def cmd_unban(self, data, client=None, cmd=None):
         """
         <name> - un-ban a player
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
         cid, reason = m
         reason = self.getReason(reason)
 
-        sclient = self.findClientPrompt(cid, client)
-        if sclient:
+        if sclient := self.findClientPrompt(cid, client):
             for w in sclient.bans:
                 if w.adminId:
                     try:
@@ -1900,15 +1812,13 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - list a players aliases
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
         cid = m[0]
 
-        sclient = self.findClientPrompt(cid, client)
-        if sclient:
+        if sclient := self.findClientPrompt(cid, client):
             if sclient.maskGroup:
                 cmd.sayLoudOrPM(client, self.getMessage('no_aliases', sclient.exactName))
             else:
@@ -1940,8 +1850,7 @@ class AdminPlugin(b3.plugin.Plugin):
             client.message(self.getMessage('invalid_parameters'))
         else:
             cid, notice = m
-            sclient = self.findClientPrompt(cid, client)
-            if sclient:
+            if sclient := self.findClientPrompt(cid, client):
                 if sclient.maxLevel >= client.maxLevel:
                     client.message('^7Cannot add notice to higher level admin %s' % sclient.exactName)
                 else:
@@ -1952,13 +1861,11 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> [<warning>] - warn user
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
         else:
             cid, keyword = m
-            sclient = self.findClientPrompt(cid, client)
-            if sclient:
+            if sclient := self.findClientPrompt(cid, client):
                 if sclient.id == client.id:
                     client.message(self.getMessage('warn_self', client.exactName))
                 elif sclient.maxLevel >= client.maxLevel:
@@ -1986,13 +1893,11 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - remove a users last warning
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
-        sclient = self.findClientPrompt(m[0], client)
-        if sclient:
+        if sclient := self.findClientPrompt(m[0], client):
             w = sclient.lastWarning
             if not sclient.numWarnings or not w:
                 client.message('^7No warnings found for %s' % sclient.exactName)
@@ -2016,13 +1921,11 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - clear all of a users warnings
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
-        sclient = self.findClientPrompt(m[0], client)
-        if sclient:
+        if sclient := self.findClientPrompt(m[0], client):
             if not sclient.numWarnings:
                 client.message('^7No warnings found for %s' % sclient.exactName)
                 return
@@ -2055,21 +1958,16 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <name> - display how many warning points a user has
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
         else:
-            sclient = self.findClientPrompt(m[0], client)
-            if sclient:
-                warns = sclient.numWarnings
-                if warns:
+            if sclient := self.findClientPrompt(m[0], client):
+                if warns := sclient.numWarnings:
                     msg = ''
-                    warn = sclient.firstWarning
-                    if warn:
+                    if warn := sclient.firstWarning:
                         expire = functions.minutesStr((warn.timeExpire - (self.console.time())) / 60)
                         msg = ', expires in ^2%s' % expire
-                    warn = sclient.lastWarning
-                    if warn:
+                    if warn := sclient.lastWarning:
                         msg += '^7: ^3%s' % warn.reason
                     message = '^7%s ^7has ^1%s ^7active warnings%s' % (sclient.exactName, warns, msg)
                 else:
@@ -2095,8 +1993,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         - list the next map in rotation
         """
-        mapname = self.console.getNextMap()
-        if mapname:
+        if mapname := self.console.getNextMap():
             cmd.sayLoudOrPM(client, '^7Next Map: ^2%s' % mapname)
         else:
             client.message('^7ERROR: could not get nextmap')
@@ -2105,8 +2002,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <duration> - pause the bot from parsing
         """
-        m = re.match('^([0-9]+[a-z]*)$', data)
-        if not m:
+        if not (m := re.match('^([0-9]+[a-z]*)$', data)):
             client.message(self.getMessage('invalid_parameters'))
         else:
             duration = functions.time2minutes(data)
@@ -2120,24 +2016,20 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         [player] <message> - spam a predefined message to all players or a given player
         """
-        m = re.match(r'^((?P<player>\w+)\s+)?(?P<keyword>\w{2,})$', data)
-        if not m:
+        if not (m := re.match(r'^((?P<player>\w+)\s+)?(?P<keyword>\w{2,})$', data)):
             client.message(self.getMessage('invalid_parameters'))
         else:
             keyword = m.group("keyword")
-            msg = self.getSpam(keyword)
-            if not msg:
+            if not (msg := self.getSpam(keyword)):
                 client.message('^7Could not find spam message ^1%s' % keyword)
             else:
-                player_name = m.group("player")
-                if not player_name:
+                if not (player_name := m.group("player")):
                     if cmd and cmd.big:
                         self.console.saybig(msg)
                     else:
                         self.console.say(msg)
                 else:
-                    sclient = self.findClientPrompt(player_name, client)
-                    if sclient:
+                    if sclient := self.findClientPrompt(player_name, client):
                         sclient.message(msg)
 
     def cmd_rules(self, data, client=None, cmd=None):
@@ -2149,8 +2041,7 @@ class AdminPlugin(b3.plugin.Plugin):
         else:
             if data:
                 if client.maxLevel >= self._admins_level:
-                    sclient = self.findClientPrompt(data, client)
-                    if sclient:
+                    if sclient := self.findClientPrompt(data, client):
                         if sclient.maxLevel >= client.maxLevel:
                             client.message('%s ^7already knows the rules' % sclient.exactName)
                         else:
@@ -2168,8 +2059,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         - list spam messages
         """
-        ws = sorted(self.config.options('spamages'))
-        if ws:
+        if ws := sorted(self.config.options('spamages')):
             client.message('^7Spamages: %s' % ', '.join(ws))
         else:
             client.message('^7No spamage message defined')
@@ -2185,8 +2075,7 @@ class AdminPlugin(b3.plugin.Plugin):
             return
 
         cid = m[0]
-        m = re.match(r'^([0-9]+[dwhsm]*)(?:\s(.+))?$', m[1], re.I)
-        if not m:
+        if not (m := re.match(r'^([0-9]+[dwhsm]*)(?:\s(.+))?$', m[1], re.I)):
             client.message(self.getMessage('invalid_parameters'))
             return
 
@@ -2206,8 +2095,7 @@ class AdminPlugin(b3.plugin.Plugin):
             client.message('^7You must supply a duration for this ban')
             return
 
-        sclient = self.findClientPrompt(cid, client)
-        if sclient:
+        if sclient := self.findClientPrompt(cid, client):
             if sclient.cid == client.cid:
                 self.console.say(self.getMessage('temp_ban_self', client.exactName))
             elif sclient.maxLevel >= client.maxLevel:
@@ -2225,15 +2113,13 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <player> - notify a player that he needs to move
         """
-        m = self.parseUserCmd(data)
-        if not m:
+        if not (m := self.parseUserCmd(data)):
             client.message(self.getMessage('invalid_parameters'))
         else:
             if m[0] == 'b3':
                 self.warnClient(client, 'Do not poke b3!', None, False, '', 1)
             else:
-                sclient = self.findClientPrompt(m[0], client)
-                if sclient:
+                if sclient := self.findClientPrompt(m[0], client):
                     message = random.choice(('Wake up', '*poke*', 'Attention', 'Get up', 'Go', 'Move out'))
                     self.console.say('^7%s %s^7!' % (message, sclient.exactName))
 
