@@ -23,11 +23,13 @@ class DayOfWeek(enum.IntEnum):
 
     @staticmethod
     def range(*args):
-        return ",".join([str(x.value) for x in args])
+        return ','.join([str(x.value) for x in args])
 
 
 class ReMatcher:
-    _re = None
+
+    def __init__(self):
+        self._re = None
 
     def match(self, regexp, value):
         """
@@ -46,34 +48,25 @@ class ReMatcher:
 
 
 class CronTab:
-    _second = None
-    _minute = None
-    _hour = None
-    _day = None
-    _month = None
-    _dow = None
 
-    command = None
-    maxRuns = 0
-    numRuns = 0
-
-    def __init__(self, command, second=0, minute='*', hour='*', day='*', month='*', dow='*'):
+    def __init__(self, command, minute='*', hour='*', day='*', month='*', dow='*'):
         """
         Object constructor.
         """
-        self.second = second
-        self.minute = minute
-        self.hour = hour
-        self.day = day
-        self.month = month
-        self.dow = dow
+        self._minute = CronTab._getRate(minute, 60)
+        self._hour = CronTab._getRate(hour, 24)
+        self._day = CronTab._getRate(day, 31)
+        self._month = CronTab._getRate(month, 12)
+        self._dow = CronTab._getRate(dow, 7)
         self.command = command
         self.run_stats = deque(maxlen=20)
+        self.maxRuns = 0
+        self.numRuns = 0
 
     def __repr__(self):
         return (
             f"{self.__class__.__name__}(command={self.command.__qualname__}, "
-            f"second={self.second}, minute={self.minute}, hour={self.hour}, "
+            f"minute={self.minute}, hour={self.hour}, "
             f"day={self.day}, month={self.month}, dow={self.dow})"
         )
 
@@ -87,11 +80,11 @@ class CronTab:
 
     @property
     def second(self):
-        return self._second
+        return 0
 
     @second.setter
     def second(self, value):
-        self._second = self._getRate(value, 60)
+        pass
 
     @property
     def minute(self):
@@ -133,7 +126,8 @@ class CronTab:
     def dow(self, value):
         self._dow = self._getRate(value, 7)
 
-    def _getRate(self, rate, maxrate=None):
+    @staticmethod
+    def _getRate(rate, maxrate=None):
         """
         >>> o = CronTab(lambda: None)
         >>> o._getRate('*/5', 60)
@@ -151,46 +145,45 @@ class CronTab:
                 # 10,20,30 = [10, 20, 30]
                 # 5,6,7,20,30 = [5-7, 20, 30]
                 # 5,7,9,11,30,40,41,42 = [5-12/2, 30, 40-42]
-                myset = {}
+                myset = set()
                 for fragment in rate.split(','):
-                    result = self._getRateFromFragment(fragment.strip(), maxrate)
+                    result = CronTab._getRateFromFragment(fragment.strip(), maxrate)
                     if isinstance(result, int):
-                        myset[result] = None
+                        myset.add(result)
                     else:
                         # must be a list
                         for val in result:
-                            myset[int(val)] = None
+                            myset.add(int(val))
 
-                mylist = list(myset.keys())
-                mylist.sort()
-                return mylist
+                return sorted(myset)
             else:
-                return self._getRateFromFragment(rate, maxrate)
+                return CronTab._getRateFromFragment(rate, maxrate)
         elif isinstance(rate, int):
             if rate < 0 or rate >= maxrate:
-                raise ValueError('accepted range is 0-%s' % (maxrate - 1))
+                raise ValueError(f'accepted range is 0-{(maxrate - 1)}')
             return rate
         elif isinstance(rate, float):
             if int(rate) < 0 or int(rate) >= maxrate:
-                raise ValueError('accepted range is 0-%s' % (maxrate - 1))
+                raise ValueError(f'accepted range is 0-{(maxrate - 1)}')
             return int(rate)
 
-        raise TypeError('"%s" is not a known cron rate type' % rate)
+        raise TypeError(f'"{rate}" is not a known cron rate type')
 
     @staticmethod
     def _getRateFromFragment(rate, maxrate):
-        r = ReMatcher()
         if rate == '*':
             return -1
-        elif r.match(r'^([0-9]+)$', rate):
+
+        r = ReMatcher()
+        if r.match(r'^([0-9]+)$', rate):
             if int(rate) >= maxrate:
-                raise ValueError('%s cannot be over %s' % (rate, maxrate - 1))
+                raise ValueError(f'{rate} cannot be over {maxrate - 1}')
             return int(rate)
         elif r.match(r'^\*/([0-9]+)$', rate):
             # */10 = [0, 10, 20, 30, 40, 50]
             step = int(r.results.group(1))
             if step > maxrate:
-                raise ValueError('%s cannot be over every %s' % (rate, maxrate - 1))
+                raise ValueError(f'{rate} cannot be over every {maxrate - 1}')
             return list(range(0, maxrate, step))
         elif r.match(r'^(?P<lmin>[0-9]+)-(?P<lmax>[0-9]+)(/(?P<step>[0-9]+))?$', rate):
             # 10-20 = [0, 10, 20, 30, 40, 50]
@@ -202,58 +195,48 @@ class CronTab:
             else:
                 step = int(step)
             if step > maxrate:
-                raise ValueError('%s is out of accepted range 0-%s' % (step, maxrate))
+                raise ValueError(f'{step} is out of accepted range 0-{maxrate}')
             if lmin < 0 or lmax > maxrate:
-                raise ValueError('%s is out of accepted range 0-%s' % (rate, maxrate - 1))
+                raise ValueError(f'{rate} is out of accepted range 0-{maxrate - 1}')
             if lmin > lmax:
-                raise ValueError('%s cannot be greater than %s in %s' % (lmin, lmax, rate))
+                raise ValueError(f'{lmin} cannot be greater than {lmax} in {rate}')
             return list(range(lmin, lmax + 1, step))
 
-        raise TypeError('"%s" is not a known cron rate type' % rate)
+        raise TypeError(f'"{rate}" is not a known cron rate type')
 
     @staticmethod
     def _match(unit, value):
         if isinstance(unit, int):
-            if unit == -1 or unit == value:
-                return True
-        elif value in unit:
-            return True
-        return False
+            return unit == -1 or unit == value
+        return value in unit
 
     def match(self, timetuple):
-        # second
-        timematch = self._match(self.second, timetuple[5] - (timetuple[5] % 1))
-        # minute
-        timematch = timematch and self._match(self.minute, timetuple[4])
-        # hour
-        timematch = timematch and self._match(self.hour, timetuple[3])
-        # day
-        timematch = timematch and self._match(self.day, timetuple[2])
-        # month
-        timematch = timematch and self._match(self.month, timetuple[1])
-        # weekday (in crontab 0 is Mon)
-        timematch = timematch and self._match(self.dow, timetuple[6])
-        return timematch
+        return (
+            self._match(self.minute, timetuple[4])
+            and self._match(self.hour, timetuple[3])
+            and self._match(self.day, timetuple[2])
+            and self._match(self.month, timetuple[1])
+            and self._match(self.dow, timetuple[6])
+        )
 
 
 class OneTimeCronTab(CronTab):
 
-    def __init__(self, command, second=0, minute='*', hour='*', day='*', month='*', dow='*'):
+    def __init__(self, command, minute='*', hour='*', day='*', month='*', dow='*'):
         """
         Object constructor.
         """
-        CronTab.__init__(self, command, second, minute, hour, day, month, dow)
+        super().__init__(command, minute, hour, day, month, dow)
         self.maxRuns = 1
 
 
 class PluginCronTab(CronTab):
-    plugin = None
 
-    def __init__(self, plugin, command, second=0, minute='*', hour='*', day='*', month='*', dow='*'):
+    def __init__(self, plugin, command, minute='*', hour='*', day='*', month='*', dow='*'):
         """
         Object constructor.
         """
-        CronTab.__init__(self, command, second, minute, hour, day, month, dow)
+        super().__init__(command, minute, hour, day, month, dow)
         self.plugin = plugin
 
     def match(self, timetuple):
@@ -262,7 +245,7 @@ class PluginCronTab(CronTab):
         Will return False if the plugin is disabled.
         """
         if self.plugin.isEnabled():
-            return CronTab.match(self, timetuple)
+            return super().match(timetuple)
         return False
 
     def run(self):
@@ -271,7 +254,7 @@ class PluginCronTab(CronTab):
         Will do nothing if the plugin is disabled.
         """
         if self.plugin.isEnabled():
-            CronTab.run(self)
+            super().run()
 
 
 class Cron:
@@ -286,11 +269,11 @@ class Cron:
         # thread will stop if this event gets set
         self._stopEvent = threading.Event()
 
-    def create(self, command, second=0, minute='*', hour='*', day='*', month='*', dow='*'):
+    def create(self, command, minute='*', hour='*', day='*', month='*', dow='*'):
         """
         Create a new CronTab and add it to the active cron tabs.
         """
-        t = CronTab(command, second, minute, hour, day, month, dow)
+        t = CronTab(command, minute, hour, day, month, dow)
         return self.add(t)
 
     def add(self, tab):
@@ -327,13 +310,6 @@ class Cron:
         """
         b3.functions.start_daemon_thread(target=self.run, name='crontab')
 
-    @staticmethod
-    def time():
-        """
-        Return the current timestamp.
-        """
-        return time.time()
-
     def stop(self):
         """
         Stop the cron scheduler.
@@ -346,39 +322,34 @@ class Cron:
         Will terminate when stop event is set.
         """
         self.console.info("Cron scheduler started")
-        nexttime = self.getNextTime()
-        while not self._stopEvent.isSet():
-            now = self.time()
-            if now < nexttime:
-                self._stopEvent.wait(nexttime - now + .1)
-
-            # Check if the time has changed by more than two minutes. This
-            # case arises when the system clock is changed. We must reset the timer.
-            if abs(self.time() - nexttime) > 120:
-                nexttime = self.getNextTime()
-
-            t = time.gmtime(nexttime)
+        while True:
+            t = time.gmtime()
             for k, c in self._tabs.items():
                 if c.match(t):
-                    if 0 < c.maxRuns < c.numRuns + 1:
+                    c.numRuns += 1
+                    try:
+                        c.run()
+                    except Exception as msg:
+                        self.console.error('Exception raised while executing crontab %s: %s\n%s',
+                                           c, msg, traceback.extract_tb(sys.exc_info()[2]))
+                    if 0 < c.maxRuns <= c.numRuns:
                         # reached max executions, remove tab
                         del self._tabs[k]
-                    else:
-                        c.numRuns += 1
-                        try:
-                            c.run()
-                        except Exception as msg:
-                            self.console.error('Exception raised while executing crontab %s: %s\n%s',
-                                               c, msg, traceback.extract_tb(sys.exc_info()[2]))
+                    if self._stopEvent.wait(timeout=0.075):
+                        break
 
-            nexttime += 1
+            # calculate wait until the next minute
+            t2 = time.gmtime()
+            if t2.tm_min == t.tm_min:
+                delay = 62 - t2.tm_sec
+            else:
+                self.console.warning('Cron run crossed the minute mark: '
+                                     'start %s:%s / end %s:%s',
+                                     t.tm_min, t.tm_sec, t2.tm_min, t2.tm_sec)
+                # since the next minute has arrived we only add a small delay
+                delay = 0.1
+
+            if self._stopEvent.wait(timeout=delay):
+                break
 
         self.console.info("Cron scheduler ended")
-
-    @staticmethod
-    def getNextTime():
-        # store the time first, we don't want it to change on us
-        t = time.time()
-        # current time, minus it's 1 second remainder, plus 1 seconds
-        # will round to the next nearest 1 seconds
-        return (t - t % 1) + 1

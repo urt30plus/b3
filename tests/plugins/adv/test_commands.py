@@ -73,7 +73,7 @@ class Test_commands(AdvTestCase):
         self.joe.clearMessageHistory()
         self.p.cmd_advrate(data='', client=self.joe)
         self.assertEqual('30s', self.p._rate)
-        self.assertEqual(['Current rate is every 30 seconds'], self.joe.message_history)
+        self.assertEqual(['Current rate is every minute'], self.joe.message_history)
 
     def test_advrate_no_arg_2min(self):
         self.init_plugin("""
@@ -110,7 +110,7 @@ class Test_commands(AdvTestCase):
         self.joe.clearMessageHistory()
         self.p.cmd_advrate(data="20s", client=self.joe)
         self.assertEqual('20s', self.p._rate)
-        self.assertEqual(['Adv: rate set to 20 seconds'], self.joe.message_history)
+        self.assertEqual(['Adv: rate set to every minute'], self.joe.message_history)
 
     def test_advrate_set_3min(self):
         self.init_plugin("""

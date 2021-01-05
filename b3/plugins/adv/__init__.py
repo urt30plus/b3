@@ -93,7 +93,7 @@ class AdvPlugin(b3.plugin.Plugin):
             self.console.cron - self._crontab
 
         (m, s) = self._get_rate_minsec(self._rate)
-        self._crontab = b3.cron.PluginCronTab(self, self.adv, second=s, minute=m)
+        self._crontab = b3.cron.PluginCronTab(self, self.adv, minute=m)
         self.console.cron + self._crontab
 
     def onStartup(self):
@@ -261,16 +261,16 @@ class AdvPlugin(b3.plugin.Plugin):
         """
         if not data:
             if self._rate[-1] == 's':
-                client.message(f'Current rate is every {self._rate[:-1]} seconds')
+                client.message(f'Current rate is every minute')
             else:
                 client.message(f'Current rate is every {self._rate} minutes')
         else:
             self._rate = data
-            (m, s) = self._get_rate_minsec(self._rate)
+            m, s = self._get_rate_minsec(self._rate)
             self._crontab.minute = m
-            self._crontab.second = s
             if self._rate[-1] == 's':
-                client.message(f'^3Adv: ^7rate set to {self._rate[:-1]} seconds')
+                self._crontab.minute = '*'
+                client.message(f'^3Adv: ^7rate set to every minute')
             else:
                 client.message(f'^3Adv: ^7rate set to {self._rate} minutes')
 

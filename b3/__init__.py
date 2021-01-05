@@ -1,5 +1,5 @@
 __author__ = 'ThorN'
-__version__ = '3.31.19'
+__version__ = '3.31.20'
 
 versionEdition = "WindyCity"
 versionId = f'v{__version__}'

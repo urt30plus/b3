@@ -12,7 +12,6 @@ class Test_Crontab(unittest.TestCase):
         command = sentinel
         tab = CronTab(command)
         self.assertEqual(command, tab.command)
-        self.assertEqual(0, tab.second)
         self.assertEqual(-1, tab.minute)
         self.assertEqual(-1, tab.hour)
         self.assertEqual(-1, tab.day)
@@ -22,16 +21,15 @@ class Test_Crontab(unittest.TestCase):
 
     def test_constructor(self):
         command = sentinel
-        tab = CronTab(command, second=1, minute=2, hour=3, day=4, month=5, dow=1)
+        tab = CronTab(command, minute=2, hour=3, day=4, month=5, dow=1)
         self.assertEqual(command, tab.command)
-        self.assertEqual(1, tab.second)
         self.assertEqual(2, tab.minute)
         self.assertEqual(3, tab.hour)
         self.assertEqual(4, tab.day)
         self.assertEqual(5, tab.month)
         self.assertEqual(1, tab.dow)
 
-        tab = CronTab(command, second=1, minute=2, hour=3, day=4, month=5, dow=DayOfWeek.TUESDAY)
+        tab = CronTab(command, minute=2, hour=3, day=4, month=5, dow=DayOfWeek.TUESDAY)
         self.assertEqual(1, tab.dow)
 
     def test_dow(self):
@@ -83,17 +81,17 @@ class Test_Crontab(unittest.TestCase):
         assert command.called
 
     def test_match(self):
-        tab = CronTab(None, second='*', minute='*', hour='*', day='*', month='*', dow='*')
+        tab = CronTab(None, minute='*', hour='*', day='*', month='*', dow='*')
         self.assertTrue(tab.match(time.gmtime()))
 
-        tab = CronTab(None, second='*', minute='*', hour='*', day='*', month='*', dow='0,1,2,3,4,5,6')
+        tab = CronTab(None, minute='*', hour='*', day='*', month='*', dow='0,1,2,3,4,5,6')
         self.assertTrue(tab.match(time.gmtime()))
 
         days = DayOfWeek.range(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
                                DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY,
                                DayOfWeek.FRIDAY, DayOfWeek.SATURDAY,
                                DayOfWeek.SUNDAY)
-        tab = CronTab(None, second='*', minute='*', hour='*', day='*', month='*', dow=days)
+        tab = CronTab(None, minute='*', hour='*', day='*', month='*', dow=days)
         self.assertTrue(tab.match(time.gmtime()))
 
 

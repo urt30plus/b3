@@ -296,7 +296,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         if self._tkpointsHalflife > 0:
             minute, sec = self.crontab_time()
-            self._cronTab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, second=sec, minute=minute)
+            self._cronTab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, minute=minute)
             self.console.cron + self._cronTab_tkhalflife
             self.debug('TK Crontab started')
 
@@ -332,7 +332,7 @@ class TkPlugin(b3.plugin.Plugin):
                     # remove existing crontab
                     self.console.cron - self._cronTab_tkhalflife
                 (m, s) = self.crontab_time()
-                self._cronTab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, second=s, minute=m)
+                self._cronTab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, minute=m)
                 self.console.cron + self._cronTab_tkhalflife
                 self.debug('TK crontab started')
 
@@ -412,7 +412,7 @@ class TkPlugin(b3.plugin.Plugin):
                 # remove existing crontab
                 self.console.cron - self._cronTab_tkhalflife
             (m, s) = self.crontab_time()
-            self._cronTab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, second=s, minute=m)
+            self._cronTab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, minute=m)
             self.console.cron + self._cronTab_tkhalflife
             # self.console.say('TK Crontab re-started')
             self.debug('TK crontab re-started')

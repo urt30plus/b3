@@ -321,7 +321,7 @@ class Test_commands(PluginmanagerTestCase):
         mock_plugin.registerEvent('EVT_CLIENT_SAY', mock_plugin.onSay)
         ###### MOCK CRON
         mock_plugin.mockCronjob = Mock()
-        mock_plugin.mockCrontab = b3.cron.PluginCronTab(mock_plugin, mock_plugin.mockCronjob, minute='*', second='*/60')
+        mock_plugin.mockCrontab = b3.cron.PluginCronTab(mock_plugin, mock_plugin.mockCronjob, minute='*')
         self.console.cron.add(mock_plugin.mockCrontab)
         self.assertIn(id(mock_plugin.mockCrontab), self.console.cron._tabs)
 

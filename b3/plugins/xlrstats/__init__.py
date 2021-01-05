@@ -188,14 +188,14 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
         # Analyze the ELO pool of points
         self.correctStats()
-        self._cronTabCorrectStats = b3.cron.PluginCronTab(self, self.correctStats, 0, '0', '*/2')
+        self._cronTabCorrectStats = b3.cron.PluginCronTab(self, self.correctStats, minute='0', hour='*/2')
         self.console.cron + self._cronTabCorrectStats
 
         self.purgePlayers()
 
         # set proper kill_bonus and crontab
         self.calculateKillBonus()
-        self._cronTabKillBonus = b3.cron.PluginCronTab(self, self.calculateKillBonus, 0, '*/10')
+        self._cronTabKillBonus = b3.cron.PluginCronTab(self, self.calculateKillBonus, minute='*/10')
         self.console.cron + self._cronTabKillBonus
 
         # start the ctime subplugin
@@ -1728,7 +1728,7 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         self.debug(u'%02d:%02d => %02d:%02d UTC' % (self._hours, self._minutes, hoursGMT, self._minutes))
         self.info(u'everyday at %2d:%2d, history info older than %s months and %s weeks will be deleted' % (
             self._hours, self._minutes, self._max_months, self._max_weeks))
-        self._cronTab = b3.cron.PluginCronTab(self, self.purge, 0, self._minutes, hoursGMT, '*', '*', '*')
+        self._cronTab = b3.cron.PluginCronTab(self, self.purge, minute=self._minutes, hour=hoursGMT)
         self.console.cron + self._cronTab
 
     def onStartup(self):
@@ -1750,12 +1750,11 @@ class XlrstatshistoryPlugin(b3.plugin.Plugin):
         try:
             hour = self.console.to_utc_hour(0)  # adjust to zero hour (midnight) local time
             self._cronTabMonth = b3.cron.PluginCronTab(self, self.snapshot_month,
-                                                       0, 0, hour, 1, '*', '*')
+                                                       minute=0, hour=hour, day=1)
             self.console.cron + self._cronTabMonth
             self._cronTabWeek = b3.cron.PluginCronTab(self, self.snapshot_week,
-                                                      0, 0, hour,
-                                                      '*', '*',
-                                                      b3.cron.DayOfWeek.MONDAY)
+                                                      minute=0, hour=hour,
+                                                      dow=b3.cron.DayOfWeek.MONDAY)
             self.console.cron + self._cronTabWeek
         except Exception as msg:
             self.error('unable to install history crontabs: %s', msg)
@@ -1871,7 +1870,7 @@ class CtimePlugin(b3.plugin.Plugin):
         self.info(u'everyday at %2d:%2d, connection info older than %s days will be deleted' % (self._hours,
                                                                                                    self._minutes,
                                                                                                    self._max_age_in_days))
-        self._cronTab = b3.cron.PluginCronTab(self, self.purge, 0, self._minutes, hoursGMT, '*', '*', '*')
+        self._cronTab = b3.cron.PluginCronTab(self, self.purge, minute=self._minutes, hour=hoursGMT)
         self.console.cron + self._cronTab
 
     def onStartup(self):

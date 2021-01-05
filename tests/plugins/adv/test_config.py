@@ -8,8 +8,8 @@ class Test_config(AdvTestCase):
         self.assertEqual('2', self.p._rate)
         self.assertIsNone(self.p._file_name)
         self.assertIsNotNone(self.p._crontab)
-        self.assertTupleEqual((0, list(range(0, 59, 2)), -1, -1, -1, -1),
-                              (self.p._crontab.second, self.p._crontab.minute, self.p._crontab.hour,
+        self.assertTupleEqual((list(range(0, 59, 2)), -1, -1, -1, -1),
+                              (self.p._crontab.minute, self.p._crontab.hour,
                                self.p._crontab.day, self.p._crontab.month, self.p._crontab.dow))
         self.assertEqual(9, len(self.p._msg.items))
         self.assertListEqual([
@@ -41,8 +41,8 @@ class Test_config(AdvTestCase):
 """)
         self.assertEqual('1', self.p._rate)
         self.assertIsNotNone(self.p._crontab)
-        self.assertTupleEqual((0, list(range(60)), -1, -1, -1, -1),
-                              (self.p._crontab.second, self.p._crontab.minute, self.p._crontab.hour,
+        self.assertTupleEqual((list(range(60)), -1, -1, -1, -1),
+                              (self.p._crontab.minute, self.p._crontab.hour,
                                self.p._crontab.day, self.p._crontab.month, self.p._crontab.dow))
 
     def test_rate_nominal_second(self):
@@ -55,8 +55,8 @@ class Test_config(AdvTestCase):
 """)
         self.assertEqual('40s', self.p._rate)
         self.assertIsNotNone(self.p._crontab)
-        self.assertTupleEqual(([0, 40], -1, -1, -1, -1, -1),
-                              (self.p._crontab.second, self.p._crontab.minute, self.p._crontab.hour,
+        self.assertTupleEqual((-1, -1, -1, -1, -1),
+                              (self.p._crontab.minute, self.p._crontab.hour,
                                self.p._crontab.day, self.p._crontab.month, self.p._crontab.dow))
 
     def test_rate_junk(self):

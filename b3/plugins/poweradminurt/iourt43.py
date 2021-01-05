@@ -259,16 +259,16 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             # remove existing crontab
             self.console.cron - self._skcronTab
         if self._ninterval > 0:
-            self._ncronTab = b3.cron.PluginCronTab(self, self.namecheck, 0, '*/%s' % self._ninterval)
+            self._ncronTab = b3.cron.PluginCronTab(self, self.namecheck, minute=f'*/{self._ninterval}')
             self.console.cron + self._ncronTab
         if self._tinterval > 0:
-            self._tcronTab = b3.cron.PluginCronTab(self, self.teamcheck, 0, '*/%s' % self._tinterval)
+            self._tcronTab = b3.cron.PluginCronTab(self, self.teamcheck, minute=f'*/{self._tinterval}')
             self.console.cron + self._tcronTab
         if self._sinterval > 0:
-            self._scronTab = b3.cron.PluginCronTab(self, self.speccheck, 0, '*/%s' % self._sinterval)
+            self._scronTab = b3.cron.PluginCronTab(self, self.speccheck, minute=f'*/{self._sinterval}')
             self.console.cron + self._scronTab
         if self._skinterval > 0:
-            self._skcronTab = b3.cron.PluginCronTab(self, self.skillcheck, 0, '*/%s' % self._skinterval)
+            self._skcronTab = b3.cron.PluginCronTab(self, self.skillcheck, minute=f'*/{self._skinterval}')
             self.console.cron + self._skcronTab
 
     def onLoadConfig(self):
