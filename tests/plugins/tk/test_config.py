@@ -376,14 +376,12 @@ class Test_Tk_default_config(B3TestCase):
         self.p.onLoadConfig()
 
     def test_settings(self):
-        self.assertEqual(400, self.p._maxPoints)
-        self.assertEqual(40, self.p._maxLevel)
+        self.assertEqual(800, self.p._maxPoints)
+        self.assertEqual(2, self.p._maxLevel)
         self.assertEqual({
             0: (2.0, 1.0, 2),
             1: (2.0, 1.0, 2),
             2: (1.0, 0.5, 1),
-            20: (1.0, 0.5, 0),
-            40: (0.75, 0.5, 0)
         }, self.p._levels)
         self.assertEqual(7, self.p._round_grace)
         self.assertEqual("sfire", self.p._issue_warning)
@@ -392,7 +390,7 @@ class Test_Tk_default_config(B3TestCase):
         self.assertEqual(100, self.p._damage_threshold)
         self.assertEqual(2, self.p._warn_level)
         self.assertEqual(0, self.p._tkpointsHalflife)
-        self.assertEqual('1h', self.p._tk_warn_duration)
+        self.assertEqual('10m', self.p._tk_warn_duration)
 
     def test_messages(self):
         self.assertEqual("^7team damage over limit", self.p.config.get('messages', 'ban'))
