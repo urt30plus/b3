@@ -12,6 +12,7 @@ from collections import defaultdict
 from io import StringIO
 from sys import stdout
 
+import b3.config
 import b3.events
 import b3.output
 import b3.parser
@@ -61,7 +62,6 @@ class FakeConsole(b3.parser.Parser):
         self._handlers = defaultdict(list)
 
         self.input = StringIO()
-        self.working = True
 
     def run(self):
         pass
@@ -84,7 +84,7 @@ class FakeConsole(b3.parser.Parser):
         NO QUEUE, NO THREAD for faking speed up
         """
         if event.type == self.getEventID('EVT_EXIT') or event.type == self.getEventID('EVT_STOP'):
-            self.working = False
+            self.stop_event.set()
 
         for hfunc in self._handlers[event.type]:
             if not hfunc.isEnabled():
@@ -111,9 +111,9 @@ class FakeConsole(b3.parser.Parser):
         Shutdown B3 - needed to be changed in FakeConsole due to no thread for dispatching events.
         """
         try:
-            if self.working and self.exiting.acquire():
+            with self.exiting:
                 self.bot('shutting down...')
-                self.working = False
+                self.stop_event.set()
                 self._handleEvent(self.getEvent('EVT_STOP'))
                 if self._cron:
                     self._cron.stop()

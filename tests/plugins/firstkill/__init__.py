@@ -93,7 +93,7 @@ class FirstKillCase(unittest.TestCase):
         self.mark.connects("3")
 
     def tearDown(self):
-        self.console.working = False
+        self.console.shutdown()
         self.mike.disconnects()
         self.bill.disconnects()
         self.mark.disconnects()

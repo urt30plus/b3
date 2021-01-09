@@ -821,7 +821,7 @@ class AdminPlugin(b3.plugin.Plugin):
 
         self._tkPlugin = self.console.getPlugin('tk')
         if self._tkPlugin:
-            self._tkPlugin.forgiveAll(sclient.cid)
+            self._tkPlugin.forgive_all(sclient.cid)
 
         sclient.save()
 

@@ -85,7 +85,7 @@ class Parser:
     screen = None
     storage = None  # storage module instance
     type = None
-    working = True  # whether B3 is running or not
+    stop_event = threading.Event()
     wrapper = None  # textwrapper instance
 
     deadPrefix = '[DEAD]^7'  # say dead prefix
@@ -989,60 +989,48 @@ class Parser:
         """
         Main worker thread for B3
         """
-        self.screen.write('Startup complete : B3 is running! Let\'s get to work!\n\n')
-        self.screen.write('If you run into problems check your B3 log file for more information\n')
+        self.screen.write(
+            "Startup complete : B3 is running! Let's get to work!\n\n"
+        )
+        self.screen.write(
+            'If you run into problems check your B3 log file for '
+            'more information\n'
+        )
         self.screen.flush()
 
-        log_time_start = None
-        log_time_last = 0
+        stop_event_wait = self.stop_event.wait
+        read_line = self.read
+        parse_line = self.parseLine
+        console_log = self.console
 
-        while self.working:
+        while True:
             if self._paused:
                 if not self._pauseNotice:
-                    self.bot('PAUSED - not parsing any lines: B3 will be out of sync')
+                    self.bot('PAUSED - not parsing any lines')
                     self._pauseNotice = True
-                time.sleep(self.delay)
+                if stop_event_wait(timeout=self.delay):
+                    break
                 continue
-            for line in self.read():
-                if not (line := line.strip()):
-                    continue
-                # Track the log file time changes. This is mostly for
-                # parsing old log files for testing and to have time increase
-                # predictably
-                if m := self._lineTime.match(line):
-                    log_time_current = (int(m.group('minutes')) * 60) + int(m.group('seconds'))
-                    if log_time_start and log_time_current - log_time_start < log_time_last:
-                        # Time in log has reset
-                        log_time_start = log_time_current
-                        log_time_last = 0
-                        self.debug('log time reset %d', log_time_current)
-                    elif not log_time_start:
-                        log_time_start = log_time_current
+            for line in read_line():
+                if line := line.strip():
+                    console_log(line)
+                    try:
+                        parse_line(line)
+                    except SystemExit:
+                        raise
+                    except Exception as msg:
+                        self.error('Could not parse line %s: %s',
+                                   msg, extract_tb(sys.exc_info()[2]))
+                    if stop_event_wait(timeout=self.delay2):
+                        break
 
-                    # Remove starting offset, we want the first line to be at 0 seconds
-                    log_time_current -= log_time_start
-                    self.logTime += log_time_current - log_time_last
-                    log_time_last = log_time_current
-
-                self.console(line)
-
-                try:
-                    self.parseLine(line)
-                except SystemExit:
-                    raise
-                except Exception as msg:
-                    self.error('Could not parse line %s: %s', msg, extract_tb(sys.exc_info()[2]))
-
-                time.sleep(self.delay2)
-
-            time.sleep(self.delay)
+            if stop_event_wait(timeout=self.delay):
+                break
 
         self.bot('Stop reading')
-
         with self.exiting:
             self.input.close()
             self.output.close()
-
             if self.exitcode:
                 sys.exit(self.exitcode)
 
@@ -1090,13 +1078,16 @@ class Parser:
         """
         Event handler thread.
         """
+        console_time = self.time
+        event_queue_get = self.queue.get
+        stop_event_is_set = self.stop_event.is_set
         stop_events = (self.getEventID('EVT_EXIT'), self.getEventID('EVT_STOP'))
-        while self.working:
-            added, expire, event = self.queue.get()
+        while not stop_event_is_set():
+            added, expire, event = event_queue_get()
             if event.type in stop_events:
-                self.working = False
+                self.stop_event.set()
             event_name = self.getEventName(event.type)
-            current_time = self.time()
+            current_time = console_time()
             self._eventsStats.add_event_wait((current_time - added) * 1000)
             if current_time >= expire:  # events can only sit in the queue until expire time
                 self.error('**** Event sat in queue too long: %s %s',
@@ -1172,9 +1163,9 @@ class Parser:
         Shutdown B3.
         """
         try:
-            if self.working and self.exiting.acquire():
+            with self.exiting:
                 self.bot('Shutting down...')
-                self.working = False
+                self.stop_event.set()
                 for _, plugin in self._plugins.items():
                     plugin.parseEvent(b3.events.Event(self.getEventID('EVT_STOP'), ''))
                 if self._cron:

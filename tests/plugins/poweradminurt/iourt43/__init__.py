@@ -62,7 +62,7 @@ class Iourt43TestCase(unittest.TestCase):
                                          team=TEAM_UNKNOWN, teamId=0, squad=0)
 
     def tearDown(self):
-        self.console.working = False
+        self.console.shutdown()
 
     def init_default_cvar(self):
         when(self.console).getCvar('timelimit').thenReturn(Cvar('timelimit', value=20))

@@ -2,6 +2,7 @@ from textwrap import dedent
 from unittest.mock import patch, call
 
 import b3
+import b3.functions
 from b3.config import CfgConfigParser, NoOptionError
 from b3.plugins.tk import TkPlugin
 from tests import B3TestCase
@@ -17,7 +18,7 @@ class Test_onLoadConfig(Test_Tk_plugin):
         self.p = TkPlugin(self.console, self.conf)
         self.p.onLoadConfig()
         # THEN
-        self.assertEqual(400, self.p._maxPoints)
+        self.assertEqual(400, self.p._max_points)
         self.assertDictEqual({
             0: (2.0, 1.0, 2),
             1: (2.0, 1.0, 2),
@@ -25,14 +26,14 @@ class Test_onLoadConfig(Test_Tk_plugin):
             20: (1.0, 0.5, 0),
             40: (0.75, 0.5, 0)
         }, self.p._levels)
-        self.assertEqual(40, self.p._maxLevel)
+        self.assertEqual(40, self.p._max_level)
         self.assertEqual(7, self.p._round_grace)
         self.assertEqual("sfire", self.p._issue_warning)
         self.assertTrue(self.p._grudge_enable)
         self.assertTrue(self.p._private_messages)
         self.assertEqual(100, self.p._damage_threshold)
         self.assertEqual(2, self.p._warn_level)
-        self.assertEqual(0, self.p._tkpointsHalflife)
+        self.assertEqual(0, self.p._tk_points_halflife)
         self.assertEqual('1h', self.p._tk_warn_duration)
 
     def test_onLoadConfig(self):
@@ -69,20 +70,20 @@ class Test_onLoadConfig(Test_Tk_plugin):
         # WHEN
         self.p.onLoadConfig()
         # THEN
-        self.assertEqual(350, self.p._maxPoints)
+        self.assertEqual(350, self.p._max_points)
         self.assertDictEqual({
             0: (2.0, 1.0, 3),
             1: (2.0, 1.0, 4),
             2: (1.0, 0.5, 5),
         }, self.p._levels)
-        self.assertEqual(2, self.p._maxLevel)
+        self.assertEqual(2, self.p._max_level)
         self.assertEqual(3, self.p._round_grace)
         self.assertEqual("foo", self.p._issue_warning)
         self.assertFalse(self.p._grudge_enable)
         self.assertFalse(self.p._private_messages)
         self.assertEqual(99, self.p._damage_threshold)
         self.assertEqual(10, self.p._warn_level)
-        self.assertEqual(3, self.p._tkpointsHalflife)
+        self.assertEqual(3, self.p._tk_points_halflife)
         self.assertEqual('3h', self.p._tk_warn_duration)
 
 
@@ -376,8 +377,8 @@ class Test_Tk_default_config(B3TestCase):
         self.p.onLoadConfig()
 
     def test_settings(self):
-        self.assertEqual(800, self.p._maxPoints)
-        self.assertEqual(2, self.p._maxLevel)
+        self.assertEqual(800, self.p._max_points)
+        self.assertEqual(2, self.p._max_level)
         self.assertEqual({
             0: (2.0, 1.0, 2),
             1: (2.0, 1.0, 2),
@@ -389,7 +390,7 @@ class Test_Tk_default_config(B3TestCase):
         self.assertTrue(self.p._private_messages)
         self.assertEqual(100, self.p._damage_threshold)
         self.assertEqual(2, self.p._warn_level)
-        self.assertEqual(0, self.p._tkpointsHalflife)
+        self.assertEqual(0, self.p._tk_points_halflife)
         self.assertEqual('10m', self.p._tk_warn_duration)
 
     def test_messages(self):

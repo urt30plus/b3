@@ -57,7 +57,7 @@ class Iourt43TestCase(unittest.TestCase):
     def tearDown(self):
         if hasattr(self, "parser"):
             del self.parser.clients
-            self.parser.working = False
+            self.parser.shutdown()
         unstub()
 
 
@@ -1122,7 +1122,7 @@ class Test_config(unittest.TestCase):
     def tearDown(self):
         if hasattr(self, "parser"):
             del self.parser.clients
-            self.parser.working = False
+            self.parser.shutdown()
 
 
 class Test_newGetByMagic(Iourt43TestCase):

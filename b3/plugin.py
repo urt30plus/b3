@@ -88,7 +88,6 @@ class Plugin:
         self.eventmap = defaultdict(list)
         self._messages = {}
         self._enabled = True
-        self.working = True
         self.config = None
         if isinstance(config, (b3.config.XmlConfigParser, b3.config.CfgConfigParser)):
             self.config = config
@@ -402,9 +401,6 @@ class Plugin:
             except TypeError as e:
                 self.error('could not parse event %s: %s',
                            self.console.getEventName(event.type), e)
-
-        if event.type in self._stop_events:
-            self.working = False
 
     def register_commands_from_config(self):
         """Registers the commands for this plugin as defined in its config
