@@ -324,7 +324,7 @@ class Cron:
         self.console.info("Cron scheduler started")
         while True:
             t = time.gmtime()
-            for k, c in self._tabs.items():
+            for c in self.entries():
                 if c.match(t):
                     c.numRuns += 1
                     try:
@@ -334,7 +334,7 @@ class Cron:
                                            c, msg, traceback.extract_tb(sys.exc_info()[2]))
                     if 0 < c.maxRuns <= c.numRuns:
                         # reached max executions, remove tab
-                        del self._tabs[k]
+                        self.__sub__(c)
                     if self._stopEvent.wait(timeout=0.075):
                         break
 
