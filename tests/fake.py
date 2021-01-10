@@ -101,6 +101,7 @@ class FakeConsole(b3.parser.Parser):
                 break
             except SystemExit as e:
                 self.exitcode = e.code
+                break
             except Exception as msg:
                 self.error('handler %s could not handle event %s: %s: %s %s',
                            hfunc.__class__.__name__, self.Events.getName(event.type),

@@ -164,4 +164,5 @@ class Rcon:
 
     def close(self):
         self.stop()
-        self.socket.close()
+        with self.lock:
+            self.socket.close()

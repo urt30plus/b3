@@ -122,15 +122,17 @@ class Parser:
     #
     # How exiting works, in detail:
     #
-    #   - the parallel loops in run() and handleEvents() are terminated only when working==False.
+    #   - the parallel loops in run() and handleEvents() are terminated only
+    #     when ``stop_event`` is set.
     #   - die() or restart() invokes shutdown() from the handler thread.
-    #   - the exiting lock is acquired by shutdown() in the handler thread before it sets working=False to
-    #     end both loops.
-    #   - die() or restart() raises SystemExit in the handler thread after shutdown() and a few seconds delay.
-    #   - when SystemExit is caught by handleEvents(), its exit status is pushed to the main context via exitcode.
-    #   - handleEvents() ensures the exiting lock is released when it finishes.
-    #   - run() waits to acquire the lock in the main thread before proceeding with teardown, repeating
-    #     sys.exit(exitcode) from the main thread if set.
+    #   - the exiting lock is acquired by shutdown() in the handler thread
+    #     before it sets the ``stop_event`` to end both loops.
+    #   - die() or restart() raises SystemExit in the handler thread after
+    #     shutdown() and a few seconds delay.
+    #   - when SystemExit is caught by handleEvents(), its exit status is
+    #     pushed to the main context via exitcode.
+    #   - run() waits to acquire the lock in the main thread before proceeding
+    #     with teardown, repeating sys.exit(exitcode) from the main thread if set.
     #
     #   In the case of an abnormal exception in the handler thread, ``exitcode''
     #   will be None and the ``exiting'' lock will be released when``handleEvents''
@@ -138,7 +140,7 @@ class Parser:
     #
     #   Exits occurring in the main thread do not need to be synchronised.
 
-    exiting = threading.Lock()
+    exiting = threading.RLock()
     exitcode = None
 
     def __init__(self, conf, options):
@@ -393,19 +395,19 @@ class Parser:
         """
         Stop B3 with the die exit status (0)
         """
+        self.exitcode = 0
         self.shutdown()
         self.finalize()
         time.sleep(5)
-        self.exitcode = 0
 
     def restart(self):
         """
         Stop B3 with the restart exit status (221)
         """
+        self.exitcode = 221
+        self.bot('Restarting...')
         self.shutdown()
         time.sleep(5)
-        self.bot('Restarting...')
-        self.exitcode = 221
 
     def upTime(self):
         """
@@ -1001,7 +1003,6 @@ class Parser:
         stop_event_wait = self.stop_event.wait
         read_line = self.read
         parse_line = self.parseLine
-        console_log = self.console
 
         while True:
             if self._paused:
@@ -1013,14 +1014,11 @@ class Parser:
                 continue
             for line in read_line():
                 if line := line.strip():
-                    console_log(line)
                     try:
                         parse_line(line)
-                    except SystemExit:
-                        raise
                     except Exception as msg:
-                        self.error('Could not parse line %s: %s',
-                                   msg, extract_tb(sys.exc_info()[2]))
+                        self.error('Could not parse line %s - (%s) %s',
+                                   line, msg, extract_tb(sys.exc_info()[2]))
                     if stop_event_wait(timeout=self.delay2):
                         break
 
@@ -1029,7 +1027,9 @@ class Parser:
 
         self.bot('Stop reading')
         with self.exiting:
+            self.bot('Closing games log file')
             self.input.close()
+            self.bot('Closing RCON')
             self.output.close()
             if self.exitcode:
                 sys.exit(self.exitcode)
@@ -1063,7 +1063,6 @@ class Parser:
     def queueEvent(self, event, expire=10):
         try:
             if event.type in self._handlers:
-                self.verbose('Queueing event %s : %s', self.getEventName(event.type), event.data)
                 time.sleep(0.001)  # wait a bit so event doesnt get jumbled
                 current_time = self.time()
                 self.queue.put((current_time, current_time + expire, event), timeout=2)
@@ -1085,7 +1084,7 @@ class Parser:
         while not stop_event_is_set():
             added, expire, event = event_queue_get()
             if event.type in stop_events:
-                self.stop_event.set()
+                break
             event_name = self.getEventName(event.type)
             current_time = console_time()
             self._eventsStats.add_event_wait((current_time - added) * 1000)
@@ -1097,8 +1096,6 @@ class Parser:
             for hfunc in self._handlers[event.type]:
                 if not hfunc.isEnabled():
                     continue
-                self.verbose('Parsing event: %s: %s',
-                             event_name, hfunc.__class__.__name__)
                 timer_plugin_begin = time.perf_counter()
                 try:
                     hfunc.parseEvent(event)
@@ -1109,6 +1106,7 @@ class Parser:
                     break
                 except SystemExit as e:
                     self.exitcode = e.code
+                    break
                 except Exception as msg:
                     self.error('Handler %s could not handle event %s: %s: %s %s',
                                hfunc.__class__.__name__,
@@ -1121,8 +1119,9 @@ class Parser:
                                                         event_name, elapsed * 1000)
 
         self.bot('Shutting down event handler')
-        if self.exiting.locked():
-            self.exiting.release()
+        with self.exiting:
+            if not self.stop_event.is_set():
+                self.shutdown()
 
     def write(self, msg, maxRetries=None, socketTimeout=None):
         """
@@ -1149,10 +1148,10 @@ class Parser:
             # there's a problem
             filestats = os.fstat(self.input.fileno())
             if self.input.tell() > filestats.st_size:
-                self.debug('Parser: game log is suddenly smaller than it was '
-                           f'before ({self.input.tell()} bytes, now {filestats.st_size}), '
-                           'the log was probably either rotated or emptied. B3 will now re-adjust to '
-                           'the new size of the log')
+                self.warning('Parser: game log is suddenly smaller than it was '
+                             f'before ({self.input.tell()} bytes, now {filestats.st_size}), '
+                             'the log was probably either rotated or emptied. B3 will now re-adjust to '
+                             'the new size of the log')
                 self.input.seek(0, os.SEEK_END)
                 lines = self.input.readlines()
 
@@ -1162,10 +1161,12 @@ class Parser:
         """
         Shutdown B3.
         """
-        try:
-            with self.exiting:
-                self.bot('Shutting down...')
-                self.stop_event.set()
+        with self.exiting:
+            if self.stop_event.is_set():
+                return
+            self.bot('Shutting down...')
+            self.stop_event.set()
+            try:
                 for _, plugin in self._plugins.items():
                     plugin.parseEvent(b3.events.Event(self.getEventID('EVT_STOP'), ''))
                 if self._cron:
@@ -1174,8 +1175,8 @@ class Parser:
                 if self.storage:
                     self.bot('Shutting down database connection')
                     self.storage.shutdown()
-        except Exception as e:
-            self.error(e)
+            except Exception as e:
+                self.error(e)
 
     def finalize(self):
         """
@@ -1295,10 +1296,10 @@ class Parser:
         Log a CRITICAL message and shutdown B3.
         """
         self.log.critical(msg, *args, **kwargs)
+        self.exitcode = 220
         self.shutdown()
         self.finalize()
         time.sleep(2)
-        self.exitcode = 220
         raise SystemExit(self.exitcode)
 
     @staticmethod
