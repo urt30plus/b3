@@ -76,7 +76,7 @@ class CronTab:
         """
         start_tick = time.perf_counter()
         self.command()
-        self.run_stats.append((time.perf_counter() - start_tick) * 1000)
+        self.run_stats.append(time.perf_counter() - start_tick)
 
     @property
     def second(self):
