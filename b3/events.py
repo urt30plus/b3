@@ -179,43 +179,29 @@ class EventsStats:
         deque_with_max = functools.partial(deque, maxlen=max_samples)
         dict_deque = functools.partial(defaultdict, deque_with_max)
         self._handling_timers = defaultdict(dict_deque)
-        self._queue_wait = deque_with_max()
 
-    def add_event_handled(self, plugin_name, event_name, milliseconds_elapsed):
+    def add_event_handled(self, plugin_name, event_name, elapsed):
         """
         Add an event to the dict of handled ones.
         :param plugin_name: The name of the plugin which handled the event
         :param event_name: The event name
-        :param milliseconds_elapsed: The amount of milliseconds necessary to handle the event
+        :param elapsed: The amount of milliseconds necessary to handle the event
         """
-        self._handling_timers[plugin_name][event_name].append(milliseconds_elapsed)
-        self.console.verbose2("%s event handled by %s in %0.3f ms", event_name, plugin_name, milliseconds_elapsed)
-
-    def add_event_wait(self, milliseconds_wait):
-        """
-        Add delay to the event processing.
-        :param milliseconds_wait: The amount of milliseconds to wait
-        """
-        self._queue_wait.append(milliseconds_wait)
+        self._handling_timers[plugin_name][event_name].append(elapsed)
 
     def dump_stats(self):
         """
         Print event stats in the log file.
         """
         self.console.info('***** Event Stats *****')
-
-        if self._queue_wait:
-            mean, stdv = meanstdv(self._queue_wait)
-            self.console.info("Events waiting in queue stats : (ms) min(%0.4f), max(%0.4f), mean(%0.4f), "
-                               "stddev(%0.4f)", min(self._queue_wait), max(self._queue_wait), mean, stdv)
-
         for plugin_name, plugin_timers in self._handling_timers.items():
             for event_name, event_timers in plugin_timers.items():
                 if event_timers:
                     mean, stdv = meanstdv(event_timers)
-                    self.console.info("%s %s : (ms) min(%0.4f), max(%0.4f), mean(%0.4f), "
-                                      "stddev(%0.4f)", plugin_name, event_name, min(event_timers),
-                                      max(event_timers), mean, stdv)
+                    self.console.info("%s %s : min(%0.4f), max(%0.4f), mean(%0.4f), stddev(%0.4f)",
+                                      plugin_name, event_name,
+                                      min(event_timers), max(event_timers),
+                                      mean, stdv)
 
 
 class VetoEvent(Exception):
