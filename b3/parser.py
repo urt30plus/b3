@@ -358,7 +358,7 @@ class Parser:
         for tab in self.cron.entries():
             if stats := tab.run_stats:
                 mean, stdv = b3.functions.meanstdv(stats)
-                self.info('%s: (ms) min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
+                self.info('%s: min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
                            tab, min(stats), max(stats), mean, stdv, len(stats))
             else:
                 self.info('%s: no stats available', tab)
@@ -370,13 +370,10 @@ class Parser:
 
     def schedule_cron_tasks(self):
         if self.log.isEnabledFor(b3.output.INFO):
-            self._eventsStats_cronTab = b3.cron.CronTab(self._dump_events_stats, minute='*/5')
-            self.cron.add(self._eventsStats_cronTab)
-
-            self._cron_stats_crontab = b3.cron.CronTab(self._dump_cron_stats, minute='*/5')
+            self._cron_stats_crontab = b3.cron.CronTab(self._dump_cron_stats, minute='10')
             self.cron.add(self._cron_stats_crontab)
 
-            self._cron_stats_threads = b3.cron.CronTab(self._dump_thread_info, minute='*/10')
+            self._cron_stats_threads = b3.cron.CronTab(self._dump_thread_info, minute='15')
             self.cron.add(self._cron_stats_threads)
 
         tz_offset, tz_name = self.tz_offset_and_name()
@@ -401,6 +398,7 @@ class Parser:
         self.exitcode = 4
         self.bot('Restarting...')
         self.shutdown()
+        self.finalize()
 
     def upTime(self):
         """
@@ -1053,7 +1051,7 @@ class Parser:
                            event_handler.__class__.__name__, self.getEventName(event_name))
                 handlers.remove(event_handler)
 
-    def queueEvent(self, event, expire=10):
+    def queueEvent(self, event, expire=15):
         try:
             if event.type in self._handlers:
                 time.sleep(0.001)  # wait a bit so event doesnt get jumbled
@@ -1079,17 +1077,18 @@ class Parser:
             if event.type in stop_events:
                 break
             event_name = self.getEventName(event.type)
-            self._eventsStats.add_event_wait((current_time - added) * 1000)
-            if current_time > expire:  # events can only sit in the queue until expire time
-                self.error('**** Event sat in queue too long: %s %s',
-                           event_name, current_time - expire)
-                # TODO: dump stats here
+            if current_time > expire:
+                self.error('**** Event sat in queue too long: %s '
+                           'created %s, added %s, current %s, expired %s',
+                           event_name, event.time, added, current_time, expire)
+                self._dump_events_stats()
                 continue
 
             for hfunc in self._handlers[event.type]:
                 if not hfunc.isEnabled():
                     continue
                 timer_plugin_begin = time.perf_counter()
+                thread_plugin_begin = time.thread_time()
                 try:
                     hfunc.parseEvent(event)
                     time.sleep(0.001)
@@ -1104,9 +1103,13 @@ class Parser:
                                msg,
                                extract_tb(sys.exc_info()[2]))
                 finally:
-                    elapsed = time.perf_counter() - timer_plugin_begin
+                    if (elapsed := time.perf_counter() - timer_plugin_begin) > 2.0:
+                        elapsed_thread = time.thread_time() - thread_plugin_begin
+                        self.warning('Handler %s took more that 2 seconds '
+                                     'to handle %s: total %0.4f / thread %0.4f',
+                                     hfunc.__class__.__name__, event_name, elapsed, elapsed_thread)
                     self._eventsStats.add_event_handled(hfunc.__class__.__name__,
-                                                        event_name, elapsed * 1000)
+                                                        event_name, elapsed)
 
         self.handle_events_shutdown()
 
