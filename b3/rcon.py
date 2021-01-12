@@ -33,6 +33,7 @@ class Rcon:
         self.queue = None
         self._stopEvent = object()
         self.console.bot('Game name is: %s', self.console.gameName)
+        self._writelines_thread = None
 
     def send_rcon(self, data, maxRetries=None, socketTimeout=None):
         """
@@ -138,7 +139,9 @@ class Rcon:
         """
         if not self.queue:
             self.queue = queue.Queue()
-            b3.functions.start_daemon_thread(target=self._writelines, name='rcon')
+            self._writelines_thread = b3.functions.start_daemon_thread(
+                target=self._writelines, name='rcon'
+            )
 
         self.queue.put(lines)
 
@@ -161,6 +164,7 @@ class Rcon:
         """
         if self.queue:
             self.queue.put(self._stopEvent)
+            self._writelines_thread.join(timeout=5.0)
 
     def close(self):
         self.stop()
