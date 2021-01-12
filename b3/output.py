@@ -45,7 +45,7 @@ class OutputHandler(logging.Logger):
         """
         kwargs['exc_info'] = True
         logging.Logger.critical(self, msg, *args, **kwargs)
-        sys.exit(220)
+        sys.exit(2)
 
     def console(self, msg, *args, **kwargs):
         """
