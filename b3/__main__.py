@@ -2,7 +2,6 @@ import argparse
 import os
 import signal
 import sys
-import traceback
 
 import b3
 import b3.config
@@ -44,7 +43,6 @@ def start(mainconfig, options):
         """
         b3.console.bot("TERM signal received: shutting down")
         b3.console.shutdown()
-        raise SystemExit(0)
 
     try:
         # necessary if using the functions profiler,
@@ -57,15 +55,6 @@ def start(mainconfig, options):
         b3.console.start()
     except KeyboardInterrupt:
         b3.console.shutdown()
-        print('Goodbye')
-        return
-    except SystemExit as msg:
-        print(f'EXITING: {msg}')
-        raise
-    except Exception as msg:
-        print(f'ERROR: {msg}')
-        traceback.print_exc()
-        sys.exit(223)
 
 
 def run_update(config=None):
@@ -81,26 +70,14 @@ def run(options):
     Run B3 in console.
     :param options: command line options
     """
-    try:
-        main_config = b3.config.get_main_config(options.config)
-        if analysis := main_config.analyze():
-            raise b3.config.ConfigFileNotValid(
-                'Invalid configuration file specified: ' +
-                '\n >>> '.join(analysis)
-            )
+    main_config = b3.config.get_main_config(options.config)
+    if analysis := main_config.analyze():
+        raise b3.config.ConfigFileNotValid(
+            'Invalid configuration file specified: ' +
+            '\n >>> '.join(analysis)
+        )
 
-        start(main_config, options)
-
-    except b3.config.ConfigFileNotValid as cerr:
-        print(cerr)
-        raise SystemExit(1)
-    except SystemExit:
-        raise
-    except:
-        if sys.stdout != sys.__stdout__:
-            sys.stdout = sys.__stdout__
-            sys.stderr = sys.__stderr__
-        traceback.print_exc()
+    start(main_config, options)
 
 
 def main():
