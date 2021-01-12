@@ -557,7 +557,6 @@ class Iourt43Parser(b3.parser.Parser):
         if info[:1] != '\\':
             info = '\\' + info
 
-        self.verbose2('Parsing userinfo: %s', info)
         options = re.findall(r'\\([^\\]+)\\([^\\]+)', info)
 
         data = {}
@@ -568,7 +567,7 @@ class Iourt43Parser(b3.parser.Parser):
         return data
 
     def OnClientconnect(self, action, data, match=None):
-        self.debug('Client connected: ready to parse userinfo line')
+        pass
 
     def OnClientbegin(self, action, data, match=None):
         # we get user info in two parts:
@@ -601,8 +600,6 @@ class Iourt43Parser(b3.parser.Parser):
 
         if 'team' in bclient:
             bclient['team'] = self.getTeam(bclient['team'])
-
-        self.verbose('Parsed user info: %s' % bclient)
 
         if bclient:
 
@@ -637,15 +634,15 @@ class Iourt43Parser(b3.parser.Parser):
 
                 # v 1.10.5 => https://github.com/BigBrotherBot/big-brother-bot/issues/346
                 if len(bclient['name']) > 32:
-                    self.debug("UrT4.2 bug spotted! %s [GUID: '%s'] [FSA: '%s'] has a too long "
-                               "nickname (%s characters)", bclient['name'], guid, fsa, len(bclient['name']))
+                    self.warning("UrT4.2 bug spotted! %s [GUID: '%s'] [FSA: '%s'] has a too long "
+                                 "nickname (%s characters)", bclient['name'], guid, fsa, len(bclient['name']))
                     if self._allow_userinfo_overflow:
                         x = bclient['name'][0:32]
-                        self.debug('Truncating %s (%s) nickname => %s (%s)', bclient['name'], len(bclient['name']), x,
-                                   len(x))
+                        self.warning('Truncating %s (%s) nickname => %s (%s)', bclient['name'], len(bclient['name']), x,
+                                     len(x))
                         bclient['name'] = x
                     else:
-                        self.debug("Connection denied to  %s [GUID: '%s'] [FSA: '%s']", bclient['name'], guid, fsa)
+                        self.warning("Connection denied to  %s [GUID: '%s'] [FSA: '%s']", bclient['name'], guid, fsa)
                         self.write(
                             self.getCommand('kick', cid=bclient['cid'], reason='userinfo string overflow protection'))
                         return
@@ -654,12 +651,10 @@ class Iourt43Parser(b3.parser.Parser):
                     if guid == 'unknown':
                         # happens when a client is (temp)banned and got kicked so client was destroyed,
                         # but infoline was still waiting to be parsed.
-                        self.debug('Client disconnected: ignoring...')
                         return None
                     else:
                         try:
                             # see issue xlr8or/big-brother-bot#87 - ip can be missing
-                            self.debug("Missing ip: trying to get ip with 'status'")
                             plist = self.getPlayerList()
                             client_data = plist[bclient['cid']]
                             bclient['ip'] = client_data['ip']
@@ -691,7 +686,6 @@ class Iourt43Parser(b3.parser.Parser):
     def OnClientuserinfochanged(self, action, data, match=None):
         # 7 n\[SNT]^1XLR^78or\t\3\r\2\tl\0\f0\\f1\\f2\\a0\0\a1\0\a2\0
         parseddata = self.parseUserInfo(data)
-        self.verbose('Parsed userinfo: %s' % parseddata)
         if parseddata:
             client = self.clients.getByCID(parseddata['cid'])
             if client:
@@ -726,7 +720,6 @@ class Iourt43Parser(b3.parser.Parser):
 
     def OnRadio(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         msg_group = match.group('msg_group')
         msg_id = match.group('msg_id')
@@ -739,11 +732,9 @@ class Iourt43Parser(b3.parser.Parser):
         # Hit: 13 10 0 8: Grover hit jacobdk92 in the Head
         # Hit: cid acid hitloc aweap: text
         if not (victim := self.clients.getByCID(match.group('cid'))):
-            self.debug('No victim')
             return None
 
         if not (attacker := self.clients.getByCID(match.group('acid'))):
-            self.debug('No attacker')
             return None
 
         event = self.getEventID('EVT_CLIENT_DAMAGE')
@@ -761,14 +752,12 @@ class Iourt43Parser(b3.parser.Parser):
 
     def OnCallvote(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         vote_string = match.group('vote_string')
         return self.getEvent('EVT_CLIENT_CALLVOTE', client=client, data=vote_string)
 
     def OnVote(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         value = match.group('value')
         return self.getEvent('EVT_CLIENT_VOTE', client=client, data=value)
@@ -789,14 +778,12 @@ class Iourt43Parser(b3.parser.Parser):
         # FlagCaptureTime: 0: 1234567890
         # FlagCaptureTime: 1: 1125480101
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         captime = int(match.group('captime'))
         return self.getEvent('EVT_FLAG_CAPTURE_TIME', client=client, data=captime)
 
     def OnClientjumprunstarted(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         way_id = match.group('way_id')
         attempt_num = match.group('attempt_num')
@@ -807,7 +794,6 @@ class Iourt43Parser(b3.parser.Parser):
 
     def OnClientjumprunstopped(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         way_id = match.group('way_id')
         way_time = match.group('way_time')
@@ -820,7 +806,6 @@ class Iourt43Parser(b3.parser.Parser):
 
     def OnClientjumpruncanceled(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         way_id = match.group('way_id')
         attempt_num = match.group('attempt_num')
@@ -831,27 +816,23 @@ class Iourt43Parser(b3.parser.Parser):
 
     def OnClientsaveposition(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         position = float(match.group('x')), float(match.group('y')), float(match.group('z'))
         return self.getEvent('EVT_CLIENT_POS_SAVE', client=client, data={'position': position})
 
     def OnClientloadposition(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         position = float(match.group('x')), float(match.group('y')), float(match.group('z'))
         return self.getEvent('EVT_CLIENT_POS_LOAD', client=client, data={'position': position})
 
     def OnClientgoto(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         tcid = match.group('tcid')
         position = float(match.group('x')), float(match.group('y')), float(match.group('z'))
 
         if not (target := self.getByCidOrJoinPlayer(tcid)):
-            self.debug('No target client found')
             return None
 
         return self.getEvent('EVT_CLIENT_GOTO', client=client, target=target, data={'position': position})
@@ -859,7 +840,6 @@ class Iourt43Parser(b3.parser.Parser):
     def OnClientspawn(self, action, data, match=None):
         # ClientSpawn: 0
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         client.state = b3.STATE_ALIVE
         return self.getEvent('EVT_CLIENT_SPAWN', client=client)
@@ -867,7 +847,6 @@ class Iourt43Parser(b3.parser.Parser):
     def OnClientmelted(self, action, data, match=None):
         # ClientMelted: 0
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client found')
             return None
         client.state = b3.STATE_ALIVE
         return self.getEvent('EVT_CLIENT_MELTED', client=client)
@@ -882,22 +861,18 @@ class Iourt43Parser(b3.parser.Parser):
             return self.getEvent('EVT_SURVIVOR_WIN', data=data)
         else:
             if not (client := self.getByCidOrJoinPlayer(data)):
-                self.debug('No client found')
                 return None
             return self.getEvent('EVT_CLIENT_SURVIVOR_WINNER', client=client)
 
     def OnFreeze(self, action, data, match=None):
         # 6:37 Freeze: 0 1 16: Fenix froze Biddle by UT_MOD_SPAS
         if not (victim := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No victim')
             return None
 
         if not (attacker := self.getByCidOrJoinPlayer(match.group('acid'))):
-            self.debug('No attacker')
             return None
 
         if not (weapon := match.group('aweap')):
-            self.debug('No weapon')
             return None
 
         victim.state = b3.STATE_DEAD
@@ -906,11 +881,9 @@ class Iourt43Parser(b3.parser.Parser):
     def OnThawoutstarted(self, action, data, match=None):
         # ThawOutStarted: 0 1: Fenix started thawing out Biddle
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client')
             return None
 
         if not (target := self.getByCidOrJoinPlayer(match.group('tcid'))):
-            self.debug('No target')
             return None
 
         return self.getEvent('EVT_CLIENT_THAWOUT_STARTED', client=client, target=target)
@@ -918,11 +891,9 @@ class Iourt43Parser(b3.parser.Parser):
     def OnThawoutfinished(self, action, data, match=None):
         # ThawOutFinished: 0 1: Fenix thawed out Biddle
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No client')
             return None
 
         if not (target := self.getByCidOrJoinPlayer(match.group('tcid'))):
-            self.debug('No target')
             return None
 
         target.state = b3.STATE_ALIVE
@@ -971,24 +942,18 @@ class Iourt43Parser(b3.parser.Parser):
         39:     UT_MOD_FLAG === exclusive attackers : , 0(<non-client>)
         40:     UT_MOD_GOOMBA --- normal kill line
         """
-        self.debug('OnKill: %s (%s)' % (match.group('aweap'), match.group('text')))
         if not (victim := self.getByCidOrJoinPlayer(match.group('cid'))):
-            self.debug('No victim')
-            # self.OnClientuserinfo(action, data, match)
             return None
 
         if not (weapon := match.group('aweap')):
-            self.debug('No weapon')
             return None
 
         # Fix attacker
         if match.group('aweap') in (self.UT_MOD_SLAPPED, self.UT_MOD_NUKED, self.MOD_TELEFRAG):
-            self.debug('OnKill: slap/nuke => attacker should be None')
             attacker = self.clients.getByCID('-1')  # make the attacker 'World'
         elif match.group('aweap') in (self.MOD_WATER, self.MOD_LAVA, self.MOD_FALLING,
                                       self.MOD_TRIGGER_HURT, self.UT_MOD_BOMBED, self.UT_MOD_FLAG):
             # those kills should be considered suicides
-            self.debug('OnKill: water/lava/falling/trigger_hurt/bombed/flag should be suicides')
             attacker = victim
         else:
             attacker = self.getByCidOrJoinPlayer(match.group('acid'))
@@ -999,11 +964,9 @@ class Iourt43Parser(b3.parser.Parser):
             if match.group('aweap') == self.UT_MOD_BERETTA and match.group('acid') == self.WORLD:
                 return self.getEvent('EVT_SENTRY_KILL', target=victim)
             else:
-                self.debug('No attacker')
                 return None
 
         if not (damagetype := match.group('text').split()[-1:][0]):
-            self.debug('No damage type, weapon: %s' % weapon)
             return None
 
         event = self.getEventID('EVT_CLIENT_KILL')
@@ -1013,7 +976,6 @@ class Iourt43Parser(b3.parser.Parser):
             if weapon == self.MOD_CHANGE_TEAM:
                 # do not pass a teamchange event here
                 # that event is passed shortly after the kill
-                self.verbose('Team change event caught: exiting...')
                 return None
             else:
                 event = self.getEventID('EVT_CLIENT_SUICIDE')
@@ -1034,15 +996,12 @@ class Iourt43Parser(b3.parser.Parser):
     def OnAssist(self, action, data, match=None):
         # Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
         if not (client := self.getByCidOrJoinPlayer(match.group('acid'))):
-            self.debug('No client')
             return None
 
         if not (victim := self.getByCidOrJoinPlayer(match.group('dcid'))):
-            self.debug('No victim')
             return None
 
         if not (attacker := self.getByCidOrJoinPlayer(match.group('kcid'))):
-            self.debug('No attacker')
             return None
 
         return self.getEvent('EVT_ASSIST', client=client, target=victim, data=attacker)
@@ -1101,9 +1060,7 @@ class Iourt43Parser(b3.parser.Parser):
 
     def OnAction(self, cid, actiontype, data, match=None):
         if not (client := self.clients.getByCID(cid)):
-            self.debug('No client found')
             return None
-        self.verbose('onAction: %s: %s %s' % (client.name, actiontype, data))
         return self.getEvent('EVT_CLIENT_ACTION', data=actiontype, client=client)
 
     def OnItem(self, action, data, match=None):
@@ -1113,9 +1070,7 @@ class Iourt43Parser(b3.parser.Parser):
         if client := self.getByCidOrJoinPlayer(cid):
             # correct flag/bomb-pickups
             if 'flag' in item or 'bomb' in item:
-                self.verbose('Item pickup corrected to action: %s' % item)
                 return self.OnAction(cid, item, data)
-            # self.verbose('on_item: %s picked up %s' % (client.name, item) )
             return self.getEvent('EVT_CLIENT_ITEM_PICKUP', data=item, client=client)
         return None
 
@@ -1128,14 +1083,11 @@ class Iourt43Parser(b3.parser.Parser):
         client = self.getByCidOrJoinPlayer(match.group('cid'))
 
         if not client or client.name != name:
-            self.debug('Urban Terror bug spotted: trying to get client by name')
+            self.warning('Urban Terror bug spotted: trying to get client by name: %s', name)
             client = self.clients.getByName(name)
 
         if not client:
-            self.verbose('No client found')
             return None
-
-        self.verbose('Client found: %s on slot %s' % (client.name, client.cid))
 
         data = match.group('text')
 
@@ -1154,14 +1106,11 @@ class Iourt43Parser(b3.parser.Parser):
         client = self.getByCidOrJoinPlayer(match.group('cid'))
 
         if not client or client.name != name:
-            self.debug('Urban Terror bug spotted: trying to get client by name')
+            self.warning('Urban Terror bug spotted: trying to get client by name: %s', name)
             client = self.clients.getByName(name)
 
         if not client:
-            self.verbose('no client found!')
             return None
-
-        self.verbose('Client found: %s on slot %s' % (client.name, client.cid))
 
         data = match.group('text')
         if data and ord(data[:1]) == 21:
@@ -1180,14 +1129,11 @@ class Iourt43Parser(b3.parser.Parser):
         target = self.clients.getByCID(match.group('acid'))
 
         if not client or client.name != name:
-            self.debug('Urban Terror bug spotted: trying to get client by name')
+            self.warning('Urban Terror bug spotted: trying to get client by name: %s', name)
             client = self.clients.getByName(name)
 
         if not client:
-            self.verbose('No client found')
             return None
-
-        self.verbose('client found: %s on slot %s' % (client.name, client.cid))
 
         data = match.group('text')
         if data and ord(data[:1]) == 21:
@@ -1196,29 +1142,11 @@ class Iourt43Parser(b3.parser.Parser):
         return self.getEvent('EVT_CLIENT_PRIVATE_SAY', data=data, client=client, target=target)
 
     def OnTell(self, action, data, match=None):
-        # 5:27 tell: woekele to XLR8or: test
-        # We'll use saytell instead
-        #
-        # client = self.clients.get_by_exact_name(match.group('name'))
-        # target = self.clients.get_by_exact_name(match.group('aname'))
-        #
-        # if not client:
-        #    self.verbose('no client found!')
-        #    return None
-        #
-        # data = match.group('text')
-        # if data and ord(data[:1]) == 21:
-        #    data = data[1:]
-        #
-        # client.name = match.group('name')
-        # return self.get_Event('EVT_CLIENT_PRIVATE_SAY', data=data, client=client, target=target)
         return None
 
     # endmap/shutdown
     def OnShutdowngame(self, action, data=None, match=None):
         self.game.mapEnd()
-        # self.clients.sync()
-        # self.debug('Synchronizing client info')
         self._maplist = None  # when UrT server reloads, newly uploaded maps get available: force refresh
         return self.getEvent('EVT_GAME_EXIT', data=data)
 
@@ -1242,7 +1170,6 @@ class Iourt43Parser(b3.parser.Parser):
             else:
                 setattr(self.game, o[0], o[1])
 
-        self.verbose('...self.console.game.gameType: %s' % self.game.gameType)
         self.game.startMap()
         self.game.rounds = 0
         start_daemon_thread(target=self.clients.sync, name='iourt43-syncinit')
@@ -1271,7 +1198,6 @@ class Iourt43Parser(b3.parser.Parser):
             else:
                 setattr(self.game, o[0], o[1])
 
-        self.verbose('...self.console.game.gameType: %s' % self.game.gameType)
         self.game.startMap()
         self.game.rounds = 0
         start_daemon_thread(target=self.clients.sync, name='iourt43-roundsync')
@@ -1309,7 +1235,7 @@ class Iourt43Parser(b3.parser.Parser):
         :param admin: The admin who performed the ban
         :param silent: Whether or not to announce this ban
         """
-        self.debug('BAN : client: %s, reason: %s', client, reason)
+        self.info('BAN : client: %s, reason: %s', client, reason)
         if isinstance(client, Client) and not client.guid:
             # client has no guid, kick instead
             return self.kick(client, reason, admin, silent)
@@ -1330,11 +1256,11 @@ class Iourt43Parser(b3.parser.Parser):
 
         if client.cid is None:
             # ban by ip, this happens when we !permban @xx a player that is not connected
-            self.debug('EFFECTIVE BAN : %s', self.getCommand('banByIp', ip=client.ip, reason=reason))
+            self.info('EFFECTIVE BAN : %s', self.getCommand('banByIp', ip=client.ip, reason=reason))
             self.write(self.getCommand('banByIp', ip=client.ip, reason=reason))
         else:
             # ban by cid
-            self.debug('EFFECTIVE BAN : %s', self.getCommand('ban', cid=client.cid, reason=reason))
+            self.info('EFFECTIVE BAN : %s', self.getCommand('ban', cid=client.cid, reason=reason))
 
             if client.connected:
                 cmd = self.getCommand('ban', cid=client.cid, reason=reason)
@@ -1427,7 +1353,7 @@ class Iourt43Parser(b3.parser.Parser):
         :param admin: The admin who unbanned this client
         :param silent: Whether or not to announce this unban
         """
-        self.debug('EFFECTIVE UNBAN : %s', self.getCommand('unbanByIp', ip=client.ip, reason=reason))
+        self.info('EFFECTIVE UNBAN : %s', self.getCommand('unbanByIp', ip=client.ip, reason=reason))
         cmd = self.getCommand('unbanByIp', ip=client.ip, reason=reason)
         # UrT adds multiple instances to banlist.txt
         # Make sure we remove up to 5 duplicates in a separate thread
@@ -1468,7 +1394,6 @@ class Iourt43Parser(b3.parser.Parser):
         look for inconsistencies. If required call the client.disconnect() method to remove
         a client from self.clients.
         """
-        self.debug('synchronizing client info')
         plist = self.getPlayerList(maxRetries=4)
         mlist = dict()
 
@@ -1476,26 +1401,19 @@ class Iourt43Parser(b3.parser.Parser):
             if client := self.getByCidOrJoinPlayer(cid):
                 # Disconnect the zombies first
                 if c['ping'] == 'ZMBI':
-                    self.debug('slot is in state zombie: %s - ignoring', c['ip'])
-                    # client.disconnect()
+                    pass
                 elif client.guid and 'guid' in c:
                     if client.guid == c['guid']:
                         # player matches
-                        self.debug('in-sync %s == %s', client.guid, c['guid'])
                         mlist[str(cid)] = client
                     else:
-                        self.debug('no-sync %s <> %s', client.guid, c['guid'])
                         client.disconnect()
                 elif client.ip and 'ip' in c:
                     if client.ip == c['ip']:
                         # player matches
-                        self.debug('in-sync %s == %s', client.ip, c['ip'])
                         mlist[str(cid)] = client
                     else:
-                        self.debug('no-sync %s <> %s', client.ip, c['ip'])
                         client.disconnect()
-                else:
-                    self.debug('no-sync: no guid or ip found')
 
         return mlist
 
@@ -1586,7 +1504,6 @@ class Iourt43Parser(b3.parser.Parser):
         Return a B3 team given the team value.
         :param team: The team value
         """
-        self.debug("getTeam(%s)", team)
         return self._team_map.get(str(team).lower(), b3.TEAM_UNKNOWN)
 
     def getNextMap(self):
@@ -1596,12 +1513,10 @@ class Iourt43Parser(b3.parser.Parser):
         cvars = self.cvarList('g_next')
         # let's first check if a vote passed for the next map
         nmap = cvars.get('g_nextmap')
-        self.debug('g_nextmap: %s' % nmap)
         if nmap != "":
             return nmap
 
         nmap = cvars.get('g_nextcyclemap')
-        self.debug('g_nextcyclemap: %s' % nmap)
         if nmap != "":
             return nmap
 
@@ -1673,8 +1588,6 @@ class Iourt43Parser(b3.parser.Parser):
         lines = data.splitlines()
 
         if lines[0] != "userinfo":
-            self.debug("dumpuser %s returned : %s", cid, data)
-            self.debug('Client %s probably disconnected, but its character is still hanging in game...', cid)
             return None
 
         datatransformed = f"{cid} "
@@ -1732,7 +1645,6 @@ class Iourt43Parser(b3.parser.Parser):
         player_teams = {}
         players_data = self.write('players')
         for line in players_data.splitlines()[3:]:
-            self.debug(line.strip())
             m = re.match(self._rePlayerScore, line.strip())
             if m and line.strip() != '0:  FREE k:0 d:0 ping:0':
                 cid = m.group('slot')
@@ -1757,9 +1669,7 @@ class Iourt43Parser(b3.parser.Parser):
         a hit of a given weapon to a given body location.
         """
         try:
-            points = self.damage[weapon][int(hitloc) - 1]
-            self.debug("_getDamagePoints(%s, %s) -> %d" % (weapon, hitloc, points))
-            return points
+            return self.damage[weapon][int(hitloc) - 1]
         except (KeyError, IndexError) as err:
             self.warning("_getDamagePoints(%s, %s) cannot find value : %s" % (weapon, hitloc, err))
             return 15
@@ -1807,21 +1717,21 @@ class Iourt43Parser(b3.parser.Parser):
         if not self.game.fs_game:
             self.warning("Could not query server for fs_game")
         else:
-            self.debug("fs_game: %s" % self.game.fs_game)
+            self.info("fs_game: %s" % self.game.fs_game)
 
         self.game.fs_basepath = cvarlist.get('fs_basepath')
         if not self.game.fs_basepath:
             self.warning("Could not query server for fs_basepath")
         else:
             self.game.fs_basepath = self.game.fs_basepath.rstrip('/')
-            self.debug('fs_basepath: %s' % self.game.fs_basepath)
+            self.info('fs_basepath: %s' % self.game.fs_basepath)
 
         self.game.fs_homepath = cvarlist.get('fs_homepath')
         if not self.game.fs_homepath:
             self.warning("Could not query server for fs_homepath")
         else:
             self.game.fs_homepath = self.game.fs_homepath.rstrip('/')
-            self.debug('fs_homepath: %s' % self.game.fs_homepath)
+            self.info('fs_homepath: %s' % self.game.fs_homepath)
 
     def __setup_events(self):
         # add event mappings
@@ -1839,7 +1749,7 @@ class Iourt43Parser(b3.parser.Parser):
         self.getMaps()
 
     def __setup_log_sync(self):
-        self.debug('Forcing server cvar g_logsync to %s' % self._logSync)
+        self.info('Forcing server cvar g_logsync to %s' % self._logSync)
         self.setCvar('g_logsync', self._logSync)
 
     def __setup_connected_players(self):
@@ -1869,7 +1779,6 @@ class Iourt43Parser(b3.parser.Parser):
             if client and client.cid in player_teams:
                 newteam = player_teams[client.cid]
                 if newteam != client.team:
-                    self.debug('Fixing client team for %s : %s is now %s' % (client.name, client.team, newteam))
                     setattr(client, 'team', newteam)
 
     def getPlayerScores(self):
@@ -1907,10 +1816,6 @@ class Iourt43Parser(b3.parser.Parser):
                     d['pbid'] = None
                     players[str(m.group('slot'))] = d
 
-                else:
-                    self.debug('Duplicate or incorrect slot number - '
-                               'client ignored %s last slot %s' % (m.group('slot'), lastslot))
-
         return players
 
     def getCvar(self, cvar_name):
@@ -1920,7 +1825,6 @@ class Iourt43Parser(b3.parser.Parser):
         """
         if self._reCvarName.match(cvar_name):
             val = self.write(cvar_name)
-            self.debug('Get cvar %s = [%s]', cvar_name, val)
 
             for f in self._reCvar:
                 if m := re.match(f, val):
@@ -1942,7 +1846,6 @@ class Iourt43Parser(b3.parser.Parser):
         :param value: The CVAR value
         """
         if re.match('^[a-z0-9_.]+$', cvar_name, re.IGNORECASE):
-            self.debug('Set cvar %s = [%s]', cvar_name, value)
             self.write(self.getCommand('set', name=cvar_name, value=value))
         else:
             self.error('%s is not a valid cvar name', cvar_name)

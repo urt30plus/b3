@@ -502,7 +502,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         if self._rmenable and self.console.time() > self._dontcount and self._mapchanged:
             self._playercount -= 1
-            self.debug('PlayerCount: %s' % self._playercount)
             self.adjustrotation(-1)
 
     def onClientAuth(self, event):
@@ -513,7 +512,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.setupVars(event.client)
         if self._rmenable and self.console.time() > self._dontcount and self._mapchanged:
             self._playercount += 1
-            self.debug('PlayerCount: %s' % self._playercount)
             self.adjustrotation(+1)
 
     def onGameRoundStart(self, _):
@@ -547,7 +545,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             # re-enable voting
             tm = self._votedelay * 60
             t1 = threading.Timer(tm, self.votedelay)
-            self.debug('Starting Vote delay Timer: %s seconds' % tm)
             t1.start()
 
     def onGameExit(self, _):
@@ -575,15 +572,13 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             tm = 60
             self._dontcount = self.console.time() + tm
             t2 = threading.Timer(tm, self.recountplayers)
-            self.debug('Starting RecountPlayers Timer: %s seconds' % tm)
             t2.start()
 
     def onGameMapChange(self, _):
         """
         Handle EVT_GAME_MAP_CHANGE.
         """
-        matchmode = self.console.getCvar('g_matchmode')
-        if matchmode:
+        if matchmode := self.console.getCvar('g_matchmode'):
             self._matchmode = matchmode.getBoolean()
 
     def onKill(self, event):
@@ -627,7 +622,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             return
 
         if client.var(self, 'radio_ignore_till', self.getTime()).value > self.getTime():
-            self.debug("ignoring radio event")
             return
 
         points = 0
@@ -658,7 +652,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             spamins = 0
 
         # set new values
-        self.verbose("radio_spamins for %s : %s" % (client.name, spamins))
         client.setvar(self, 'radio_spamins', spamins)
         client.setvar(self, 'last_radio_time', now)
         client.setvar(self, 'last_radio_data', data)
@@ -802,13 +795,10 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         <player1> [player2] - Swap two teams for 2 clients. If player2 is not specified, the admin
         using the command is swapped with player1. Doesn't work with spectators (exception for calling admin).
         """
-        # check the input
-        args = self._adminPlugin.parseUserCmd(data)
         # check for input. If none, exist with a message.
-        if args:
+        if args := self._adminPlugin.parseUserCmd(data):
             # check if the first player exists. If none, exit.
-            client1 = self._adminPlugin.findClientPrompt(args[0], client)
-            if not client1:
+            if not (client1 := self._adminPlugin.findClientPrompt(args[0], client)):
                 return
         else:
             client.message("Invalid parameters, try !help paswap")
@@ -816,8 +806,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         # if the specified player doesn't exist, exit.
         if args[1] is not None:
-            client2 = self._adminPlugin.findClientPrompt(args[1], client)
-            if not client2:
+            if not (client2 := self._adminPlugin.findClientPrompt(args[1], client)):
                 return
         else:
             client2 = client
@@ -874,20 +863,14 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if not data:
             if client:
                 client.message('^7Invalid or missing data, try !help pavote')
-            else:
-                self.debug('No data sent to cmd_pavote')
             return
 
         if data.lower() in ('on', 'off', 'reset'):
             if client:
                 client.message('^7Voting: ^1%s' % data)
-            else:
-                self.debug('Voting: %s' % data)
         else:
             if client:
                 client.message('^7Invalid data, try !help pavote')
-            else:
-                self.debug('Invalid data sent to cmd_pavote')
             return
 
         if data.lower() == 'off':
@@ -916,7 +899,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             return
 
         if re.match('^[a-z0-9_.]+.cfg$', data, re.I):
-            self.debug('executing configfile: %s' % data)
             result = self.console.write('exec %s' % data)
             cmd.sayLoudOrPM(client, result)
         else:
@@ -991,11 +973,9 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         # this will split the player name and the message
-        args = self._adminPlugin.parseUserCmd(data)
-        if args:
+        if args := self._adminPlugin.parseUserCmd(data):
             # args[0] is the player id
-            sclient = self._adminPlugin.findClientPrompt(args[0], client)
-            if not sclient:
+            if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
                 # a player matchin the name was not found, a list of closest matches will be displayed
                 # we can exit here and the user will retry with a more specific player
                 return
@@ -1028,11 +1008,9 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         # this will split the player name and the message
-        args = self._adminPlugin.parseUserCmd(data)
-        if args:
+        if args := self._adminPlugin.parseUserCmd(data):
             # args[0] is the player id
-            sclient = self._adminPlugin.findClientPrompt(args[0], client)
-            if not sclient:
+            if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
                 # a player matchin the name was not found, a list of closest matches will be displayed
                 # we can exit here and the user will retry with a more specific player
                 return
@@ -1057,7 +1035,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             else:
                 client.message('^7Number of punishments out of range, must be 1 to 25')
         else:
-            self.debug('Performing single slap...')
             self.console.write('slap %s' % sclient.cid)
 
     def cmd_panuke(self, data, client, cmd=None):
@@ -1066,11 +1043,9 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         # this will split the player name and the message
-        args = self._adminPlugin.parseUserCmd(data)
-        if args:
+        if args := self._adminPlugin.parseUserCmd(data):
             # args[0] is the player id
-            sclient = self._adminPlugin.findClientPrompt(args[0], client)
-            if not sclient:
+            if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
                 # a player matchin the name was not found, a list of closest matches will be displayed
                 # we can exit here and the user will retry with a more specific player
                 return
@@ -1091,7 +1066,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             else:
                 client.message('^7Number of punishments out of range, must be 1 to 25')
         else:
-            self.debug('Performing single nuke...')
             self.console.write('nuke %s' % sclient.cid)
 
     def cmd_paveto(self, data, client, cmd=None):
@@ -1109,8 +1083,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         # this will split the player name and the message
-        args = self._adminPlugin.parseUserCmd(data)
-        if args:
+        if args := self._adminPlugin.parseUserCmd(data):
             # check if all Locks should be released
             if args[0] == "all" and args[1] == "free":
                 self.resetTeamLocks()
@@ -1118,8 +1091,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 return
 
             # args[0] is the player id
-            sclient = self._adminPlugin.findClientPrompt(args[0], client)
-            if not sclient:
+            if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
                 # a player matchin the name was not found, a list of closest matches will be displayed
                 # we can exit here and the user will retry with a more specific player
                 return
@@ -1264,9 +1236,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.console.say('^7Match mode: ^2ON')
             self.console.write('bigtext "^7MATCH starting soon !!"')
             for e in self._match_plugin_disable:
-                self.debug('disabling plugin %s' % e)
-                plugin = self.console.getPlugin(e)
-                if plugin:
+                self.info('disabling plugin %s' % e)
+                if plugin := self.console.getPlugin(e):
                     plugin.disable()
                     client.message('^7plugin %s disabled' % e)
             client.message('^7type ^5!mapreload^7 to apply change')
@@ -1278,9 +1249,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.console.say('^7Match mode: ^1OFF')
 
             for e in self._match_plugin_disable:
-                self.debug('enabling plugin %s' % e)
-                plugin = self.console.getPlugin(e)
-                if plugin:
+                self.info('enabling plugin %s' % e)
+                if plugin := self.console.getPlugin(e):
                     plugin.enable()
                     client.message('^7plugin %s enabled' % e)
             client.message('^7type ^5!mapreload^7 to apply change')
@@ -1369,14 +1339,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         <name> - show the ip and guid and authname of a player
         (You can safely use the command without the 'pa' at the beginning)
         """
-        args = self._adminPlugin.parseUserCmd(data)
-        if not args:
+        if not (args := self._adminPlugin.parseUserCmd(data)):
             cmd.sayLoudOrPM(client, 'Your id is ^2@%s' % client.id)
             return
 
         # args[0] is the player id
-        sclient = self._adminPlugin.findClientPrompt(args[0], client)
-        if not sclient:
+        if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
             # a player matching the name was not found, a list of closest matches will be displayed
             # we can exit here and the user will retry with a more specific player
             return
@@ -1396,10 +1364,10 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self._is_round_end = True
         if self.isEnabled() and self._getGameType() in self._round_based_gametypes:
             if self._pending_skillbalance and self._skillbalance_func:
-                self.debug('onRoundEnd: executing skill balancing')
+                self.info('onRoundEnd: executing skill balancing')
                 self._skillbalance_func()
             elif self._pending_teambalance:
-                self.debug('onRoundEnd: executing team balancing')
+                self.info('onRoundEnd: executing team balancing')
                 self.teambalance()
 
         self._pending_teambalance = False
@@ -1414,7 +1382,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         team = event.data
         # store the time of teamjoin for autobalancing purposes
         client.setvar(self, 'teamtime', self.console.time())
-        self.verbose('client variable teamtime set to: %s' % client.var(self, 'teamtime').value)
         # remember current stats so we can tell how the player
         # is performing on the new team
         self._saveTeamvars(client)
@@ -1424,7 +1391,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             if team != b3.TEAM_UNKNOWN and team != self.console.getTeam(forcedteam):
                 self.console.write('forceteam %s %s' % (client.cid, forcedteam))
                 client.message('^1You are LOCKED! You are NOT allowed to switch!')
-                self.verbose('%s was locked and forced back to %s' % (client.name, forcedteam))
             # break out of this function, nothing more to do here
             return None
 
@@ -1439,7 +1405,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             if self.isEnabled() and not self._balancing:
                 # set balancing flag
                 self._balancing = True
-                self.verbose('teamchanged cid: %s, name: %s, team: %s' % (client.cid, client.name, team))
 
                 # are we supposed to be balanced?
                 if client.maxLevel >= self._tmaxlevel:
@@ -1449,12 +1414,10 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
                 # did player join spectators?
                 if team == b3.TEAM_SPEC:
-                    self.verbose('player joined specs')
                     # done balancing
                     self._balancing = False
                     return None
                 elif team == b3.TEAM_UNKNOWN:
-                    self.verbose('team is unknown')
                     # done balancing
                     self._balancing = False
                     return None
@@ -1466,20 +1429,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     return False
                 if abs(self._teamred - self._teamblue) <= self._teamdiff:
                     # teams are balanced
-                    self.verbose('teams are balanced, red: %s, blue: %s' % (self._teamred, self._teamblue))
-                    # done balancing
                     self._balancing = False
                     return None
                 else:
-                    # teams are not balanced
-                    self.verbose('teams are NOT balanced, red: %s, blue: %s' % (self._teamred, self._teamblue))
-
                     # switch is not allowed, so this should be a client suicide, not a legit switch.
                     # added as anti stats-harvest-exploit measure. One suicide is added as extra penalty for harvesting.
                     if self.console:
-
-                        self.verbose('Applying Teamswitch penalties')
-
                         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_SUICIDE',
                                                                       (100, 'penalty', 'body', 'Team_Switch_Penalty'),
                                                                       client, client))
@@ -1495,18 +1450,16 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
                     if self._teamred > self._teamblue:
                         # join the blue team
-                        self.verbose('forcing %s to the Blue team' % client.name)
                         self.console.write('forceteam %s blue' % client.cid)
                     else:
                         # join the red team
-                        self.verbose('forcing %s to the Red team' % client.name)
                         self.console.write('forceteam %s red' % client.cid)
 
                 # done balancing
                 self._balancing = False
 
         else:
-            self.debug('onTeamChange DISABLED')
+            self.info('onTeamChange DISABLED')
 
     def countteams(self):
         """
@@ -1537,9 +1490,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             try:
                 # find and set current gametype
                 self.console.game.gameType = self.console.defineGameType(self.console.getCvar('g_gametype').getString())
-                self.debug('current gametype found - changed to (%s)', self.console.game.gameType)
             except Exception:
-                self.debug('unable to determine current gametype - remains at (%s)', self.console.game.gameType)
+                self.warning('unable to determine current gametype - remains at (%s)', self.console.game.gameType)
 
         return self.console.game.gameType
 
@@ -1550,12 +1502,10 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         gametype = self._getGameType()
         # run teambalance only if current gametype is in autobalance_gametypes list
         if gametype not in self._autobalance_gametypes_array:
-            self.debug('current gametype (%s) is not specified in autobalance_gametypes - teambalancer disabled',
-                       gametype)
             return
 
         if gametype in self._round_based_gametypes:
-            self.debug('round based gametype detected (%s) : delaying teambalance till round end', gametype)
+            self.info('round based gametype detected (%s) : delaying teambalance till round end', gametype)
             self._pending_teambalance = True
             return
 
@@ -1572,7 +1522,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if self.isEnabled() and not self._balancing and not self._matchmode:
             # set balancing flag
             self._balancing = True
-            self.verbose('checking for balancing')
 
             if not self.countteams():
                 self._balancing = False
@@ -1582,16 +1531,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             if abs(self._teamred - self._teamblue) <= self._teamdiff:
                 # teams are balanced
                 self._teamsbalanced = True
-                self.verbose('teambalance: teams are balanced, '
-                             'red: %s, blue: %s (diff: %s)' % (self._teamred, self._teamblue, self._teamdiff))
                 # done balancing
                 self._balancing = False
                 return True
             else:
                 # teams are not balanced
                 self._teamsbalanced = False
-                self.verbose('teambalance: teams are NOT balanced, '
-                             'red: %s, blue: %s (diff: %s)' % (self._teamred, self._teamblue, self._teamdiff))
                 if self._announce == 1:
                     self.console.write('say Autobalancing Teams!')
                 elif self._announce == 2:
@@ -1604,22 +1549,17 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     newteam = 'red'
                     oldteam = b3.TEAM_BLUE
 
-                self.verbose('smaller team is: %s' % newteam)
-
                 # endless loop protection
                 count = 25
                 while abs(self._teamred - self._teamblue) > self._teamdiff and count > 0:
                     stime = self.console.upTime()
-                    self.verbose('uptime bot: %s' % stime)
                     forceclient = None
                     clients = self.console.clients.getList()
                     for c in clients:
                         if not c.isvar(self, 'teamtime'):
-                            self.debug('client has no variable teamtime')
                             # 10/22/2008 - 1.4.0b11 - mindriot
                             # store the time of teamjoin for autobalancing purposes
                             c.setvar(self, 'teamtime', self.console.time())
-                            self.verbose('client variable teamtime set to: %s' % c.var(self, 'teamtime').value)
 
                         if self.console.time() - c.var(self, 'teamtime').value < stime and \
                                 c.team == oldteam and c.maxLevel < self._tmaxlevel and not c.isvar(self, 'paforced'):
@@ -1628,12 +1568,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
                     if forceclient:
                         if newteam:
-                            self.verbose('forcing client: %s to team: %s' % (forceclient, newteam))
                             self.console.write('forceteam %s %s' % (forceclient, newteam))
-                        else:
-                            self.debug('no new team to force to')
-                    else:
-                        self.debug('no client to force')
 
                     count -= 1
                     # recount the teams... do we need to balance once more?
@@ -1642,18 +1577,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                         self.error('aborting teambalance: counting teams failed!')
                         return False
 
-                    # 10/28/2008 - 1.4.0b13 - mindriot
-                    self.verbose(
-                        'teambalance: red: %s, blue: %s (diff: %s)' % (self._teamred, self._teamblue, self._teamdiff))
-
                     if self._teamred > self._teamblue:
                         newteam = 'blue'
                         oldteam = b3.TEAM_RED
                     else:
                         newteam = 'red'
                         oldteam = b3.TEAM_BLUE
-
-                    self.verbose('smaller team is: %s' % newteam)
 
             # done balancing
             self._balancing = False
@@ -1666,31 +1595,26 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             for c in clients:
                 if c.isvar(self, 'paforced'):
                     c.delvar(self, 'paforced')
-            self.debug('TeamLocks Released')
         return None
 
     def namecheck(self):
         if self._matchmode:
             return None
 
-        self.debug('checking names')
         d = {}
         if self.isEnabled() and self.console.time() > self._ignoreTill:
             for player in self.console.clients.getList():
                 if player.name not in d:
                     d[player.name] = [player.cid]
                 else:
-                    # l = d[player.name]
-                    # l.append(cid)
-                    # d[player.name]=l
                     d[player.name].append(player.cid)
 
             for pname, cidlist in d.items():
                 if self._checkdupes and len(cidlist) > 1:
-                    self.info("warning players %s for using the same name" %
-                              (", ".join(["%s <%s> @%s" %
-                                          (c.exactName, c.cid, c.id) for c in
-                                          map(self.console.clients.getByCID, cidlist)])))
+                    self.warning("warning players %s for using the same name" %
+                                (", ".join(["%s <%s> @%s" %
+                                (c.exactName, c.cid, c.id) for c in
+                                map(self.console.clients.getByCID, cidlist)])))
 
                     for cid in cidlist:
                         client = self.console.clients.getByCID(cid)
@@ -1699,15 +1623,15 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 if self._checkunknown and pname == self.console.stripColors('New UrT Player'):
                     for cid in cidlist:
                         client = self.console.clients.getByCID(cid)
-                        self.info("warning player %s <%s> @%s for using forbidden name 'New UrT Player'" %
-                                  (client.exactName, client.cid, client.id))
+                        self.warning("warning player %s <%s> @%s for using forbidden name 'New UrT Player'" %
+                                    (client.exactName, client.cid, client.id))
                         self._adminPlugin.warnClient(client, 'badname')
 
                 if self._checkbadnames and pname == 'all':
                     for cid in cidlist:
                         client = self.console.clients.getByCID(cid)
-                        self.info("warning player %s <%s> @%s for using forbidden name 'all'" %
-                                  (client.exactName, client.cid, client.id))
+                        self.warning("warning player %s <%s> @%s for using forbidden name 'all'" %
+                                    (client.exactName, client.cid, client.id))
                         self._adminPlugin.warnClient(client, 'badname')
 
     def onNameChange(self, event):
@@ -1715,7 +1639,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         Handle EVT_CLIENT_NAME_CHANGE.
         """
         client = event.client
-        name = event.data
         if self.isEnabled() and self._checkchanges and client.maxLevel < 9:
             if not client.isvar(self, 'namechanges'):
                 client.setvar(self, 'namechanges', 0)
@@ -1741,11 +1664,9 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
     def resetNameChanges(self):
         if self.isEnabled() and self._checkchanges:
-            clients = self.console.clients.getList()
-            for c in clients:
+            for c in self.console.clients.getList():
                 if c.isvar(self, 'namechanges'):
                     c.setvar(self, 'namechanges', 0)
-            self.debug('Namechanges Reset')
 
     def votedelay(self, data=None):
         if not data:
@@ -1754,56 +1675,45 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
     def speccheck(self):
         if self.isEnabled() and self._g_maxGameClients == 0 and not self._matchmode:
-            self.debug('checking for idle spectators')
             clients = self.console.clients.getList()
             if len(clients) < self._smaxplayers:
-                self.verbose('clients online (%s) < maxplayers (%s), ignoring' % (len(clients), self._smaxplayers))
                 return
 
             for c in clients:
                 if not c.isvar(self, 'teamtime'):
-                    self.debug('client %s has no variable teamtime' % c)
                     # 10/22/2008 - 1.4.0b11 - mindriot
                     # store the time of teamjoin for autobalancing purposes
                     c.setvar(self, 'teamtime', self.console.time())
                     self.verbose('client variable teamtime set to: %s' % c.var(self, 'teamtime').value)
 
                 if c.maxLevel >= self._smaxlevel:
-                    self.debug('%s is allowed to idle in spec' % c.name)
                     continue
                 elif c.isvar(self, 'paforced'):
-                    self.debug('%s is forced by an admin' % c.name)
                     continue
                 elif c.team == b3.TEAM_SPEC and (self.console.time() - c.var(self, 'teamtime').value) > \
                         (self._smaxspectime * 60):
-                    self.debug('warning %s for speccing on full server' % c.name)
                     self._adminPlugin.warnClient(c, 'spec')
 
     def botsupport(self, data=None):
         """
         Check for bot support on the current map.
         """
-        self.debug('checking for bot support')
         if self.isEnabled() and not self._matchmode:
-
             try:
                 test = self.console.game.mapName
             except AttributeError:
-                self.debug('mapName not yet available')
+                self.warning('mapName not yet available')
             else:
                 if self._botenable:
                     for m in self._botmaps:
                         if m == self.console.game.mapName:
                             # we got ourselves a winner
-                            self.debug('enabling bots for this map: %s' % self.console.game.mapName)
                             self.botsenable()
 
     def botsdisable(self):
-        self.debug('disabling the bots')
         self.console.write('set bot_minplayers 0')
 
     def botsenable(self):
-        self.debug('enabling the bots')
         self.console.write('set bot_minplayers %s' % self._botminplayers)
 
     def setupVars(self, client):
@@ -1821,7 +1731,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             client.setvar(self, 'torsohitted', 0.00)
 
         client.setvar(self, 'hitvars', True)
-        self.debug('ClientVars set up for %s' % client.name)
 
     def resetVars(self):
         if self.isEnabled() and self._hsenable:
@@ -1835,7 +1744,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     c.setvar(self, 'helmethits', 0.00)
                     c.setvar(self, 'torsohitted', 0.00)
 
-            self.debug('ClientVars Reset')
         return None
 
     def headshotcounter(self, event):
@@ -1956,7 +1864,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.error('invalid newrotation passed to setrotation')
             return
 
-        self.debug('adjusting to %s mapRotation' % rotname)
         self.console.setCvar('g_mapcycle', rotation)
         self._currentrotation = newrotation
 
@@ -1964,8 +1871,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         # reset, recount and set a rotation
         self._oldplayercount = self._playercount
         self._playercount = len(self.console.clients.getList())
-
-        self.debug('initial playercount: %s' % self._playercount)
 
         if self._oldplayercount == -1:
             self.adjustrotation(0)
@@ -2128,7 +2033,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 cfgfile = self._gameconfig.get(modestring)
                 filename = os.path.join(self.console.game.fs_homepath, self.console.game.fs_game, cfgfile)
                 if os.path.isfile(filename):
-                    self.debug('executing config file: %s', cfgfile)
+                    self.info('executing config file: %s', cfgfile)
                     self.console.write('exec %s' % cfgfile)
 
         if self._matchmode:
@@ -2139,7 +2044,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if cfgfile:
             filename = os.path.join(self.console.game.fs_homepath, self.console.game.fs_game, cfgfile)
             if os.path.isfile(filename):
-                self.debug('executing configfile: %s', cfgfile)
+                self.info('executing configfile: %s', cfgfile)
                 self.console.write('exec %s' % cfgfile)
 
     def cmd_pakill(self, data, client, cmd=None):
@@ -2151,8 +2056,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             client.message('^7invalid data, try !help pakill')
             return
 
-        sclient = self._adminPlugin.findClientPrompt(data, client)
-        if not sclient:
+        if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
             # a player matchin the name was not found, a list of closest matches will be displayed
             # we can exit here and the user will retry with a more specific player
             return
@@ -2324,8 +2228,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if not data:
             sclient = client
         else:
-            sclient = self._adminPlugin.findClientPrompt(data, client)
-            if not sclient:
+            if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
                 return
 
         if sclient.team == b3.TEAM_SPEC:
@@ -2352,8 +2255,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if not data:
             sclient = client
         else:
-            sclient = self._adminPlugin.findClientPrompt(data, client)
-            if not sclient:
+            if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
                 return
 
         if sclient.team == b3.TEAM_SPEC:
@@ -2522,8 +2424,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         }
 
         weightsum = sum(weights[key] for key in keys)
-        self.debug("score: maxstats=%s" % str(maxstats))
-        self.debug("score: minstats=%s" % str(minstats))
         for c in clients:
             score = 0.0
             tm = min(1.0, playerstats[c.id]['age'] / 5.0)  # reduce score for players who just joined
@@ -2540,8 +2440,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     score += keyscore
 
             score /= weightsum
-            self.debug('score: %s %s score=%.3f age=%.2f %s' % (c.team, c.name, score,
-                                                                playerstats[c.id]['age'], ' '.join(msg)))
             scores[c.id] = score
 
         return scores
@@ -2583,10 +2481,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         scores = self._getScores(clients, usexlrstats=tdm)
         blue = [c for c in clients if c.team == b3.TEAM_BLUE]
         red = [c for c in clients if c.team == b3.TEAM_RED]
-        self.debug("advise: numblue=%d numred=%d" % (len(blue), len(red)))
 
         if minplayers and len(blue) + len(red) < minplayers:
-            self.debug('advise: too few players')
             return None, None
 
         diff = self._getTeamScoreDiff(blue, red, scores)
@@ -2594,14 +2490,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if tdm:
             bs, rs = self._getAvgKillsRatios(blue, red)
             avgdiff = bs - rs
-            self.debug('advise: TDM blue=%.2f red=%.2f avgdiff=%.2f skilldiff=%.2f' % (bs, rs, avgdiff, diff))
         else:
             # just looking at kill ratios doesn't work well for CTF, so we base
             # the balance diff on the skill diff for now
             sincelast = self.console.time() - self._lastbal
             damping = min(1.0, sincelast / (1.0 + 60.0 * self._minbalinterval))
             avgdiff = 1.21 * diff * damping
-            self.debug('advise: CTF/BOMB avgdiff=%.2f skilldiff=%.2f damping=%.2f' % (avgdiff, diff, damping))
 
         return avgdiff, diff
 
@@ -2624,7 +2518,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         tmax = 4.0
         totkpm = len(list((self._getRecentKills(60))))
         tm = max(tmin, tmax - 0.1 * totkpm)
-        self.debug('recent: totkpm=%d tm=%.2f' % (totkpm, tm))
         recentcontrib = {}
         t0 = self.console.time() - tm * 60
         for c in blue + red:
@@ -2638,8 +2531,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     elif s < 0:
                         d += 1
             recentcontrib[c.id] = k / (1.0 + d)
-
-        self.debug('recent: %s' % str(recentcontrib))
 
         def contribcmp(a, b):
             return b3.functions.cmp(recentcontrib[b.id], recentcontrib[a.id])
@@ -2682,9 +2573,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         return 'Z' in gear or 'N' in gear or 'i' in gear
 
     def _move(self, blue, red, scores=None):
-        self.debug('move: final blue team: ' + ' '.join(c.name for c in blue))
-        self.debug('move: final red team: ' + ' '.join(c.name for c in red))
-
         # Filter out players already in correct team
         blue = [c for c in blue if c.team != b3.TEAM_BLUE]
         red = [c for c in red if c.team != b3.TEAM_RED]
@@ -2700,7 +2588,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         clients = self.console.clients.getList()
         numblue = len([c for c in clients if c.team == b3.TEAM_BLUE])
         numred = len([c for c in clients if c.team == b3.TEAM_RED])
-        self.debug('move: num players: blue=%d red=%d' % (numblue, numred))
         self.ignoreSet(30)
 
         # We have to make sure we don't get a "too many players" error from the
@@ -2709,17 +2596,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         # spec mode.
         moves = len(blue) + len(red)
         spec = None
-        self.debug('move: need to do %d moves' % moves)
-        self.debug('move: will go to blue team: ' + ' '.join(c.name for c in blue))
-        self.debug('move: will go to red team: ' + ' '.join(c.name for c in red))
-
         if blue and numblue == numred:
             random.shuffle(blue)
             spec = blue.pop()
             self.console.write('forceteam %s spectator' % spec.cid)
             numred -= 1
             moves -= 1
-            self.debug('move: moved %s from red to spec' % spec.name)
 
         queue = []
 
@@ -2732,14 +2614,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 self.console.write('forceteam %s %s' % (c.cid, newteam))
                 numblue += 1
                 numred -= 1
-                self.debug('move: moved %s to blue' % c.name)
             elif red:
                 c = red.pop()
                 newteam = 'red'
                 self.console.write('forceteam %s %s' % (c.cid, newteam))
                 numblue -= 1
                 numred += 1
-                self.debug('move: moved %s to red' % c.name)
 
             if newteam and scores:
                 if newteam == "red":
@@ -2785,7 +2665,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         if spec:
             self.console.write('forceteam %s blue' % spec.cid)
-            self.debug('move: moved %s from spec to blue' % spec.name)
 
         for c, msg in queue:
             c.message(msg)
@@ -2802,8 +2681,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         oldred = [c for c in clients if c.team == b3.TEAM_RED]
         n = len(oldblue) + len(oldred)
         olddiff = self._getTeamScoreDiff(oldblue, oldred, scores)
-        self.debug('rand: n=%s' % n)
-        self.debug('rand: olddiff=%.2f' % olddiff)
         bestdiff = None  # best balance diff so far when diff > slack
         sbestdiff = None  # best balance diff so far when diff < slack
         bestnumdiff = None  # best difference in number of snipers so far
@@ -2814,7 +2691,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if not maxmovesperc and abs(len(oldblue) - len(oldred)) > 1:
             # Teams are unbalanced by count, force both teams two have equal number
             # of players
-            self.debug('rand: force new teams')
             bestblue, bestred = self._getRandomTeams(clients, checkforced=True)
             bestdiff = self._getTeamScoreDiff(bestblue, bestred, scores)
 
@@ -2831,37 +2707,20 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 numdiff = abs(self._countSnipers(blue) - self._countSnipers(red))
                 if bestnumdiff is None or numdiff < bestnumdiff:
                     # got better sniper num diff
-                    if bestnumdiff is None:
-                        self.debug('rand: first numdiff %d (sdiff=%.2f)' % (numdiff, diff))
-                    else:
-                        self.debug('rand: found better numdiff %d < %d (sdiff=%.2f)' % (numdiff, bestnumdiff, diff))
-
                     sbestblue, sbestred = blue, red
                     sbestdiff, bestnumdiff = diff, numdiff
 
                 elif numdiff == bestnumdiff and abs(diff) < abs(sbestdiff) - epsilon:
                     # same number of snipers but better balance diff
-                    self.debug('rand: found better sdiff %.2f < %.2f (numdiff=%d bestnumdiff=%d)' % (
-                        abs(diff), abs(sbestdiff), numdiff, bestnumdiff))
                     sbestblue, sbestred = blue, red
                     sbestdiff = diff
 
             elif bestdiff is None or abs(diff) < abs(bestdiff) - epsilon:
                 # balance above slack threshold
-                if bestdiff is None:
-                    self.debug('rand: first diff %.2f' % abs(diff))
-                else:
-                    self.debug('rand: found better diff %.2f < %.2f' % (abs(diff), abs(bestdiff)))
-
                 bestblue, bestred = blue, red
                 bestdiff = diff
 
-        if bestdiff is not None:
-            self.debug('rand: bestdiff=%.2f' % bestdiff)
-
         if sbestdiff is not None:
-            self.debug('rand: sbestdiff=%.2f bestnumdiff=%d' % (sbestdiff, bestnumdiff))
-            self.debug('rand: snipers: blue=%d red=%d' % (self._countSnipers(sbestblue), self._countSnipers(sbestred)))
             return olddiff, sbestdiff, sbestblue, sbestred, scores
 
         return olddiff, bestdiff, bestblue, bestred, scores
@@ -2886,8 +2745,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         # run skillbalancer only if current
         # gametype is in autobalance_gametypes list
         if gametype not in self._autobalance_gametypes_array:
-            self.debug('current gametype (%s) is not specified in autobalance_gametypes - '
-                       'skillbalancer disabled', self.console.game.gameType)
             return
 
         # skill balance disabled
@@ -2954,7 +2811,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         if word:
             oldteam, oldword, oldabsdiff = self._oldadv
-            self.debug('advise: oldteam=%s oldword=%s oldabsdiff=%s' % (oldteam, oldword, oldabsdiff))
             team = avgdiff < 0 and 'Red' or 'Blue'
             if team == oldteam:
                 if word == oldword:
@@ -2980,7 +2836,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             if not unfair and mode == 1:
                 msg += ', but no action necessary yet'
 
-            self.debug('advise: team=%s word=%s absdiff=%s' % (team, word, absdiff))
             self._oldadv = (team, word, absdiff)
 
         else:

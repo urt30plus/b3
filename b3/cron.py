@@ -283,7 +283,7 @@ class Cron:
         """
         tab_id = id(tab)
         self._tabs[tab_id] = tab
-        self.console.verbose('Added crontab %s', tab)
+        self.console.info('Added crontab %s', tab)
         return tab_id
 
     def entries(self):
@@ -295,9 +295,9 @@ class Cron:
         """
         try:
             del self._tabs[tab_id]
-            self.console.verbose('Removed crontab %s', tab_id)
+            self.console.info('Removed crontab %s', tab_id)
         except KeyError:
-            self.console.verbose('Crontab %s not found', tab_id)
+            self.console.info('Crontab %s not found', tab_id)
 
     def __add__(self, tab):
         self.add(tab)

@@ -529,11 +529,7 @@ class AdminPlugin(b3.plugin.Plugin):
         cmd_prefixes = (self.cmdPrefix, self.cmdPrefixLoud,
                         self.cmdPrefixBig, self.cmdPrefixPrivate)
 
-        self.debug('OnSay handle %s:"%s"', event.type, event_data)
-
         if len(event_data) >= 2 and event_data[:1] in cmd_prefixes:
-
-            self.debug('handle command %s', event_data)
 
             if event_data[1:2] in cmd_prefixes:
                 # self.is the alias for say

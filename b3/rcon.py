@@ -49,8 +49,6 @@ class Rcon:
             maxRetries = 2
 
         data = data.strip()
-        self.console.verbose('RCON sending (%s:%s) %r', self.host[0], self.host[1], data)
-
         payload = self.rconsendstring + data.encode(self.console.encoding) + b'\n'
 
         retries = 0
@@ -67,30 +65,19 @@ class Rcon:
                     self.console.warning('RCON: error sending: %r', msg)
                 else:
                     try:
-                        data = self.read_socket(self.socket, socketTimeout=socketTimeout)
-                        self.console.verbose2('RCON: received %r', data)
-                        return data
+                        return self.read_socket(self.socket, socketTimeout=socketTimeout)
                     except Exception as msg:
                         self.console.warning('RCON: error reading: %r', msg)
 
                 if re.match(r'^quit|map(_rotate)?.*', data):
                     # do not retry quits and map changes since they prevent the server from responding
-                    self.console.verbose2('RCON: no retry for %r', data)
                     return ''
 
-            else:
-                self.console.verbose('RCON: no writeable socket')
-
             time.sleep(0.05)
-
             retries += 1
             if retries >= maxRetries:
                 self.console.error('RCON: too many tries: aborting (%r)', data)
                 break
-
-            self.console.verbose('RCON: retry sending %r (%s/%s)...', data, retries, maxRetries)
-
-        self.console.debug('RCON: did not send any data')
         return ''
 
     def read_socket(self, sock, size=4096, socketTimeout=None):
@@ -109,7 +96,6 @@ class Rcon:
             self.console.warning('RCON read_socket: %s', str(errors))
 
         if not readables:
-            self.console.verbose('No readable socket')
             return ''
 
         data = b''
