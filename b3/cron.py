@@ -268,6 +268,7 @@ class Cron:
 
         # thread will stop if this event gets set
         self._stopEvent = threading.Event()
+        self._cron_thread = None
 
     def create(self, command, minute='*', hour='*', day='*', month='*', dow='*'):
         """
@@ -308,13 +309,17 @@ class Cron:
         """
         Start the cron scheduler in a separate thread.
         """
-        b3.functions.start_daemon_thread(target=self.run, name='crontab')
+        self._cron_thread = b3.functions.start_daemon_thread(
+            target=self.run, name='crontab'
+        )
 
     def stop(self):
         """
         Stop the cron scheduler.
         """
         self._stopEvent.set()
+        if self._cron_thread:
+            self._cron_thread.join(timeout=5.0)
 
     def run(self):
         """
