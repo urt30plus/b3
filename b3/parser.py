@@ -41,6 +41,7 @@ class Parser:
     _commands = {}  # will hold RCON commands for the current game
     _cron = None  # cron instance
     _events = {}  # available events (K=>EVENT)
+    _event_handling_thread = None
     _eventsStats_cronTab = None  # crontab used to log event statistics
     _cron_stats_crontab = None  # crontab used to log cron run statistics
     _cron_stats_threads = None  # crontab used to log thread statistics
@@ -85,7 +86,7 @@ class Parser:
     screen = None
     storage = None  # storage module instance
     type = None
-    stop_event = threading.Event()
+    stop_parsing_event = threading.Event()
     wrapper = None  # textwrapper instance
 
     deadPrefix = '[DEAD]^7'  # say dead prefix
@@ -122,25 +123,17 @@ class Parser:
     #
     # How exiting works, in detail:
     #
-    #   - the parallel loops in run() and handleEvents() are terminated only
-    #     when ``stop_event`` is set.
+    #   - the main loop in run() and is terminated only when ``stop_parsing_event``
+    #     is set in the ``shutdown`` method.
     #   - die() or restart() invokes shutdown() from the handler thread.
-    #   - the exiting lock is acquired by shutdown() in the handler thread
-    #     before it sets the ``stop_event`` to end both loops.
+    #   - the handler thread sets the ``stop_parsing_event`` and queues a EVT_STOP
+    #     event to initiate it's own shutdown.
     #   - die() or restart() raises SystemExit in the handler thread after
     #     shutdown() and a few seconds delay.
     #   - when SystemExit is caught by handleEvents(), its exit status is
     #     pushed to the main context via exitcode.
-    #   - run() waits to acquire the lock in the main thread before proceeding
-    #     with teardown, repeating sys.exit(exitcode) from the main thread if set.
-    #
-    #   In the case of an abnormal exception in the handler thread, ``exitcode''
-    #   will be None and the ``exiting'' lock will be released when``handleEvents''
-    #   finishes so the main thread can still continue.
-    #
-    #   Exits occurring in the main thread do not need to be synchronised.
+    #   - run() waits for the event handling thread to stop before exiting
 
-    exiting = threading.RLock()
     exitcode = None
 
     def __init__(self, conf, options):
@@ -153,7 +146,7 @@ class Parser:
 
         if not self.loadConfig(conf):
             print('CRITICAL ERROR : COULD NOT LOAD CONFIG')
-            raise SystemExit(220)
+            raise SystemExit(2)
 
         if self.config.has_option('server', 'encoding'):
             self.encoding = self.config.get('server', 'encoding')
@@ -348,7 +341,9 @@ class Parser:
         self.bot("All plugins started")
         self.pluginsStarted()
         self.bot("Starting event dispatching thread")
-        start_daemon_thread(target=self.handleEvents, name='event_handler')
+        self._event_handling_thread = start_daemon_thread(
+            target=self.handleEvents, name='event_handler'
+        )
         self.bot("Start reading game events")
         self.run()
 
@@ -398,16 +393,14 @@ class Parser:
         self.exitcode = 0
         self.shutdown()
         self.finalize()
-        time.sleep(5)
 
     def restart(self):
         """
         Stop B3 with the restart exit status (221)
         """
-        self.exitcode = 221
+        self.exitcode = 4
         self.bot('Restarting...')
         self.shutdown()
-        time.sleep(5)
 
     def upTime(self):
         """
@@ -1000,7 +993,7 @@ class Parser:
         )
         self.screen.flush()
 
-        stop_event_wait = self.stop_event.wait
+        stop_parsing_event_wait = self.stop_parsing_event.wait
         read_line = self.read
         parse_line = self.parseLine
 
@@ -1009,7 +1002,7 @@ class Parser:
                 if not self._pauseNotice:
                     self.bot('PAUSED - not parsing any lines')
                     self._pauseNotice = True
-                if stop_event_wait(timeout=self.delay):
+                if stop_parsing_event_wait(timeout=self.delay):
                     break
                 continue
             for line in read_line():
@@ -1019,20 +1012,20 @@ class Parser:
                     except Exception as msg:
                         self.error('Could not parse line %s - (%s) %s',
                                    line, msg, extract_tb(sys.exc_info()[2]))
-                    if stop_event_wait(timeout=self.delay2):
+                    if stop_parsing_event_wait(timeout=self.delay2):
                         break
 
-            if stop_event_wait(timeout=self.delay):
+            if stop_parsing_event_wait(timeout=self.delay):
                 break
 
-        self.bot('Stop reading')
-        with self.exiting:
-            self.bot('Closing games log file')
-            self.input.close()
-            self.bot('Closing RCON')
-            self.output.close()
-            if self.exitcode:
-                sys.exit(self.exitcode)
+        self.bot('Stopped parsing')
+        self.bot('Closing games log file')
+        self.input.close()
+        self.bot('Awaiting Event Handling Thread stop')
+        self._event_handling_thread.join(timeout=15.0)
+        self.bot('Event Handling Thread stopped')
+        if self.exitcode:
+            sys.exit(self.exitcode)
 
     def parseLine(self, line):
         """
@@ -1079,18 +1072,18 @@ class Parser:
         """
         console_time = self.time
         event_queue_get = self.queue.get
-        stop_event_is_set = self.stop_event.is_set
         stop_events = (self.getEventID('EVT_EXIT'), self.getEventID('EVT_STOP'))
-        while not stop_event_is_set():
+        while True:
             added, expire, event = event_queue_get()
+            current_time = console_time()
             if event.type in stop_events:
                 break
             event_name = self.getEventName(event.type)
-            current_time = console_time()
             self._eventsStats.add_event_wait((current_time - added) * 1000)
-            if current_time >= expire:  # events can only sit in the queue until expire time
+            if current_time > expire:  # events can only sit in the queue until expire time
                 self.error('**** Event sat in queue too long: %s %s',
                            event_name, current_time - expire)
+                # TODO: dump stats here
                 continue
 
             for hfunc in self._handlers[event.type]:
@@ -1104,9 +1097,6 @@ class Parser:
                     # plugin called for a halt to event processing
                     self.bot('Event %s vetoed by %s', event_name, str(hfunc))
                     break
-                except SystemExit as e:
-                    self.exitcode = e.code
-                    break
                 except Exception as msg:
                     self.error('Handler %s could not handle event %s: %s: %s %s',
                                hfunc.__class__.__name__,
@@ -1118,10 +1108,39 @@ class Parser:
                     self._eventsStats.add_event_handled(hfunc.__class__.__name__,
                                                         event_name, elapsed * 1000)
 
+        self.handle_events_shutdown()
+
+    def handle_events_shutdown(self):
         self.bot('Shutting down event handler')
-        with self.exiting:
-            if not self.stop_event.is_set():
-                self.shutdown()
+
+        if not self.stop_parsing_event.is_set():
+            self.stop_parsing_event.set()
+
+        self.bot('Sending EVT_STOP message to all plugins')
+        event = b3.events.Event(self.getEventID('EVT_STOP'), '')
+        for plugin in self._plugins.values():
+            try:
+                plugin.parseEvent(event)
+            except Exception as e:
+                self.error(e)
+
+        self.bot('Stopping cron')
+        try:
+            self._cron.stop()
+        except Exception as e:
+            self.error(e)
+
+        self.bot('Shutting down database connection')
+        try:
+            self.storage.shutdown()
+        except Exception as e:
+            self.error(e)
+
+        self.bot('Shutting down RCON connection')
+        try:
+            self.output.close()
+        except Exception as e:
+            self.error(e)
 
     def write(self, msg, maxRetries=None, socketTimeout=None):
         """
@@ -1161,22 +1180,9 @@ class Parser:
         """
         Shutdown B3.
         """
-        with self.exiting:
-            if self.stop_event.is_set():
-                return
-            self.bot('Shutting down...')
-            self.stop_event.set()
-            try:
-                for _, plugin in self._plugins.items():
-                    plugin.parseEvent(b3.events.Event(self.getEventID('EVT_STOP'), ''))
-                if self._cron:
-                    self.bot('Stopping cron')
-                    self._cron.stop()
-                if self.storage:
-                    self.bot('Shutting down database connection')
-                    self.storage.shutdown()
-            except Exception as e:
-                self.error(e)
+        self.bot('Shutting down...')
+        self.stop_parsing_event.set()
+        self.queueEvent(b3.events.Event(self.getEventID('EVT_STOP'), ''))
 
     def finalize(self):
         """
@@ -1296,11 +1302,9 @@ class Parser:
         Log a CRITICAL message and shutdown B3.
         """
         self.log.critical(msg, *args, **kwargs)
-        self.exitcode = 220
+        self.exitcode = 2
         self.shutdown()
         self.finalize()
-        time.sleep(2)
-        raise SystemExit(self.exitcode)
 
     @staticmethod
     def time():
