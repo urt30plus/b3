@@ -908,60 +908,25 @@ class Iourt43Parser(b3.parser.Parser):
         pass
 
     def OnKill(self, action, data, match=None):
-        """
-        1:      MOD_WATER === exclusive attackers : , 1022(<world>), 0(<non-client>)
-        3:      MOD_LAVA === exclusive attackers : , 1022(<world>), 0(<non-client>)
-        5:      MOD_TELEFRAG --- normal kill line
-        6:      MOD_FALLING === exclusive attackers : , 1022(<world>), 0(<non-client>)
-        7:      MOD_SUICIDE ===> attacker is always the victim
-        9:      MOD_TRIGGER_HURT === exclusive attackers : , 1022(<world>)
-        10:     MOD_CHANGE_TEAM ===> attacker is always the victim
-        12:     UT_MOD_KNIFE --- normal kill line
-        13:     UT_MOD_KNIFE_THROWN --- normal kill line
-        14:     UT_MOD_BERETTA --- normal kill line
-        15:     UT_MOD_DEAGLE --- normal kill line
-        16:     UT_MOD_SPAS --- normal kill line
-        17:     UT_MOD_UMP45 --- normal kill line
-        18:     UT_MOD_MP5K --- normal kill line
-        19:     UT_MOD_LR300 --- normal kill line
-        20:     UT_MOD_G36 --- normal kill line
-        21:     UT_MOD_PSG1 --- normal kill line
-        22:     UT_MOD_HK69 --- normal kill line
-        23:     UT_MOD_BLED --- normal kill line
-        24:     UT_MOD_KICKED --- normal kill line
-        25:     UT_MOD_HEGRENADE --- normal kill line
-        28:     UT_MOD_SR8 --- normal kill line
-        30:     UT_MOD_AK103 --- normal kill line
-        31:     UT_MOD_SPLODED ===> attacker is always the victim
-        32:     UT_MOD_SLAPPED ===> attacker is always the victim
-        33:     UT_MOD_BOMBED --- normal kill line
-        34:     UT_MOD_NUKED --- normal kill line
-        35:     UT_MOD_NEGEV --- normal kill line
-        37:     UT_MOD_HK69_HIT --- normal kill line
-        38:     UT_MOD_M4 --- normal kill line
-        39:     UT_MOD_FLAG === exclusive attackers : , 0(<non-client>)
-        40:     UT_MOD_GOOMBA --- normal kill line
-        """
         if not (victim := self.getByCidOrJoinPlayer(match.group('cid'))):
             return None
 
         if not (weapon := match.group('aweap')):
             return None
 
-        # Fix attacker
-        if match.group('aweap') in (self.UT_MOD_SLAPPED, self.UT_MOD_NUKED, self.MOD_TELEFRAG):
+        if weapon in (self.UT_MOD_SLAPPED, self.UT_MOD_NUKED, self.MOD_TELEFRAG):
             attacker = self.clients.getByCID('-1')  # make the attacker 'World'
-        elif match.group('aweap') in (self.MOD_WATER, self.MOD_LAVA, self.MOD_FALLING,
-                                      self.MOD_TRIGGER_HURT, self.UT_MOD_BOMBED, self.UT_MOD_FLAG):
+        elif weapon in (self.MOD_WATER, self.MOD_LAVA, self.MOD_FALLING,
+                        self.MOD_TRIGGER_HURT, self.UT_MOD_BOMBED,
+                        self.UT_MOD_FLAG):
             # those kills should be considered suicides
             attacker = victim
         else:
             attacker = self.getByCidOrJoinPlayer(match.group('acid'))
-        # End fix attacker
 
         if not attacker:
             # handle the case where Mr.Sentry killed a player
-            if match.group('aweap') == self.UT_MOD_BERETTA and match.group('acid') == self.WORLD:
+            if weapon == self.UT_MOD_BERETTA and match.group('acid') == self.WORLD:
                 return self.getEvent('EVT_SENTRY_KILL', target=victim)
             else:
                 return None
@@ -983,11 +948,7 @@ class Iourt43Parser(b3.parser.Parser):
             event = self.getEventID('EVT_CLIENT_KILL_TEAM')
 
         # if not logging damage we need a general hitloc (for xlrstats)
-        if 'lastDamageTaken' in victim.data:
-            last_damage_data = victim.data['lastDamageTaken']
-            del victim.data['lastDamageTaken']
-        else:
-            last_damage_data = (100, weapon, 'body')
+        last_damage_data = victim.data.pop('lastDamageTaken', (100, weapon, 'body'))
 
         victim.state = b3.STATE_DEAD
         # need to pass some amount of damage for the teamkill plugin - 100 is a kill
