@@ -35,9 +35,10 @@ class Rcon:
         self.console.bot('Game name is: %s', self.console.gameName)
         self._writelines_thread = None
 
-    def send_rcon(self, data, maxRetries=None, socketTimeout=None):
+    def send_rcon(self, sock, data, maxRetries=None, socketTimeout=None):
         """
         Send an RCON command.
+        :param sock: The socket used to send the payload
         :param data: The string to be sent
         :param maxRetries: How many times we have to retry the sending upon failure
         :param socketTimeout: The socket timeout value
@@ -54,7 +55,7 @@ class Rcon:
         retries = 0
         start_time = time.time()
         while time.time() - start_time < 5:
-            readables, writeables, errors = select.select([], [self.socket], [self.socket], socketTimeout)
+            readables, writeables, errors = select.select([], [sock], [sock], socketTimeout)
 
             if errors:
                 self.console.warning('RCON send_rcon: %s', str(errors))
@@ -65,7 +66,7 @@ class Rcon:
                     self.console.warning('RCON: error sending: %r', msg)
                 else:
                     try:
-                        return self.read_socket(self.socket, socketTimeout=socketTimeout)
+                        return self.read_socket(sock, socketTimeout=socketTimeout)
                     except Exception as msg:
                         self.console.warning('RCON: error reading: %r', msg)
 
@@ -115,7 +116,7 @@ class Rcon:
         :param socketTimeout: The socket timeout value
         """
         with self.lock:
-            data = self.send_rcon(cmd, maxRetries=maxRetries, socketTimeout=socketTimeout)
+            data = self.send_rcon(self.socket, cmd, maxRetries=maxRetries, socketTimeout=socketTimeout)
         return data or ''
 
     def writelines(self, lines):
@@ -142,7 +143,7 @@ class Rcon:
             for cmd in lines:
                 if cmd:
                     with self.lock:
-                        self.send_rcon(cmd, maxRetries=1)
+                        self.send_rcon(self.socket, cmd, maxRetries=1)
 
     def stop(self):
         """
