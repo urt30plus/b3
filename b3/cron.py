@@ -79,14 +79,6 @@ class CronTab:
         self.run_stats.append(time.perf_counter() - start_tick)
 
     @property
-    def second(self):
-        return 0
-
-    @second.setter
-    def second(self, value):
-        pass
-
-    @property
     def minute(self):
         return self._minute
 
