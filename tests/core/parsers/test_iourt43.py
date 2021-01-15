@@ -10,7 +10,7 @@ from b3.config import XmlConfigParser
 from b3.events import Event
 from b3.output import VERBOSE2
 from b3.parsers.iourt43 import Iourt43Parser
-from tests import logging_disabled
+from tests import logging_disabled, InstantTimer
 from tests.fake import FakeClient
 
 log = logging.getLogger("test")
@@ -986,14 +986,13 @@ maps/ut4_ambush.bsp
         # THEN
         self.assertListEqual(['ut4_abbey', 'ut4_algiers', 'ut4_ambush'], rv)
 
-    @patch('time.sleep')
-    def test_rotateMap(self, sleep_mock):
+    @patch('threading.Timer', new_callable=lambda: InstantTimer)
+    def test_rotateMap(self, timer_mock):
         self.console.rotateMap()
         self.console.write.assert_has_calls([call('say ^7Changing to next map'), call('cyclemap')])
-        sleep_mock.assert_called_once_with(1)
 
-    @patch('time.sleep')
-    def test_changeMap(self, sleep_mock):
+    @patch('threading.Timer', new_callable=lambda: InstantTimer)
+    def test_changeMap(self, timer_mock):
         # GIVEN
         when(self.output_mock).write('fdir *.bsp', socketTimeout=anything()).thenReturn("""\
 ---------------
@@ -1005,7 +1004,6 @@ maps/ut4_foo.bsp
         # THEN
         self.assertIsNone(suggestions)
         self.console.write.assert_has_calls([call('map ut4_foo')])
-        sleep_mock.assert_called_once_with(1)
 
     def test_getPlayerPings(self):
         # GIVEN

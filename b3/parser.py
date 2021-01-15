@@ -46,7 +46,6 @@ class Parser:
     _cron_stats_crontab = None  # crontab used to log cron run statistics
     _timezone_crontab = None  # force recache of timezone info
     _handlers = defaultdict(list)  # event handlers
-    _lineTime = re.compile(r'^(?P<minutes>[0-9]+):(?P<seconds>[0-9]+).*')  # used to track log file time changes
     _lineFormat = re.compile('^([a-z ]+): (.*?)', re.IGNORECASE)
     _lineClear = re.compile(r'^(?:[0-9:]+\s?)?')
     _line_color_prefix = ''  # a color code prefix to be added to every line resulting from getWrap
@@ -76,10 +75,8 @@ class Parser:
     game = None
     gameName = None  # console name
     log = None  # logger instance
-    logTime = 0  # time in seconds of epoch of game log
     name = 'b3'  # bot name
     output = None  # used to send data to the game server (default to b3.parsers.q3a.rcon.Rcon)
-    privateMsg = True  # will be set to True if the game supports private messages
     queue = None  # event queue
     rconTest = True  # whether to perform RCON testing or not
     screen = None
@@ -88,7 +85,6 @@ class Parser:
     stop_parsing_event = threading.Event()
     wrapper = None  # textwrapper instance
 
-    deadPrefix = '[DEAD]^7'  # say dead prefix
     msgPrefix = ''  # say prefix
     pmPrefix = '^8[pm]^7'  # private message prefix
     prefix = '^2%s:^3'  # B3 prefix
@@ -1082,7 +1078,6 @@ class Parser:
                 if not hfunc.isEnabled():
                     continue
                 timer_plugin_begin = time.perf_counter()
-                thread_plugin_begin = time.thread_time()
                 try:
                     hfunc.parseEvent(event)
                     time.sleep(0.001)
@@ -1098,10 +1093,9 @@ class Parser:
                                extract_tb(sys.exc_info()[2]))
                 finally:
                     if (elapsed := time.perf_counter() - timer_plugin_begin) > 2.0:
-                        elapsed_thread = time.thread_time() - thread_plugin_begin
                         self.warning('Handler %s took more that 2 seconds '
-                                     'to handle %s: total %0.4f / thread %0.4f',
-                                     hfunc.__class__.__name__, event_name, elapsed, elapsed_thread)
+                                     'to handle %s: total %0.4f',
+                                     hfunc.__class__.__name__, event_name, elapsed)
                     self._eventsStats.add_event_handled(hfunc.__class__.__name__,
                                                         event_name, elapsed)
 
