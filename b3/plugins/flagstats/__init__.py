@@ -231,7 +231,7 @@ class FlagstatsPlugin(b3.plugin.Plugin):
             if hrs > 0:
                 result = ''.join([result, '%s h ' % hrs])
             if minute > 0:
-                result = ''.join([result, '%s m ' % min])
+                result = ''.join([result, '%s m ' % minute])
             result = ''.join([result, '%0.2f s' % sec])
 
         return result
