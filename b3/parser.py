@@ -42,9 +42,8 @@ class Parser:
     _cron = None  # cron instance
     _events = {}  # available events (K=>EVENT)
     _event_handling_thread = None
-    _eventsStats_cronTab = None  # crontab used to log event statistics
+    _cron_stats_events = None  # crontab used to log event statistics
     _cron_stats_crontab = None  # crontab used to log cron run statistics
-    _cron_stats_threads = None  # crontab used to log thread statistics
     _timezone_crontab = None  # force recache of timezone info
     _handlers = defaultdict(list)  # event handlers
     _lineTime = re.compile(r'^(?P<minutes>[0-9]+):(?P<seconds>[0-9]+).*')  # used to track log file time changes
@@ -363,18 +362,13 @@ class Parser:
             else:
                 self.info('%s: no stats available', tab)
 
-    def _dump_thread_info(self):
-        self.info('***** Thread Stats *****')
-        for t in threading.enumerate():
-            self.info('%s(%s)', t.name, t.__dict__)
-
     def schedule_cron_tasks(self):
-        if self.log.isEnabledFor(b3.output.INFO):
-            self._cron_stats_crontab = b3.cron.CronTab(self._dump_cron_stats, minute='10')
-            self.cron.add(self._cron_stats_crontab)
+        if self.log.isEnabledFor(b3.output.DEBUG):
+            self._cron_stats_events = b3.cron.CronTab(self._dump_events_stats, minute='15')
+            self.cron.add(self._cron_stats_events)
 
-            self._cron_stats_threads = b3.cron.CronTab(self._dump_thread_info, minute='15')
-            self.cron.add(self._cron_stats_threads)
+            self._cron_stats_crontab = b3.cron.CronTab(self._dump_cron_stats, minute='30')
+            self.cron.add(self._cron_stats_crontab)
 
         tz_offset, tz_name = self.tz_offset_and_name()
         if tz_name != "UTC":
@@ -992,7 +986,7 @@ class Parser:
         self.screen.flush()
 
         stop_parsing_event_wait = self.stop_parsing_event.wait
-        read_line = self.read
+        read_lines = self.read
         parse_line = self.parseLine
 
         while True:
@@ -1003,7 +997,7 @@ class Parser:
                 if stop_parsing_event_wait(timeout=self.delay):
                     break
                 continue
-            for line in read_line():
+            for line in read_lines():
                 if line := line.strip():
                     try:
                         parse_line(line)
@@ -1079,9 +1073,10 @@ class Parser:
             event_name = self.getEventName(event.type)
             if current_time > expire:
                 self.error('**** Event sat in queue too long: %s '
-                           'created %s, added %s, current %s, expired %s',
-                           event_name, event.time, added, current_time, expire)
-                self._dump_events_stats()
+                           'created %s, added %s, current %s, '
+                           'expired %s, total (%s)',
+                           event_name, event.time, added, current_time,
+                           expire, current_time - added)
                 continue
 
             for hfunc in self._handlers[event.type]:
