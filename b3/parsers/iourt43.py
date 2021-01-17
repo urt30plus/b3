@@ -1,6 +1,6 @@
 import re
 import string
-import time
+import threading
 
 import b3
 import b3.clients
@@ -1380,8 +1380,7 @@ class Iourt43Parser(b3.parser.Parser):
         Load the next map/level.
         """
         self.say('^7Changing to next map')
-        time.sleep(1)
-        self.write('cyclemap')
+        threading.Timer(1.0, self.write, ('cyclemap',)).start()
 
     def changeMap(self, map_name):
         """
@@ -1390,8 +1389,7 @@ class Iourt43Parser(b3.parser.Parser):
         rv = self.getMapsSoundingLike(map_name)
         if isinstance(rv, str):
             self.say(f'^7Changing map to {rv}')
-            time.sleep(1)
-            self.write(f'map {rv}')
+            threading.Timer(1.0, self.write, (f'map {rv}',)).start()
         else:
             return rv
 
