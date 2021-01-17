@@ -371,7 +371,7 @@ class Parser:
             self.cron.add(self._cron_stats_crontab)
 
         tz_offset, tz_name = self.tz_offset_and_name()
-        if tz_name != "UTC":
+        if tz_name not in ("UTC", "GMT"):
             hour = self.to_utc_hour(2)
             self._timezone_crontab = b3.cron.CronTab(self._reset_timezone_info, minute=1, hour=hour)
             self.bot("Timezone reset scheduled daily at UTC %s:%s", hour, "01")
@@ -925,7 +925,7 @@ class Parser:
         """
         tz_offset = self._tz_offset
         tz_name = self._tz_name
-        if all((tz_offset, tz_name)):
+        if tz_name and tz_offset is not None:
             return tz_offset, tz_name
 
         if self.config.has_option("b3", "time_zone"):
@@ -945,7 +945,7 @@ class Parser:
             self._tz_name = tz_name
             self._tz_offset = tz_offset
 
-        self.info("Using timezone: %s : %s", tz_offset, tz_name)
+        self.info("Using timezone: %s offset (%s)", tz_name, tz_offset)
         return tz_offset, tz_name
 
     def formatTime(self, gmttime, tz_name=None):
@@ -969,7 +969,6 @@ class Parser:
             tz_offset, tz_name = self.tz_offset_and_name()
 
         time_format = self.config.get('b3', 'time_format').replace('%Z', tz_name).replace('%z', tz_name)
-        self.debug('Formatting time with timezone [%s], tzOffset : %s', tz_name, tz_offset)
         return time.strftime(time_format, time.gmtime(gmttime + int(tz_offset * 3600)))
 
     def run(self):
