@@ -1105,13 +1105,10 @@ class Iourt43Parser(b3.parser.Parser):
     def OnTell(self, action, data, match=None):
         return None
 
-    # endmap/shutdown
     def OnShutdowngame(self, action, data=None, match=None):
         self.game.mapEnd()
-        self._maplist = None  # when UrT server reloads, newly uploaded maps get available: force refresh
         return self.getEvent('EVT_GAME_EXIT', data=data)
 
-    # Startgame
     def OnInitgame(self, action, data, match=None):
         options = re.findall(r'\\([^\\]+)\\([^\\]+)', data)
         # capturelimit / fraglimit / timelimit
@@ -1392,9 +1389,9 @@ class Iourt43Parser(b3.parser.Parser):
         """
         rv = self.getMapsSoundingLike(map_name)
         if isinstance(rv, str):
-            self.say('^7Changing map to %s' % rv)
+            self.say(f'^7Changing map to {rv}')
             time.sleep(1)
-            self.write('map %s' % rv)
+            self.write(f'map {rv}')
         else:
             return rv
 
@@ -1412,8 +1409,8 @@ class Iourt43Parser(b3.parser.Parser):
         maps = []
         for line in data.splitlines():
             if m := re.match(mapregex, line.strip()):
-                if m.group('map'):
-                    maps.append(m.group('map'))
+                if map_name := m.group('map'):
+                    maps.append(map_name)
 
         self._maplist = maps
         self.info(f"getMaps() cached {len(maps)} maps")
