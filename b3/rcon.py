@@ -12,7 +12,7 @@ __version__ = '1.11'
 
 
 class Rcon:
-    socket_timeout = 0.80
+    socket_timeout = 0.750
     rconreplystring = b'\377\377\377\377print\n'
 
     def __init__(self, console, host, password):
@@ -32,7 +32,6 @@ class Rcon:
         self.lock = threading.Lock()
         self.queue = None
         self._stopEvent = object()
-        self.console.bot('Game name is: %s', self.console.gameName)
         self._writelines_thread = None
 
     def send_rcon(self, sock, data, maxRetries=None, socketTimeout=None):
@@ -58,7 +57,7 @@ class Rcon:
             readables, writeables, errors = select.select([], [sock], [sock], socketTimeout)
 
             if errors:
-                self.console.warning('RCON send_rcon: %s', str(errors))
+                self.console.warning('RCON send_rcon errors: %s', str(errors))
             elif writeables:
                 try:
                     writeables[0].send(payload)
@@ -74,11 +73,13 @@ class Rcon:
                     # do not retry quits and map changes since they prevent the server from responding
                     return ''
 
-            time.sleep(0.05)
             retries += 1
             if retries >= maxRetries:
                 self.console.error('RCON: too many tries: aborting (%r)', data)
                 break
+            else:
+                self.console.warning('RCON: retry %s', retries)
+
         return ''
 
     def read_socket(self, sock, size=4096, socketTimeout=None):
@@ -94,16 +95,18 @@ class Rcon:
         readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
         if errors:
-            self.console.warning('RCON read_socket: %s', str(errors))
+            self.console.warning('RCON read_socket errors: %s', str(errors))
 
         if not readables:
+            self.console.warning('RCON read_socket no readables before timeout %s', socketTimeout)
             return ''
 
         data = b''
         while readables:
             if payload := sock.recv(size):
-                # remove rcon header
                 data += payload.replace(self.rconreplystring, b'')
+                if not data:
+                    socketTimeout = max(socketTimeout / 2, 0.250)
             readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
         return data.decode(encoding=self.console.encoding)
