@@ -92,10 +92,8 @@ class Rcon:
         while True:
             try:
                 payload = sock.recv(size)
-            except (socket.timeout, socket.error):
-                if data:
-                    break
-                raise
+            except socket.timeout:
+                break
             else:
                 if not data:
                     # lower timeout for subsequent recv calls
