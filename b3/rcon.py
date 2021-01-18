@@ -12,7 +12,7 @@ __version__ = '1.11'
 
 
 class Rcon:
-    socket_timeout = 0.5
+    socket_timeout = 0.8
     rconreplystring = b'\377\377\377\377print\n'
 
     def __init__(self, console, host, password):
