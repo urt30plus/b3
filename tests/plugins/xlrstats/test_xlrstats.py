@@ -310,16 +310,6 @@ class Test_kill(XlrstatsTestCase):
         # THEN
         self.assertEqual(['XLR Stats: P1 : K 1 D 1 TK 0 Ratio 1.00 Skill 1003.82'], self.p1.message_history)
 
-    def test_p1_kills_bot(self):
-        # GIVEN
-        self.p2.bot = True
-        self.p.exclude_bots = True
-        self.console.verbose = Mock()
-        # WHEN
-        self.p1.kills(self.p2)
-        # THEN
-        self.console.verbose.assert_called_with("XlrstatsPlugin: bot involved: do not process!")
-
 
 class Test_storage(XlrstatsTestCase):
 
