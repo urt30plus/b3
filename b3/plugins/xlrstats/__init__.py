@@ -766,7 +766,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
         # exclude botkills?
         if (client.bot or target.bot) and self.exclude_bots:
-            self.verbose('bot involved: do not process!')
             return
 
         _assists_count, _assists_sum, _victim_sum = self.check_Assists(client, target, data, 'kill')
@@ -793,9 +792,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             victimstats = self.get_PlayerAnon()
             if victimstats is None:
                 return
-
-        # _killer_confrontations = killerstats.kills + killerstats.deaths
-        # _victom_confrontations = victimstats.kills + victimstats.deaths
 
         # calculate winning probabilities for both players
         killer_prob = self.win_prob(killerstats.skill, victimstats.skill)
@@ -827,15 +823,10 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                 pass
             elif _assists_sum >= (_skilladdition / 2):
                 _skilladdition /= 2
-                self.verbose('----> XLRstats: killer: assists > 50perc: %.3f - skilladd: %.3f', _assists_sum,
-                             _skilladdition)
             else:
                 _skilladdition -= _assists_sum
-                self.verbose('----> XLRstats: killer: assists < 50perc: %.3f - skilladd: %.3f', _assists_sum,
-                             _skilladdition)
 
             killerstats.skill = float(killerstats.skill) + _skilladdition
-            self.verbose('----> XLRstats: killer: oldsk: %.3f - newsk: %.3f', oldskill, killerstats.skill)
             killerstats.kills = int(killerstats.kills) + 1
 
             if int(killerstats.deaths) != 0:
@@ -858,7 +849,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                     (killerstats.kills + killerstats.deaths) < self.Kswitch_confrontations and \
                     self.provisional_ranking:
                 _both_provisional = True
-                self.verbose('----> XLRstats: both players in provisional ranking state!')
 
             # implementation of provisional ranking 23-2-2014 MWe:
             # we use the first Kswitch_confrontations to determine the victims skill,
@@ -881,15 +871,10 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                 pass
             elif _victim_sum <= (_skilldeduction / 2):  # carefull, negative numbers here
                 _skilldeduction /= 2
-                self.verbose('----> XLRstats: victim: assists > 50perc: %.3f - skilldeduct: %.3f', _victim_sum,
-                             _skilldeduction)
             else:
                 _skilldeduction -= _victim_sum
-                self.verbose('----> XLRstats: victim: assists < 50perc: %.3f - skilldeduct: %.3f', _victim_sum,
-                             _skilldeduction)
 
             victimstats.skill = float(victimstats.skill) + _skilldeduction
-            self.verbose('----> XLRstats: victim: oldsk: %.3f - newsk: %.3f', oldskill, victimstats.skill)
             victimstats.deaths = int(victimstats.deaths) + 1
 
             victimstats.ratio = float(victimstats.kills) / float(victimstats.deaths)
@@ -909,7 +894,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
             if (victimstats.kills + victimstats.deaths) < self.Kswitch_confrontations and \
                     (killerstats.kills + killerstats.deaths) < self.Kswitch_confrontations and self.provisional_ranking:
                 _both_provisional = True
-                self.verbose('----> XLRstats: both players in provisional ranking state!')
 
             # implementation of provisional ranking 23-2-2014 MWe:
             # we use the first Kswitch_confrontations to determine the victims skill,
@@ -980,7 +964,6 @@ class XlrstatsPlugin(b3.plugin.Plugin):
                 self.save_Stat(map_killer)
                 self.save_Stat(map_victim)
 
-        # end of kill function
         return
 
     def damage(self, client, target, data):
@@ -988,30 +971,22 @@ class XlrstatsPlugin(b3.plugin.Plugin):
         Handle situations where client damaged target.
         """
         if client.id == self._world_clientid:
-            self.verbose('----> XLRstats: onDamage: WORLD-damage, moving on...')
             return None
         if client.cid == target.cid:
-            self.verbose('----> XLRstats: onDamage: self damage: %s damaged %s, continueing', client.name, target.name)
             return None
 
         # exclude botdamage?
         if (client.bot or target.bot) and self.exclude_bots:
-            self.verbose('bot involved: do not process!')
             return None
 
         # check if game is _damage_able -> 50 points or more damage will award an assist
         if self._damage_ability and data[0] < 50:
-            self.verbose('---> XLRstats: not enough damage done to award an assist')
             return
 
         try:
             target._attackers[client.cid] = time.time()
         except:
             target._attackers = {client.cid: time.time()}
-
-        self.verbose('----> XLRstats: onDamage: attacker added: %s (%s) damaged %s (%s)',
-                     client.name, client.cid, target.name, target.cid)
-        self.verbose('----> XLRstats: Assistinfo: %s' % target._attackers)
 
     def suicide(self, client, target, data):
         """
