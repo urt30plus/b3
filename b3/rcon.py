@@ -12,7 +12,7 @@ __version__ = '1.11'
 
 
 class Rcon:
-    socket_timeout = 0.750
+    socket_timeout = 0.5
     rconreplystring = b'\377\377\377\377print\n'
 
     def __init__(self, console, host, password):
@@ -27,12 +27,12 @@ class Rcon:
             self.console.encoding
         )
         self.socket = socket.socket(type=socket.SOCK_DGRAM)
-        self.socket.settimeout(2)
         self.socket.connect(self.host)
         self.lock = threading.Lock()
         self.queue = None
         self._stopEvent = object()
         self._writelines_thread = None
+        self._last_command = None
 
     def send_rcon(self, sock, data, maxRetries=None, socketTimeout=None):
         """
@@ -48,37 +48,33 @@ class Rcon:
         if maxRetries is None:
             maxRetries = 2
 
-        data = data.strip()
+        data = self._last_command = data.strip()
         payload = self.rconsendstring + data.encode(self.console.encoding) + b'\n'
 
+        sock.settimeout(socketTimeout)
         retries = 0
         start_time = time.time()
         while time.time() - start_time < 5:
-            readables, writeables, errors = select.select([], [sock], [sock], socketTimeout)
-
-            if errors:
-                self.console.warning('RCON send_rcon errors: %s', str(errors))
-            elif writeables:
+            try:
+                sock.sendall(payload)
+            except Exception as msg:
+                self.console.warning('RCON: send(%s) error: %r', data, msg)
+            else:
                 try:
-                    writeables[0].send(payload)
+                    return self.read_socket(sock, socketTimeout=socketTimeout)
                 except Exception as msg:
-                    self.console.warning('RCON: error sending: %r', msg)
-                else:
-                    try:
-                        return self.read_socket(sock, socketTimeout=socketTimeout)
-                    except Exception as msg:
-                        self.console.warning('RCON: error reading: %r', msg)
+                    self.console.warning('RCON: read(%s) error: %r', data, msg)
 
-                if re.match(r'^quit|map(_rotate)?.*', data):
-                    # do not retry quits and map changes since they prevent the server from responding
-                    return ''
+            if re.match(r'^quit|map(_rotate)?.*', data):
+                # do not retry quits and map changes since they prevent the server from responding
+                return ''
 
             retries += 1
             if retries >= maxRetries:
-                self.console.error('RCON: too many tries: aborting (%r)', data)
+                self.console.error('RCON: send(%s) too many tries, aborting', data)
                 break
             else:
-                self.console.warning('RCON: retry %s', retries)
+                self.console.warning('RCON: send(%s) retry %s', data, retries)
 
         return ''
 
@@ -95,18 +91,18 @@ class Rcon:
         readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
         if errors:
-            self.console.warning('RCON read_socket errors: %s', str(errors))
+            self.console.warning('RCON: read(%s) errors: %s', self._last_command, str(errors))
 
         if not readables:
-            self.console.warning('RCON read_socket no readables before timeout %s', socketTimeout)
+            self.console.warning('RCON: read(%s) no readables before timeout %s',
+                                 self._last_command, socketTimeout)
             return ''
 
+        socketTimeout = 0.25
         data = b''
         while readables:
-            if payload := sock.recv(size):
-                data += payload.replace(self.rconreplystring, b'')
-                if not data:
-                    socketTimeout = max(socketTimeout / 2, 0.250)
+            payload = sock.recv(size)
+            data += payload.replace(self.rconreplystring, b'')
             readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
 
         return data.decode(encoding=self.console.encoding)
