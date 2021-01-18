@@ -515,7 +515,7 @@ class Iourt43Parser(b3.parser.Parser):
             if m := re.match(f, line):
                 break
         else:
-            if '------' not in line:
+            if '------' not in line and not line.startswith('Session data initialised'):
                 self.warning('Line did not match format: %s', line)
             return
 
