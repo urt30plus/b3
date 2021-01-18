@@ -1,6 +1,5 @@
 import queue
 import re
-import select
 import socket
 import threading
 import time
@@ -27,13 +26,12 @@ class Rcon:
             self.console.encoding
         )
         self.socket = socket.socket(type=socket.SOCK_DGRAM)
-        self.socket.settimeout(self.socket_timeout)
+        self.socket.settimeout(2.0)
         self.socket.connect(self.host)
         self.lock = threading.Lock()
         self.queue = None
         self._stopEvent = object()
         self._writelines_thread = None
-        self._last_command = None
 
     def send_rcon(self, sock, data, maxRetries=None, socketTimeout=None):
         """
@@ -49,13 +47,13 @@ class Rcon:
         if maxRetries is None:
             maxRetries = 2
 
-        data = self._last_command = data.strip()
+        data = data.strip()
         payload = self.rconsendstring + data.encode(self.console.encoding) + b'\n'
 
-        sock.settimeout(socketTimeout)
         retries = 0
         start_time = time.time()
         while time.time() - start_time < 5:
+            sock.settimeout(socketTimeout)
             try:
                 sock.sendall(payload)
             except Exception as msg:
@@ -89,23 +87,20 @@ class Rcon:
         if socketTimeout is None:
             socketTimeout = self.socket_timeout
 
-        readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
-
-        if errors:
-            self.console.warning('RCON: read(%s) errors: %s', self._last_command, str(errors))
-
-        if not readables:
-            self.console.warning('RCON: read(%s) no readables before timeout %s',
-                                 self._last_command, socketTimeout)
-            return ''
-
-        # lower timeout for subsequent recv calls
-        socketTimeout = min(socketTimeout, 0.25)
         data = b''
-        while readables:
-            payload = sock.recv(size)
-            data += payload.replace(self.rconreplystring, b'')
-            readables, writeables, errors = select.select([sock], [], [sock], socketTimeout)
+        sock.settimeout(socketTimeout)
+        while True:
+            try:
+                payload = sock.recv(size)
+            except (socket.timeout, socket.error):
+                if data:
+                    break
+                raise
+            else:
+                if not data:
+                    # lower timeout for subsequent recv calls
+                    sock.settimeout(min(socketTimeout, 0.25))
+                data += payload.replace(self.rconreplystring, b'')
 
         return data.decode(encoding=self.console.encoding)
 
