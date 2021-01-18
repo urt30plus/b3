@@ -27,6 +27,7 @@ class Rcon:
             self.console.encoding
         )
         self.socket = socket.socket(type=socket.SOCK_DGRAM)
+        self.socket.settimeout(self.socket_timeout)
         self.socket.connect(self.host)
         self.lock = threading.Lock()
         self.queue = None
@@ -98,7 +99,8 @@ class Rcon:
                                  self._last_command, socketTimeout)
             return ''
 
-        socketTimeout = 0.25
+        # lower timeout for subsequent recv calls
+        socketTimeout = min(socketTimeout, 0.25)
         data = b''
         while readables:
             payload = sock.recv(size)
