@@ -3,7 +3,6 @@ import re
 import select
 import socket
 import threading
-import time
 
 import b3.functions
 
@@ -13,6 +12,7 @@ __version__ = '1.11'
 
 class Rcon:
     socket_timeout = 0.8
+    socket_timeout2 = 0.225
     rconreplystring = b'\377\377\377\377print\n'
 
     def __init__(self, console, host, password):
@@ -52,8 +52,7 @@ class Rcon:
         payload = self.rconsendstring + data.encode(self.console.encoding) + b'\n'
 
         retries = 0
-        start_time = time.time()
-        while time.time() - start_time < 5:
+        while retries < maxRetries:
             sock.settimeout(socketTimeout)
             try:
                 sock.sendall(payload)
@@ -66,16 +65,14 @@ class Rcon:
                     self.console.warning('RCON: read(%s) error: %r', data, msg)
 
             if re.match(r'^quit|map(_rotate)?.*', data):
-                # do not retry quits and map changes since they prevent the server from responding
+                # do not retry quits and map changes since they prevent the
+                # server from responding
                 return ''
 
             retries += 1
-            if retries >= maxRetries:
-                self.console.error('RCON: send(%s) too many tries, aborting', data)
-                break
-            else:
-                self.console.warning('RCON: send(%s) retry %s', data, retries)
+            self.console.warning('RCON: send(%s) retry %s', data, retries)
 
+        self.console.error('RCON: send(%s) too many tries, aborting', data)
         return ''
 
     def read_socket(self, sock, size=4096, socketTimeout=0.5):
@@ -92,11 +89,13 @@ class Rcon:
                 raise socket.error
             if not readables:
                 break
-            # lower timeout for subsequent calls
-            socketTimeout = min(socketTimeout, 0.205)
             payload = sock.recv(size)
             data += payload.replace(self.rconreplystring, b'')
+            # lower timeout for subsequent calls
+            socketTimeout = self.socket_timeout2
 
+        if data == b'':
+            return ''
         return data.decode(encoding=self.console.encoding)
 
     def write(self, cmd, maxRetries=None, socketTimeout=None):
@@ -148,3 +147,10 @@ class Rcon:
         self.stop()
         with self.lock:
             self.socket.close()
+
+    def __str__(self):
+        return (
+            f'Rcon({self.host}, '
+            f'timeout={self.socket_timeout}, timeout2={self.socket_timeout2})'
+        )
+

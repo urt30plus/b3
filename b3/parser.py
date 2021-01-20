@@ -284,7 +284,12 @@ class Parser:
         if self.config.has_option('server', 'rcon_timeout'):
             custom_socket_timeout = self.config.getfloat('server', 'rcon_timeout')
             self.output.socket_timeout = custom_socket_timeout
-            self.bot('Setting rcon socket timeout to: %0.3f sec', custom_socket_timeout)
+
+        if self.config.has_option('server', 'rcon_timeout2'):
+            custom_socket_timeout2 = self.config.getfloat('server', 'rcon_timeout2')
+            self.output.socket_timeout2 = custom_socket_timeout2
+
+        self.bot('RCON client: %s', self.output)
 
     def __init_rcon_test(self):
         if self.rconTest:
