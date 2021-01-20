@@ -650,7 +650,9 @@ class TkPlugin(b3.plugin.Plugin):
         v = self.client_tkinfo(client)
         if len(v.attackers) > 0:
             myattackers = []
-            for cid, points in v.attackers.items():
+            # Make a copy of items to avoid `dictionary changed size during
+            # iteration` error since `v.forgive` can mutate the same dict
+            for cid, points in list(v.attackers.items()):
                 attacker = self.console.clients.getByCID(cid)
                 if not attacker:
                     v.forgive(cid)
