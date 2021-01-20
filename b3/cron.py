@@ -26,27 +26,6 @@ class DayOfWeek(enum.IntEnum):
         return ','.join([str(x.value) for x in args])
 
 
-class ReMatcher:
-
-    def __init__(self):
-        self._re = None
-
-    def match(self, regexp, value):
-        """
-        Match the given value with the given
-        regexp and store the result locally.
-        :param regexp: The regular expression
-        :param value: The value to match
-        :return True if the value matches the regexp, False otherwise
-        """
-        self._re = re.match(regexp, value)
-        return self._re
-
-    @property
-    def results(self):
-        return self._re
-
-
 class CronTab:
 
     def __init__(self, command, minute='*', hour='*', day='*', month='*', dow='*'):
@@ -166,22 +145,21 @@ class CronTab:
         if rate == '*':
             return -1
 
-        r = ReMatcher()
-        if r.match(r'^([0-9]+)$', rate):
+        if re.match(r'^([0-9]+)$', rate):
             if int(rate) >= maxrate:
                 raise ValueError(f'{rate} cannot be over {maxrate - 1}')
             return int(rate)
-        elif r.match(r'^\*/([0-9]+)$', rate):
+        elif r := re.match(r'^\*/([0-9]+)$', rate):
             # */10 = [0, 10, 20, 30, 40, 50]
-            step = int(r.results.group(1))
+            step = int(r.group(1))
             if step > maxrate:
                 raise ValueError(f'{rate} cannot be over every {maxrate - 1}')
             return list(range(0, maxrate, step))
-        elif r.match(r'^(?P<lmin>[0-9]+)-(?P<lmax>[0-9]+)(/(?P<step>[0-9]+))?$', rate):
+        elif r := re.match(r'^(?P<lmin>[0-9]+)-(?P<lmax>[0-9]+)(/(?P<step>[0-9]+))?$', rate):
             # 10-20 = [0, 10, 20, 30, 40, 50]
-            lmin = int(r.results.group('lmin'))
-            lmax = int(r.results.group('lmax'))
-            step = r.results.group('step')
+            lmin = int(r.group('lmin'))
+            lmax = int(r.group('lmax'))
+            step = r.group('step')
             if step is None:
                 step = 1
             else:
