@@ -1,5 +1,6 @@
 import queue
 import re
+import select
 import socket
 import threading
 import time
@@ -77,28 +78,24 @@ class Rcon:
 
         return ''
 
-    def read_socket(self, sock, size=4096, socketTimeout=None):
+    def read_socket(self, sock, size=4096, socketTimeout=0.5):
         """
         Read data from the socket.
         :param sock: The socket from where to read data
         :param size: The read size
         :param socketTimeout: The socket timeout value
         """
-        if socketTimeout is None:
-            socketTimeout = self.socket_timeout
-
         data = b''
-        sock.settimeout(socketTimeout)
         while True:
-            try:
-                payload = sock.recv(size)
-            except socket.timeout:
+            readables, _, errors = select.select([sock], [], [sock], socketTimeout)
+            if errors:
+                raise socket.error
+            if not readables:
                 break
-            else:
-                if not data:
-                    # lower timeout for subsequent recv calls
-                    sock.settimeout(min(socketTimeout, 0.25))
-                data += payload.replace(self.rconreplystring, b'')
+            # lower timeout for subsequent calls
+            socketTimeout = min(socketTimeout, 0.205)
+            payload = sock.recv(size)
+            data += payload.replace(self.rconreplystring, b'')
 
         return data.decode(encoding=self.console.encoding)
 
