@@ -229,7 +229,7 @@ class Iourt43Parser(b3.parser.Parser):
 
         # Bombmode actions:
         # 3:06 Bombholder is 2
-        re.compile(r'^(?P<action>Bombholder)(?P<data>\sis\s(?P<cid>[0-9]))$', re.IGNORECASE),
+        re.compile(r'^(?P<action>Bombholder)(?P<data>\sis\s(?P<cid>[0-9]+))$', re.IGNORECASE),
 
         # was planted, was defused, was tossed, has been collected (doh, how gramatically correct!)
         # 2:13 Bomb was tossed by 2
