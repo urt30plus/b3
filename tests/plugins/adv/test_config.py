@@ -11,7 +11,7 @@ class Test_config(AdvTestCase):
         self.assertTupleEqual((list(range(0, 59, 2)), -1, -1, -1, -1),
                               (self.p._crontab.minute, self.p._crontab.hour,
                                self.p._crontab.day, self.p._crontab.month, self.p._crontab.dow))
-        self.assertEqual(9, len(self.p._msg.items))
+        self.assertEqual(7, len(self.p._msg.items))
         self.assertListEqual([
             '^2Visit us at www.urt-30plus.org',
             '^2Public Teamspeak 3 server: ts3urt30.ts.nfoservers.com',
@@ -20,8 +20,6 @@ class Test_config(AdvTestCase):
             '^2Send demos to urt30plus@gmail.com',
             '^3Rule #8: No profanity or offensive language (in any language)',
             '@nextmap',
-            '^2Type !help for commands',
-            '^2Type !xlrstats for statistics'
         ], self.p._msg.items)
 
     def test_empty(self):
