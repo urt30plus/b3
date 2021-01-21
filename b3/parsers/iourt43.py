@@ -1131,6 +1131,8 @@ class Iourt43Parser(b3.parser.Parser):
         self.game.startMap()
         self.game.rounds = 0
         start_daemon_thread(target=self.clients.sync, name='iourt43-syncinit')
+        self.info('Round Start: map [%s], game_type [%s]', 
+                  self.game.mapName, self.game.gameType)
         return self.getEvent('EVT_GAME_ROUND_START', data=self.game)
 
     def OnWarmup(self, action, data=None, match=None):
@@ -1329,6 +1331,7 @@ class Iourt43Parser(b3.parser.Parser):
         :param filter_client_ids: If filter_client_id is an iterable, only return values for the given client ids.
         """
         if not (data := self.write('status')):
+            self.warning('getPlayerPings: rcon status response empty')
             return {}
 
         players = {}
@@ -1539,6 +1542,7 @@ class Iourt43Parser(b3.parser.Parser):
         weapmodes           00000110220000020002
         """
         if not (data := self.write('dumpuser %s' % cid)):
+            self.warning('queryClientUserInfoByCid: rcon dumpuser %s no response', cid)
             return None
 
         lines = data.splitlines()
@@ -1742,6 +1746,7 @@ class Iourt43Parser(b3.parser.Parser):
         Returns a dict having players' id for keys and players' scores for values.
         """
         if not (data := self.write('status')):
+            self.warning('getPlayerScores: rcon status no response')
             return {}
 
         players = {}
@@ -1760,6 +1765,7 @@ class Iourt43Parser(b3.parser.Parser):
         Return a dict having players' id for keys and players' data as another dict for values.
         """
         if not (data := self.write('status', maxRetries=maxRetries)):
+            self.warning('getPlayerList: rcon status no response')
             return {}
 
         players = {}
@@ -1820,6 +1826,7 @@ class Iourt43Parser(b3.parser.Parser):
         Return the current map/level name.
         """
         if not (data := self.write('status')):
+            self.warning('getMap: rcon status no response')
             return None
 
         line = data.splitlines()[0]
