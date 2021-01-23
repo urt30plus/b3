@@ -5,6 +5,7 @@ from mockito import when
 
 from b3 import TEAM_UNKNOWN
 from b3.config import CfgConfigParser
+from b3.events import eventManager
 from b3.plugins.admin import AdminPlugin
 from b3.plugins.afk import AfkPlugin
 from tests import logging_disabled
@@ -73,3 +74,8 @@ def bot(console):
     client = FakeClient(console, name="Bot", guid="bot_guid", groupBits=1, team=TEAM_UNKNOWN, bot=True)
     client.clearMessageHistory()
     return client
+
+
+@pytest.fixture
+def event_id():
+    return eventManager.getId('EVT_CUSTOM')

@@ -25,7 +25,7 @@ def plugin(console):
     p.disable()
 
 
-def test_3_consecutive_deaths_with_no_activity(plugin, joe, jack):
+def test_3_consecutive_deaths_with_no_activity(plugin, joe, jack, event_id):
     """
     player is killed 3 times in a row but shown some activity
     """
@@ -34,7 +34,7 @@ def test_3_consecutive_deaths_with_no_activity(plugin, joe, jack):
     joe.connects(1)
     jack.connects(2)
     # WHEN
-    plugin.on_client_activity(Event("", None, client=jack))  # some activity
+    plugin.on_client_activity(Event(event_id, None, client=jack))  # some activity
     joe.kills(jack)  # 1st death
     joe.kills(jack)  # 2nd death
     # THEN jack is not yet checked
@@ -45,7 +45,7 @@ def test_3_consecutive_deaths_with_no_activity(plugin, joe, jack):
     assert [call(jack)] == plugin.check_client.mock_calls
 
 
-def test_3_consecutive_deaths_with_some_activity(plugin, joe, jack):
+def test_3_consecutive_deaths_with_some_activity(plugin, joe, jack, event_id):
     """
     player is killed 3 times in a row but shown some activity
     """
@@ -54,10 +54,10 @@ def test_3_consecutive_deaths_with_some_activity(plugin, joe, jack):
     joe.connects(1)
     jack.connects(2)
     # WHEN
-    plugin.on_client_activity(Event("", None, client=jack))  # some activity
+    plugin.on_client_activity(Event(event_id, None, client=jack))  # some activity
     joe.kills(jack)  # 1st death
     joe.kills(jack)  # 2nd death
-    plugin.on_client_activity(Event("", None, client=jack))  # some activity
+    plugin.on_client_activity(Event(event_id, None, client=jack))  # some activity
     # THEN jack is not yet checked
     assert not plugin.check_client.called
     # WHEN
@@ -66,7 +66,7 @@ def test_3_consecutive_deaths_with_some_activity(plugin, joe, jack):
     assert not plugin.check_client.called
 
 
-def testd_3_consecutive_deaths_with_no_activity_but_not_enough_players(plugin, joe, jack, bot):
+def testd_3_consecutive_deaths_with_no_activity_but_not_enough_players(plugin, joe, jack, bot, event_id):
     """
     player is killed 3 times in a row but shown some activity but he's the last player on the server
     """
@@ -78,7 +78,7 @@ def testd_3_consecutive_deaths_with_no_activity_but_not_enough_players(plugin, j
     jack.team = TEAM_SPEC
     bot.connects(2)
     # WHEN
-    plugin.on_client_activity(Event("", None, client=joe))  # some activity
+    plugin.on_client_activity(Event(event_id, None, client=joe))  # some activity
     bot.kills(joe)  # 1st death
     bot.kills(joe)  # 2nd death
     # THEN jack is not yet checked
