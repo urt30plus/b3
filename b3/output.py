@@ -144,7 +144,7 @@ def getInstance(logfile='b3.log', loglevel=21, logsize=10485760, log2console=Fal
         __output = logging.getLogger('output')
 
         # FILE HANDLER
-        file_formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)r', '%y%m%d %H:%M:%S')
+        file_formatter = logging.Formatter('%(asctime)s %(levelname)s [%(threadName)s] %(message)s')
         handler = handlers.RotatingFileHandler(logfile, maxBytes=logsize, backupCount=5, encoding="UTF-8")
         handler.doRollover()
         handler.setFormatter(file_formatter)
@@ -153,7 +153,7 @@ def getInstance(logfile='b3.log', loglevel=21, logsize=10485760, log2console=Fal
 
         if log2console:
             # CONSOLE HANDLER
-            console_formatter = logging.Formatter('%(asctime)s\t%(levelname)s\t%(message)r', '%M:%S')
+            console_formatter = logging.Formatter('%(asctime)s\t%(levelname)s\t[%(threadName)s] %(message)s')
             handler2 = logging.StreamHandler(sys.stdout)
             handler2.setFormatter(console_formatter)
 
