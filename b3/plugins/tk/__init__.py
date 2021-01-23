@@ -364,7 +364,7 @@ class TkPlugin(b3.plugin.Plugin):
                 mult = 1
 
             duration = self.getMultipliers(client)[2] * mult
-            for cid, a in tkinfo.attacked.items():
+            for cid, a in list(tkinfo.attacked.items()):
                 self.forgive(cid, client, True)
 
             client.tempban(self.getMessage('ban'), 'tk', duration)
@@ -536,7 +536,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         # forgive all his points
         points = 0
-        for cid, c in self.console.clients.items():
+        for cid, c in list(self.console.clients.items()):
             v = self.client_tkinfo(c)
             points += v.forgive(acid)
             a.forgiven(v.cid)
@@ -554,7 +554,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         if not data:
             if len(v.attackers) == 1:
-                for cid, points in v.attackers.items():
+                for cid, points in list(v.attackers.items()):
                     self.grudge(cid, client)
             else:
                 self.cmd_forgivelist(data, client)
@@ -564,7 +564,7 @@ class TkPlugin(b3.plugin.Plugin):
             self.grudge(data, client)
         else:
             data = data.lower()
-            for cid, points in v.attackers.items():
+            for cid, points in list(v.attackers.items()):
                 c = self.console.clients.getByCID(cid)
                 if c and c.name.lower().find(data) != -1:
                     self.grudge(c.cid, client)
