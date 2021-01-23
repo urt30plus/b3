@@ -1144,15 +1144,18 @@ class Parser:
         """
         Write a message to Rcon/Console
         """
-        return self.output.write(msg, maxRetries=maxRetries, socketTimeout=socketTimeout)
+        s = time.perf_counter()
+        r = self.output.write(msg, maxRetries=maxRetries, socketTimeout=socketTimeout)
+        self.info('RCON write(%s) retries=%s, timeout=%s, time=%0.4f', 
+                  msg, maxRetries, socketTimeout, time.perf_counter() - s)
+        return r
 
     def writelines(self, msg):
         """
         Write a sequence of messages to Rcon/Console. Optimized for speed.
         :param msg: The message to be sent to Rcon/Console.
         """
-        if msg:
-            return self.output.writelines(msg)
+        self.output.writelines(msg)
 
     def read(self):
         """
