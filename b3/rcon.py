@@ -114,13 +114,14 @@ class Rcon:
         Enqueue multiple RCON commands for later processing.
         :param lines: A list of RCON commands.
         """
-        if not self.queue:
-            self.queue = queue.Queue()
+        q = self.queue
+        if not q:
+            q = self.queue = queue.Queue(maxsize=100)
             self._writelines_thread = b3.functions.start_daemon_thread(
                 target=self._writelines, name='rcon'
             )
 
-        self.queue.put(lines)
+        q.put(lines)
 
     def _writelines(self):
         """
