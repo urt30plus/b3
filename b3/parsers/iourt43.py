@@ -248,7 +248,14 @@ class Iourt43Parser(b3.parser.Parser):
         re.compile(r'^(?P<action>[a-z]+):\s(?P<data>.*)$', re.IGNORECASE),
 
         # Shutdowngame and Warmup... the one word lines
-        re.compile(r'^(?P<action>[a-z]+):$', re.IGNORECASE)
+        re.compile(r'^(?P<action>[a-z]+):$', re.IGNORECASE),
+
+        re.compile(r'^(?P<data>((?P<action>red):\s(?P<score_red>\d+)\s'
+                   r'blue:\s(?P<score_blue>\d+)))', re.IGNORECASE),
+
+        re.compile(r'^(?P<action>Session data initialised)\s'
+                   r'(?P<data>for client on slot (?P<slot>\d+)\s'
+                   r'at (?P<session_id>\d+))', re.IGNORECASE)
     )
 
     # map: ut4_casa
@@ -515,7 +522,7 @@ class Iourt43Parser(b3.parser.Parser):
             if m := re.match(f, line):
                 break
         else:
-            if '------' not in line and not line.startswith('Session data initialised'):
+            if '------' not in line:
                 self.warning('Line did not match format: %s', line)
             return
 
@@ -544,6 +551,12 @@ class Iourt43Parser(b3.parser.Parser):
         else:
             data = str(action) + ': ' + str(data)
             self.queueEvent(self.getEvent('EVT_UNKNOWN', data=data, client=client, target=target))
+
+    def OnSessionDataInitialised(self, action, data, match=None):
+        pass
+
+    def OnRed(self, action, data, match=None):
+        self.info('Score: %s', data)
 
     def parseUserInfo(self, info):
         """
