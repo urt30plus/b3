@@ -162,9 +162,10 @@ class Event:
         self.data = data
         self.client = client
         self.target = target
+        self.key = eventManager.getKey(type)
 
     def __str__(self):
-        return "Event<%s>(%r, %s, %s)" % (eventManager.getKey(self.type), self.data, self.client, self.target)
+        return "Event<%s>(%r, %s, %s)" % (self.key, self.data, self.client, self.target)
 
 
 class EventsStats:

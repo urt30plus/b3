@@ -989,12 +989,15 @@ class Parser:
         read_lines = self.read
         parse_line = self.parseLine
 
+        delay_per_line = self.delay2
+        delay_read_lines = self.delay
+
         while True:
             if self._paused:
                 if not self._pauseNotice:
                     self.bot('PAUSED - not parsing any lines')
                     self._pauseNotice = True
-                if stop_parsing_event_wait(timeout=self.delay):
+                if stop_parsing_event_wait(timeout=delay_read_lines):
                     break
                 continue
             for line in read_lines():
@@ -1004,10 +1007,10 @@ class Parser:
                     except Exception as msg:
                         self.error('Could not parse line %s - (%s) %s',
                                    line, msg, extract_tb(sys.exc_info()[2]))
-                    if stop_parsing_event_wait(timeout=self.delay2):
+                    if stop_parsing_event_wait(timeout=delay_per_line):
                         break
 
-            if stop_parsing_event_wait(timeout=self.delay):
+            if stop_parsing_event_wait(timeout=delay_read_lines):
                 break
 
         self.bot('Stopped parsing')
@@ -1062,6 +1065,7 @@ class Parser:
         """
         Event handler thread.
         """
+        timer_func = time.perf_counter
         console_time = self.time
         event_queue_get = self.queue.get
         stop_events = (self.getEventID('EVT_EXIT'), self.getEventID('EVT_STOP'))
@@ -1070,39 +1074,37 @@ class Parser:
             current_time = console_time()
             if event.type in stop_events:
                 break
-            event_name = self.getEventName(event.type)
             if current_time > expire:
-                self.error('**** Event sat in queue too long: %s '
-                           'created %s, added %s, current %s, '
+                self.error('**** %s sat in queue too long: '
+                           'added %s, current %s, '
                            'expired %s, total (%s)',
-                           event_name, event.time, added, current_time,
-                           expire, current_time - added)
+                           event, added, current_time, expire, 
+                           current_time - added)
                 continue
 
             for hfunc in self._handlers[event.type]:
                 if not hfunc.isEnabled():
                     continue
-                timer_plugin_begin = time.perf_counter()
+                timer_plugin_begin = timer_func()
                 try:
                     hfunc.parseEvent(event)
                     time.sleep(0.001)
                 except b3.events.VetoEvent:
                     # plugin called for a halt to event processing
-                    self.bot('Event %s vetoed by %s', event_name, str(hfunc))
+                    self.bot('%s vetoed by %s', event, str(hfunc))
                     break
                 except Exception as msg:
-                    self.error('Handler %s could not handle event %s: %s: %s %s',
-                               hfunc.__class__.__name__,
-                               event_name, msg.__class__.__name__,
-                               msg,
+                    self.error('Handler %s could not handle %s: %s: %s %s',
+                               hfunc.__class__.__name__, event, 
+                               msg.__class__.__name__, msg, 
                                extract_tb(sys.exc_info()[2]))
                 finally:
-                    if (elapsed := time.perf_counter() - timer_plugin_begin) > 2.0:
-                        self.warning('Handler %s took more that 2 seconds '
+                    if (elapsed := timer_func() - timer_plugin_begin) > 1.5:
+                        self.warning('Handler %s took more that 1.5 seconds '
                                      'to handle %s: total %0.4f',
-                                     hfunc.__class__.__name__, event_name, elapsed)
+                                     hfunc.__class__.__name__, event, elapsed)
                     self._eventsStats.add_event_handled(hfunc.__class__.__name__,
-                                                        event_name, elapsed)
+                                                        event.key, elapsed)
 
         self.handle_events_shutdown()
 
