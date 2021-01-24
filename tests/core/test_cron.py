@@ -211,6 +211,12 @@ class Test_Cron(B3TestCase):
         self.assertEqual(1, len(self.cron._tabs))
         self.assertIn(id(mock_tab), self.cron._tabs)
 
+    def test_iadd_operator(self):
+        mock_tab = Mock(spec=CronTab)
+        self.cron += mock_tab
+        self.assertEqual(1, len(self.cron._tabs))
+        self.assertIn(id(mock_tab), self.cron._tabs)
+
     def test_cancel(self):
         mock_tab = Mock(spec=CronTab)
         res = self.cron.add(mock_tab)
@@ -228,6 +234,14 @@ class Test_Cron(B3TestCase):
         res = self.cron.add(mock_tab)
         self.assertEqual(1, len(self.cron._tabs))
         self.cron - mock_tab
+        self.assertNotIn(res, self.cron._tabs)
+        self.assertEqual(0, len(self.cron._tabs))
+
+    def test_isub_operator(self):
+        mock_tab = Mock(spec=CronTab)
+        res = self.cron.add(mock_tab)
+        self.assertEqual(1, len(self.cron._tabs))
+        self.cron -= mock_tab
         self.assertNotIn(res, self.cron._tabs)
         self.assertEqual(0, len(self.cron._tabs))
 

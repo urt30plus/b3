@@ -263,17 +263,26 @@ class Cron:
         """
         Remove a CronTab from the list of active cron tabs.
         """
-        try:
-            del self._tabs[tab_id]
-            self.console.info('Removed crontab %s', tab_id)
-        except KeyError:
+        if tab := self._tabs.pop(tab_id, None):
+            self.console.info('Removed crontab %s', tab)
+        else:
             self.console.info('Crontab %s not found', tab_id)
 
     def __add__(self, tab):
         self.add(tab)
+        return self
+
+    def __iadd__(self, tab):
+        self.add(tab)
+        return self
 
     def __sub__(self, tab):
         self.cancel(id(tab))
+        return self
+
+    def __isub__(self, tab):
+        self.cancel(id(tab))
+        return self
 
     def start(self):
         """
@@ -289,16 +298,18 @@ class Cron:
         """
         self._stopEvent.set()
         if self._cron_thread:
-            self._cron_thread.join(timeout=5.0)
+            self._cron_thread.join(timeout=10.0)
 
     def run(self):
         """
         Main cron loop.
         Will terminate when stop event is set.
         """
+        time_func = time.gmtime
+        stop_event_wait = self._stopEvent.wait
         self.console.info("Cron scheduler started")
         while True:
-            t = time.gmtime()
+            t = time_func()
             for c in self.entries():
                 if c.match(t):
                     c.numRuns += 1
@@ -309,12 +320,12 @@ class Cron:
                                            c, msg, traceback.extract_tb(sys.exc_info()[2]))
                     if 0 < c.maxRuns <= c.numRuns:
                         # reached max executions, remove tab
-                        self.__sub__(c)
-                    if self._stopEvent.wait(timeout=0.075):
+                        self - c
+                    if stop_event_wait(timeout=0.075):
                         break
 
             # calculate wait until the next minute
-            t2 = time.gmtime()
+            t2 = time_func()
             if t2.tm_min == t.tm_min:
                 delay = 62 - t2.tm_sec
             else:
@@ -324,7 +335,7 @@ class Cron:
                 # since the next minute has arrived we only add a small delay
                 delay = 0.1
 
-            if self._stopEvent.wait(timeout=delay):
+            if stop_event_wait(timeout=delay):
                 break
 
         self.console.info("Cron scheduler ended")
