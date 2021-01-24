@@ -250,9 +250,11 @@ class Iourt43Parser(b3.parser.Parser):
         # Shutdowngame and Warmup... the one word lines
         re.compile(r'^(?P<action>[a-z]+):$', re.IGNORECASE),
 
+        # red: 12 blue: 8
         re.compile(r'^(?P<data>((?P<action>red):\s(?P<score_red>\d+)\s'
                    r'blue:\s(?P<score_blue>\d+)))', re.IGNORECASE),
 
+        # Session data initialised for client on slot 0 at 123456
         re.compile(r'^(?P<action>Session data initialised)\s'
                    r'(?P<data>for client on slot (?P<slot>\d+)\s'
                    r'at (?P<session_id>\d+))', re.IGNORECASE)
@@ -550,6 +552,7 @@ class Iourt43Parser(b3.parser.Parser):
             self.queueEvent(self.getEvent(self._eventMap[action], data=data, client=client, target=target))
         else:
             data = str(action) + ': ' + str(data)
+            self.warning('Unknown Event: %s', data)
             self.queueEvent(self.getEvent('EVT_UNKNOWN', data=data, client=client, target=target))
 
     def OnSessionDataInitialised(self, action, data, match=None):
@@ -1304,14 +1307,17 @@ class Iourt43Parser(b3.parser.Parser):
         Client 3 is not active.
         """
         if not (data := self.write(f'auth-whois {cid}')):
+            self.warning('queryClientFrozenSandAccount: auth-whois failed for %s', cid)
             return {}
 
         if data == f'Client {cid} is not active.':
+            self.warning('queryClientFrozenSandAccount: %s is not active', cid)
             return {}
 
         if m := self._re_authwhois.match(data):
             return m.groupdict()
         else:
+            self.warning('queryClientFrozenSandAccount: auth-whois no match: %s', data)
             return {}
 
     def defineGameType(self, gametype_int):
