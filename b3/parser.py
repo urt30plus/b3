@@ -1033,8 +1033,8 @@ class Parser:
         """
         Register an event handler.
         """
-        self.debug('%s: register event <%s>',
-                   event_handler.__class__.__name__, self.getEventName(event_name))
+        self.info('%s: register event <%s>',
+                   event_handler.__class__.__name__, self.getEventKey(event_name))
         if event_handler not in self._handlers[event_name]:
             self._handlers[event_name].append(event_handler)
 
@@ -1044,11 +1044,11 @@ class Parser:
         """
         for event_name, handlers in self._handlers.items():
             if event_handler in handlers:
-                self.debug('%s: unregister event <%s>',
-                           event_handler.__class__.__name__, self.getEventName(event_name))
+                self.info('%s: unregister event <%s>',
+                           event_handler.__class__.__name__, self.getEventKey(event_name))
                 handlers.remove(event_handler)
 
-    def queueEvent(self, event, expire=15):
+    def queueEvent(self, event, expire=10):
         try:
             if event.type in self._handlers:
                 time.sleep(0.001)  # wait a bit so event doesnt get jumbled
