@@ -651,12 +651,13 @@ class Iourt43Parser(b3.parser.Parser):
         # we get user info in two parts:
         # 19:42.36 ClientBegin: 4
         if client := self.getByCidOrJoinPlayer(data):
-            return b3.events.Event(self.getEventID('EVT_CLIENT_JOIN'), data=data, client=client)
+            return self.getEvent('EVT_CLIENT_JOIN', data=data, client=client)
 
     def OnClientuserinfo(self, action, data, match=None):
         # 2 \ip\145.99.135.227:27960\challenge\-232198920\qport\2781\protocol\68\battleye\1\name\[SNT]^1XLR^78or..
         # 0 \gear\GMIORAA\team\blue\skill\5.000000\characterfile\bots/ut_chicken_c.c\color\4\sex\male\race\2\snaps\20\..
         bclient = self.parseUserInfo(data)
+
         bot = False
         if 'cl_guid' not in bclient and 'skill' in bclient:
             # must be a bot connecting
@@ -665,136 +666,127 @@ class Iourt43Parser(b3.parser.Parser):
             bclient['cl_guid'] = 'BOT' + str(bclient['cid'])
             bot = True
 
-        if 'name' in bclient:
+        if client_name := bclient.get('name'):
             # remove spaces from name
-            bclient['name'] = bclient['name'].replace(' ', '')
+            bclient['name'] = client_name.replace(' ', '')
 
         # split port from ip field
-        if 'ip' in bclient:
-            ip_port_data = bclient['ip'].split(':', 1)
-            bclient['ip'] = ip_port_data[0]
-            if len(ip_port_data) > 1:
-                bclient['port'] = ip_port_data[1]
+        if client_ip := bclient.get('ip'):
+            ip, _, port = client_ip.partition(':')
+            bclient['ip'] = ip
+            if port:
+                bclient['port'] = port
 
-        if 'team' in bclient:
-            bclient['team'] = self.getTeam(bclient['team'])
+        if client_team := bclient.get('team'):
+            bclient['team'] = self.getTeam(client_team)
 
-        if bclient:
+        if client := self.clients.getByCID(bclient['cid']):
+            # update existing client
+            excluded_attrs = ('login', 'password', 'groupBits', 'maskLevel', 'autoLogin', 'greeting')
+            for k, v in bclient.items():
+                if hasattr(client, 'gear') and k == 'gear' and client.gear != v:
+                    self.queueEvent(self.getEvent('EVT_CLIENT_GEAR_CHANGE', v, client))
+                if not k.startswith('_') and k not in excluded_attrs:
+                    setattr(client, k, v)
+        else:
+            # make a new client
+            guid = bclient.get('cl_guid', 'unknown')
 
-            client = self.clients.getByCID(bclient['cid'])
-
-            if client:
-                # update existing client
-                for k, v in bclient.items():
-                    if hasattr(client, 'gear') and k == 'gear' and client.gear != v:
-                        self.queueEvent(b3.events.Event(self.getEventID('EVT_CLIENT_GEAR_CHANGE'), v, client))
-                    if not k.startswith('_') and k not in (
-                            'login', 'password', 'groupBits', 'maskLevel', 'autoLogin', 'greeting'):
-                        setattr(client, k, v)
+            if client_authl := bclient.get('authl'):
+                # authl contains FSA since UrT 4.2.022
+                fsa = client_authl
             else:
-                # make a new client
-                if 'cl_guid' in bclient:
-                    guid = bclient['cl_guid']
+                # query FrozenSand Account
+                auth_info = self.queryClientFrozenSandAccount(bclient['cid'])
+                fsa = auth_info.get('login', None)
+
+            # v1.0.17 - mindriot - 02-Nov-2008
+            if 'name' not in bclient:
+                bclient['name'] = self._empty_name_default
+
+            # v 1.10.5 => https://github.com/BigBrotherBot/big-brother-bot/issues/346
+            if len(bclient['name']) > 32:
+                self.warning("UrT4.2 bug spotted! %s [GUID: '%s'] [FSA: '%s'] has a too long "
+                             "nickname (%s characters)", bclient['name'], guid, fsa, len(bclient['name']))
+                if self._allow_userinfo_overflow:
+                    x = bclient['name'][0:32]
+                    self.warning('Truncating %s (%s) nickname => %s (%s)', bclient['name'], len(bclient['name']), x,
+                                 len(x))
+                    bclient['name'] = x
                 else:
-                    guid = 'unknown'
+                    self.warning("Connection denied to  %s [GUID: '%s'] [FSA: '%s']", bclient['name'], guid, fsa)
+                    self.write(
+                        self.getCommand('kick', cid=bclient['cid'], reason='userinfo string overflow protection'))
+                    return
 
-                if 'authl' in bclient:
-                    # authl contains FSA since UrT 4.2.022
-                    fsa = bclient['authl']
+            if 'ip' not in bclient:
+                if guid == 'unknown':
+                    # happens when a client is (temp)banned and got kicked so client was destroyed,
+                    # but infoline was still waiting to be parsed.
+                    return None
                 else:
-                    # query FrozenSand Account
-                    auth_info = self.queryClientFrozenSandAccount(bclient['cid'])
-                    fsa = auth_info.get('login', None)
+                    try:
+                        # see issue xlr8or/big-brother-bot#87 - ip can be missing
+                        plist = self.getPlayerList()
+                        client_data = plist[bclient['cid']]
+                        bclient['ip'] = client_data['ip']
+                    except Exception as err:
+                        bclient['ip'] = ''
+                        self.warning("Failed to get client %s ip address" % bclient['cid'], err)
 
-                # v1.0.17 - mindriot - 02-Nov-2008
-                if 'name' not in bclient:
-                    bclient['name'] = self._empty_name_default
+            nguid = ''
+            # override the guid... use ip's only if self.console.IpsOnly is set True.
+            if self.IpsOnly:
+                nguid = bclient['ip']
+            # replace last part of the guid with two segments of the ip
+            elif self.IpCombi:
+                i = bclient['ip'].split('.')
+                d = len(i[0]) + len(i[1])
+                nguid = guid[:-d] + i[0] + i[1]
+            # Quake clients don't have a cl_guid, we'll use ip instead
+            elif guid == 'unknown':
+                nguid = bclient['ip']
 
-                # v 1.10.5 => https://github.com/BigBrotherBot/big-brother-bot/issues/346
-                if len(bclient['name']) > 32:
-                    self.warning("UrT4.2 bug spotted! %s [GUID: '%s'] [FSA: '%s'] has a too long "
-                                 "nickname (%s characters)", bclient['name'], guid, fsa, len(bclient['name']))
-                    if self._allow_userinfo_overflow:
-                        x = bclient['name'][0:32]
-                        self.warning('Truncating %s (%s) nickname => %s (%s)', bclient['name'], len(bclient['name']), x,
-                                     len(x))
-                        bclient['name'] = x
-                    else:
-                        self.warning("Connection denied to  %s [GUID: '%s'] [FSA: '%s']", bclient['name'], guid, fsa)
-                        self.write(
-                            self.getCommand('kick', cid=bclient['cid'], reason='userinfo string overflow protection'))
-                        return
+            if nguid != '':
+                guid = nguid
 
-                if 'ip' not in bclient:
-                    if guid == 'unknown':
-                        # happens when a client is (temp)banned and got kicked so client was destroyed,
-                        # but infoline was still waiting to be parsed.
-                        return None
-                    else:
-                        try:
-                            # see issue xlr8or/big-brother-bot#87 - ip can be missing
-                            plist = self.getPlayerList()
-                            client_data = plist[bclient['cid']]
-                            bclient['ip'] = client_data['ip']
-                        except Exception as err:
-                            bclient['ip'] = ''
-                            self.warning("Failed to get client %s ip address" % bclient['cid'], err)
-
-                nguid = ''
-                # override the guid... use ip's only if self.console.IpsOnly is set True.
-                if self.IpsOnly:
-                    nguid = bclient['ip']
-                # replace last part of the guid with two segments of the ip
-                elif self.IpCombi:
-                    i = bclient['ip'].split('.')
-                    d = len(i[0]) + len(i[1])
-                    nguid = guid[:-d] + i[0] + i[1]
-                # Quake clients don't have a cl_guid, we'll use ip instead
-                elif guid == 'unknown':
-                    nguid = bclient['ip']
-
-                if nguid != '':
-                    guid = nguid
-
-                self.clients.newClient(bclient['cid'], name=bclient['name'], ip=bclient['ip'], bot=bot, guid=guid,
-                                       pbid=fsa)
+            self.clients.newClient(bclient['cid'], name=bclient['name'], ip=bclient['ip'], bot=bot, guid=guid,
+                                   pbid=fsa)
 
         return None
 
     def OnClientuserinfochanged(self, action, data, match=None):
         # 7 n\[SNT]^1XLR^78or\t\3\r\2\tl\0\f0\\f1\\f2\\a0\0\a1\0\a2\0
         parseddata = self.parseUserInfo(data)
-        if parseddata:
-            client = self.clients.getByCID(parseddata['cid'])
-            if client:
-                # update existing client
-                if 'n' in parseddata:
-                    setattr(client, 'name', parseddata['n'])
+        if client := self.clients.getByCID(parseddata['cid']):
+            # update existing client
+            if 'n' in parseddata:
+                setattr(client, 'name', parseddata['n'])
 
-                if 't' in parseddata:
-                    team = self.getTeam(parseddata['t'])
-                    setattr(client, 'team', team)
+            if 't' in parseddata:
+                team = self.getTeam(parseddata['t'])
+                setattr(client, 'team', team)
 
-                    if 'r' in parseddata:
-                        if team == b3.TEAM_BLUE:
-                            setattr(client, 'raceblue', parseddata['r'])
-                        elif team == b3.TEAM_RED:
-                            setattr(client, 'racered', parseddata['r'])
-                        elif team == b3.TEAM_FREE:
-                            setattr(client, 'racefree', parseddata['r'])
+                if 'r' in parseddata:
+                    if team == b3.TEAM_BLUE:
+                        setattr(client, 'raceblue', parseddata['r'])
+                    elif team == b3.TEAM_RED:
+                        setattr(client, 'racered', parseddata['r'])
+                    elif team == b3.TEAM_FREE:
+                        setattr(client, 'racefree', parseddata['r'])
 
-                    if parseddata.get('f0') is not None \
-                            and parseddata.get('f1') is not None \
-                            and parseddata.get('f2') is not None:
+                if parseddata.get('f0') is not None \
+                        and parseddata.get('f1') is not None \
+                        and parseddata.get('f2') is not None:
 
-                        data = "%s,%s,%s" % (parseddata['f0'], parseddata['f1'], parseddata['f2'])
-                        if team == b3.TEAM_BLUE:
-                            setattr(client, 'funblue', data)
-                        elif team == b3.TEAM_RED:
-                            setattr(client, 'funred', data)
+                    data = "%s,%s,%s" % (parseddata['f0'], parseddata['f1'], parseddata['f2'])
+                    if team == b3.TEAM_BLUE:
+                        setattr(client, 'funblue', data)
+                    elif team == b3.TEAM_RED:
+                        setattr(client, 'funred', data)
 
-                if 'a0' in parseddata and 'a1' in parseddata and 'a2' in parseddata:
-                    setattr(client, 'cg_rgb', "%s %s %s" % (parseddata['a0'], parseddata['a1'], parseddata['a2']))
+            if 'a0' in parseddata and 'a1' in parseddata and 'a2' in parseddata:
+                setattr(client, 'cg_rgb', "%s %s %s" % (parseddata['a0'], parseddata['a1'], parseddata['a2']))
 
     def OnRadio(self, action, data, match=None):
         if not (client := self.getByCidOrJoinPlayer(match.group('cid'))):
