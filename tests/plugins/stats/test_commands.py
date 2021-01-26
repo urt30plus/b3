@@ -8,7 +8,7 @@ class Test_cmd_mapstats(StatPluginTestCase):
         # WHEN
         self.joe.says('!mapstats')
         # THEN
-        self.assertListEqual(['Stats [ Joe ] K 0 D 0 TK 0 Dmg 0 Skill 100.00 XP 0.0'], self.joe.message_history)
+        self.assertListEqual(['Stats [ Joe ] K 0 D 0 A 0 TK 0 Dmg 0 Skill 100.00 XP 0.0'], self.joe.message_history)
 
     def test_tk(self):
         # GIVEN
@@ -16,11 +16,11 @@ class Test_cmd_mapstats(StatPluginTestCase):
         # WHEN
         self.joe.says('!mapstats')
         # THEN
-        self.assertListEqual(['Stats [ Joe ] K 0 D 0 TK 1 Dmg 0 Skill 87.50 XP 0.0'], self.joe.message_history)
+        self.assertListEqual(['Stats [ Joe ] K 0 D 0 A 0 TK 1 Dmg 0 Skill 87.50 XP 0.0'], self.joe.message_history)
         # WHEN
         self.mike.says('!mapstats')
         # THEN
-        self.assertListEqual(['Stats [ Mike ] K 0 D 0 TK 0 Dmg 0 Skill 100.00 XP 0.0'], self.mike.message_history)
+        self.assertListEqual(['Stats [ Mike ] K 0 D 0 A 0 TK 0 Dmg 0 Skill 100.00 XP 0.0'], self.mike.message_history)
 
     def test_kill(self):
         # GIVEN
@@ -30,11 +30,11 @@ class Test_cmd_mapstats(StatPluginTestCase):
         # WHEN
         self.joe.says('!mapstats')
         # THEN
-        self.assertListEqual(['Stats [ Joe ] K 1 D 0 TK 0 Dmg 100 Skill 112.50 XP 12.5'], self.joe.message_history)
+        self.assertListEqual(['Stats [ Joe ] K 1 D 0 A 0 TK 0 Dmg 100 Skill 112.50 XP 12.5'], self.joe.message_history)
         # WHEN
         self.mike.says('!mapstats')
         # THEN
-        self.assertListEqual(['Stats [ Mike ] K 0 D 1 TK 0 Dmg 0 Skill 87.50 XP 0.0'], self.mike.message_history)
+        self.assertListEqual(['Stats [ Mike ] K 0 D 1 A 0 TK 0 Dmg 0 Skill 87.50 XP 0.0'], self.mike.message_history)
 
 
 class Test_cmd_testscore(StatPluginTestCase):
