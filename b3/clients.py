@@ -524,12 +524,8 @@ class Client:
             newName = name.strip()
 
         if self._name == newName:
-            if self.console:
-                self.console.verbose2('Aborted making alias for cid %s: name is the same', self.cid)
             return
         if self.cid == '-1' or self.cid == 'Server':  # bfbc2 addition
-            if self.console:
-                self.console.verbose2('Aborted making alias for cid %s: must be B3', self.cid)
             return
 
         self.makeAlias(self._name)
@@ -815,7 +811,7 @@ class Client:
             alias = IpAlias(clientId=self.id, ip=ip)
 
         alias.save(self.console)
-        self.console.bot('created new IP alias for client @%s: %s', str(self.id), alias.ip)
+        self.console.bot('Created new IP alias for client @%s: %s', str(self.id), alias.ip)
 
     def save(self, console=None):
         """
@@ -849,8 +845,6 @@ class Client:
             if not pbid and self.cid:
                 fsa_info = self.console.queryClientFrozenSandAccount(self.cid)
                 self.pbid = pbid = fsa_info.get('login', None)
-
-            self.console.verbose("Auth with %r", {'name': name, 'ip': ip, 'pbid': pbid, 'guid': guid})
 
             # FSA will be found in pbid
             if not self.pbid:
@@ -898,8 +892,6 @@ class Client:
             self.save()
             self.authed = True
 
-            self.console.debug("Client authorized: %s [@%s] [GUID: '%s'] [FSA: '%s']", self.name, self.id, self.guid,
-                               self.pbid)
 
             # check for bans
             if self.numBans > 0:
@@ -920,18 +912,16 @@ class Client:
         """
         Authorize this client using his GUID.
         """
-        self.console.debug("Auth by guid: %r", self.guid)
         try:
             return self.console.storage.getClient(self)
         except KeyError as msg:
-            self.console.debug('User not found %s: %s', self.guid, msg)
+            self.console.warning('auth_by_guid: user not found %s: %s', self.guid, msg)
             return False
 
     def auth_by_pbid(self):
         """
         Authorize this client using his PBID.
         """
-        self.console.debug("Auth by FSA: %r", self.pbid)
         clients_matching_pbid = self.console.storage.getClientsMatching(dict(pbid=self.pbid))
         if len(clients_matching_pbid) > 1:
             self.console.warning("Found %s client having FSA '%s'", len(clients_matching_pbid), self.pbid)
@@ -951,20 +941,19 @@ class Client:
                     self._guid = None
             return self.console.storage.getClient(self)
         else:
-            self.console.debug('Frozen Sand account [%s] unknown in database', self.pbid)
+            self.console.warning('Frozen Sand account [%s] unknown in database', self.pbid)
             return False
 
     def auth_by_pbid_and_guid(self):
         """
         Authorize this client using both his PBID and GUID.
         """
-        self.console.debug("Auth by both guid and FSA: %r, %r", self.guid, self.pbid)
         clients_matching_pbid = self.console.storage.getClientsMatching({'pbid': self.pbid, 'guid': self.guid})
         if clients_matching_pbid:
             self.id = clients_matching_pbid[0].id
             return self.console.storage.getClient(self)
         else:
-            self.console.debug("Frozen Sand account [%s] with guid '%s' unknown in database", self.pbid, self.guid)
+            self.console.warning("Frozen Sand account [%s] with guid '%s' unknown in database", self.pbid, self.guid)
             return False
 
     def __str__(self):
@@ -1243,9 +1232,10 @@ class IpAlias(Struct):
         Save the ip alias in the storage.
         :param console: The console implementation
         """
-        self.timeEdit = console.time()
+        now = console.time()
+        self.timeEdit = now
         if not self.id:
-            self.timeAdd = console.time()
+            self.timeAdd = now
         return console.storage.setClientIpAddress(self)
 
     def __str__(self):
@@ -1307,9 +1297,10 @@ class Group(Struct):
         Save the group in the storage.
         :param console: The console implementation
         """
-        self.timeEdit = console.time()
+        now = console.time()
+        self.timeEdit = now
         if not self.id:
-            self.timeAdd = console.time()
+            self.timeAdd = now
         return console.storage.setGroup(self)
 
     def __repr__(self):
@@ -1603,8 +1594,6 @@ class Clients(dict):
         client = Client(console=self.console, cid=cid, timeAdd=self.console.time(), **kwargs)
         self[client.cid] = client
         self.resetIndex()
-        self.console.debug('Client connected: [%s] %s - %s (%s)', self[client.cid].cid,
-                           self[client.cid].name, self[client.cid].guid, self[client.cid].data)
         self.console.queueEvent(self.console.getEvent('EVT_CLIENT_CONNECT', data=client, client=client))
 
         if client.guid and not client.bot:
