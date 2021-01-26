@@ -1772,8 +1772,8 @@ warn_command_abusers: no
         with patch.object(self.p, "info") as info_mock:
             self.player.says("!help")
         # THEN
-        self.assertListEqual([call('ThePlayer does not have sufficient rights to use !help. Required level: 2')],
-                             info_mock.mock_calls)
+        self.assertEqual(call('ThePlayer does not have sufficient rights to use !help. Required level: 2'),
+                             info_mock.mock_calls[1])
         # message section not loaded so this will fallback on the default warn message
         self.assertListEqual(['You do not have sufficient access to use !help'], self.player.message_history)
         self.assertFalse(self.player_warn_mock.called)
@@ -1792,8 +1792,8 @@ warn_command_abusers: yes
         with patch.object(self.p, "info") as info_mock:
             self.player.says("!help")
         # THEN
-        self.assertListEqual([call('ThePlayer does not have sufficient rights to use !help. Required level: 2')],
-                             info_mock.mock_calls)
+        self.assertEqual(call('ThePlayer does not have sufficient rights to use !help. Required level: 2'),
+                             info_mock.mock_calls[1])
         # message section not loaded so this will fallback on the default warn message
         self.assertListEqual(['You do not have sufficient access to use !help'], self.player.message_history)
         self.assertFalse(self.player_warn_mock.called)
@@ -1815,9 +1815,8 @@ nocmd: 90s, do not use commands you do not have access to, try using !help
             self.player.says("!help")
             self.player.says("!help")
         # THEN
-        self.assertListEqual([call('ThePlayer does not have sufficient rights to use !help. Required level: 2'),
-                              call('ThePlayer does not have sufficient rights to use !help. Required level: 2')],
-                             info_mock.mock_calls)
+        self.assertEqual(call('ThePlayer does not have sufficient rights to use !help. Required level: 2'),
+                         info_mock.mock_calls[1])
         # message section not loaded so this will fallback on the default warn message
         self.assertListEqual(['You do not have sufficient access to use !help',
                               'You do not have sufficient access to use !help'], self.player.message_history)
