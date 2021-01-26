@@ -85,7 +85,6 @@ class Iourt43Parser(b3.parser.Parser):
     _line_length = 90
 
     _lineFormats = (
-        # Generated with ioUrbanTerror v4.1:
         # Hit: 12 7 1 19: BSTHanzo[FR] hit ercan in the Helmet
         # Hit: 13 10 0 8: Grover hit jacobdk92 in the Head
         re.compile(r'^(?P<action>Hit):\s'
@@ -100,11 +99,16 @@ class Iourt43Parser(b3.parser.Parser):
         # Item: 0 team_CTF_redflag
         re.compile(r'^(?P<action>Item):\s(?P<data>.*)$', re.IGNORECASE),
 
+        # ClientBegin: 4
+        # ClientConnect: 4
+        # ClientDisconnect: 4
         # ClientSpawn: 0
         # ClientMelted: 1
-        re.compile(r'^(?P<action>Client(Melted|Spawn)):\s(?P<cid>[0-9]+)$', re.IGNORECASE),
+        re.compile(r'^(?P<action>Client(Begin|Connect|Disconnect|Melted|Spawn)):\s'
+                   r'(?P<data>'
+                   r'(?P<cid>[0-9]+))$', re.IGNORECASE),
 
-        # 6:37 Kill: 0 1 16: XLR8or killed =lvl1=Cheetah by UT_MOD_SPAS
+        # Kill: 0 1 16: XLR8or killed =lvl1=Cheetah by UT_MOD_SPAS
         re.compile(r'^(?P<action>Kill):\s'
                    r'(?P<data>'
                    r'(?P<acid>[0-9]+)\s'
@@ -112,10 +116,22 @@ class Iourt43Parser(b3.parser.Parser):
                    r'(?P<aweap>[0-9]+):\s+'
                    r'(?P<text>.*))$', re.IGNORECASE),
 
-        # SGT: fix issue with onSay when something like this come and the match could'nt find the name group
+        # ClientUserinfo: 2 \ip\11.181.55.130:27960\snaps\20\name\|30+|money\...
+        # ClientUserinfoChanged: 4 n\pibul\t\1\r\1\tl\0\f0\ninja\f1\\f2\\a0\0\a1\0\a2\0
+        re.compile(r'^(?P<action>ClientUserinfo(Changed)?):\s'
+                   r'(?P<data>.*)$', re.IGNORECASE),
+
+        # Flag: 2 2: team_CTF_blueflag
+        re.compile(r'^(?P<action>Flag):\s'
+                   r'(?P<data>'
+                   r'(?P<cid>[0-9]+)\s'
+                   r'(?P<name>[^ ]+):\s*'
+                   r'(?P<text>.*))$', re.IGNORECASE),
+
         # say: 7 -crespino-:
         # say: 6 ^5Marcel ^2[^6CZARMY^2]: !help
-        re.compile(r'^(?P<action>(say|sayteam|saytell)):\s'
+        # sayteam: 9[Rev]BudgetTussle: np
+        re.compile(r'^(?P<action>(say|sayteam)):\s'
                    r'(?P<data>'
                    r'(?P<cid>[0-9]+)\s'
                    r'(?P<name>[^ ]+):\s*'
@@ -137,9 +153,45 @@ class Iourt43Parser(b3.parser.Parser):
         # FlagCaptureTime: 1: 1125480101
         re.compile(r'^(?P<action>FlagCaptureTime):\s(?P<cid>[0-9]+):\s(?P<captime>[0-9]+)$', re.IGNORECASE),
 
-        # 15:42 Flag Return: RED
-        # 15:42 Flag Return: BLUE
+        # Flag Return: RED
+        # Flag Return: BLUE
         re.compile(r'^(?P<action>Flag Return):\s(?P<data>(?P<color>.+))$', re.IGNORECASE),
+
+        # Session data initialised for client on slot 0 at 123456
+        re.compile(r'^(?P<action>Session data initialised)\s'
+                   r'(?P<data>for client on slot (?P<slot>\d+)\s'
+                   r'at (?P<session_id>\d+))', re.IGNORECASE),
+
+        # ShutdownGame:
+        # Warmup:
+        re.compile(r'^(?P<action>[a-z]+):$', re.IGNORECASE),
+
+        # Bombholder is 2
+        re.compile(r'^(?P<action>Bombholder)(?P<data>\sis\s(?P<cid>[0-9]+))$', re.IGNORECASE),
+
+        # Bomb was tossed by 2
+        # Bomb was planted by 2
+        # Bomb was defused by 3!
+        # Bomb has been collected by 2
+        re.compile(r'^(?P<action>Bomb)\s'
+                   r'(?P<data>(was|has been)\s'
+                   r'(?P<subaction>[a-z]+)\sby\s'
+                   r'(?P<cid>[0-9]+).*)$', re.IGNORECASE),
+
+        # Pop!
+        re.compile(r'^(?P<action>Pop)!$', re.IGNORECASE),
+
+        # ThawOutStarted: 0 1: Fenix started thawing out Biddle
+        # ThawOutFinished: 0 1: Fenix thawed out Biddle
+        re.compile(r'^(?P<action>ThawOut(Started|Finished)):\s'
+                   r'(?P<data>'
+                   r'(?P<cid>[0-9]+)\s'
+                   r'(?P<tcid>[0-9]+):\s+'
+                   r'(?P<text>.*))$', re.IGNORECASE),
+
+        # red:12 blue:8
+        re.compile(r'^(?P<data>((?P<action>red):\s(?P<score_red>\d+)\s'
+                   r'blue:\s(?P<score_blue>\d+)))', re.IGNORECASE),
 
         # Callvote: 1 - "map dressingroom"
         re.compile(r'^(?P<action>Callvote): (?P<data>(?P<cid>[0-9]+) - "(?P<vote_string>.*)")$', re.IGNORECASE),
@@ -214,14 +266,6 @@ class Iourt43Parser(b3.parser.Parser):
                    r'(?P<aweap>[0-9]+):\s+'
                    r'(?P<text>.*))$', re.IGNORECASE),
 
-        # ThawOutStarted: 0 1: Fenix started thawing out Biddle
-        # ThawOutFinished: 0 1: Fenix thawed out Biddle
-        re.compile(r'^(?P<action>ThawOut(Started|Finished)):\s'
-                   r'(?P<data>'
-                   r'(?P<cid>[0-9]+)\s'
-                   r'(?P<tcid>[0-9]+):\s+'
-                   r'(?P<text>.*))$', re.IGNORECASE),
-
         # Processing chats and tell events...
         # 5:39 saytell: 15 16 repelSteeltje: nno
         # 5:39 saytell: 15 15 repelSteeltje: nno
@@ -241,37 +285,8 @@ class Iourt43Parser(b3.parser.Parser):
                    r'(?P<name>[^ ]+):\s*'
                    r'(?P<text>.*))$', re.IGNORECASE),
 
-        # Bombmode actions:
-        # 3:06 Bombholder is 2
-        re.compile(r'^(?P<action>Bombholder)(?P<data>\sis\s(?P<cid>[0-9]+))$', re.IGNORECASE),
-
-        # was planted, was defused, was tossed, has been collected (doh, how gramatically correct!)
-        # 2:13 Bomb was tossed by 2
-        # 2:32 Bomb was planted by 2
-        # 3:01 Bomb was defused by 3!
-        # 2:17 Bomb has been collected by 2
-        re.compile(r'^(?P<action>Bomb)\s'
-                   r'(?P<data>(was|has been)\s'
-                   r'(?P<subaction>[a-z]+)\sby\s'
-                   r'(?P<cid>[0-9]+).*)$', re.IGNORECASE),
-
-        # 17:24 Pop!
-        re.compile(r'^(?P<action>Pop)!$', re.IGNORECASE),
-
         # Falling thru? Item stuff and so forth
         re.compile(r'^(?P<action>[a-z]+):\s(?P<data>.*)$', re.IGNORECASE),
-
-        # Shutdowngame and Warmup... the one word lines
-        re.compile(r'^(?P<action>[a-z]+):$', re.IGNORECASE),
-
-        # red: 12 blue: 8
-        re.compile(r'^(?P<data>((?P<action>red):\s(?P<score_red>\d+)\s'
-                   r'blue:\s(?P<score_blue>\d+)))', re.IGNORECASE),
-
-        # Session data initialised for client on slot 0 at 123456
-        re.compile(r'^(?P<action>Session data initialised)\s'
-                   r'(?P<data>for client on slot (?P<slot>\d+)\s'
-                   r'at (?P<session_id>\d+))', re.IGNORECASE)
     )
 
     _line_formats_counter = Counter()
@@ -557,6 +572,9 @@ class Iourt43Parser(b3.parser.Parser):
         for index, f in enumerate(self._lineFormats):
             if m := re.match(f, line):
                 self._line_formats_counter[index] += 1
+                # log lines for the more generalized formats
+                if index > 26:
+                    self.info('re.match(%s): %s', index, line)
                 break
         else:
             if '------' not in line:
@@ -590,11 +608,20 @@ class Iourt43Parser(b3.parser.Parser):
             self.warning('Unknown Event: %s', data)
             self.queueEvent(self.getEvent('EVT_UNKNOWN', data=data, client=client, target=target))
 
+    def OnInitauth(self, action, data, match=None):
+        pass
+
+    def OnAccountvalidated(self, action, data, match=None):
+        pass
+
     def OnSessionDataInitialised(self, action, data, match=None):
         pass
 
-    def OnRed(self, action, data, match=None):
+    def OnScore(self, action, data, match=None):
         self.info('Score: %s', data)
+
+    def OnRed(self, action, data, match=None):
+        self.info('Team Score: %s', data)
 
     def parseUserInfo(self, info):
         """
