@@ -28,11 +28,13 @@ class Rcon:
         )
         self.socket = socket.socket(type=socket.SOCK_DGRAM)
         self.socket.settimeout(2.0)
-        self.socket.connect(self.host)
+        self.socket.connect(host)
         self.lock = threading.Lock()
-        self.queue = None
         self._stopEvent = object()
-        self._writelines_thread = None
+        self.queue = queue.Queue(maxsize=100)
+        self._writelines_thread = b3.functions.start_daemon_thread(
+            target=self._writelines, name='rcon'
+        )
 
     def send_rcon(self, sock, data, maxRetries=None, socketTimeout=None):
         """
@@ -114,35 +116,32 @@ class Rcon:
         Enqueue multiple RCON commands for later processing.
         :param lines: A list of RCON commands.
         """
-        q = self.queue
-        if not q:
-            q = self.queue = queue.Queue(maxsize=100)
-            self._writelines_thread = b3.functions.start_daemon_thread(
-                target=self._writelines, name='rcon'
-            )
-
-        q.put(lines)
+        self.queue.put(lines)
 
     def _writelines(self):
         """
         Write multiple RCON commands on the socket.
         """
+        queue_get = self.queue.get
+        stop_event = self._stopEvent
+        send_rcon = self.send_rcon
+        sock = self.socket
+        sock_lock = self.lock
         while True:
-            lines = self.queue.get()
-            if lines is self._stopEvent:
+            lines = queue_get()
+            if lines is stop_event:
                 break
             for cmd in lines:
                 if cmd:
-                    with self.lock:
-                        self.send_rcon(self.socket, cmd, maxRetries=1)
+                    with sock_lock:
+                        send_rcon(sock, cmd, maxRetries=1)
 
     def stop(self):
         """
         Stop the rcon writelines queue.
         """
-        if self.queue:
-            self.queue.put(self._stopEvent)
-            self._writelines_thread.join(timeout=5.0)
+        self.queue.put(self._stopEvent)
+        self._writelines_thread.join(timeout=10.0)
 
     def close(self):
         self.stop()
