@@ -84,7 +84,7 @@ class FakeConsole(b3.parser.Parser):
         NO QUEUE, NO THREAD for faking speed up
         """
         if event.type == self.getEventID('EVT_EXIT') or event.type == self.getEventID('EVT_STOP'):
-            self.stop_parsing_event.set()
+            self.working = False
 
         for hfunc in self._handlers[event.type]:
             if not hfunc.isEnabled():
@@ -113,7 +113,7 @@ class FakeConsole(b3.parser.Parser):
         """
         try:
             self.bot('shutting down...')
-            self.stop_parsing_event.set()
+            self.working = False
             self._handleEvent(self.getEvent('EVT_STOP'))
             if self._cron:
                 self._cron.stop()

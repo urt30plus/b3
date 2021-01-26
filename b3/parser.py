@@ -8,7 +8,6 @@ import queue
 import re
 import socket
 import sys
-import threading
 import time
 from collections import defaultdict, OrderedDict
 from textwrap import TextWrapper
@@ -82,7 +81,6 @@ class Parser:
     screen = None
     storage = None  # storage module instance
     type = None
-    stop_parsing_event = threading.Event()
     wrapper = None  # textwrapper instance
 
     msgPrefix = ''  # say prefix
@@ -103,7 +101,7 @@ class Parser:
 
     # === Exiting ===
     #
-    # The parser runs two threads: main and handler.  The main thread is
+    # The parser runs two threads: main and handler. The main thread is
     # responsible for the main loop parsing and queuing events, and process
     # termination. The handler thread is responsible for processing queued events
     # including raising ``SystemExit'' when a user-requested exit is needed.
@@ -118,17 +116,18 @@ class Parser:
     #
     # How exiting works, in detail:
     #
-    #   - the main loop in run() and is terminated only when ``stop_parsing_event``
-    #     is set in the ``shutdown`` method.
+    #   - the main loop in run() and is terminated only when ``working``
+    #     is unset in the ``shutdown`` method.
     #   - die() or restart() invokes shutdown() from the handler thread.
-    #   - the handler thread sets the ``stop_parsing_event`` and queues a EVT_STOP
-    #     event to initiate it's own shutdown.
+    #   - the handler thread unsets ``working`` and that causes the main
+    #     thread to queue a EVT_STOP to initiate the event handling shutdown.
     #   - die() or restart() raises SystemExit in the handler thread after
     #     shutdown() and a few seconds delay.
     #   - when SystemExit is caught by handleEvents(), its exit status is
     #     pushed to the main context via exitcode.
     #   - run() waits for the event handling thread to stop before exiting
 
+    working = True
     exitcode = None
 
     def __init__(self, conf, options):
@@ -985,20 +984,19 @@ class Parser:
         )
         self.screen.flush()
 
-        stop_parsing_event_wait = self.stop_parsing_event.wait
+        sleep = time.sleep
         read_lines = self.read
         parse_line = self.parseLine
 
         delay_per_line = self.delay2
         delay_read_lines = self.delay
 
-        while True:
+        while self.working:
             if self._paused:
                 if not self._pauseNotice:
                     self.bot('PAUSED - not parsing any lines')
                     self._pauseNotice = True
-                if stop_parsing_event_wait(timeout=delay_read_lines):
-                    break
+                sleep(delay_read_lines)
                 continue
             for line in read_lines():
                 if line := line.strip():
@@ -1007,20 +1005,22 @@ class Parser:
                     except Exception as msg:
                         self.error('Could not parse line %s - (%s) %s',
                                    line, msg, extract_tb(sys.exc_info()[2]))
-                    if stop_parsing_event_wait(timeout=delay_per_line):
-                        break
+                    sleep(delay_per_line)
 
-            if stop_parsing_event_wait(timeout=delay_read_lines):
-                break
+            sleep(delay_read_lines)
 
         self.bot('Stopped parsing')
         self.bot('Closing games log file')
         self.input.close()
+
+        self.bot('Send STOP Event to Event Handling Thread')
+        self.queueEvent(self.getEvent('EVT_STOP'))
         self.bot('Awaiting Event Handling Thread stop')
         self._event_handling_thread.join(timeout=15.0)
         self.bot('Event Handling Thread stopped')
         if self.exitcode:
             sys.exit(self.exitcode)
+        self.bot('Shutdown Complete')
 
     def parseLine(self, line):
         """
@@ -1111,11 +1111,12 @@ class Parser:
     def handle_events_shutdown(self):
         self.bot('Shutting down event handler')
 
-        if not self.stop_parsing_event.is_set():
-            self.stop_parsing_event.set()
+        if self.working:
+            self.working = False
+            self.bot('Working was set, shutdown initiated from outside of main thread')
 
         self.bot('Sending EVT_STOP message to all plugins')
-        event = b3.events.Event(self.getEventID('EVT_STOP'), '')
+        event = self.getEvent('EVT_STOP')
         for plugin in self._plugins.values():
             try:
                 plugin.parseEvent(event)
@@ -1181,9 +1182,9 @@ class Parser:
         """
         Shutdown B3.
         """
-        self.bot('Shutting down...')
-        self.stop_parsing_event.set()
-        self.queueEvent(b3.events.Event(self.getEventID('EVT_STOP'), ''))
+        if self.working:
+            self.working = False
+            self.bot('Shutting down...')
 
     def finalize(self):
         """
