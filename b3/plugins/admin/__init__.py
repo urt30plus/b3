@@ -526,6 +526,7 @@ class AdminPlugin(b3.plugin.Plugin):
         Handle EVT_CLIENT_SAY
         """
         event_data = event.data
+        event_client = event.client
         cmd_prefixes = (self.cmdPrefix, self.cmdPrefixLoud,
                         self.cmdPrefixBig, self.cmdPrefixPrivate)
 
@@ -545,85 +546,91 @@ class AdminPlugin(b3.plugin.Plugin):
                     data = ''
 
             cmd_lower = cmd.lower()
+            self.info('Command [%s] issued by %s', cmd_lower, event_client.name)
+
             try:
                 command = self._commands[cmd_lower]
             except KeyError:
-                spell_check = self.get_cmdSoundingLike(cmd, event.client)
+                spell_check = self.get_cmdSoundingLike(cmd, event_client)
                 _msg = self.getMessage('unknown_command', cmd)
                 if spell_check:
                     _msg += '. Did you mean %s%s?' % (event_data[:1], spell_check)
-                event.client.message(_msg)
-                if event.client.maxLevel < self._admins_level and self._warn_command_abusers and event.client.authed:
-                    event.client.var(self, 'fakeCommand', 0).value += 1
-                    if event.client.var(self, 'fakeCommand').toInt() >= 3:
-                        event.client.setvar(self, 'fakeCommand', 0)
-                        self.warnClient(event.client, 'fakecmd', None, False)
+                event_client.message(_msg)
+                if event_client.maxLevel < self._admins_level and self._warn_command_abusers and event_client.authed:
+                    event_client.var(self, 'fakeCommand', 0).value += 1
+                    if event_client.var(self, 'fakeCommand').toInt() >= 3:
+                        event_client.setvar(self, 'fakeCommand', 0)
+                        self.warnClient(event_client, 'fakecmd', None, False)
+                    self.warning('Command [%s] not allowed for %s', cmd_lower, event_client.name)
+                else:
+                    self.warning('Command [%s] not found, called by %s', cmd_lower, event_client.name)
                 return
 
             cmd = cmd_lower
 
             if not command.plugin.isEnabled():
                 try:
-                    event.client.message(self.getMessage('cmd_plugin_disabled'))
+                    event_client.message(self.getMessage('cmd_plugin_disabled'))
                 except NoOptionError:
-                    event.client.message("plugin disabled: cannot execute command %s" % cmd)
+                    event_client.message("plugin disabled: cannot execute command %s" % cmd)
+                self.warning('Command [%s] disabled, called by %s', cmd, event_client.name)
                 return
-
-            elif not event.client.authed and command.level > 0:
-                event.client.message('^7Please try your command after you have been authenticated')
+            elif not event_client.authed and command.level > 0:
+                event_client.message('^7Please try your command after you have been authenticated')
                 self.console.clients.authorizeClients()
                 return
             elif private:
-                # self.is a silent command
-                if event.client.maxLevel < command.secretLevel:
-                    event.client.message('^7You do not have sufficient access to do silent commands')
+                if event_client.maxLevel < command.secretLevel:
+                    event_client.message('^7You do not have sufficient access to do silent commands')
+                    self.warning('Command [%s] private call not allowed by %s', cmd, event_client.name)
                     return False
 
-            if command.canUse(event.client):
+            if command.canUse(event_client):
 
                 try:
-                    if event_data[:1] == self.cmdPrefixLoud and event.client.maxLevel >= 9:
-                        results = command.executeLoud(data, event.client)
-                    elif event_data[:1] == self.cmdPrefixBig and event.client.maxLevel >= 9:
-                        results = command.executeBig(data, event.client)
-                    elif event_data[:1] == self.cmdPrefixPrivate and event.client.maxLevel >= 9:
-                        results = command.executePrivate(data, event.client)
+                    if event_data[:1] == self.cmdPrefixLoud and event_client.maxLevel >= 9:
+                        results = command.executeLoud(data, event_client)
+                    elif event_data[:1] == self.cmdPrefixBig and event_client.maxLevel >= 9:
+                        results = command.executeBig(data, event_client)
+                    elif event_data[:1] == self.cmdPrefixPrivate and event_client.maxLevel >= 9:
+                        results = command.executePrivate(data, event_client)
                     else:
-                        results = command.execute(data, event.client)
+                        results = command.execute(data, event_client)
                 except (KeyboardInterrupt, SystemExit):
                     pass
                 except:
-                    event.client.message('^7There was an error processing your command')
+                    event_client.message('^7There was an error processing your command')
                     raise
                 else:
                     self.console.queueEvent(self.console.getEvent('EVT_ADMIN_COMMAND',
-                                                                  (command, data, results), event.client))
+                                                                  (command, data, results), event_client))
             else:
+                self.warning('Command [%s] not allowed by %s', cmd, event_client.name)
 
-                if self._warn_command_abusers and event.client.maxLevel < self._admins_level:
-                    event.client.var(self, 'noCommand', 0).value += 1
-                    if event.client.var(self, 'noCommand').toInt() >= 3:
-                        event.client.setvar(self, 'noCommand', 0)
-                        self.warnClient(event.client, 'nocmd', None, False)
+                if self._warn_command_abusers and event_client.maxLevel < self._admins_level:
+                    event_client.var(self, 'noCommand', 0).value += 1
+                    if event_client.var(self, 'noCommand').toInt() >= 3:
+                        event_client.setvar(self, 'noCommand', 0)
+                        self.warnClient(event_client, 'nocmd', None, False)
                         return
 
                 if command.level is None:
-                    event.client.message('^7%s%s command is disabled' % (self.cmdPrefix, cmd))
+                    event_client.message('^7%s%s command is disabled' % (self.cmdPrefix, cmd))
                 else:
 
                     self.info("%s does not have sufficient rights to use %s%s. "
-                              "Required level: %s" % (event.client.name, self.cmdPrefix, cmd, command.level[0]))
+                              "Required level: %s" % (event_client.name, self.cmdPrefix, cmd, command.level[0]))
                     try:
                         # show the preconfigured message
                         group = self.console.getGroup(command.level[0])
-                        event.client.message(self.getMessage('cmd_not_enough_access', {'group_name': group.name,
+                        event_client.message(self.getMessage('cmd_not_enough_access', {'group_name': group.name,
                                                                                        'prefix': self.cmdPrefix,
                                                                                        'command': cmd}))
                     except Exception as e:
                         # fallback to default one if we errors shows up (mostly invalid command level/group specified
                         # in the configuration file thus we fail in retrieving the group from the storage)
                         self.warning("could not format 'cmd_not_enough_access' message (using default): %s", e)
-                        event.client.message('^7You do not have sufficient access to use %s%s' % (self.cmdPrefix, cmd))
+                        event_client.message('^7You do not have sufficient access to use %s%s' % (self.cmdPrefix, cmd))
 
     def aquireCmdLock(self, cmd, client, delay, all=True):
         """
