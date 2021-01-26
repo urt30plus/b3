@@ -1,6 +1,7 @@
 import re
 import string
 import threading
+from collections import Counter
 
 import b3
 import b3.clients
@@ -95,6 +96,14 @@ class Iourt43Parser(b3.parser.Parser):
                    r'(?P<aweap>[0-9]+):\s+'
                    r'(?P<text>.*))$', re.IGNORECASE),
 
+        # Item: 4 ut_weapon_glock
+        # Item: 0 team_CTF_redflag
+        re.compile(r'^(?P<action>Item):\s(?P<data>.*)$', re.IGNORECASE),
+
+        # ClientSpawn: 0
+        # ClientMelted: 1
+        re.compile(r'^(?P<action>Client(Melted|Spawn)):\s(?P<cid>[0-9]+)$', re.IGNORECASE),
+
         # 6:37 Kill: 0 1 16: XLR8or killed =lvl1=Cheetah by UT_MOD_SPAS
         re.compile(r'^(?P<action>Kill):\s'
                    r'(?P<data>'
@@ -103,21 +112,18 @@ class Iourt43Parser(b3.parser.Parser):
                    r'(?P<aweap>[0-9]+):\s+'
                    r'(?P<text>.*))$', re.IGNORECASE),
 
+        # SGT: fix issue with onSay when something like this come and the match could'nt find the name group
+        # say: 7 -crespino-:
+        # say: 6 ^5Marcel ^2[^6CZARMY^2]: !help
+        re.compile(r'^(?P<action>(say|sayteam|saytell)):\s'
+                   r'(?P<data>'
+                   r'(?P<cid>[0-9]+)\s'
+                   r'(?P<name>[^ ]+):\s*'
+                   r'(?P<text>.*))$', re.IGNORECASE),
+
         # Assist: 0 14 15: -[TPF]-PtitBigorneau assisted Bot1 to kill Bot2
         re.compile(r'^(?P<action>Assist):\s(?P<acid>[0-9]+)\s(?P<kcid>[0-9]+)\s(?P<dcid>[0-9]+):\s+(?P<text>.*)$',
                    re.IGNORECASE),
-
-        # FlagCaptureTime: 0: 1234567890
-        # FlagCaptureTime: 1: 1125480101
-        re.compile(r'^(?P<action>FlagCaptureTime):\s(?P<cid>[0-9]+):\s(?P<captime>[0-9]+)$', re.IGNORECASE),
-
-        # 15:42 Flag Return: RED
-        # 15:42 Flag Return: BLUE
-        re.compile(r'^(?P<action>Flag Return):\s(?P<data>(?P<color>.+))$', re.IGNORECASE),
-
-        # ClientSpawn: 0
-        # ClientMelted: 1
-        re.compile(r'^(?P<action>Client(Melted|Spawn)):\s(?P<cid>[0-9]+)$', re.IGNORECASE),
 
         # Radio: 0 - 7 - 2 - "New Alley" - "I'm going for the flag"
         re.compile(r'^(?P<action>Radio): '
@@ -126,6 +132,14 @@ class Iourt43Parser(b3.parser.Parser):
                    r'(?P<msg_id>[0-9]+) - '
                    r'"(?P<location>.*)" - '
                    r'"(?P<text>.*)")$', re.IGNORECASE),
+
+        # FlagCaptureTime: 0: 1234567890
+        # FlagCaptureTime: 1: 1125480101
+        re.compile(r'^(?P<action>FlagCaptureTime):\s(?P<cid>[0-9]+):\s(?P<captime>[0-9]+)$', re.IGNORECASE),
+
+        # 15:42 Flag Return: RED
+        # 15:42 Flag Return: BLUE
+        re.compile(r'^(?P<action>Flag Return):\s(?P<data>(?P<color>.+))$', re.IGNORECASE),
 
         # Callvote: 1 - "map dressingroom"
         re.compile(r'^(?P<action>Callvote): (?P<data>(?P<cid>[0-9]+) - "(?P<vote_string>.*)")$', re.IGNORECASE),
@@ -259,6 +273,26 @@ class Iourt43Parser(b3.parser.Parser):
                    r'(?P<data>for client on slot (?P<slot>\d+)\s'
                    r'at (?P<session_id>\d+))', re.IGNORECASE)
     )
+
+    _line_formats_counter = Counter()
+
+    def dump_line_format_counter(self):
+        self._line_formats_counter['games'] += 1
+        # make sure each line format has an entry
+        for i in range(len(self._lineFormats)):
+            self._line_formats_counter[i] += 0
+        lines = ['Line Format Counts']
+        game_count = 0
+        for index, count in self._line_formats_counter.most_common():
+            if index == 'games':
+                game_count = count
+                continue
+            pattern = self._lineFormats[index].pattern
+            lines.append(f'{count:10,}: ({index:2}) {pattern}')
+        lines.append(f'Games Played: {game_count}')
+        self.info('\n'.join(lines))
+        if game_count > 50:
+            self._line_formats_counter.clear()
 
     # map: ut4_casa
     # num score ping name            lastmsg address               qport rate
@@ -520,8 +554,9 @@ class Iourt43Parser(b3.parser.Parser):
         :param line: The line to be parsed
         """
         line = re.sub(self._lineClear, '', line, 1)
-        for f in self._lineFormats:
+        for index, f in enumerate(self._lineFormats):
             if m := re.match(f, line):
+                self._line_formats_counter[index] += 1
                 break
         else:
             if '------' not in line:
@@ -1123,6 +1158,7 @@ class Iourt43Parser(b3.parser.Parser):
 
     def OnShutdowngame(self, action, data=None, match=None):
         self.game.mapEnd()
+        self.dump_line_format_counter()
         return self.getEvent('EVT_GAME_EXIT', data=data)
 
     def OnInitgame(self, action, data, match=None):
