@@ -440,11 +440,11 @@ class AdminPlugin(b3.plugin.Plugin):
 
         # install past bans check crontab
         if self._past_bans_check_rate > 0:
-            self.debug(
-                'installing past bans check crontab: B3 will check for banned players every %s seconds' % self._past_bans_check_rate)
-            self.console.cron.cancel(id(self._past_bans_crontab))
-            self._past_bans_crontab = b3.cron.PluginCronTab(self, self.doPastBansCheck, minute='*')
-            self.console.cron.add(self._past_bans_crontab)
+            self.console.cron - self._past_bans_crontab
+            self._past_bans_crontab = b3.cron.PluginCronTab(
+                    self, self.doPastBansCheck, minute=f'*/{self._past_bans_check_rate}'
+            )
+            self.console.cron + self._past_bans_crontab
 
     def registerCommand(self, plugin, command, level, handler, alias=None, secretLevel=None):
         """
