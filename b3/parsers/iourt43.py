@@ -189,8 +189,8 @@ class Iourt43Parser(b3.parser.Parser):
                    r'(?P<text>.*))$', re.IGNORECASE),
 
         # red:12 blue:8
-        re.compile(r'^(?P<data>((?P<action>red):\s(?P<score_red>\d+)\s'
-                   r'blue:\s(?P<score_blue>\d+)))', re.IGNORECASE),
+        re.compile(r'^(?P<data>((?P<action>red):(?P<score_red>\d+)\s+'
+                   r'blue:(?P<score_blue>\d+)))$', re.IGNORECASE),
 
         # Callvote: 1 - "map dressingroom"
         re.compile(r'^(?P<action>Callvote): (?P<data>(?P<cid>[0-9]+) - "(?P<vote_string>.*)")$', re.IGNORECASE),
