@@ -1125,7 +1125,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 self.console.say(self.getMessage('cleared_warnings', {'admin': client.exactName,
                                                                       'player': sclient.exactName}))
         else:
-            for cid, c in self.console.clients.items():
+            for cid, c in list(self.console.clients.items()):
                 self.clearAll(c, client)
             self.console.say(self.getMessage('cleared_warnings_for_all', {'admin': client.exactName}))
 
