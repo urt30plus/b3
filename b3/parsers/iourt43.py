@@ -1,5 +1,4 @@
 import re
-import string
 import threading
 from collections import Counter
 
@@ -579,34 +578,37 @@ class Iourt43Parser(b3.parser.Parser):
         else:
             if '------' not in line:
                 self.warning('Line did not match format: %s', line)
-            return
+            return None, None, None
 
         try:
-            data = m.group('data').strip()
+            data = m['data'].strip()
         except:
             data = None
-        return m, m.group('action').lower(), data, None, None
+
+        return m, m['action'].lower(), data
 
     def parseLine(self, line):
         """
         Parse a log line creating necessary events.
         :param line: The log line to be parsed
         """
-        if not (m := self.getLineParts(line)):
+        match, action, data = self.getLineParts(line)
+        if not match:
             return False
 
-        match, action, data, client, target = m
-        func_name = 'On%s' % string.capwords(action).replace(' ', '')
+        func_name = f"On{action.title().replace(' ', '')}"
 
         if func := getattr(self, func_name, None):
             if event := func(action, data, match):
                 self.queueEvent(event)
         elif action in self._eventMap:
-            self.queueEvent(self.getEvent(self._eventMap[action], data=data, client=client, target=target))
+            self.queueEvent(self.getEvent(self._eventMap[action], data=data))
         else:
             data = str(action) + ': ' + str(data)
             self.warning('Unknown Event: %s', data)
-            self.queueEvent(self.getEvent('EVT_UNKNOWN', data=data, client=client, target=target))
+            self.queueEvent(self.getEvent('EVT_UNKNOWN', data=data))
+
+        return True
 
     def OnInitauth(self, action, data, match=None):
         pass
