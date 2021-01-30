@@ -165,6 +165,12 @@ class Iourt43Parser(b3.parser.Parser):
         # Warmup:
         re.compile(r'^(?P<action>[a-z]+):$', re.IGNORECASE),
 
+        # AccountValidated: 4 - m0neysh0t - -1 - ""
+        # InitAuth: \auth\1\auth_status\public\auth_cheaters\1\auth_tags\1\...
+        # InitGame: \sv_allowdownload\0\g_matchmode\0\g_gametype\8\...
+        re.compile(r'^(?P<action>(AccountValidated|InitAuth|InitGame)):\s'
+                   r'(?P<data>.*)$'),
+
         # Bombholder is 2
         re.compile(r'^(?P<action>Bombholder)(?P<data>\sis\s(?P<cid>[0-9]+))$', re.IGNORECASE),
 
