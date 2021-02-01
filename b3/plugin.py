@@ -98,9 +98,6 @@ class Plugin:
                     self.loadConfig(config)
                 except b3.config.ConfigFileNotValid as e:
                     self.critical("The configuration file syntax is broken: %s", e)
-                    self.critical("TIP: make use of a text editor with syntax highlighting to "
-                                  "modify your config files: it makes easy to spot errors")
-                    raise e
 
         self.registerEvent('EVT_STOP', self.onStop)
         self.registerEvent('EVT_EXIT', self.onExit)
@@ -394,13 +391,11 @@ class Plugin:
         Dispatch an Event.
         :param event: The event to be dispatched
         """
-        collection = self.eventmap[event.type]
-        for func in collection:
+        for func in self.eventmap[event.type]:
             try:
                 func(event)
             except TypeError as e:
-                self.error('could not parse event %s: %s',
-                           self.console.getEventName(event.type), e)
+                self.error('could not parse event %s: %s', event.key, e)
 
     def register_commands_from_config(self):
         """Registers the commands for this plugin as defined in its config
