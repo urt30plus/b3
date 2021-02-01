@@ -315,7 +315,6 @@ class DatabaseStorage(Storage):
         Return a client object fetching data from the storage.
         :param client: The client object to fill with fetch data.
         """
-        self.console.debug('Storage: getClient %s', client)
         where = {'id': client.id} if client.id > 0 else {'guid': client.guid}
         try:
             with self.query(QueryBuilder(self.db).SelectQuery('*', 'clients', where, None, 1)) as cursor:
@@ -346,7 +345,6 @@ class DatabaseStorage(Storage):
         Return a list of clients matching the given data:
         :param match: The data to match clients against.
         """
-        self.console.debug('Storage: getClientsMatching %s', match)
         stmt = QueryBuilder(self.db).SelectQuery(
             '*', 'clients', match, 'time_edit DESC', 5
         )
@@ -367,7 +365,6 @@ class DatabaseStorage(Storage):
         :param client: The client to be saved.
         :return: The ID of the client stored into the database.
         """
-        self.console.debug('Storage: setClient %s', client)
         fields = ('ip', 'greeting', 'connections', 'time_edit',
                   'guid', 'pbid', 'name', 'time_add', 'auto_login',
                   'mask_level', 'group_bits', 'login', 'password')
@@ -378,7 +375,6 @@ class DatabaseStorage(Storage):
             if hasattr(client, self.getVar(f)):
                 data[f] = getattr(client, self.getVar(f))
 
-        self.console.debug('Storage: setClient data %s', data)
         if client.id > 0:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'clients', {'id': client.id}))
         else:
@@ -393,7 +389,6 @@ class DatabaseStorage(Storage):
         :param alias: The alias to be saved.
         :return: The ID of the alias stored into the database.
         """
-        self.console.debug('Storage: setClientAlias %s', alias)
         fields = ('num_used', 'alias', 'client_id', 'time_add', 'time_edit')
         data = {'id': alias.id} if alias.id else {}
 
@@ -401,7 +396,6 @@ class DatabaseStorage(Storage):
             if hasattr(alias, self.getVar(f)):
                 data[f] = getattr(alias, self.getVar(f))
 
-        self.console.debug('Storage: setClientAlias data %s', data)
         if alias.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'aliases', {'id': alias.id}))
         else:
@@ -416,7 +410,6 @@ class DatabaseStorage(Storage):
         :param alias: The alias object to fill with fetch data.
         :return: The alias object given in input with all the fields set.
         """
-        self.console.debug('Storage: getClientAlias %s', alias)
         if hasattr(alias, 'id') and alias.id > 0:
             query = QueryBuilder(self.db).SelectQuery('*', 'aliases', {'id': alias.id}, None, 1)
         elif hasattr(alias, 'alias') and hasattr(alias, 'clientId'):
@@ -443,7 +436,6 @@ class DatabaseStorage(Storage):
         :param client: The client whose aliases we want to retrieve.
         :return: List of b3.clients.Alias instances.
         """
-        self.console.debug('Storage: getClientAliases %s', client)
         stmt = QueryBuilder(self.db).SelectQuery(
             '*', 'aliases', {'client_id': client.id}, 'id'
         )
@@ -467,7 +459,6 @@ class DatabaseStorage(Storage):
         Insert/update an ipalias in the storage.
         :param ipalias: The ipalias to be saved.
         """
-        self.console.debug('Storage: setClientIpAddress %s', ipalias)
         fields = ('num_used', 'ip', 'client_id', 'time_add', 'time_edit')
         data = {'id': ipalias.id} if ipalias.id else {}
 
@@ -475,7 +466,6 @@ class DatabaseStorage(Storage):
             if hasattr(ipalias, self.getVar(f)):
                 data[f] = getattr(ipalias, self.getVar(f))
 
-        self.console.debug('Storage: setClientIpAddress data %s', data)
         if ipalias.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'ipaliases', {'id': ipalias.id}))
         else:
@@ -490,7 +480,6 @@ class DatabaseStorage(Storage):
         :param ipalias: The ipalias object to fill with fetch data.
         :return: The ip alias object given in input with all the fields set.
         """
-        self.console.debug('Storage: getClientIpAddress %s', ipalias)
         if hasattr(ipalias, 'id') and ipalias.id > 0:
             query = QueryBuilder(self.db).SelectQuery('*', 'ipaliases', {'id': ipalias.id}, None, 1)
         elif hasattr(ipalias, 'ip') and hasattr(ipalias, 'clientId'):
@@ -517,7 +506,6 @@ class DatabaseStorage(Storage):
         :param client: The client whose ip aliases we want to retrieve.
         :return: List of b3.clients.IpAlias instances
         """
-        self.console.debug('Storage: getClientIpAddresses %s', client)
         stmt = QueryBuilder(self.db).SelectQuery(
             '*', 'ipaliases', {'client_id': client.id}, 'id'
         )
@@ -575,8 +563,6 @@ class DatabaseStorage(Storage):
             if hasattr(penalty, self.getVar(f)):
                 data[f] = getattr(penalty, self.getVar(f))
 
-        self.console.debug('Storage: setClientPenalty data %s', data)
-
         if penalty.id:
             self.query(QueryBuilder(self.db).UpdateQuery(data, 'penalties', {'id': penalty.id}))
         else:
@@ -591,7 +577,6 @@ class DatabaseStorage(Storage):
         :param penalty: The penalty object to fill with fetch data.
         :return: The penalty given as input with all the fields set.
         """
-        self.console.debug('Storage: getClientPenalty %s', penalty)
         stmt = QueryBuilder(self.db).SelectQuery(
             '*', 'penalties', {'id': penalty.id}, None, 1
         )
@@ -606,7 +591,6 @@ class DatabaseStorage(Storage):
         :param type: The type of the penalties we want to retrieve.
         :return: List of penalties
         """
-        self.console.debug('Storage: getClientPenalties %s', client)
         where = QueryBuilder(self.db).WhereClause({'type': type, 'client_id': client.id, 'inactive': 0})
         where += f' AND (time_expire = -1 OR time_expire > {int(time())})'
         stmt = QueryBuilder(self.db).SelectQuery(
