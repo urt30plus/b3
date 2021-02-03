@@ -108,69 +108,55 @@ class AdminPlugin(b3.plugin.Plugin):
     }
 
     def onLoadConfig(self):
-        """
-        Load plugin configuration.
-        """
         self.load_config_warn_reasons()
         self.load_config_messages()
         self.load_config_warn()
 
         try:
             self._noreason_level = self.console.getGroupLevel(self.config.get('settings', 'noreason_level'))
-            self.debug('loaded settings/noreason_level: %s' % self._noreason_level)
         except NoOptionError:
             self.warning('could not find settings/noreason_level in config file, '
-                         'using default: %s' % self._noreason_level)
+                         'using default: %s', self._noreason_level)
         except KeyError as e:
-            self.error('could not load settings/noreason_level config value: %s' % e)
-            self.debug('using default value (%s) for settings/noreason_level' % self._noreason_level)
+            self.error('could not load settings/noreason_level config value: %s', e)
 
         try:
             self._long_tempban_level = self.console.getGroupLevel(self.config.get('settings', 'long_tempban_level'))
-            self.debug('loaded settings/long_tempban_level: %s' % self._long_tempban_level)
         except NoOptionError:
             self.warning('could not find settings/long_tempban_level in config file, '
-                         'using default: %s' % self._long_tempban_level)
+                         'using default: %s', self._long_tempban_level)
         except KeyError as e:
-            self.error('could not load settings/long_tempban_level config value: %s' % e)
-            self.debug('using default value (%s) for settings/long_tempban_level' % self._long_tempban_level)
+            self.error('could not load settings/long_tempban_level config value: %s', e)
 
         try:
             self._long_tempban_max_duration = self.config.getDuration('settings', 'long_tempban_max_duration')
-            self.debug('loaded settings/long_tempban_max_duration: %s' % self._long_tempban_level)
         except NoOptionError:
             self.warning('could not find settings/long_tempban_max_duration in config file, '
-                         'using default: %s' % self._long_tempban_max_duration)
+                         'using default: %s', self._long_tempban_max_duration)
 
         try:
             self._hidecmd_level = self.console.getGroupLevel(self.config.get('settings', 'hidecmd_level'))
-            self.debug('loaded settings/hidecmd_level: %s' % self._hidecmd_level)
         except NoOptionError:
             self.warning('could not find settings/hidecmd_level in config file, '
-                         'using default: %s' % self._hidecmd_level)
+                         'using default: %s', self._hidecmd_level)
         except KeyError as e:
             self.error('could not load settings/hidecmd_level config value: %s' % e)
-            self.debug('using default value (%s) for settings/hidecmd_level' % self._hidecmd_level)
 
         try:
             self._admins_level = self.console.getGroupLevel(self.config.get('settings', 'admins_level'))
-            self.debug('loaded settings/admins_level: %s' % self._admins_level)
         except NoOptionError:
             self.warning('could not find settings/admins_level in config file, '
-                         'using default: %s' % self._admins_level)
+                         'using default: %s', self._admins_level)
         except KeyError as e:
-            self.error('could not load settings/admins_level config value: %s' % e)
-            self.debug('using default value (%s) for settings/admins_level' % self._admins_level)
+            self.error('could not load settings/admins_level config value: %s', e)
 
         try:
             self._announce_registration = self.config.getboolean('settings', 'announce_registration')
-            self.debug('loaded settings/announce_registration: %s' % self._announce_registration)
         except NoOptionError:
             self.warning('could not find settings/announce_registration in config file, '
-                         'using default: %s' % self._announce_registration)
+                         'using default: %s', self._announce_registration)
         except ValueError as e:
-            self.error('could not load settings/announce_registration config value: %s' % e)
-            self.debug('using default value (%s) for settings/announce_registration' % self._announce_registration)
+            self.error('could not load settings/announce_registration config value: %s', e)
 
         try:
             # be sure to clamp at 59 seconds else the cronjob won't work properly
@@ -178,19 +164,13 @@ class AdminPlugin(b3.plugin.Plugin):
             if past_bans_check_rate > 59:
                 past_bans_check_rate = 59
             self._past_bans_check_rate = past_bans_check_rate
-            self.debug('loaded settings/past_bans_check_rate: %s' % self._past_bans_check_rate)
         except NoOptionError:
             self.warning('could not find settings/past_bans_check_rate in config file, '
-                         'using default: %s' % self._past_bans_check_rate)
+                         'using default: %s', self._past_bans_check_rate)
         except ValueError as e:
-            self.error('could not load settings/past_bans_check_rate config value: %s' % e)
-            self.debug('using default value (%s) for settings/past_bans_check_rate' % self._past_bans_check_rate)
+            self.error('could not load settings/past_bans_check_rate config value: %s', e)
 
     def load_config_messages(self):
-        """
-        Load section 'messages' from config and put the messages in local cache.
-        Optionally apply validation rules.
-        """
         self._messages = {
             # regme_confirmation
             'regme_confirmation': "^7Thanks for your registration. You are now a member of the group %s"
@@ -203,69 +183,53 @@ class AdminPlugin(b3.plugin.Plugin):
             self._messages['regme_confirmation'] = msg
         except NoOptionError:
             self.warning('could not find messages/regme_confirmation in config file, '
-                         'using default: %s' % self._messages['regme_confirmation'])
+                         'using default: %s', self._messages['regme_confirmation'])
         except ValueError as e:
-            self.error('could not load messages/regme_confirmation config value: %s' % e)
-            self.debug(
-                'using default value (%s) for messages/regme_confirmation' % self._messages['regme_confirmation'])
+            self.error('could not load messages/regme_confirmation config value: %s', e)
 
     def load_config_warn(self):
-        """
-        Load section 'warn' from config.
-        """
         try:
             raw_data = self.config.getint('warn', 'warn_delay')
             if raw_data < 0:
                 raise ValueError("can't be less than 0")
             self.warn_delay = raw_data
-            self.debug('loaded warn/warn_delay: %s' % self.warn_delay)
         except NoOptionError:
             self.warning('could not find warn/warn_delay in config file, '
-                         'using default: %s' % self.warn_delay)
+                         'using default: %s', self.warn_delay)
         except ValueError as e:
-            self.error('could not load warn/warn_delay config value: %s' % e)
-            self.debug('using default value (%s) for warn/warn_delay' % self.warn_delay)
+            self.error('could not load warn/warn_delay config value: %s', e)
 
         try:
             raw_data = self.config.getint('warn', 'instant_kick_num')
             if raw_data < 0:
                 raise ValueError("can't be less than 0")
             self.warn_instant_kick_num = raw_data
-            self.debug('loaded warn/instant_kick_num: %s' % self.warn_instant_kick_num)
         except NoOptionError:
             self.warning('could not find warn/instant_kick_num in config file, '
-                         'using default: %s' % self.warn_instant_kick_num)
+                         'using default: %s', self.warn_instant_kick_num)
         except ValueError as e:
-            self.error('could not load warn/instant_kick_num config value: %s' % e)
-            self.debug('using default value (%s) for warn/instant_kick_num' % self.warn_instant_kick_num)
+            self.error('could not load warn/instant_kick_num config value: %s', e)
 
         try:
             raw_data = self.config.getint('warn', 'alert_kick_num')
             if raw_data < 0:
                 raise ValueError("can't be less than 0")
             self.warn_alert_kick_num = raw_data
-            self.debug('loaded warn/alert_kick_num: %s' % self.warn_alert_kick_num)
         except NoOptionError:
             self.warning('could not find warn/alert_kick_num in config file, '
-                         'using default: %s' % self.warn_alert_kick_num)
+                         'using default: %s', self.warn_alert_kick_num)
         except ValueError as e:
-            self.error('could not load warn/alert_kick_num config value: %s' % e)
-            self.debug('using default value (%s) for warn/alert_kick_num' % self.warn_alert_kick_num)
+            self.error('could not load warn/alert_kick_num config value: %s', e)
 
         try:
             self._warn_command_abusers = self.config.getboolean('warn', 'warn_command_abusers')
-            self.debug('loaded warn/warn_command_abusers: %s' % self._warn_command_abusers)
         except NoOptionError:
             self.warning('could not find warn/warn_command_abusers in config file, '
-                         'using default: %s' % self._warn_command_abusers)
+                         'using default: %s', self._warn_command_abusers)
         except ValueError as e:
-            self.error('could not load warn/warn_command_abusers config value: %s' % e)
-            self.debug('using default value (%s) for warn/warn_command_abusers' % self._warn_command_abusers)
+            self.error('could not load warn/warn_command_abusers config value: %s', e)
 
     def load_config_warn_reasons(self):
-        """
-        Load section 'warn_reasons' from config.
-        """
         re_valid_warn_reason_value_from_config = re.compile(r"""
                 ^
                 (?:
@@ -291,7 +255,7 @@ class AdminPlugin(b3.plugin.Plugin):
             if re.match(re_valid_warn_reason_value_from_config, reason_from_config) is None:
                 self.warning("""warn_reason '%s': invalid value "%s". Expected format is : "<duration>, <reason or
                                 /spam# followed by a reference to a spamage keyword>" or '/' followed by a reference to
-                                another warn_reason""" % (key, reason_from_config))
+                                another warn_reason""", key, reason_from_config)
                 return
 
             if reason_from_config[:1] == '/':
@@ -299,15 +263,15 @@ class AdminPlugin(b3.plugin.Plugin):
                     r = self.config.getTextTemplate('warn_reasons', reason_from_config[1:])
                 except NoOptionError:
                     self.warning("warn_reason '%s' refers to '/%s' but warn_reason '%s' cannot "
-                                 "be found" % (key, reason_from_config[1:], reason_from_config[1:]))
+                                 "be found", key, reason_from_config[1:], reason_from_config[1:])
                     return
                 except Exception as err:
                     self.error("warn_reason '%s' refers to '/%s' but '%s' could not be read: "
-                               "%s" % (key, reason_from_config[1:], reason_from_config[1:], err), err)
+                               "%s", key, reason_from_config[1:], reason_from_config[1:], err, err)
                     return
 
                 if r[:1] == '/':
-                    self.warning("warn_reason '%s': possible recursion %s, %s" % (key, r, reason_from_config[1:]))
+                    self.warning("warn_reason '%s': possible recursion %s, %s", key, r, reason_from_config[1:])
                     return
             else:
                 r = reason_from_config
@@ -318,7 +282,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 spam_reason = self.getSpam(r[6:])
                 if spam_reason is None:
                     self.warning("warn_reason '%s' refers to '/spam#%s' but spamage '%s' cannot be "
-                                 "found" % (key, r[6:], r[6:]))
+                                 "found", key, r[6:], r[6:])
                     return
                 else:
                     r = spam_reason
@@ -329,9 +293,9 @@ class AdminPlugin(b3.plugin.Plugin):
             if self.config.has_option('warn_reasons', key):
                 self.warn_reasons[key] = load_warn_reason(key, self.config.getTextTemplate('warn_reasons', key))
             if key not in self.warn_reasons or self.warn_reasons[key] is None:
-                self.warning("no valid option '%s' in section 'warn_reasons': falling back on default value" % key)
+                self.warning("no valid option '%s' in section 'warn_reasons': falling back on default value", key)
                 self.warn_reasons[key] = functions.time2minutes(default_duration), default_reason
-            self.info("warn reason '%s': %s" % (key, self.warn_reasons[key]))
+            self.info("warn reason '%s': %s", key, self.warn_reasons[key])
 
         self.info("------ loading warn_reasons from config file ------")
 
@@ -350,9 +314,6 @@ class AdminPlugin(b3.plugin.Plugin):
         self.info("-------------- warn_reasons loaded ----------------")
 
     def onStartup(self):
-        """
-        Plugin startup.
-        """
         self.registerEvent('EVT_CLIENT_SAY', self.OnSay)
         self.registerEvent('EVT_CLIENT_TEAM_SAY', self.OnSay)
         self.registerEvent('EVT_CLIENT_SQUAD_SAY', self.OnSay)
@@ -363,37 +324,33 @@ class AdminPlugin(b3.plugin.Plugin):
             cmdPrefix = self.config.get('settings', 'command_prefix')
             if cmdPrefix:
                 self.cmdPrefix = cmdPrefix
-            self.debug('loaded settings/command_prefix: %s' % self.cmdPrefix)
         except NoOptionError:
             self.warning('could not find settings/command_prefix in config file, '
-                         'using default: %s' % self.cmdPrefix)
+                         'using default: %s', self.cmdPrefix)
 
         try:
             cmdPrefixLoud = self.config.get('settings', 'command_prefix_loud')
             if cmdPrefixLoud:
                 self.cmdPrefixLoud = cmdPrefixLoud
-            self.debug('loaded settings/command_prefix_loud: %s' % self.cmdPrefixLoud)
         except NoOptionError:
             self.warning('could not find settings/command_prefix_loud in config file, '
-                         'using default: %s' % self.cmdPrefixLoud)
+                         'using default: %s', self.cmdPrefixLoud)
 
         try:
             cmdPrefixBig = self.config.get('settings', 'command_prefix_big')
             if cmdPrefixBig:
                 self.cmdPrefixBig = cmdPrefixBig
-            self.debug('loaded settings/command_prefix_big: %s' % self.cmdPrefixBig)
         except NoOptionError:
             self.warning('could not find settings/command_prefix_big in config file, '
-                         'using default: %s' % self.cmdPrefixBig)
+                         'using default: %s', self.cmdPrefixBig)
 
         try:
             cmdPrefixPrivate = self.config.get('settings', 'command_prefix_private')
             if cmdPrefixPrivate:
                 self.cmdPrefixPrivate = cmdPrefixPrivate
-            self.debug('loaded settings/command_prefix_private: %s' % self.cmdPrefixPrivate)
         except NoOptionError:
             self.warning('could not find settings/command_prefix_private in config file, '
-                         'using default: %s' % self.cmdPrefixPrivate)
+                         'using default: %s', self.cmdPrefixPrivate)
 
         # register commands
         if 'commands' in self.config.sections():
@@ -413,7 +370,6 @@ class AdminPlugin(b3.plugin.Plugin):
             superadmins = []
             try:
                 superadmins = self.console.clients.lookupSuperAdmins()
-                self.debug('%s superadmins found in database' % len(superadmins))
             except Exception as msg:
                 # no proper groups available, cannot continue
                 self.critical('seems your groups table in the database is empty: please recreate your database using '
@@ -427,16 +383,16 @@ class AdminPlugin(b3.plugin.Plugin):
                     self._commands['iamgod'].level[0] >= 0:
                 # here the config file for the admin plugin explicitly enables the iamgod command
                 if len(superadmins) == 0:
-                    self.verbose('!iamgod command enabled by config file: be sure to disable it after typing !iamgod.')
+                    self.warning('!iamgod command enabled by config file: be sure to disable it after typing !iamgod.')
                 else:
                     self.warning('!iamgod command enabled by config file but %s superadmin are already registered: ' +
                                  'make sure to disable the iamgod command in the admin plugin', len(superadmins))
             elif len(superadmins) == 0:
-                self.verbose('no superadmin found: enabling !iamgod')
+                self.info('no superadmin found: enabling !iamgod')
                 # There are no superadmins, enable the !iamgod command
                 self.registerCommand(self, 'iamgod', 0, getCmd(self, 'iamgod'))
             else:
-                self.verbose('superadmin(s) found: no need for !iamgod')
+                self.info('superadmin(s) found: no need for !iamgod')
 
         # install past bans check crontab
         if self._past_bans_check_rate > 0:
@@ -457,7 +413,7 @@ class AdminPlugin(b3.plugin.Plugin):
         :param secretLevel: The command secret level
         """
         if not handler:
-            self.error('command "%s" registration failed: no handler specified' % command)
+            self.error('command "%s" registration failed: no handler specified', command)
             return False
 
         if plugin.config and plugin != self and plugin.config.has_option('commands', command):
@@ -487,12 +443,9 @@ class AdminPlugin(b3.plugin.Plugin):
             self._commands[command].prefixLoud = self.cmdPrefixLoud
             self._commands[command].prefixPrivate = self.cmdPrefixPrivate
 
-            self.debug('command "%s (%s)" registered with %s for level %s' % (command, alias,
-                                                                              self._commands[command].func.__name__,
-                                                                              self._commands[command].level))
             return True
         except Exception as msg:
-            self.error('command "%s" registration failed: %s' % (command, msg))
+            self.error('command "%s" registration failed: %s', command, msg)
             self.exception(msg)
             return False
 
@@ -504,27 +457,20 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         try:
             command = self._commands[name]
-            self.debug('unregistering command %s (%s) : %s' % (command.command, command.alias, command.func.__name__))
             alias = command.alias
             del self._commands[command.command]
             if alias and alias in self._commands:
                 del self._commands[alias]
             return True
         except KeyError:
-            self.debug('command not found: %s' % name)
+            self.warning('unregisterCommand(%s): command not found', name)
             return False
 
     def OnPrivateSay(self, event):
-        """
-        Handle EVT_CLIENT_PRIVATE_SAY
-        """
         if event.target and event.client.id == event.target.id:
             self.OnSay(event, True)
 
     def OnSay(self, event, private=False):
-        """
-        Handle EVT_CLIENT_SAY
-        """
         event_data = event.data
         event_client = event.client
         cmd_prefixes = (self.cmdPrefix, self.cmdPrefixLoud,
@@ -678,8 +624,7 @@ class AdminPlugin(b3.plugin.Plugin):
         :param handle: The search handle
         :param client: The client who to notify search results
         """
-        matches = self.console.clients.getByMagic(handle)
-        if matches:
+        if matches := self.console.clients.getByMagic(handle):
             if len(matches) > 1:
                 names = []
                 for c in matches:
@@ -707,12 +652,12 @@ class AdminPlugin(b3.plugin.Plugin):
         Return None if could cmd is not in the expected format
         """
         if m := re.match(self._parseUserCmdRE, cmd):
-            cid = m.group('cid')
-            parms = m.group('parms')
+            parms = m['parms']
 
             if req and not parms:
                 return None
 
+            cid = m['cid']
             if cid[:1] == "'" and cid[-1:] == "'":
                 cid = cid[1:-1]
 
@@ -736,7 +681,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 try:
                     levelmin = self.console.getGroupLevel(levelmin)
                 except KeyError:
-                    self.error('unknown group %s' % levelmin)
+                    self.error('unknown group %s', levelmin)
                     return False
             try:
                 levelmax = int(levelmax)
@@ -744,9 +689,9 @@ class AdminPlugin(b3.plugin.Plugin):
                 try:
                     levelmax = self.console.getGroupLevel(levelmax)
                 except KeyError:
-                    self.error('unknown group %s' % levelmax)
+                    self.error('unknown group %s', levelmax)
                     return False
-            level = '%s-%s' % (levelmin, levelmax)
+            level = f'{levelmin}-{levelmax}'
         else:
             try:
                 level = int(level)
@@ -754,7 +699,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 try:
                     level = self.console.getGroupLevel(level)
                 except KeyError:
-                    self.error('unknown group %s' % level)
+                    self.error('unknown group %s', level)
                     return False
         return level
 
@@ -848,12 +793,10 @@ class AdminPlugin(b3.plugin.Plugin):
                 # update counts for next check
                 for k2 in self._past_bans_counts:
                     self._past_bans_counts[k2] = counts[k2]
-                self.debug('checking for banned clients still connected to the server...')
                 for client in self.console.clients.getList():
                     if client.numBans > 0:
                         ban = client.lastBan
                         if ban:
-                            self.debug('banned client still online %s: re-applying penalty (%s)' % (client, ban.type))
                             client.reBan(ban)
                 break
 
@@ -921,7 +864,7 @@ class AdminPlugin(b3.plugin.Plugin):
             duration, warning = self.getWarning(keyword)
         except Exception:
             duration, warning = self.getWarning('generic')
-            warning = '%s %s' % (warning, keyword)
+            warning = f'{warning} {keyword}'
 
         if newDuration:
             duration = newDuration
@@ -1050,7 +993,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         - shutdown b3
         """
-        cmd.sayLoudOrPM(client, '^7Shutting down ^3%s' % data)
+        cmd.sayLoudOrPM(client, f'^7Shutting down ^3{data}')
         self.console.die()
 
     def cmd_restart(self, data, client, cmd=None):
@@ -1094,9 +1037,9 @@ class AdminPlugin(b3.plugin.Plugin):
         sclient.save()
 
         if sclient != client:
-            client.message('^7Masked %s as %s' % (sclient.name, group.name))
+            client.message(f'^7Masked {sclient.name} as {group.name}')
 
-        sclient.message('^7Masked as %s' % group.name)
+        sclient.message(f'^7Masked as {group.name}')
 
     def cmd_unmask(self, data, client, cmd=None):
         """
@@ -1111,7 +1054,7 @@ class AdminPlugin(b3.plugin.Plugin):
             sclient.maskLevel = 0
             sclient.save()
             if sclient != client:
-                client.message('^7Un-Masked %s' % sclient.name)
+                client.message(f'^7Un-Masked {sclient.name}')
 
             sclient.message('^7Un-Masked')
 
@@ -2360,4 +2303,4 @@ class Command:
         return params
 
     def __repr__(self):
-        return "Command<" + self.command + ">"
+        return f"Command<{self.command}>"

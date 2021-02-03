@@ -1,6 +1,6 @@
 import logging
 import sys
-from unittest.mock import patch, call, Mock
+from unittest.mock import ANY, patch, call, Mock
 
 import b3
 from tests.plugins.admin import Admin_TestCase, Admin_functional_test
@@ -72,7 +72,7 @@ class Test_conf_announce_registration(Config_reading_TestCase):
         self.p.onLoadConfig()
         # THEN
         self.assertTrue(self.p._announce_registration)
-        self.assertIn(call('could not find settings/announce_registration in config file, using default: True'),
+        self.assertIn(call('could not find settings/announce_registration in config file, using default: %s', True),
                       self.warning_mock.mock_calls)
         self.assertNoErrorMessage()
 
@@ -135,8 +135,9 @@ announce_registration:
         self.assertTrue(self.p._announce_registration)
         self.assertNoWarningMessage()
         self.assertIn(
-            call("could not load settings/announce_registration config value: settings.announce_registration : "
-                 "'' is not a boolean value"), self.error_mock.mock_calls)
+            call("could not load settings/announce_registration config value: %s", ANY),
+            self.error_mock.mock_calls
+        )
 
     def test_junk(self):
         # GIVEN
@@ -149,8 +150,9 @@ announce_registration: xxxxxxxxx
         self.assertTrue(self.p._announce_registration)
         self.assertNoWarningMessage()
         self.assertIn(
-            call("could not load settings/announce_registration config value: settings.announce_registration : "
-                 "'xxxxxxxxx' is not a boolean value"), self.error_mock.mock_calls)
+            call("could not load settings/announce_registration config value: %s", ANY),
+            self.error_mock.mock_calls
+        )
 
 
 class Test_conf_regme_confirmation(Config_reading_TestCase):
@@ -169,8 +171,9 @@ class Test_conf_regme_confirmation(Config_reading_TestCase):
         self.assertEqual('^7Thanks for your registration. You are now a member of the group f00',
                          self.p.getMessage('regme_confirmation', 'f00'))
         self.assertIn(
-            call("could not find messages/regme_confirmation in config file, using default: ^7Thanks for your "
-                 "registration. You are now a member of the group %s"), self.warning_mock.mock_calls)
+            call('could not find messages/regme_confirmation in config file, using default: %s', 
+                 '^7Thanks for your registration. You are now a member of the group %s'), 
+                 self.warning_mock.mock_calls)
         self.assertNoErrorMessage()
 
     def test_nominal(self):
@@ -196,8 +199,10 @@ regme_confirmation: ^7Thanks for your registration
         self.assertEqual('^7Thanks for your registration. You are now a member of the group f00',
                          self.p.getMessage('regme_confirmation', 'f00'))
         self.assertNoWarningMessage()
-        self.assertIn(call("could not load messages/regme_confirmation config value: message regme_confirmation must "
-                           "have a placeholder \'%%s\' for the group name"), self.error_mock.mock_calls)
+        self.assertIn(
+            call("could not load messages/regme_confirmation config value: %s", ANY),
+            self.error_mock.mock_calls
+        )
 
 
 class Test_warn_reasons_default_config(Admin_functional_test):
