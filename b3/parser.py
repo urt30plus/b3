@@ -596,7 +596,7 @@ class Parser:
         # we will import needed python classes and generate configuration file instances for plugins.
         for p in self.config.get_plugins():
 
-            if p['name'] in [plugins[i].name for i in plugins if plugins[i].name == p['name']]:
+            if p['name'] in plugins:
                 # do not load a plugin multiple times
                 self.warning('Plugin %s already loaded: avoid multiple entries of the same plugin', p['name'])
                 continue
