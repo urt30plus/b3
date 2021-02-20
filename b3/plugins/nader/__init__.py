@@ -382,7 +382,6 @@ class NaderPlugin(b3.plugin.Plugin):
                 -1 * skillLost, -1 * weapon_factor * skillLost))
 
     def updateHallOfFame(self, nadeKillers, mapName):
-        self.debug('Updating Hall of Fame')
         if len(nadeKillers) == 0:
             return
 
@@ -402,15 +401,17 @@ class NaderPlugin(b3.plugin.Plugin):
             listKills = [x for (key, x) in tmplist]
             listKills.reverse()
 
-        (bestPlayer, topKills) = listKills[0]
-        self.debug('BestPlayer : %s, topKills : %s' % (bestPlayer, topKills))
+        bestPlayer, topKills = listKills[0]
+        if topKills == 0:
+            return
 
         # Retrieve data for current map (if exists)
         currentMap = mapName
-        (currentRecordHolder, currentRecordValue) = self.getRecord()
+        currentRecordHolder, currentRecordValue = self.getRecord()
         if currentRecordValue == '-1':
-            self.debug('SQL error, cannot get record')
+            self.error('SQL error, cannot get record')
             return
+
         # Retrieve HOF for the current map
         if (currentRecordHolder != '') and (currentRecordValue != '0'):
             self.debug('Record already exists in DB')
@@ -422,14 +423,10 @@ class NaderPlugin(b3.plugin.Plugin):
                 q = """UPDATE plugin_hof SET player_id=%s, score=%s WHERE plugin_name='%s' and map_name='%s'""" % (
                     bestPlayer.id, topKills, self._hof_plugin_name, currentMap
                 )
-                self.debug('New record, updating: %s' % q)
                 try:
                     cursor = self.query(q)
                 except:
                     self.error('Can\'t execute query : %s' % q)
-            else:
-                self.debug('No new record, previous record for %s = %s HE grenade kills' % (
-                    currentRecordHolder, currentRecordValue))
         else:
             # New record
             newRecord = 1
@@ -438,7 +435,6 @@ class NaderPlugin(b3.plugin.Plugin):
             q = """INSERT INTO plugin_hof (plugin_name, map_name, player_id, score) VALUES('%s', '%s', %s, %s)""" % (
                 self._hof_plugin_name, currentMap, bestPlayer.id, topKills
             )
-            self.debug('New record, inserting: %s' % q)
             try:
                 cursor = self.query(q)
             except:
