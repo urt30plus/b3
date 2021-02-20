@@ -155,9 +155,15 @@ class AdvPlugin(b3.plugin.Plugin):
         Display an advertisement message.
         :param first_try: Whether or not it's the first time we try to display this ad
         """
+        if not self.console.clients:
+            return
+
         if not (ad := self._msg.getnext()):
             return
 
+        self.print_ad(ad)
+
+    def print_ad(self, ad):
         if ad == "@nextmap":
             if nextmap := self.console.getNextMap():
                 ad = "^2Next map: ^3" + nextmap
