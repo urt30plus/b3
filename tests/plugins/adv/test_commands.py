@@ -20,7 +20,7 @@ class Test_commands(AdvTestCase):
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advlist(data=None, client=self.joe)
-        self.assertEqual([], self.p._msg.items)
+        self.assertEqual([], self.p.ad_list)
         self.assertEqual(['Adv: no ads loaded'], self.joe.message_history)
 
     def test_advlist_one_item(self):
@@ -36,7 +36,7 @@ class Test_commands(AdvTestCase):
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advlist(data=None, client=self.joe)
-        self.assertEqual(['f00'], self.p._msg.items)
+        self.assertEqual(['f00'], self.p.ad_list)
         self.assertEqual(['Adv: [1] f00'], self.joe.message_history)
 
     def test_advlist_many_items(self):
@@ -54,7 +54,7 @@ class Test_commands(AdvTestCase):
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advlist(data=None, client=self.joe)
-        self.assertEqual(['f00', 'bar', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.assertEqual(['Adv: [1] f00', 'Adv: [2] bar', 'Adv: [3] test'], self.joe.message_history)
 
     def test_advrate_no_arg_30s(self):
@@ -144,10 +144,10 @@ class Test_commands(AdvTestCase):
                 </ads>
             </configuration>
         """)
-        self.assertEqual(['f00', 'bar', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.joe.clearMessageHistory()
         self.p.cmd_advrem(data="2", client=self.joe)
-        self.assertEqual(['f00', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'test'], self.p.ad_list)
         self.assertEqual(['Adv: removed item: bar'], self.joe.message_history)
 
     def test_advrem_no_arg(self):
@@ -163,10 +163,10 @@ class Test_commands(AdvTestCase):
                 </ads>
             </configuration>
         """)
-        self.assertEqual(['f00', 'bar', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.joe.clearMessageHistory()
         self.p.cmd_advrem(data=None, client=self.joe)
-        self.assertEqual(['f00', 'bar', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.assertEqual(['Missing data, try !help advrem'], self.joe.message_history)
 
     def test_advrem_junk(self):
@@ -182,10 +182,10 @@ class Test_commands(AdvTestCase):
                 </ads>
             </configuration>
         """)
-        self.assertEqual(['f00', 'bar', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.joe.clearMessageHistory()
         self.p.cmd_advrem(data='f00', client=self.joe)
-        self.assertEqual(['f00', 'bar', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.assertEqual(['Invalid data, use the !advlist command to list valid items numbers'],
                          self.joe.message_history)
 
@@ -202,10 +202,10 @@ class Test_commands(AdvTestCase):
                 </ads>
             </configuration>
         """)
-        self.assertEqual(['f00', 'bar', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.joe.clearMessageHistory()
         self.p.cmd_advrem(data='-18', client=self.joe)
-        self.assertEqual(['f00', 'bar', 'test'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.assertEqual(['Invalid data, use the !advlist command to list valid items numbers'],
                          self.joe.message_history)
 
@@ -220,10 +220,10 @@ class Test_commands(AdvTestCase):
                 </ads>
             </configuration>
         """)
-        self.assertEqual(['f00'], self.p._msg.items)
+        self.assertEqual(['f00'], self.p.ad_list)
         self.joe.clearMessageHistory()
         self.p.cmd_advadd(data="bar", client=self.joe)
-        self.assertEqual(['f00', 'bar'], self.p._msg.items)
+        self.assertEqual(['f00', 'bar'], self.p.ad_list)
         self.assertEqual(['Adv: "bar" added'], self.joe.message_history)
 
     def test_advadd_no_arg(self):
@@ -237,8 +237,8 @@ class Test_commands(AdvTestCase):
                 </ads>
             </configuration>
         """)
-        self.assertEqual(['f00'], self.p._msg.items)
+        self.assertEqual(['f00'], self.p.ad_list)
         self.joe.clearMessageHistory()
         self.p.cmd_advadd(data=None, client=self.joe)
-        self.assertEqual(['f00'], self.p._msg.items)
+        self.assertEqual(['f00'], self.p.ad_list)
         self.assertEqual(['Missing data, try !help advadd'], self.joe.message_history)

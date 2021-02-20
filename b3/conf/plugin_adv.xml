@@ -5,7 +5,7 @@
           per minutes, then you can add a 's' as a suffix for seconds.
           i.e. : <set name="rate">30s</set>
         -->
-        <set name="rate">2</set>
+        <set name="rate">1</set>
         <!--
             you can either set here a text file that will contain one ad per line
             or fill the <ads> section below
@@ -46,7 +46,7 @@
           @regulars - connected players from the regular grout. You can change the message format in your admin plugin config
         -->
         <ad>^2Visit us at www.urt-30plus.org</ad>
-        <ad>^2Public Teamspeak 3 server: ts3urt30.ts.nfoservers.com</ad>
+        <ad>^2Public Teamspeak server: ts3urt30.ts.nfoservers.com</ad>
         <ad>^2Type !register to register as a user</ad>
         <ad>^2Type !fa in chat to forgive team damage</ad>
         <ad>^2Send demos to urt30plus@gmail.com</ad>

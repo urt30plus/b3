@@ -1,3 +1,4 @@
+import itertools
 import os
 import time
 
@@ -9,61 +10,6 @@ __author__ = 'ThorN'
 __version__ = '1.6.1'
 
 
-class MessageLoop:
-
-    def __init__(self):
-        self.items = []
-        self.index = 0
-
-    def put(self, item):
-        """
-        Add an element to the list.
-        """
-        self.items.append(item)
-
-    def getnext(self):
-        """
-        Get the next item in the list.
-        """
-        try:
-            item = self.items[self.index]
-        except IndexError:
-            self.index = 0
-            return None
-
-        self.index += 1
-
-        if self.index >= len(self.items):
-            self.index = 0
-
-        return item
-
-    def getitem(self, index):
-        """
-        Get a specific element from the list.
-        :param index: The element index
-        """
-        try:
-            return self.items[index]
-        except IndexError:
-            return None
-
-    def remove(self, index):
-        """
-        Remove an element from the list.
-        :param index: The element index
-        """
-        self.items = [item for i, item in enumerate(self.items) if i != index]
-
-    def clear(self):
-        """
-        Empty the list
-        """
-        self.items = []
-
-    def __len__(self):
-        return len(self.items)
-
 
 class AdvPlugin(b3.plugin.Plugin):
 
@@ -72,14 +18,12 @@ class AdvPlugin(b3.plugin.Plugin):
         self._admin_plugin = self.console.getPlugin('admin')
         self._xlrstats_plugin = self.console.getPlugin('xlrstats')
         self._crontab = None
-        self._msg = MessageLoop()
         self._file_name = None
         self._rate = '2'
+        self._ad_list = None
+        self._msg_cycle = None
 
     def onLoadConfig(self):
-        """
-        Load plugin configuration
-        """
         self._rate = self.getSetting("settings", "rate", default=self._rate)
 
         if self.config.has_option('settings', 'ads'):
@@ -92,35 +36,37 @@ class AdvPlugin(b3.plugin.Plugin):
         if self._crontab:
             self.console.cron - self._crontab
 
-        (m, s) = self._get_rate_minsec(self._rate)
+        m, _ = self._get_rate_minsec(self._rate)
         self._crontab = b3.cron.PluginCronTab(self, self.adv, minute=m)
         self.console.cron + self._crontab
 
     def onStartup(self):
-        """
-        Initialize the plugin
-        """
         if not self._xlrstats_plugin:
             self.debug('XLRstats not installed: @topstats not available!')
-
         self.register_commands_from_config()
 
+    def _update_ad_list(self, ad_list=None):
+        if ad_list is None:
+            ad_list = []
+        self._ad_list = ad_list
+        self._msg_cycle = itertools.cycle(ad_list)
+
+    @property
+    def ad_list(self):
+        if not self._ad_list:
+            return []
+        return self._ad_list[:]
+
     def save(self):
-        """
-        Save the current advertisements list.
-        """
         if self._file_name:
             with open(self._file_name, 'w') as f:
-                for msg in self._msg.items:
+                for msg in self._ad_list:
                     if msg:
                         f.write(msg + "\n")
         else:
             raise Exception('save to XML config not supported')
 
     def load_from_file(self, filename):
-        """
-        Load advertisements from a file.
-        """
         if not os.path.isfile(filename):
             self.error('advertisement file %s does not exist', filename)
             return
@@ -129,41 +75,32 @@ class AdvPlugin(b3.plugin.Plugin):
             self.load(f.readlines())
 
     def load_from_config(self):
-        """
-        Load advertisement from the plugin configuration file.
-        """
-        self.load([e.text for e in self.config.get("ads/ad")])
+        self.load([e.text for e in self.config.get('ads/ad')])
 
     def load(self, items=None):
-        """
-        Load an advertisement message.
-        """
-        self._msg.clear()
-
-        if items is None:
+        if not items:
+            self._update_ad_list()
             return
 
+        ad_list = []
         for w in items:
             w = w.strip()
             if len(w) > 1:
                 if w[:6] == '/spam#':
                     w = self._admin_plugin.getSpam(w[6:])
-                self._msg.put(w)
+                ad_list.append(w)
+        self._update_ad_list(ad_list)
 
     def adv(self, first_try=True):
         """
         Display an advertisement message.
         :param first_try: Whether or not it's the first time we try to display this ad
         """
-        if not self.console.clients:
-            return
+        if self.console.clients:
+            if ad := next(self._msg_cycle):
+                self.print_ad(ad, first_try)
 
-        if not (ad := self._msg.getnext()):
-            return
-
-        self.print_ad(ad)
-
-    def print_ad(self, ad):
+    def print_ad(self, ad, first_try=True):
         if ad == "@nextmap":
             if nextmap := self.console.getNextMap():
                 ad = "^2Next map: ^3" + nextmap
@@ -239,7 +176,9 @@ class AdvPlugin(b3.plugin.Plugin):
         if not data:
             client.message('Missing data, try !help advadd')
         else:
-            self._msg.put(data)
+            new_ad_list = self.ad_list
+            new_ad_list.append(data)
+            self._update_ad_list(new_ad_list)
             client.message(f'^3Adv: ^7"{data}^7" added')
             if self._file_name:
                 self.save()
@@ -250,7 +189,7 @@ class AdvPlugin(b3.plugin.Plugin):
         """
         try:
             self.save()
-            client.message(f'^3Adv: ^7saved {len(self._msg)} messages')
+            client.message(f'^3Adv: ^7saved {len(self._ad_list)} messages')
         except Exception as e:
             client.message(f'^3Adv: ^7error saving: {e}')
 
@@ -259,7 +198,7 @@ class AdvPlugin(b3.plugin.Plugin):
         Reload adv plugin configuration.
         """
         self.onLoadConfig()
-        client.message(f'^3Adv: ^7loaded {len(self._msg)} messages')
+        client.message(f'^3Adv: ^7loaded {len(self._ad_list)} messages')
 
     def cmd_advrate(self, data, client=None, cmd=None):
         """
@@ -286,30 +225,29 @@ class AdvPlugin(b3.plugin.Plugin):
         """
         if not data:
             client.message('Missing data, try !help advrem')
-        else:
+            return
 
-            try:
-                item_index = int(data) - 1
-            except ValueError:
+        try:
+            item_index = int(data) - 1
+        except ValueError:
+            client.message("Invalid data, use the !advlist command to list valid items numbers")
+        else:
+            new_ad_list = self.ad_list
+            if not 0 <= item_index < len(new_ad_list):
                 client.message("Invalid data, use the !advlist command to list valid items numbers")
             else:
-                if not 0 <= item_index < len(self._msg):
-                    client.message("Invalid data, use the !advlist command to list valid items numbers")
-                else:
-                    if item := self._msg.getitem(item_index):
-                        self._msg.remove(int(data) - 1)
-                        if self._file_name:
-                            self.save()
-                        client.message(f'^3Adv: ^7removed item: {item}')
-                    else:
-                        client.message(f'^3Adv: ^7item {data} not found')
+                item = new_ad_list.pop(item_index)
+                self._update_ad_list(new_ad_list)
+                if self._file_name:
+                    self.save()
+                client.message(f'^3Adv: ^7removed item: {item}')
 
     def cmd_advlist(self, data, client=None, cmd=None):
         """
         List advertisement messages
         """
-        if self._msg.items:
-            for i, msg in enumerate(self._msg.items, start=1):
+        if self._ad_list:
+            for i, msg in enumerate(self._ad_list, start=1):
                 client.message(f'^3Adv: ^7[^2{i}^7] {msg}')
         else:
             client.message('^3Adv: ^7no ads loaded')

@@ -14,43 +14,52 @@ class Test_keywords(AdvTestCase):
 
     def test_admins(self):
         # GIVEN
-        when(self.p._msg).getnext().thenReturn("@admins")
         joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=128)
+        joe.connects(0)
         when(self.p._admin_plugin).getAdmins().thenReturn([joe])
         with patch.object(self.console, "say") as say_mock:
             # WHEN
-            self.p.adv()
+            self.p.print_ad('@admins')
         # THEN
         say_mock.assert_has_calls([call('^7Admins online: Joe^7^7 [^3100^7]')])
 
     def test_regulars(self):
         # GIVEN
-        when(self.p._msg).getnext().thenReturn("@regulars")
         joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=2)
+        joe.connects(0)
         when(self.p._admin_plugin).getRegulars().thenReturn([joe])
         with patch.object(self.console, "say") as say_mock:
             # WHEN
-            self.p.adv()
+            self.p.print_ad('@regulars')
         # THEN
         say_mock.assert_has_calls([call('^7Regular players online: Joe^7')])
 
     def test_topstats(self):
-        when(self.p._msg).getnext().thenReturn("@topstats")
+        joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=128)
+        joe.connects(0)
         self.p._xlrstats_plugin = Mock()
         with patch.object(self.p._xlrstats_plugin, "cmd_xlrtopstats") as xlrtopstats_mock:
-            self.p.adv()
-            xlrtopstats_mock.assert_has_calls([call(ext=True, cmd=None, data='3', client=None)])
+            # WHEN
+            self.p.print_ad('@topstats')
+        # THEN
+        xlrtopstats_mock.assert_has_calls([call(ext=True, cmd=None, data='3', client=None)])
 
     def test_time(self):
-        when(self.p._msg).getnext().thenReturn("@time")
         when(self.console).formatTime(ANY()).thenReturn("f00")
+        joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=128)
+        joe.connects(0)
         with patch.object(self.console, "say") as say_mock:
-            self.p.adv()
-            say_mock.assert_has_calls([call('^2Time: ^3f00')])
+            # WHEN
+            self.p.print_ad('@time')
+        # THEN
+        say_mock.assert_has_calls([call('^2Time: ^3f00')])
 
     def test_nextmap(self):
-        when(self.p._msg).getnext().thenReturn("@nextmap")
         when(self.console).getNextMap().thenReturn("f00")
+        joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=128)
+        joe.connects(0)
         with patch.object(self.console, "say") as say_mock:
-            self.p.adv()
-            say_mock.assert_has_calls([call('^2Next map: ^3f00')])
+            # WHEN
+            self.p.print_ad('@nextmap')
+        # THEN
+        say_mock.assert_has_calls([call('^2Next map: ^3f00')])
