@@ -1,10 +1,6 @@
 <configuration plugin="adv">
     <settings name="settings">
-        <!-- rate in minutes.
-          If you want a rate faster than once
-          per minutes, then you can add a 's' as a suffix for seconds.
-          i.e. : <set name="rate">30s</set>
-        -->
+        <!-- rate in minutes. -->
         <set name="rate">1</set>
         <!--
             you can either set here a text file that will contain one ad per line

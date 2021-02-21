@@ -12,7 +12,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">30s</set>
+                    <set name="rate">3</set>
                 </settings>
                 <ads>
                 </ads>
@@ -27,7 +27,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">30s</set>
+                    <set name="rate">3</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -43,7 +43,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">30s</set>
+                    <set name="rate">3</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -57,11 +57,11 @@ class Test_commands(AdvTestCase):
         self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.assertEqual(['Adv: [1] f00', 'Adv: [2] bar', 'Adv: [3] test'], self.joe.message_history)
 
-    def test_advrate_no_arg_30s(self):
+    def test_advrate_no_arg_3min(self):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">30s</set>
+                    <set name="rate">3</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -72,8 +72,8 @@ class Test_commands(AdvTestCase):
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advrate(data='', client=self.joe)
-        self.assertEqual('30s', self.p._rate)
-        self.assertEqual(['Current rate is every minute'], self.joe.message_history)
+        self.assertEqual('3', self.p._rate)
+        self.assertEqual(['Current rate is every 3 minutes'], self.joe.message_history)
 
     def test_advrate_no_arg_2min(self):
         self.init_plugin("""
@@ -93,11 +93,11 @@ class Test_commands(AdvTestCase):
         self.assertEqual('2', self.p._rate)
         self.assertEqual(['Current rate is every 2 minutes'], self.joe.message_history)
 
-    def test_advrate_set_20s(self):
+    def test_advrate_set_2min(self):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">45s</set>
+                    <set name="rate">4</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -106,17 +106,17 @@ class Test_commands(AdvTestCase):
                 </ads>
             </configuration>
         """)
-        self.assertEqual('45s', self.p._rate)
+        self.assertEqual('4', self.p._rate)
         self.joe.clearMessageHistory()
-        self.p.cmd_advrate(data="20s", client=self.joe)
-        self.assertEqual('20s', self.p._rate)
-        self.assertEqual(['Adv: rate set to every minute'], self.joe.message_history)
+        self.p.cmd_advrate(data="2", client=self.joe)
+        self.assertEqual('2', self.p._rate)
+        self.assertEqual(['Adv: rate set to 2 minutes'], self.joe.message_history)
 
     def test_advrate_set_3min(self):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">45s</set>
+                    <set name="rate">4</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -125,7 +125,7 @@ class Test_commands(AdvTestCase):
                 </ads>
             </configuration>
         """)
-        self.assertEqual('45s', self.p._rate)
+        self.assertEqual('4', self.p._rate)
         self.joe.clearMessageHistory()
         self.p.cmd_advrate(data="3", client=self.joe)
         self.assertEqual('3', self.p._rate)
@@ -135,7 +135,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">45s</set>
+                    <set name="rate">4</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -154,7 +154,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">45s</set>
+                    <set name="rate">4</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -173,7 +173,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">45s</set>
+                    <set name="rate">4</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -193,7 +193,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">45s</set>
+                    <set name="rate">4</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -213,7 +213,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">45s</set>
+                    <set name="rate">4</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>
@@ -230,7 +230,7 @@ class Test_commands(AdvTestCase):
         self.init_plugin("""
             <configuration>
                 <settings name="settings">
-                    <set name="rate">45s</set>
+                    <set name="rate">4</set>
                 </settings>
                 <ads>
                     <ad>f00</ad>

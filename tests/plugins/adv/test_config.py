@@ -43,20 +43,6 @@ class Test_config(AdvTestCase):
                               (self.p._crontab.minute, self.p._crontab.hour,
                                self.p._crontab.day, self.p._crontab.month, self.p._crontab.dow))
 
-    def test_rate_nominal_second(self):
-        self.init_plugin("""\
-<configuration plugin="adv">
-    <settings name="settings">
-        <set name="rate">40s</set>
-    </settings>
-</configuration>
-""")
-        self.assertEqual('40s', self.p._rate)
-        self.assertIsNotNone(self.p._crontab)
-        self.assertTupleEqual((-1, -1, -1, -1, -1),
-                              (self.p._crontab.minute, self.p._crontab.hour,
-                               self.p._crontab.day, self.p._crontab.month, self.p._crontab.dow))
-
     def test_rate_junk(self):
         try:
             self.init_plugin("""\

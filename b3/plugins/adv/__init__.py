@@ -35,9 +35,7 @@ class AdvPlugin(b3.plugin.Plugin):
 
         if self._crontab:
             self.console.cron - self._crontab
-
-        m, _ = self._get_rate_minsec(self._rate)
-        self._crontab = b3.cron.PluginCronTab(self, self.adv, minute=m)
+        self._crontab = b3.cron.PluginCronTab(self, self.adv, minute=f'*/{self._rate}')
         self.console.cron + self._crontab
 
     def onStartup(self):
@@ -105,7 +103,6 @@ class AdvPlugin(b3.plugin.Plugin):
             if nextmap := self.console.getNextMap():
                 ad = "^2Next map: ^3" + nextmap
             else:
-                self.debug('could not get nextmap')
                 ad = None
         elif ad == "@time":
             ad = "^2Time: ^3" + self.console.formatTime(time.time())
@@ -151,24 +148,6 @@ class AdvPlugin(b3.plugin.Plugin):
         if ad:
             self.console.say(ad)
 
-    def _get_rate_minsec(self, rate):
-        """
-        Allow to define the rate in second by adding 's' at the end
-        :param rate: The rate string representation
-        """
-        seconds = 0
-        minutes = '*'
-        if rate[-1] == 's':
-            # rate is in seconds
-            s = rate[:-1]
-            if int(s) > 59:
-                s = 59
-            seconds = f'*/{s}'
-        else:
-            minutes = f'*/{rate}'
-        self.debug('%s -> (%s,%s)', rate, minutes, seconds)
-        return minutes, seconds
-
     def cmd_advadd(self, data, client=None, cmd=None):
         """
         <add> - add a new advertisement message
@@ -205,19 +184,11 @@ class AdvPlugin(b3.plugin.Plugin):
         [<rate>] - get/set the advertisement rotation rate
         """
         if not data:
-            if self._rate[-1] == 's':
-                client.message(f'Current rate is every minute')
-            else:
-                client.message(f'Current rate is every {self._rate} minutes')
+            client.message(f'Current rate is every {self._rate} minutes')
         else:
             self._rate = data
-            m, s = self._get_rate_minsec(self._rate)
-            self._crontab.minute = m
-            if self._rate[-1] == 's':
-                self._crontab.minute = '*'
-                client.message(f'^3Adv: ^7rate set to every minute')
-            else:
-                client.message(f'^3Adv: ^7rate set to {self._rate} minutes')
+            self._crontab.minute = f'*/{self._rate}'
+            client.message(f'^3Adv: ^7rate set to {self._rate} minutes')
 
     def cmd_advrem(self, data, client=None, cmd=None):
         """
