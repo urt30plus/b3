@@ -94,7 +94,7 @@ class AdvPlugin(b3.plugin.Plugin):
         Display an advertisement message.
         :param first_try: Whether or not it's the first time we try to display this ad
         """
-        if self.console.clients:
+        if self.console.clients.getList():
             if ad := next(self._msg_cycle):
                 self.print_ad(ad, first_try)
 
