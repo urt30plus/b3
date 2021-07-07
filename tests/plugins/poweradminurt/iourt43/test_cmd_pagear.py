@@ -8,7 +8,7 @@ from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
-G_ALL = "FGHIJKLMNZacefghijklOQRSTUVWX"
+G_ALL = "FGHIJKLMNOQRSTUVWXZacefghijkl"
 G_NONE = ""
 G_BERETTA_92FS = "F"
 G_50_DESERT_EAGLE = "G"
@@ -156,7 +156,7 @@ pagear-gear: 20
         when(self.console).getCvar('sv_maxclients').thenReturn(Cvar('sv_maxclients', value=16))
         when(self.console).getCvar('sv_privateClients').thenReturn(Cvar('sv_privateClients', value=0))
         when(self.console).getCvar('g_allowvote').thenReturn(Cvar('g_allowvote', value=0))
-        when(self.console).getCvar('g_modversion').thenReturn(Cvar('g_modversion', value="4.2.018"))
+        when(self.console).getCvar('g_modversion').thenReturn(Cvar('g_modversion', value="4.3.4"))
         self.given_forbidden_weapon_are(G_NONE)
         self.p.onLoadConfig()
         self.p.onStartup()
@@ -203,11 +203,14 @@ pagear-gear: 20
         self.given_forbidden_weapon_are("1234")
         self.p.onStartup()
         # WHEN
+        self.given_forbidden_weapon_are("12345")
         self.superadmin.says("!gear reset")
         # THEN
         self.assert_set_gear('1234')
 
     def test_all(self):
+        # GIVEN
+        self.given_forbidden_weapon_are("1234")
         # WHEN
         self.superadmin.says("!gear all")
         # THEN
@@ -287,7 +290,7 @@ pagear-gear: 20
         # WHEN
         self.superadmin.says("!gear +all_nades")
         # THEN
-        self.assert_set_gear(all_gear_but(G_SMOKE_GRENADE, G_HE_GRENADE))
+        self.assert_set_gear(all_gear_but(G_HK69, G_HE_GRENADE))
 
     def test_disallow_group_nades(self):
         # GIVEN
@@ -295,7 +298,7 @@ pagear-gear: 20
         # WHEN
         self.superadmin.says("!gear -all_nades")
         # THEN
-        self.assert_set_gear(only_gear(G_SMOKE_GRENADE, G_HE_GRENADE))
+        self.assert_set_gear(only_gear(G_HK69, G_HE_GRENADE))
 
     def test_disallow_group_nades_spaced(self):
         # GIVEN
@@ -303,7 +306,7 @@ pagear-gear: 20
         # WHEN
         self.superadmin.says("!gear - all_nades")
         # THEN
-        self.assert_set_gear(only_gear(G_SMOKE_GRENADE, G_HE_GRENADE))
+        self.assert_set_gear(only_gear(G_HK69, G_HE_GRENADE))
 
     def test_allow_all_snipers(self):
         # GIVEN
@@ -342,7 +345,7 @@ pagear-gear: 20
         # GIVEN
         self.given_forbidden_weapon_are(G_ALL)
         # WHEN
-        self.superadmin.says("!gear +all_auto")
+        self.superadmin.says("!gear +all_autos")
         # THEN
         self.assert_set_gear(
             all_gear_but(G_MP5K, G_LR300ML, G_COLT_M4, G_MAC11, G_UMP45, G_G36, G_AK103, G_NEGEV_LMG, G_P90))
@@ -351,7 +354,7 @@ pagear-gear: 20
         # GIVEN
         self.given_forbidden_weapon_are(G_NONE)
         # WHEN
-        self.superadmin.says("!gear -all_auto")
+        self.superadmin.says("!gear -all_autos")
         # THEN
         self.assert_set_gear(
             only_gear(G_MP5K, G_LR300ML, G_COLT_M4, G_MAC11, G_UMP45, G_G36, G_AK103, G_NEGEV_LMG, G_P90))
@@ -360,7 +363,7 @@ pagear-gear: 20
         # GIVEN
         self.given_forbidden_weapon_are(G_ALL)
         # WHEN
-        self.superadmin.says("!gear all -all_auto -smoke")
+        self.superadmin.says("!gear all -all_autos -smoke")
         # THEN
         self.assert_set_gear(only_gear(G_MP5K, G_LR300ML, G_COLT_M4, G_MAC11, G_UMP45, G_G36, G_AK103,
                                        G_NEGEV_LMG, G_SMOKE_GRENADE, G_P90))
@@ -369,7 +372,7 @@ pagear-gear: 20
         # GIVEN
         self.given_forbidden_weapon_are(G_ALL)
         # WHEN
-        self.superadmin.says("!gear all - all_auto - smoke")
+        self.superadmin.says("!gear all - all_autos - smoke")
         # THEN
         self.assert_set_gear(only_gear(G_MP5K, G_LR300ML, G_COLT_M4, G_MAC11, G_UMP45, G_G36, G_AK103,
                                        G_NEGEV_LMG, G_SMOKE_GRENADE, G_P90))
@@ -378,7 +381,7 @@ pagear-gear: 20
         # GIVEN
         self.given_forbidden_weapon_are(G_ALL)
         # WHEN
-        self.superadmin.says("!gear all -all_auto +lr")
+        self.superadmin.says("!gear all -all_autos +lr")
         # THEN
         self.assert_set_gear(only_gear(G_MP5K, G_COLT_M4, G_MAC11, G_UMP45, G_G36, G_AK103,
                                        G_NEGEV_LMG, G_P90))
@@ -387,7 +390,7 @@ pagear-gear: 20
         # GIVEN
         self.given_forbidden_weapon_are(G_ALL)
         # WHEN
-        self.superadmin.says("!gear all - all_auto + lr")
+        self.superadmin.says("!gear all - all_autos + lr")
         # THEN
         self.assert_set_gear(only_gear(G_MP5K, G_COLT_M4, G_MAC11, G_UMP45, G_G36, G_AK103,
                                        G_NEGEV_LMG, G_P90))

@@ -110,41 +110,73 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
     _pending_skillbalance = False
     _skillbalance_func = None
 
-    _gears = dict(none='FGHIJKLMNZacefghOQRSTUVWX', all='', reset='')
-
-    _weapons = dict(ber='F', de='G', glo='f', colt='g', spas='H', mp5='I',
-                    ump='J', mac='h', hk='K', lr='L', g36='M', psg='N',
-                    sr8='Z', ak='a', neg='c', m4='e', he='O', smo='Q',
-                    vest='R', hel='W', sil='U', las='V', med='T', nvg='S',
-                    ammo='X', p90='k', frf1='i', mag='l', ben='j')
+    # https://www.urbanterror.info/support/180-server-cvars/#2
+    _weapons = {
+        'ber': 'F',
+        'mp5': 'I',
+        'lr': 'L',
+        'sr8': 'Z',
+        'm4': 'e',
+        'mac': 'h',
+        'p90': 'k',
+        'smo': 'Q',
+        'med': 'T',
+        'hel': 'W',
+        'de': 'G',
+        'ump': 'J',
+        'g36': 'M',
+        'ak': 'a',
+        'glo': 'f',
+        'frf1': 'i',
+        'mag': 'l',
+        'vest': 'R',
+        'sil': 'U',
+        'ammo': 'X',
+        'spas': 'H',
+        'hk': 'K',
+        'psg': 'N',
+        'neg': 'c',
+        'colt': 'g',
+        'ben': 'j',
+        'he': 'O',
+        'nvg': 'S',
+        'las': 'V',
+    }
 
     # less likely weapon names to check if we fail
     # to recognize a weapon with the _weapon lists
     _weapon_aliases = {
-        ".50": "de",
-        "eag": "de",
-        "mp": "mp5",
-        "sr": "sr8",
-        "1911": "colt",
-        "kev": "vest",
-        "gog": "nvg",
-        "ext": "ammo",
-        "amm": "ammo",
-        "nail": "p90",
-        "fr": "frf1",
-        "44": "mag",
-        ".44": "mag",
-        "slug": "ben",
+        '.50': 'de',
+        'eag': 'de',
+        'mp': 'mp5',
+        'sr': 'sr8',
+        '1911': 'colt',
+        'kev': 'vest',
+        'gog': 'nvg',
+        'ext': 'ammo',
+        'amm': 'ammo',
+        'nail': 'p90',
+        'fr': 'frf1',
+        'frf': 'frf1',
+        '44': 'mag',
+        '.44': 'mag',
+        'slug': 'ben',
     }
 
     _weapon_groups = {
-        'all_nades': 'OQ',
+        'all_nades': 'KO',
         'all_snipers': 'NZi',
         'all_pistols': 'FGfgl',
-        'all_auto': 'IJLMacehk',
-        'all_shotgun': 'Hj',
-        'all_sec': 'HIJhjk',
-        'all_ak': 'HIJhjkFGfgl',
+        'all_autos': 'IJLMacehk',
+        'all_shotguns': 'Hj',
+        'all_secondaries': 'HIJhjk',
+        'all_items': 'RTUVWX',
+    }
+
+    _gears = {
+        'none': ''.join(_weapons.values()),
+        'all': '',
+        'reset': '',
     }
 
     # radio spam protection
@@ -218,7 +250,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self.installCrontabs()
 
         self._gears['reset'] = self.console.getCvar('g_gear').getString()
-        self._gears['none'] = 'FGHIJKLMNZacefghijklOQRSTUVWX'
+        self._gears['none'] = ''.join(self._weapons.values())
 
         self.debug('plugin started')
 
@@ -2185,7 +2217,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             # set a predefined gear
             if cleaned_data in self._gears:
                 gear_set.clear()
-                gear_set.add(self._gears[cleaned_data])
+                gear_set.update(self._gears[cleaned_data])
                 return
 
             # add a specific weapon to the current gear string

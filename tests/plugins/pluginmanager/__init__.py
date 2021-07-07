@@ -4,6 +4,7 @@ from mockito import when, unstub
 
 import b3
 import b3.cron
+import b3.functions
 from b3.config import CfgConfigParser
 from b3.plugins.admin import AdminPlugin
 from b3.plugins.pluginmanager import PluginmanagerPlugin

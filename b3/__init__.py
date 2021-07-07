@@ -1,7 +1,7 @@
 __author__ = 'ThorN'
-__version__ = '3.31.27'
+__version__ = '3.31.28'
 
-versionEdition = "Tex"
+versionEdition = "LA"
 versionId = f'v{__version__}'
 version = f'^0(^8b3^0) ^9{versionId} ^9[{versionEdition}^9]^3'
 
