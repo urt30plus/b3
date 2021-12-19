@@ -440,30 +440,6 @@ def prefixText(prefixes, text):
     return buff
 
 
-def right_cut(text, cut):
-    """
-    Remove 'cut' from 'text' if found as ending suffix
-    :param text: The string we want to clean
-    :param cut: The suffix of the string
-    :return: A string with the given suffix removed
-    """
-    if text.endswith(cut):
-        return text[:-len(cut)]
-    return text
-
-
-def left_cut(text, cut):
-    """
-    Remove 'cut' from 'text' if found as starting prefix
-    :param text: The string we want to clean
-    :param cut: The prefix of the string
-    :return: A string with the given prefix removed
-    """
-    if text.startswith(cut):
-        return text[len(cut):]
-    return text
-
-
 def getBytes(size):
     """
     Convert the given size in the correspondent amount of bytes.

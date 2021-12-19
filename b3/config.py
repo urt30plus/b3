@@ -3,15 +3,11 @@ import os
 import re
 import time
 from io import StringIO
+from xml.etree import ElementTree
 
 import b3
 import b3.functions
 import b3.storage
-
-try:
-    from xml.etree import cElementTree as ElementTree
-except ImportError:
-    from xml.etree import ElementTree
 
 __author__ = 'ThorN, Courgette, Fenix'
 __version__ = '1.7.9'
@@ -415,8 +411,8 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         if (key.startswith(';') or key.startswith('#')) and value is None:
             # consider multiline comments
             for line in key.split('\n'):
-                line = b3.functions.left_cut(line, ';')
-                line = b3.functions.left_cut(line, '#')
+                line = line.removeprefix(';')
+                line = line.removeprefix('#')
                 fp.write("; %s\n" % (line.strip(),))
         else:
             if value is not None and str(value).strip() != '':

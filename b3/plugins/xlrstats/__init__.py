@@ -8,7 +8,7 @@ import b3.cron
 import b3.events
 import b3.plugin
 from b3.config import NoOptionError
-from b3.functions import escape, right_cut
+from b3.functions import escape
 
 __author__ = 'xlr8or & ttlogic'
 __version__ = '3.0.0-beta.17'
@@ -269,7 +269,7 @@ class XlrstatsPlugin(b3.plugin.Plugin):
 
         for k, v in xlr_tables.items():
             if v not in current_tables:
-                sql_name = right_cut(k, '_table') + '.sql'
+                sql_name = k.removesuffix('_table') + '.sql'
                 sql_path = os.path.join(sql_main, sql_name)
                 if os.path.isfile(sql_path):
                     try:

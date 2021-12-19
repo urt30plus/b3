@@ -128,7 +128,7 @@ class Plugin:
         self.onDisable()
 
     def __get_plugin_name(self):
-        return b3.functions.right_cut(self.__class__.__name__, 'Plugin').lower()
+        return self.__class__.__name__.removesuffix('Plugin').lower()
 
     def isEnabled(self):
         """
