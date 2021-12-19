@@ -725,71 +725,50 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         Skill shuffle. Shuffle players to balanced teams by numbers and skill.
         Locked players are also moved.
         """
-        now = self.console.time()
-        sincelast = now - self._lastbal
-        if client and client.maxLevel < 20 and self.ignoreCheck() and sincelast < 60 * self._minbalinterval:
-            client.message('Teams changed recently, please wait a while')
-            return
-
-        # if we are in the middle of a round in a round based gametype, delay till the end of it
-        if self._getGameType() in self._round_based_gametypes and not self._is_round_end:
-            self._pending_skillbalance = True
-            self._skillbalance_func = self.cmd_paskuffle
-            if client:
-                client.message('^7Teams will be balanced at the end of this round')
-            return
-
-        self._balancing = True
-        olddiff, bestdiff, blue, red, scores = self._randTeams(100, 0.1)
-        if client:
-            if (client.team == b3.TEAM_BLUE and client.cid not in [c.cid for c in blue]) or \
-                    (client.team == b3.TEAM_RED and client.cid not in [c.cid for c in red]):
-                # don't move player who initiated skuffle
-                blue, red = red, blue
-
-        moves = 0
-        if bestdiff is not None:
-            self.console.write('bigtext "Skill Shuffle in Progress!"')
-            moves = self._move(blue, red, scores)
-
-        if moves:
-            self.console.say('^4Team skill difference was ^1%.2f^4, is now ^1%.2f' % (olddiff, bestdiff))
-        else:
-            self.console.say('^1Cannot improve team balance!')
-
-        self._forgetTeamContrib()
-        self._balancing = False
-        self._lastbal = now
+        self._shuffle_teams(client=client)
 
     def cmd_pabalance(self, data=None, client=None, cmd=None):
         """
         Move as few players as needed to create teams balanced by numbers AND skill.
         Locked players are not moved.
         """
+        self._shuffle_teams(client=client, maxmovesperc=0.3)
+
+    def _shuffle_teams(self, client=None, maxmovesperc=None):
         now = self.console.time()
         sincelast = now - self._lastbal
         if client and client.maxLevel < 20 and self.ignoreCheck() and sincelast < 60 * self._minbalinterval:
             client.message('Teams changed recently, please wait a while')
             return
 
-        # if we are in the middle of a round in a round based gametype, delay till the end of it
+        # if we are in the middle of a round in a round based gametype,
+        # delay till the end of it
         if self._getGameType() in self._round_based_gametypes and not self._is_round_end:
             self._pending_skillbalance = True
-            self._skillbalance_func = self.cmd_pabalance
+            self._skillbalance_func = self.cmd_pabalance if maxmovesperc else self.cmd_paskuffle
             if client:
                 client.message('^7Teams will be balanced at the end of this round')
             return
 
         self._balancing = True
-        # always allow at least 2 moves, but don't move more than 30% of the players
-        olddiff, bestdiff, bestblue, bestred, scores = self._randTeams(100, 0.1, 0.3)
+        olddiff, bestdiff, blue, red, scores = self._randTeams(100, 0.1, maxmovesperc)
         if bestdiff is not None:
-            self.console.write('bigtext "Balancing teams!"')
-            self._move(bestblue, bestred, scores)
-            self.console.say('^4Team skill difference was ^1%.2f^4, is now ^1%.2f' % (olddiff, bestdiff))
+            if maxmovesperc:
+                self.console.write('bigtext "Balancing teams!"')
+            else:
+                self.console.write('bigtext "Skill Shuffle in Progress!"')
+            moves = self._move(blue, red, scores)
         else:
-            # we couldn't beat the previous diff by moving only a few players, do a full skuffle
-            self.cmd_paskuffle(data, client, cmd)
+            moves = 0
+
+        if moves:
+            self.console.say('^4Team skill difference was ^1%.2f^4, is now ^1%.2f' % (olddiff, bestdiff))
+        elif maxmovesperc is not None:
+            # we couldn't beat the previous diff by moving only a few players
+            # with a balance so do a full skuffle
+            self._shuffle_teams(client)
+        else:
+            self.console.say('^1Cannot improve team balance!')
 
         self._forgetTeamContrib()
         self._balancing = False
@@ -2612,11 +2591,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if not blue and not red:
             return 0
 
-        bestscore = None
-
-        if scores:
-            bestscore = max(scores[c.id] for c in blue + red)
-
         clients = self.console.clients.getList()
         numblue = len([c for c in clients if c.team == b3.TEAM_BLUE])
         numred = len([c for c in clients if c.team == b3.TEAM_RED])
@@ -2624,79 +2598,45 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         # We have to make sure we don't get a "too many players" error from the
         # server when we move the players. Start moving from the team with most
-        # players. If the teams are equal in numbers, temporarily put one player in
-        # spec mode.
+        # players. If the teams are equal in numbers, temporarily put one
+        # player in spec mode.
         moves = len(blue) + len(red)
-        spec = None
         if blue and numblue == numred:
-            random.shuffle(blue)
             spec = blue.pop()
-            self.console.write('forceteam %s spectator' % spec.cid)
+            self.console.write(f'forceteam {spec.cid} spectator')
             numred -= 1
             moves -= 1
+        else:
+            spec = None
 
         queue = []
-
         for _ in range(moves):
-            newteam = None
-
             if (blue and numblue < numred) or (blue and not red):
                 c = blue.pop()
                 newteam = 'blue'
-                self.console.write('forceteam %s %s' % (c.cid, newteam))
+                self.console.write(f'forceteam {c.cid} {newteam}')
                 numblue += 1
                 numred -= 1
             elif red:
                 c = red.pop()
                 newteam = 'red'
-                self.console.write('forceteam %s %s' % (c.cid, newteam))
+                self.console.write(f'forceteam {c.cid} {newteam}')
                 numblue -= 1
                 numred += 1
+            else:
+                c = None
+                newteam = None
 
             if newteam and scores:
-                if newteam == "red":
-                    colorpfx = '^1'
-                    oldteam = "blue"
-                else:
-                    colorpfx = '^4'
-                    oldteam = "red"
-                if scores[c.id] == bestscore:
-                    messages = [
-                        "You were moved because %n team needs more noobs.",
-                        "I wanted to move the best player but settled for you instead.",
-                        "If you learnt to aim before you shoot I wouldn't have to move you!",
-                    ]
-                else:
-                    messages = [
-                        "%n team needs your help! Try not to die too many times...",
-                        "You have new friends now. Try not to kill them...",
-                        "You have no friends now but try to kill %o team anyway...",
-                        "You were moved to %n team for balance.",
-                    ]
+                colorpfx = '^1' if newteam == 'red' else '^4'
+                msg = f"{colorpfx}You were moved to {newteam} team for balance."
 
-                msg = random.choice(messages)
-                team = None
-
-                if '%n' in msg:
-                    team = newteam
-                    msg = msg.replace('%n', '%s')
-
-                if '%o' in msg:
-                    team = oldteam
-                    msg = msg.replace('%o', '%s')
-
-                if msg.startswith('%'):
-                    team = team.capitalize()
-
-                if '%s' in msg:
-                    msg = msg % team
-
-                # send priv msg after all joins, seem like we can lose the msg
-                # otherwise...
-                queue.append((c, colorpfx + msg))
+                # send private msg after all joins, seem like we can lose the
+                # msg otherwise...
+                queue.append((c, msg))
 
         if spec:
-            self.console.write('forceteam %s blue' % spec.cid)
+            self.console.write(f'forceteam {spec.cid} blue')
 
         for c, msg in queue:
             c.message(msg)
@@ -2720,22 +2660,18 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         sbestblue = sbestred = None  # new teams so far when diff < slack
         epsilon = 0.0001
 
-        if not maxmovesperc and abs(len(oldblue) - len(oldred)) > 1:
-            # Teams are unbalanced by count, force both teams two have equal number
-            # of players
-            bestblue, bestred = self._getRandomTeams(clients, checkforced=True)
-            bestdiff = self._getTeamScoreDiff(bestblue, bestred, scores)
-
         for _ in range(times):
             blue, red = self._getRandomTeams(clients, checkforced=True)
-            m = self._countMoves(oldblue, blue) + self._countMoves(oldred, red)
-            if maxmovesperc and m > max(2, int(round(maxmovesperc * n))):
-                continue
+            if maxmovesperc:
+                m = (self._countMoves(oldblue, blue) +
+                     self._countMoves(oldred, red))
+                if m > max(2, int(round(maxmovesperc * n))):
+                    continue
 
             diff = self._getTeamScoreDiff(blue, red, scores)
 
             if abs(diff) <= slack:
-                # balance below slack threshold, try to distribute the snipers instead
+                # balance below slack, try to distribute the snipers instead
                 numdiff = abs(self._countSnipers(blue) - self._countSnipers(red))
                 if bestnumdiff is None or numdiff < bestnumdiff:
                     # got better sniper num diff
