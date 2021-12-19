@@ -42,7 +42,7 @@
           @regulars - connected players from the regular grout. You can change the message format in your admin plugin config
         -->
         <ad>^2Visit us at www.urt-30plus.org</ad>
-	<ad>Join our Discord server at discord.gg/Y5v9feWZAc</ad> 
+        <ad>^2Join our Discord server at discord.gg/Y5v9feWZAc</ad>
         <ad>^2Type !register to register as a user</ad>
         <ad>^2Send demos to urt30plus@gmail.com</ad>
         <ad>/spam#rule8</ad>

@@ -11,12 +11,11 @@ class Test_config(AdvTestCase):
         self.assertTupleEqual((list(range(0, 60)), -1, -1, -1, -1),
                               (self.p._crontab.minute, self.p._crontab.hour,
                                self.p._crontab.day, self.p._crontab.month, self.p._crontab.dow))
-        self.assertEqual(7, len(self.p.ad_list))
+        self.assertEqual(6, len(self.p.ad_list))
         self.assertListEqual([
             '^2Visit us at www.urt-30plus.org',
-            '^2Public Teamspeak server: ts3urt30.ts.nfoservers.com',
+            '^2Join our Discord server at discord.gg/Y5v9feWZAc',
             '^2Type !register to register as a user',
-            '^2Type !fa in chat to forgive team damage',
             '^2Send demos to urt30plus@gmail.com',
             '^3Rule #8: No profanity or offensive language (in any language)',
             '@nextmap',
