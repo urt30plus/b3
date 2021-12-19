@@ -1530,24 +1530,57 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         Balance current teams.
         """
-        if self.isEnabled() and not self._balancing and not self._matchmode:
-            self._balancing = True
+        if not self.isEnabled() or self._balancing or self._matchmode:
+            return True
 
+        self._balancing = True
+
+        if not self.countteams():
+            self._balancing = False
+            self.warning('aborting teambalance: counting teams failed!')
+            return False
+
+        if abs(self._teamred - self._teamblue) <= self._teamdiff:
+            self._teamsbalanced = True
+            self._balancing = False
+            return True
+
+        self._teamsbalanced = False
+        if self._announce == 1:
+            self.console.write('say Autobalancing Teams!')
+        elif self._announce == 2:
+            self.console.write('bigtext "Autobalancing Teams!"')
+
+        if self._teamred > self._teamblue:
+            newteam = 'blue'
+            oldteam = b3.TEAM_RED
+        else:
+            newteam = 'red'
+            oldteam = b3.TEAM_BLUE
+
+        count = 25  # endless loop protection
+        while abs(self._teamred - self._teamblue) > self._teamdiff and count > 0:
+            stime = self.console.upTime()
+            now = self.console.time()
+            forceclient = None
+            for c in self.console.clients.getList():
+                if (
+                        c.team == oldteam
+                        and now - c.var(self, 'teamtime', now).value < stime
+                        and not c.isvar(self, 'paforced')
+                ):
+                    forceclient = c.cid
+                    stime = now - c.var(self, 'teamtime').value
+
+            if forceclient:
+                self.console.write(f'forceteam {forceclient} {newteam}')
+
+            count -= 1
+            # recount the teams... do we need to balance once more?
             if not self.countteams():
                 self._balancing = False
-                self.warning('aborting teambalance: counting teams failed!')
+                self.error('aborting teambalance: counting teams failed!')
                 return False
-
-            if abs(self._teamred - self._teamblue) <= self._teamdiff:
-                self._teamsbalanced = True
-                self._balancing = False
-                return True
-
-            self._teamsbalanced = False
-            if self._announce == 1:
-                self.console.write('say Autobalancing Teams!')
-            elif self._announce == 2:
-                self.console.write('bigtext "Autobalancing Teams!"')
 
             if self._teamred > self._teamblue:
                 newteam = 'blue'
@@ -1556,38 +1589,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 newteam = 'red'
                 oldteam = b3.TEAM_BLUE
 
-            count = 25  # endless loop protection
-            while abs(self._teamred - self._teamblue) > self._teamdiff and count > 0:
-                stime = self.console.upTime()
-                now = self.console.time()
-                forceclient = None
-                for c in self.console.clients.getList():
-                    if (
-                            c.team == oldteam
-                            and now - c.var(self, 'teamtime', now).value < stime
-                            and not c.isvar(self, 'paforced')
-                    ):
-                        forceclient = c.cid
-                        stime = now - c.var(self, 'teamtime').value
-
-                if forceclient:
-                    self.console.write(f'forceteam {forceclient} {newteam}')
-
-                count -= 1
-                # recount the teams... do we need to balance once more?
-                if not self.countteams():
-                    self._balancing = False
-                    self.error('aborting teambalance: counting teams failed!')
-                    return False
-
-                if self._teamred > self._teamblue:
-                    newteam = 'blue'
-                    oldteam = b3.TEAM_RED
-                else:
-                    newteam = 'red'
-                    oldteam = b3.TEAM_BLUE
-
-            self._balancing = False
+        self._balancing = False
 
         return True
 
