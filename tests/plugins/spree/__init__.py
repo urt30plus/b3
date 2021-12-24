@@ -51,11 +51,11 @@ class SpreeTestCase(unittest.TestCase):
                 [settings]
                 reset_spree: yes
 
-                [killingspree_messages]
+                [killing_spree_messages]
                 5: %player% is on a killing spree (5 kills in a row) # %player% stopped the spree of %victim%
                 10: %player% is on fire! (10 kills in a row) # %player% iced %victim%
 
-                [loosingspree_messages]
+                [losing_spree_messages]
                 12: Keep it up %player%, it will come eventually # You're back in business %player%
 
                 [commands]

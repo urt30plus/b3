@@ -15,11 +15,11 @@ class Test_killingspree_messages(SpreeTestCase):
             [settings]
             reset_spree: yes
 
-            [killingspree_messages]
+            [killing_spree_messages]
             # The # character splits the 'start' spree from the 'end' spree.
             5: %player% is on a killing spree (5 kills in a row) # %player% stopped the spree of %victim%
 
-            [loosingspree_messages]
+            [losing_spree_messages]
             7: Keep it up %player%, it will come eventually # You're back in business %player%
         """))
         self.assertListEqual([], self.p.warning.mock_calls)
@@ -29,9 +29,9 @@ class Test_killingspree_messages(SpreeTestCase):
             [settings]
             reset_spree: yes
 
-            [killingspree_messages]
+            [killing_spree_messages]
 
-            [loosingspree_messages]
+            [losing_spree_messages]
             7: Keep it up %player%, it will come eventually # You're back in business %player%
         """))
         self.assertListEqual([], self.p.warning.mock_calls)
@@ -41,14 +41,14 @@ class Test_killingspree_messages(SpreeTestCase):
             [settings]
             reset_spree: yes
 
-            [killingspree_messages]
+            [killing_spree_messages]
             # The # character splits the 'start' spree from the 'end' spree.
             5: foo
 
-            [loosingspree_messages]
+            [losing_spree_messages]
             7: Keep it up %player%, it will come eventually # You're back in business %player%
         """))
-        self.assertListEqual([call("ignoring killingspree message %r due to missing '#'", 'foo')],
+        self.assertListEqual([call("ignoring %s %r due to missing '#'", 'killing_spree_messages', 'foo')],
                              self.p.warning.mock_calls)
 
 
@@ -63,9 +63,9 @@ class Test_loosingspree_messages(SpreeTestCase):
             [settings]
             reset_spree: yes
 
-            [killingspree_messages]
+            [killing_spree_messages]
 
-            [loosingspree_messages]
+            [losing_spree_messages]
             # The # character splits the 'start' spree from the 'end' spree.
             7: Keep it up %player%, it will come eventually # You're back in business %player%
         """))
@@ -76,9 +76,9 @@ class Test_loosingspree_messages(SpreeTestCase):
             [settings]
             reset_spree: yes
 
-            [killingspree_messages]
+            [killing_spree_messages]
 
-            [loosingspree_messages]
+            [losing_spree_messages]
         """))
         self.assertListEqual([], self.p.warning.mock_calls)
 
@@ -87,11 +87,11 @@ class Test_loosingspree_messages(SpreeTestCase):
             [settings]
             reset_spree: yes
 
-            [killingspree_messages]
+            [killing_spree_messages]
 
-            [loosingspree_messages]
+            [losing_spree_messages]
             # The # character splits the 'start' spree from the 'end' spree.
             7: bar
         """))
-        self.assertListEqual([call("ignoring killingspree message %r due to missing '#'", 'bar')],
+        self.assertListEqual([call("ignoring %s %r due to missing '#'", 'losing_spree_messages', 'bar')],
                              self.p.warning.mock_calls)
