@@ -190,9 +190,8 @@ class Client:
         :return True if there is a value, False otherwise
         """
         try:
-            d = self._pluginData[id(plugin)][key]
-            return True
-        except Exception:
+            return key in self._pluginData[id(plugin)]
+        except KeyError:
             return False
 
     def setvar(self, plugin, key, value=None):
@@ -203,17 +202,20 @@ class Client:
         :param value: The value of this variable.
         :return The stored variable.
         """
+        plugin_id = id(plugin)
         try:
-            self._pluginData[id(plugin)]
-        except Exception:
-            self._pluginData[id(plugin)] = {}
-
-        try:
-            self._pluginData[id(plugin)][key].value = value
-        except Exception:
-            self._pluginData[id(plugin)][key] = ClientVar(value)
-
-        return self._pluginData[id(plugin)][key]
+            plugin_data = self._pluginData[plugin_id]
+        except KeyError:
+            client_var = ClientVar(value)
+            self._pluginData[plugin_id] = {key: client_var}
+        else:
+            try:
+                client_var = plugin_data[key]
+                client_var.value = value
+            except KeyError:
+                client_var = ClientVar(value)
+                plugin_data[key] = client_var
+        return client_var
 
     def var(self, plugin, key, default=None):
         """
@@ -225,7 +227,7 @@ class Client:
         """
         try:
             return self._pluginData[id(plugin)][key]
-        except Exception:
+        except KeyError:
             return self.setvar(plugin, key, default)
 
     def varlist(self, plugin, key, default=None):
