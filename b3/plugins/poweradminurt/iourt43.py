@@ -1368,6 +1368,26 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 self.console.formatTime(self.console.time()), sclient.id, sclient.exactName, sclient.ip, sclient.pbid,
                 self.console.formatTime(sclient.timeAdd)))
 
+    def cmd_paci(self, data, client=None, cmd=None):
+        """
+        <client> - kick a client that has an interrupted connection
+        """
+        if not (m := self._adminPlugin.parseUserCmd(data)):
+            client.message('^7Missing data, try !help ci')
+            return False
+
+        if not (sclient := self._adminPlugin.findClientPrompt(m[0], client)):
+            return
+
+        try:
+            players = self.console.getPlayerPings()
+            if players[str(sclient.cid)] > 500:
+                sclient.kick(self._adminPlugin.getReason('ci'), 'ci', client)
+            else:
+                client.message(f'^7{sclient.exactName} ^7is not CI')
+        except KeyError:
+            pass
+
     def onGameRoundEnd(self, _):
         """
         Handle EVT_GAME_ROUND_END.
