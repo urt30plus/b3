@@ -1,3 +1,4 @@
+import io
 import zipfile
 from contextlib import contextmanager
 from pathlib import Path
@@ -78,8 +79,9 @@ class MappyPlugin(b3.plugin.Plugin):
                 client.message(f'^7{map_filename} not found')
                 return
 
+            self.info('Looking up map modes in file: %s', map_file)
             data = self.parse_arena_file(map_file)
-            modes = data['modes']
+            modes = data.get('modes', ['unable to parse map modes'])
 
         map_modes = ' '.join([m.removeprefix('ut_') for m in modes])
         cmd.sayLoudOrPM(client, f'[{map_name}]: {map_modes}')
@@ -95,6 +97,9 @@ class MappyPlugin(b3.plugin.Plugin):
                     with pk3.open(info) as arena:
                         yield arena
                     break
+            else:
+                self.error('%s: arena file not found', map_path)
+                yield io.BytesIO()
 
     def parse_arena_file(self, map_path) -> dict[str, ...]:
         rv = {}
