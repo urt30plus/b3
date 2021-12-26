@@ -59,7 +59,8 @@ class SpreePlugin(b3.plugin.Plugin):
         self._admin_plugin = self.console.getPlugin("admin")
         self.register_commands_from_config()
         self.registerEvent('EVT_CLIENT_KILL', self.on_client_kill)
-        self.registerEvent('EVT_GAME_EXIT', self.on_game_exit)
+        if self._reset_spree_stats:
+            self.registerEvent('EVT_GAME_EXIT', self.on_game_exit)
 
     def on_client_kill(self, event):
         killer = event.client
@@ -97,6 +98,13 @@ class SpreePlugin(b3.plugin.Plugin):
                 spree_stats.end_losing_spree_message = message[1]
                 self.show_message(victim, killer, message[0])
 
+    def on_game_exit(self, event):
+        for c in self.console.clients.getList():
+            self.init_spree_stats(c)
+
+    def init_spree_stats(self, client):
+        client.setvar(self, self.VAR_NAME, SpreeStats())
+
     def get_spree_stats(self, client) -> SpreeStats:
         if spree_stats := client.var(self, self.VAR_NAME).value:
             return spree_stats
@@ -124,14 +132,6 @@ class SpreePlugin(b3.plugin.Plugin):
             if victim:
                 message = message.replace('%victim%', victim.name)
             self.console.say(message)
-
-    def on_game_exit(self, event):
-        if self._reset_spree_stats:
-            for c in self.console.clients.getList():
-                self.init_spree_stats(c)
-
-    def init_spree_stats(self, client):
-        client.setvar(self, self.VAR_NAME, SpreeStats())
 
     def cmd_spree(self, data, client, cmd=None):
         """
