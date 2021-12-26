@@ -1,4 +1,5 @@
-# Python modules needed to run the B3 test suite
+-r requirements.txt
+
 mockito
 pylint
 pytest

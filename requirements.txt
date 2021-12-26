@@ -1,1 +1,2 @@
 # Python modules needed to run the B3
+packaging
