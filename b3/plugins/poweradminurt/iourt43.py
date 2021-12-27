@@ -1514,17 +1514,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
     def _getGameType(self):
         # g_gametype //0 = FreeForAll = dm, 3 = TeamDeathMatch = tdm, 4 = Team Survivor = ts,
         # 5 = Follow the Leader = ftl, 6 = Capture and Hold = cah, 7 = Capture The Flag = ctf, 8 = Bombmode = bm
-
-        # 10/22/2008 - 1.4.0b10 - mindriot
-        # if gametype is unknown when B3 is started in the middle of a game
-        if self.console.game.gameType is None:
-            try:
-                # find and set current gametype
-                self.console.game.gameType = self.console.defineGameType(self.console.getCvar('g_gametype').getString())
-            except Exception:
-                self.warning('unable to determine current gametype - remains at (%s)', self.console.game.gameType)
-
-        return self.console.game.gameType
+        return self.console.game.game_type
 
     def teamcheck(self):
         """

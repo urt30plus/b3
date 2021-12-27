@@ -35,6 +35,17 @@ class Game:
         return self.__dict__[key]
 
     @property
+    def game_type(self):
+        if self.gameType is None:
+            try:
+                value = self.console.getCvar('g_gametype').getString()
+            except Exception:
+                self.console.warning('unable to determine current gametype')
+            else:
+                self.gameType = self.console.defineGameType(value)
+        return self.gameType
+
+    @property
     def mapName(self):
         if not self._mapName:
             try:
