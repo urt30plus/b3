@@ -55,7 +55,7 @@ def update_hall_of_fame(
             f"VALUES('{plugin_name}', '{map_name}', {client.id}, {score})"""
         )
     else:
-        if curr_record.score > score:
+        if curr_record.score >= score:
             return curr_record
         q = (
             f"UPDATE plugin_hof SET player_id={client.id}, score={score} "
