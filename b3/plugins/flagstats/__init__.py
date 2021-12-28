@@ -5,7 +5,9 @@ from typing import Optional
 import b3
 import b3.config
 import b3.events
+import b3.functions
 import b3.plugin
+import b3.plugins.hof
 from b3.clients import Client
 
 __version__ = '0.6.9'
@@ -78,8 +80,7 @@ class FlagstatsPlugin(b3.plugin.Plugin):
         self.registerEvent('EVT_GAME_ROUND_START', self.on_round_start)
         self.registerEvent('EVT_CLIENT_ACTION', self.on_client_action)
         self.registerEvent('EVT_GAME_FLAG_RETURNED', self.on_flag_return)
-        if self._show_awards:
-            self.registerEvent('EVT_GAME_EXIT', self.on_game_exit)
+        self.registerEvent('EVT_GAME_EXIT', self.on_game_exit)
 
         self._adminPlugin = self.console.getPlugin('admin')
         if not self._adminPlugin:
@@ -95,7 +96,83 @@ class FlagstatsPlugin(b3.plugin.Plugin):
         self.game_reinit(event)
 
     def on_game_exit(self, event):
-        self.flag_awards_show()
+        b3.functions.start_daemon_thread(
+            target=self.update_hall_of_fame,
+            args=(self.blue_team, self.red_team, self.console.game.mapName),
+            name='flagstats-hof',
+        )
+        if self._show_awards:
+            self.flag_awards_show()
+
+    def update_hall_of_fame(
+            self,
+            blue_team: TeamData,
+            red_team: TeamData,
+            map_name: str
+    ) -> None:
+        self.update_hall_of_fame_caps(blue_team, red_team, map_name)
+        self.update_hall_of_fame_time(blue_team, red_team, map_name)
+
+    def update_hall_of_fame_caps(
+            self,
+            blue_team: TeamData,
+            red_team: TeamData,
+            map_name: str
+    ) -> None:
+        best_team_caps, _ = self.best_team_flag_caps(blue_team, red_team)
+        if best_team_caps:
+            record = b3.plugins.hof.update_hall_of_fame(
+                self.console,
+                'flagstats_caps',
+                map_name,
+                best_team_caps.max_flag_client,
+                best_team_caps.max_flag,
+            )
+            if record.is_new:
+                message = (
+                    f'^2{record.score} ^7flag caps: congratulations '
+                    f'^3{record.client.exactName}^7, new record on this map!!'
+                )
+            else:
+                message = (
+                    f'^7Flag record on this map: ^1{record.client.exactName} '
+                    f'^2{record.score} ^caps'
+                )
+            self.console.say(message)
+
+    def update_hall_of_fame_time(
+            self,
+            blue_team: TeamData,
+            red_team: TeamData,
+            map_name: str
+    ) -> None:
+        best_team_time, _ = self.best_team_flag_time(blue_team, red_team)
+        if best_team_time:
+            # Store as a negative number since the update function only
+            # updates records where the new score is greater than the stored
+            # score. And since score is stored as an INT we convert from
+            # a FLOAT (fractional seconds to milliseconds).
+            score = int(best_team_time.min_time * -1000)
+            record = b3.plugins.hof.update_hall_of_fame(
+                self.console,
+                'flagstats_time',
+                map_name,
+                best_team_time.min_time_client,
+                score,
+            )
+            # Convert back into fractional seconds, see comment above
+            score = self.show_time(abs(record.score / 1000))
+            if record.is_new:
+                message = (
+                    f'^2{score} ^7flag cap time: congratulations '
+                    f'^3{record.client.exactName}^7, new record on this map!!'
+                )
+            else:
+                message = (
+                    f'^7Flag record on this map: ^1{record.client.exactName} '
+                    f'^2{score} ^cap time'
+                )
+            self.console.say(message)
 
     def on_client_action(self, event):
         client = event.client
@@ -181,6 +258,29 @@ class FlagstatsPlugin(b3.plugin.Plugin):
         msg = self.format_client_stats(sclient)
         client.message(msg)
 
+    def cmd_flagrecord(self, data, client, cmd=None):
+        """\
+        Displays the best flag caps/time for the current map
+        """
+        try:
+            caps_record = b3.plugins.hof.record_holder(self.console,
+                                                       'flagstats_caps')
+            time_record = b3.plugins.hof.record_holder(self.console,
+                                                       'flagstats_time')
+        except LookupError:
+            messages = ['^7No record found on this map']
+        else:
+            # see comment in self.update_hall_of_fame_time
+            record_time = self.show_time(abs(time_record.score / 1000))
+            messages = [
+                f'^7Flag record most caps: '
+                f'^1{caps_record.client.exactName} ^2{caps_record.score}',
+                f'^7Flag record fastest cap: '
+                f'^1{time_record.client.exactName} ^2{record_time}',
+            ]
+        for message in messages:
+            client.message(message)
+
     def format_client_stats(self, client: Client) -> str:
         flags = client.var(self, 'flagtaken', 0).value
         returns = client.var(self, 'flagreturned', 0).value
@@ -262,29 +362,53 @@ class FlagstatsPlugin(b3.plugin.Plugin):
                         'please wait for a capture to happen.'
                     )
 
+    @staticmethod
+    def best_team_flag_caps(
+            team1: TeamData,
+            team2: TeamData,
+    ) -> tuple[Optional[TeamData], ...]:
+        if team1.max_flag > team2.max_flag:
+            return team1, None
+        elif team2.max_flag > team1.max_flag:
+            return team2, None
+        elif team1.max_flag == team2.max_flag and team1.max_flag > 0:
+            return team1, team2
+        else:
+            return None, None
+
+    @staticmethod
+    def best_team_flag_time(
+            team1: TeamData,
+            team2: TeamData,
+    ) -> tuple[Optional[TeamData], ...]:
+        t1_time = team1.min_time
+        t2_time = team2.min_time
+        if t1_time != -1 and (t2_time == -1 or t2_time > t1_time):
+            return team1, None
+        elif t2_time != -1 and (t1_time == -1 or t1_time > t2_time):
+            return team2, None
+        elif t1_time != -1 and t1_time == t2_time:
+            return team1, team2
+        else:
+            return None, None
+
     def merged_awards_message(self) -> str:
-        if self.blue_team.max_flag > self.red_team.max_flag:
-            plural = 's' if self.blue_team.max_flag > 1 else ''
+        team1, team2 = self.best_team_flag_caps(self.blue_team, self.red_team)
+        if team1 and team2:
             msg = (
-                f'Most Flags: {self.blue_team.max_flag_client.name} [^4Blue^3] '
-                f'(^5{self.blue_team.max_flag}^3 flag{plural}) - '
+                f'Most Flags: {team1.max_flag_client.name} [^4{team1.name}^3] '
+                f'and {team2.max_flag_client.name} [^1{team2.name}^3] '
+                f'(^5{team1.max_flag}^3 flags) - '
             )
-        elif self.blue_team.max_flag < self.red_team.max_flag:
-            plural = 's' if self.red_team.max_flag > 1 else ''
+        elif team1:
+            plural = 's' if team1.max_flag > 1 else ''
+            color = '^4' if team1.team == b3.TEAM_BLUE else '^1'
             msg = (
-                f'Most Flags: {self.red_team.max_flag_client.name} [^1Red^3] '
-                f'(^5{self.red_team.max_flag}^3 flag{plural} - '
+                f'Most Flags: {team1.max_flag_client.name} '
+                f'[{color}{team1.name}^3] '
+                f'(^5{team1.max_flag}^3 flag{plural}) - '
             )
-        elif (
-                self.blue_team.max_flag == self.red_team.max_flag
-                and self.blue_team.max_flag_client is not None
-        ):
-            msg = (
-                f'Most Flags: {self.blue_team.max_flag_client.name} [^4Blue^3] '
-                f'and {self.red_team.max_flag_client.name} [^1Red^3] '
-                f'(^5{self.red_team.max_flag}^3 flags) - '
-            )
-        else:  # both are None
+        else:
             msg = ''
 
         best_client, best_score = self.best_defensive_scorer()
@@ -300,28 +424,17 @@ class FlagstatsPlugin(b3.plugin.Plugin):
                 f'(def ^5{best_score}^3) - '
             )
 
-        # FASTEST CAPTURE
-        # If blue team's fastest cap time is smaller than red team's, we take
-        # blue's score.
-        # Another case: blue team captured, red did not, so red time is -1 by
-        # default, but in this case blue team's fastest cap time is taken.
-        b_time = self.blue_team.min_time
-        r_time = self.red_team.min_time
-        if b_time != -1 and (r_time == -1 or r_time > b_time):
+        team1, team2 = self.best_team_flag_time(self.blue_team, self.red_team)
+        if team1 and team2:
             msg += (
-                f'Fastest Cap: {self.blue_team.min_time_client.name} '
-                f'[^4Blue^3] (^5{self.show_time(b_time)}^3)'
+                f'Fastest Cap: {team1.min_time_client.name} '
+                f'[^4Blue^3] and {team2.min_time_client.name} '
+                f'[^1Red^3] (^5{self.show_time(team1.min_time)}^3)'
             )
-        elif r_time != -1 and (b_time == -1 or b_time > r_time):
+        elif team1:
             msg += (
-                f'Fastest Cap: {self.red_team.min_time_client.name} [^1Red^3] '
-                f'(^5{self.show_time(r_time)}^3)'
-            )
-        elif b_time != -1 and r_time == b_time:
-            msg += (
-                f'Fastest Cap: {self.blue_team.min_time_client.name} '
-                f'[^4Blue^3] and {self.red_team.min_time_client.name} '
-                f'[^1Red^3] (^5{self.show_time(b_time)}^3)'
+                f'Fastest Cap: {team1.min_time_client.name} '
+                f'[^4Blue^3] (^5{self.show_time(team1.min_time)}^3)'
             )
 
         return msg
