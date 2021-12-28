@@ -210,11 +210,13 @@ class FlagstatsPlugin(b3.plugin.Plugin):
                     team.min_time_client = client
                 curr_best = client.var(self, 'flagbesttime', -1)
                 if curr_best.value == -1 or curr_best.value > time_capture:
-                    # new personal record
+                    # new personal record, but only show as best time if it
+                    # is not the first recorded best time
+                    show_best_time = curr_best.value != -1
                     curr_best.value = time_capture
                     self.show_message_to_client(client,
                                                 time_capture,
-                                                best_time=True)
+                                                best_time=show_best_time)
                 else:
                     self.show_message_to_client(client, time_capture)
         elif action == 'flag_carrier_kill':
