@@ -8,4 +8,4 @@ class Test_events(KniferPluginTestCase):
                                                       client=self.mike,
                                                       target=self.bill,
                                                       data=(100, self.console.UT_MOD_KNIFE)))
-        self.assertDictEqual(self.p._cutKillers, {self.mike.cid: self.mike})
+        self.assertDictEqual(self.p._killers, {self.mike.cid: self.mike})
