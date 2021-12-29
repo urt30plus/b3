@@ -292,12 +292,16 @@ class StatsPlugin(b3.plugin.Plugin):
         if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
             return
         elif sclient == client:
-            client.message('^7You don\'t get points for killing yourself')
+            client.message("^7You don't get points for killing yourself")
         elif sclient.team in (b3.TEAM_BLUE, b3.TEAM_RED) and sclient.team == client.team:
-            client.message('^7You don\'t get points for killing a team mate')
+            client.message("^7You don't get points for killing a team mate")
         else:
-            cmd.sayLoudOrPM(client, '^3Stats: ^7%s^7 will get ^3%s ^7skill points for killing %s^7' %
-                            (client.exactName, self.score(client, sclient), sclient.exactName))
+            cmd.sayLoudOrPM(
+                client,
+                f'^3Stats: ^7{client.exactName}^7 will get '
+                f'^3{self.score(client, sclient)} ^7skill points '
+                f'for killing {sclient.exactName}^7'
+            )
 
     def cmd_topstats(self, data, client=None, cmd=None):
         """
@@ -305,9 +309,9 @@ class StatsPlugin(b3.plugin.Plugin):
         """
         if results := self._top_scores('points', top_n=5):
             if client:
-                client.message('^3Top Stats:^7 %s' % ', '.join(results))
+                client.message(f'^3Top Stats:^7 {", ".join(results)}')
             else:
-                self.console.say('^3Top Stats:^7 %s' % ', '.join(results))
+                self.console.say(f'^3Top Stats:^7 {", ".join(results)}')
         else:
             client.message('^3Stats: ^7No top players')
 
@@ -317,9 +321,9 @@ class StatsPlugin(b3.plugin.Plugin):
         """
         if results := self._top_scores('experience', top_n=5):
             if client:
-                client.message('^3Top Experienced Players:^7 %s' % ', '.join(results))
+                client.message(f'^3Top Experienced Players:^7 {", ".join(results)}')
             else:
-                self.console.say('^3Top Experienced Players:^7 %s' % ', '.join(results))
+                self.console.say(f'^3Top Experienced Players:^7 {", ".join(results)}')
         else:
             client.message('^3Stats: ^7No top experienced players')
 
@@ -328,8 +332,7 @@ class StatsPlugin(b3.plugin.Plugin):
             (round(c.var(self, score_kind, self.startPoints).value, 2), c.exactName)
             for c in self.console.clients.getList() if c.isvar(self, score_kind)
         ]
-        scores.sort()
-        scores.reverse()
+        scores.sort(reverse=True)
         return [
             f'^3#{i}^7 {name} ^7[^3{score}^7]'
             for i, (score, name) in enumerate(scores[:top_n], start=1)
