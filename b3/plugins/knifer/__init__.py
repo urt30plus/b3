@@ -1,3 +1,4 @@
+import operator
 import threading
 
 import b3.functions
@@ -308,5 +309,5 @@ class KniferPlugin(b3.plugin.Plugin):
             (c.var(self, cvar_name, 0).value, c)
             for c in killers.values()
         ]
-        scores.sort(reverse=True)
+        scores.sort(key=operator.itemgetter(0), reverse=True)
         return [x for x in scores[:limit] if x[0] > 0]
