@@ -34,16 +34,6 @@ class Test_keywords(AdvTestCase):
         # THEN
         say_mock.assert_has_calls([call('^7Regular players online: Joe^7')])
 
-    def test_topstats(self):
-        joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=128)
-        joe.connects(0)
-        self.p._xlrstats_plugin = Mock()
-        with patch.object(self.p._xlrstats_plugin, "cmd_xlrtopstats") as xlrtopstats_mock:
-            # WHEN
-            self.p.print_ad('@topstats')
-        # THEN
-        xlrtopstats_mock.assert_has_calls([call(ext=True, cmd=None, data='3', client=None)])
-
     def test_time(self):
         when(self.console).formatTime(ANY()).thenReturn("f00")
         joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=128)

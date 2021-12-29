@@ -39,7 +39,6 @@ class Iourt43TestCase(unittest.TestCase):
 
             # make sure the admin plugin obtained by other plugins is our admin plugin
             when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
-            when(self.console).getPlugin('xlrstats').thenReturn(None)
             when(self.console).queryClientFrozenSandAccount(...).thenReturn({})
 
             # prepare a few players

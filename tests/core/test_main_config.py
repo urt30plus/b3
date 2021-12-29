@@ -60,12 +60,10 @@ class CommonDefaultTestMethodsMixin:
         self.assertListEqual([
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'disabled': False, 'path': None},
             {'name': 'adv', 'conf': '@b3/conf/plugin_adv.xml', 'disabled': False, 'path': None},
-            {'name': 'pluginmanager', 'conf': '@b3/conf/plugin_pluginmanager.ini', 'disabled': False, 'path': None},
             {'name': 'poweradminurt', 'conf': '@b3/conf/plugin_poweradminurt.ini', 'disabled': False, 'path': None},
             {'name': 'spree', 'conf': '@b3/conf/plugin_spree.ini', 'disabled': False, 'path': None},
             {'name': 'stats', 'conf': '@b3/conf/plugin_stats.ini', 'disabled': False, 'path': None},
             {'name': 'welcome', 'conf': '@b3/conf/plugin_welcome.ini', 'disabled': False, 'path': None},
-            {'name': 'xlrstats', 'conf': '@b3/conf/plugin_xlrstats.ini', 'disabled': False, 'path': None},
         ], self.conf.get_plugins())
 
 
@@ -81,7 +79,7 @@ class Test_XmlMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
         Vefify that the plugins are return in the same order as found in the config file
         """
         self.assertListEqual(
-            ['admin', 'adv', 'pluginmanager', 'poweradminurt', 'spree', 'stats', 'welcome', 'xlrstats'],
+            ['admin', 'adv', 'poweradminurt', 'spree', 'stats', 'welcome'],
             list([x.get('name') for x in self.conf._config_parser.get('plugins/plugin')]))
 
 
@@ -97,7 +95,7 @@ class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
         Vefify that the plugins are return in the same order as found in the config file
         """
         self.assertListEqual(
-            ['admin', 'adv', 'pluginmanager', 'poweradminurt', 'spree', 'stats', 'welcome', 'xlrstats'], self.conf._config_parser.options('plugins'))
+            ['admin', 'adv', 'poweradminurt', 'spree', 'stats', 'welcome'], self.conf._config_parser.options('plugins'))
 
 
 class TestConfig(unittest.TestCase):

@@ -57,7 +57,6 @@ class KniferPluginTestCase(unittest.TestCase):
 
         # make sure the admin plugin obtained by other plugins is our admin plugin
         when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
-        when(self.console).getPlugin('xlrstats').thenReturn(None)
 
         self.conf = CfgConfigParser()
         self.conf.loadFromString(dedent(r"""

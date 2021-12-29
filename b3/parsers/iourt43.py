@@ -1031,7 +1031,7 @@ class Iourt43Parser(b3.parser.Parser):
         elif attacker.team != b3.TEAM_UNKNOWN and attacker.team == victim.team:
             event = self.getEventID('EVT_CLIENT_KILL_TEAM')
 
-        # if not logging damage we need a general hitloc (for xlrstats)
+        # if not logging damage we need a general hitloc
         last_damage_data = victim.data.pop('lastDamageTaken', (100, weapon, 'body'))
 
         victim.state = b3.STATE_DEAD

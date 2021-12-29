@@ -113,11 +113,9 @@
         -->
         <plugin name="admin" config="@b3/conf/plugin_admin.ini" />
         <plugin name="adv" config="@b3/conf/plugin_adv.xml" />
-        <plugin name="pluginmanager" config="@b3/conf/plugin_pluginmanager.ini" />
         <plugin name="poweradminurt" config="@b3/conf/plugin_poweradminurt.ini" />
         <plugin name="spree" config="@b3/conf/plugin_spree.ini" />
         <plugin name="stats" config="@b3/conf/plugin_stats.ini" />
         <plugin name="welcome" config="@b3/conf/plugin_welcome.ini" />
-        <plugin name="xlrstats" config="@b3/conf/plugin_xlrstats.ini" />
     </plugins>
 </configuration>

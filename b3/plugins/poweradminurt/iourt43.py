@@ -1474,11 +1474,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                                                                       (100, 'penalty', 'body', 'Team_Switch_Penalty'),
                                                                       client, client))
 
-                        plugin = self.console.getPlugin('xlrstats')
-                        if plugin:
-                            client.message('^7Switching made teams ^1UNFAIR^7! '
-                                           'Points where deducted from your stats as a penalty!')
-
                     if self._teamred > self._teamblue:
                         # join the blue team
                         self.console.write('forceteam %s blue' % client.cid)
@@ -2375,8 +2370,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             old = client.var(self, var, 0).value
             client.setvar(self, "prev_" + var, old)
 
-    def _getScores(self, clients, usexlrstats=True):
-        xlrstats = self.console.getPlugin('xlrstats') if usexlrstats else None
+    def _getScores(self, clients):
         playerstats = {}
         maxstats = {}
         minstats = {}
@@ -2409,16 +2403,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 'flagperf': flagperf,
                 'bombperf': bombperf,
             }
-            stats = xlrstats.get_PlayerStats(c) if xlrstats else None
-            if stats:
-                playerstats[c.id]['xkillratio'] = stats.ratio
-                head = xlrstats.get_PlayerBody(playerid=c.cid, bodypartid=0).kills
-                helmet = xlrstats.get_PlayerBody(playerid=c.cid, bodypartid=1).kills
-                xhsratio = min(1.0, (head + helmet) / (1.0 + kills))
-                playerstats[c.id]['xhsratio'] = xhsratio
-            else:
-                playerstats[c.id]['xhsratio'] = 0.0
-                playerstats[c.id]['xkillratio'] = 0.8
+            playerstats[c.id]['xhsratio'] = 0.0
+            playerstats[c.id]['xkillratio'] = 0.8
             for key in keys:
                 if key not in maxstats or maxstats[key] < playerstats[c.id][key]:
                     maxstats[key] = playerstats[c.id][key]
@@ -2492,7 +2478,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         clients = self.console.clients.getList()
         gametype = self._getGameType()
         tdm = (gametype == 'tdm')
-        scores = self._getScores(clients, usexlrstats=tdm)
+        scores = self._getScores(clients)
         blue = [c for c in clients if c.team == b3.TEAM_BLUE]
         red = [c for c in clients if c.team == b3.TEAM_RED]
 

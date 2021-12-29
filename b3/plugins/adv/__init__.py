@@ -16,7 +16,6 @@ class AdvPlugin(b3.plugin.Plugin):
     def __init__(self, console, config=None):
         super().__init__(console, config)
         self._admin_plugin = self.console.getPlugin('admin')
-        self._xlrstats_plugin = self.console.getPlugin('xlrstats')
         self._crontab = None
         self._file_name = None
         self._rate = '2'
@@ -39,8 +38,6 @@ class AdvPlugin(b3.plugin.Plugin):
         self.console.cron + self._crontab
 
     def onStartup(self):
-        if not self._xlrstats_plugin:
-            self.debug('XLRstats not installed: @topstats not available!')
         self.register_commands_from_config()
 
     def _update_ad_list(self, ad_list=None):
@@ -106,18 +103,6 @@ class AdvPlugin(b3.plugin.Plugin):
                 ad = None
         elif ad == "@time":
             ad = "^2Time: ^3" + self.console.formatTime(time.time())
-        elif ad == "@topstats":
-            if self._xlrstats_plugin:
-                self._xlrstats_plugin.cmd_xlrtopstats(data='3', client=None, cmd=None, ext=True)
-                if first_try:
-                    # try another ad
-                    self.adv(first_try=False)
-                    return
-                else:
-                    ad = None
-            else:
-                self.error('XLRstats not installed! Cannot use @topstats in adv plugin!')
-                ad = '@topstats not available: XLRstats is not installed!'
         elif ad == "@admins":
             try:
                 command = self._admin_plugin._commands['admins']
