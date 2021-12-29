@@ -17,93 +17,70 @@ F_CUSTOM_GREETING = 32
 
 
 class WelcomePlugin(b3.plugin.Plugin):
-    _adminPlugin = None
-    _newbConnections = 15
-    _welcomeFlags = F_FIRST | F_NEWB | F_USER | F_ANNOUNCE_FIRST | F_ANNOUNCE_USER | F_CUSTOM_GREETING
-    _welcomeDelay = 30
-    _min_gap = 3600
 
-    _default_messages = {
-        'first': '^7Welcome $name^7, this must be your first visit, you are player ^3#$id. Type !help for help',
-        'newb': '^7[^2Authed^7] Welcome back $name ^7[^3@$id^7], last visit ^3$lastVisit. '
-                'Type !register in chat to register. Type !help for help',
-        'user': '^7[^2Authed^7] Welcome back $name ^7[^3@$id^7], last visit ^3$lastVisit^7, '
-                'you\'re a ^2$group^7, played $connections times',
-        'announce_first': '^7Everyone welcome $name^7, player number ^3#$id^7, to the server',
-        'announce_user': '^7Everyone welcome back $name^7, player number ^3#$id^7, to the server, '
-                         'played $connections times',
-        'greeting': '^7$name^7 joined: $greeting',
-        'greeting_empty': '^7You have no greeting set',
-        'greeting_yours': '^7Your greeting is %s',
-        'greeting_bad': '^7Greeting is not formatted properly: %s',
-        'greeting_changed': '^7Greeting changed to: %s',
-        'greeting_cleared': '^7Greeting cleared',
-    }
+    def __init__(self, console, config=None):
+        super().__init__(console, config)
+        self._adminPlugin = None
+        self._newbConnections = 15
+        self._welcomeFlags = F_FIRST | F_NEWB | F_USER | F_ANNOUNCE_FIRST | F_ANNOUNCE_USER | F_CUSTOM_GREETING
+        self._welcomeDelay = 30
+        self._min_gap = 3600
+        self._default_messages = {
+            'first': '^7Welcome $name^7, this must be your first visit, you are player ^3#$id. Type !help for help',
+            'newb': '^7[^2Authed^7] Welcome back $name ^7[^3@$id^7], last visit ^3$lastVisit. '
+                    'Type !register in chat to register. Type !help for help',
+            'user': '^7[^2Authed^7] Welcome back $name ^7[^3@$id^7], last visit ^3$lastVisit^7, '
+                    'you\'re a ^2$group^7, played $connections times',
+            'announce_first': '^7Everyone welcome $name^7, player number ^3#$id^7, to the server',
+            'announce_user': '^7Everyone welcome back $name^7, player number ^3#$id^7, to the server, '
+                             'played $connections times',
+            'greeting': '^7$name^7 joined: $greeting',
+            'greeting_empty': '^7You have no greeting set',
+            'greeting_yours': '^7Your greeting is %s',
+            'greeting_bad': '^7Greeting is not formatted properly: %s',
+            'greeting_changed': '^7Greeting changed to: %s',
+            'greeting_cleared': '^7Greeting cleared',
+        }
 
     def onStartup(self):
-        """
-        Initialize the plugin
-        """
         self._adminPlugin = self.console.getPlugin('admin')
-
         self.register_commands_from_config()
-
-        # register events needed
         self.registerEvent('EVT_CLIENT_AUTH', self.onAuth)
 
     def onLoadConfig(self):
-        """
-        Load plugin configuration
-        """
         self._load_config_flags()
 
-        try:
-            self._newbConnections = self.config.getint('settings', 'newb_connections')
-            self.debug('loaded settings/newb_connections: %s' % self._newbConnections)
-        except (NoOptionError, ValueError) as e:
-            self._newbConnections = 15
-            self.error('could not load settings/newb_connections config value: %s' % e)
-            self.debug('using default value (%s) for settings/newb_connections' % self._newbConnections)
+        self._newbConnections = self.getSetting(
+            'settings',
+            'newb_connections',
+            b3.INTEGER,
+            15,
+        )
 
-        try:
-            self._welcomeDelay = self.config.getint('settings', 'delay')
-            self.debug('loaded settings/delay: %s' % self._welcomeDelay)
-            if self._welcomeDelay < 15 or self._welcomeDelay > 90:
-                self._welcomeDelay = 30
-                self.debug('welcome delay not in range 15-90: using 30 instead')
-        except (NoOptionError, ValueError) as e:
-            self._welcomeDelay = 30
-            self.error('could not load settings/delay config value: %s' % e)
-            self.debug('using default value (%s) for settings/delay' % self._welcomeDelay)
+        self._welcomeDelay = self.getSetting(
+            'settings',
+            'delay',
+            b3.INTEGER,
+            30,
+            lambda x: x if 15 <= x <= 90 else 30,
+        )
 
-        self.info('welcomer delay set to %s: the bot will wait %ss after a player connects '
-                  'to write the welcome message' % (self._welcomeDelay, self._welcomeDelay))
-
-        try:
-            self._min_gap = self.config.getint('settings', 'min_gap')
-            self.debug('loaded settings/min_gap: %s' % self._min_gap)
-            if self._min_gap < 0:
-                self._min_gap = 0
-                self.debug('min_gap must be positive or 0: using 0 instead')
-        except (NoOptionError, ValueError) as e:
-            self._min_gap = 3600
-            self.error('could not load settings/min_gap config value: %s' % e)
-            self.debug('using default value (%s) for settings/min_gap' % self._min_gap)
-
-        self.info('min_gap set to %s: the bot will not welcome a player more than once '
-                  'every %s seconds' % (self._min_gap, self._min_gap))
+        self._min_gap = self.getSetting(
+            'settings',
+            'min_gap',
+            b3.INTEGER,
+            3600,
+            lambda x: x if x >= 0 else 0,
+        )
 
     def _load_config_flags(self):
-        """
-        Load configuration flags
-        """
         flag_options = [
-            ("welcome_first", F_FIRST),
-            ("welcome_newb", F_NEWB),
-            ("welcome_user", F_USER),
-            ("announce_first", F_ANNOUNCE_FIRST),
-            ("announce_user", F_ANNOUNCE_USER),
-            ("show_user_greeting", F_CUSTOM_GREETING)
+            ('welcome_first', F_FIRST),
+            ('welcome_newb', F_NEWB),
+            ('welcome_user', F_USER),
+            ('announce_first', F_ANNOUNCE_FIRST),
+            ('announce_user', F_ANNOUNCE_USER),
+            ('show_user_greeting', F_CUSTOM_GREETING),
         ]
 
         config_options = list(zip(*flag_options))[0]
@@ -119,31 +96,27 @@ class WelcomePlugin(b3.plugin.Plugin):
                 # old style config
                 try:
                     self._welcomeFlags = self.config.getint('settings', 'flags')
-                    self.debug('loaded settings/flags: %s' % self._welcomeFlags)
                 except (NoOptionError, ValueError) as e:
-                    self.error('could not load settings/flags config value: %s' % e)
-                    self.debug('using default value (%s) for settings/flags' % self._welcomeFlags)
+                    self.error('could not load settings/flags config value: %s', e)
             else:
-                self.warning("could not find any of '%s' in config: all welcome messages will be shown" %
-                             "', '".join(config_options))
+                self.warning(
+                    "could not find any of '%s' in config: "
+                    "all welcome messages will be shown",
+                    "', '".join(config_options)
+                )
         else:
             for opt, F in flag_options:
-                if self.config.has_option("settings", opt):
+                if self.config.has_option('settings', opt):
                     try:
-                        _ = self.config.getboolean("settings", opt)
+                        _ = self.config.getboolean('settings', opt)
                         set_flag(F) if _ else unset_flag(F)
                     except (NoOptionError, ValueError) as e:
-                        self.error('could not load settings/%s config value: %s' % (opt, e))
-                        self.debug('using default value (yes) for settings/%s' % opt)
+                        self.error('could not load settings/%s config value: %s', opt, e)
                 else:
                     set_flag(F)
-                    self.warning('could not find settings/%s config value' % opt)
-                    self.debug('using default value (yes) for settings/%s' % opt)
+                    self.warning('could not find settings/%s config value', opt)
 
     def onAuth(self, event):
-        """
-        Handle EVT_CLIENT_AUTH
-        """
         if self._welcomeFlags <= 0 or \
                 not event.client or \
                 event.client.id is None or \
@@ -152,20 +125,14 @@ class WelcomePlugin(b3.plugin.Plugin):
                 event.client.pbid == 'WORLD':
             return
         if self.console.upTime() < 300:
-            self.debug('not welcoming player because the bot started less than 5 min ago')
             return
         t = threading.Timer(self._welcomeDelay, self.welcome, (event.client,))
         t.start()
 
     def welcome(self, client):
-        """
-        Welcome a player
-        """
         if client.lastVisit:
-            self.debug('lastVisit: %s' % self.console.formatTime(client.lastVisit))
             _timeDiff = time.time() - client.lastVisit
         else:
-            self.debug('lastVisit not available: must be the first time')
             _timeDiff = 1000000  # big enough so it will welcome new players
 
         # don't need to welcome people who got kicked or where already 
@@ -191,12 +158,8 @@ class WelcomePlugin(b3.plugin.Plugin):
                 _info = {'greeting': client.greeting % info}
                 _info.update(info)
                 self.console.say(self.getMessage('greeting', _info))
-        else:
-            if _timeDiff <= self._min_gap:
-                self.debug('client already welcomed in the past %s seconds' % self._min_gap)
 
     def get_client_info(self, client):
-        assert client
         info = {
             'name': client.exactName,
             'id': str(client.id),
@@ -227,7 +190,6 @@ class WelcomePlugin(b3.plugin.Plugin):
             client.message(self.getMessage('greeting_cleared'))
         elif data:
             prepared_data = re.sub(r'\$(name|maxLevel|group|connections)', r'%(\1)s', data)
-
             if len(prepared_data) > 255:
                 client.message('^7Your greeting is too long')
             else:
