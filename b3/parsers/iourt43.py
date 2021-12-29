@@ -1462,8 +1462,7 @@ class Iourt43Parser(b3.parser.Parser):
         maps = []
         for line in data.splitlines():
             if m := re.match(mapregex, line.strip()):
-                if map_name := m['map']:
-                    maps.append(map_name)
+                maps.append(m['map'])
 
         self._maplist = maps
         self.info(f"getMaps() cached {len(maps)} maps")
@@ -1543,17 +1542,22 @@ class Iourt43Parser(b3.parser.Parser):
         if wanted_map in supported_maps:
             return wanted_map
 
-        cleaned_supported_maps = {}
-        for map_name in supported_maps:
-            cleaned_supported_maps[re.sub("^ut4?_", '', map_name, count=1)] = map_name
+        cleaned_supported_maps = {
+            re.sub(r'^ut(4|43)?_', '', map_name, count=1): map_name
+            for map_name in supported_maps
+        }
 
-        if wanted_map in cleaned_supported_maps:
-            return cleaned_supported_maps[wanted_map]
+        cleaned_wanted_map = re.sub(r'^ut(4|43)?_', '', wanted_map, count=1)
+        if match := cleaned_supported_maps.get(cleaned_wanted_map):
+            return match
 
-        cleaned_wanted_map = re.sub("^ut4?_", '', wanted_map, count=1)
-
-        matches = [cleaned_supported_maps[match] for match in getStuffSoundingLike(cleaned_wanted_map,
-                                                                                   list(cleaned_supported_maps.keys()))]
+        matches = [
+            cleaned_supported_maps[match]
+            for match in getStuffSoundingLike(
+                cleaned_wanted_map,
+                list(cleaned_supported_maps.keys())
+            )
+        ]
         if len(matches) == 1:
             # one match, get the map id
             return matches[0]
