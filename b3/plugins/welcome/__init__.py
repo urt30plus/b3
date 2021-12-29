@@ -20,7 +20,7 @@ class WelcomePlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._adminPlugin = None
+        self._adminPlugin = console.getPlugin('admin')
         self._newbConnections = 15
         self._welcomeFlags = F_FIRST | F_NEWB | F_USER | F_ANNOUNCE_FIRST | F_ANNOUNCE_USER | F_CUSTOM_GREETING
         self._welcomeDelay = 30
@@ -43,7 +43,6 @@ class WelcomePlugin(b3.plugin.Plugin):
         }
 
     def onStartup(self):
-        self._adminPlugin = self.console.getPlugin('admin')
         self.register_commands_from_config()
         self.registerEvent('EVT_CLIENT_AUTH', self.onAuth)
 

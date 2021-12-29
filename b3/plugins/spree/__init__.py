@@ -31,7 +31,7 @@ class SpreePlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None) -> None:
         super().__init__(console, config)
-        self._admin_plugin = None
+        self._admin_plugin = console.getPlugin('admin')
         self._killing_messages = {}
         self._losing_messages = {}
         self._reset_spree_stats = False
@@ -56,7 +56,6 @@ class SpreePlugin(b3.plugin.Plugin):
                              msg_type, message)
 
     def onStartup(self) -> None:
-        self._admin_plugin = self.console.getPlugin("admin")
         self.register_commands_from_config()
         self.registerEvent('EVT_CLIENT_KILL', self.on_client_kill)
         if self._reset_spree_stats:

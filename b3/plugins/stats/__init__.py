@@ -8,10 +8,10 @@ __version__ = '1.5.1'
 
 
 class StatsPlugin(b3.plugin.Plugin):
-    _adminPlugin = None
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
+        self._adminPlugin = console.getPlugin('admin')
         self.mapstatslevel = 0
         self.testscorelevel = 0
         self.topstatslevel = 2
@@ -116,8 +116,6 @@ class StatsPlugin(b3.plugin.Plugin):
             self.info('using default value (%s) for settings/show_awards_xp' % self.show_awards_xp)
 
     def onStartup(self):
-        self._adminPlugin = self.console.getPlugin('admin')
-
         self.register_commands_from_config()
 
         self.registerEvent('EVT_CLIENT_DAMAGE_TEAM', self.onDamageTeam)

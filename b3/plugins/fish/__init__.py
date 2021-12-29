@@ -12,7 +12,7 @@ class FishPlugin(Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._adminPlugin = self.console.getPlugin("admin")
+        self._adminPlugin = console.getPlugin("admin")
         self._fish_cmd = self._fish_commands[0]
         self._target_name = None
         self._target_team = None

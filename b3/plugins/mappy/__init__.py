@@ -24,13 +24,12 @@ class MappyPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None) -> None:
         super().__init__(console, config)
-        self._admin_plugin = None
+        self._admin_plugin = console.getPlugin('admin')
 
     def onLoadConfig(self) -> None:
         pass
 
     def onStartup(self) -> None:
-        self._admin_plugin = self.console.getPlugin("admin")
         self.register_commands_from_config()
 
     def cmd_mapmodes(self, data, client, cmd=None):

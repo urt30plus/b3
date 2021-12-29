@@ -15,7 +15,7 @@ class AdvPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._admin_plugin = self.console.getPlugin('admin')
+        self._admin_plugin = console.getPlugin('admin')
         self._crontab = None
         self._file_name = None
         self._rate = '2'

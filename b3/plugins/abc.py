@@ -12,7 +12,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._admin_plugin = None
+        self._admin_plugin = self.console.getPlugin('admin')
         self._active = True
         self._stfu = False  # if True, no bigtexts
         self._total_kills = 0
@@ -79,11 +79,6 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
                 )
 
     def onLoadConfig(self):
-        self._admin_plugin = self.console.getPlugin('admin')
-        if not self._admin_plugin:
-            self.error('Could not find admin plugin')
-            return False
-
         self._top_n = self.getSetting(
             'settings',
             'top_n',

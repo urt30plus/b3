@@ -10,11 +10,13 @@ __version__ = '1.4.4'
 
 
 class SpamcontrolPlugin(b3.plugin.Plugin):
-    _adminPlugin = None
 
-    _maxSpamins = 10
-    _modLevel = 20
-    _falloffRate = 6.5
+    def __init__(self, console, config=None):
+        super().__init__(console, config)
+        self._adminPlugin = console.getPlugin('admin')
+        self._maxSpamins = 10
+        self._modLevel = 20
+        self._falloffRate = 6.5
 
     def onLoadConfig(self):
         """
@@ -34,8 +36,6 @@ class SpamcontrolPlugin(b3.plugin.Plugin):
         self.registerEvent('EVT_CLIENT_TEAM_SAY', self.onChat)
         self.registerEvent('EVT_CLIENT_PRIVATE_SAY', self.onChat)
         self.registerEvent('EVT_CLIENT_RADIO', self.onRadio)
-
-        self._adminPlugin = self.console.getPlugin('admin')
 
         self.register_commands_from_config()
 

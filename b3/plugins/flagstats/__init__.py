@@ -42,7 +42,7 @@ class FlagstatsPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._adminPlugin = None
+        self._adminPlugin = console.getPlugin('admin')
         self._reset_flagstats_stats = False
         self._show_awards = False
         self._separate_awards = False
@@ -81,11 +81,6 @@ class FlagstatsPlugin(b3.plugin.Plugin):
         self.registerEvent('EVT_CLIENT_ACTION', self.on_client_action)
         self.registerEvent('EVT_GAME_FLAG_RETURNED', self.on_flag_return)
         self.registerEvent('EVT_GAME_EXIT', self.on_game_exit)
-
-        self._adminPlugin = self.console.getPlugin('admin')
-        if not self._adminPlugin:
-            self.error('Could not find admin plugin')
-            return False
 
         self.register_commands_from_config()
 

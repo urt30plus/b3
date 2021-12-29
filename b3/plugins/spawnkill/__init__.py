@@ -7,27 +7,29 @@ __version__ = '1.5.1'
 
 
 class SpawnkillPlugin(b3.plugin.Plugin):
-    adminPlugin = None
+
     requiresParsers = ['iourt42', 'iourt43']
 
-    penalties = {}
-
-    settings = {
-        'hit': {
-            'maxlevel': 40,
-            'delay': 2,
-            'penalty': 'warn',
-            'duration': 3,
-            'reason': 'do not shoot to spawning players!'
-        },
-        'kill': {
-            'maxlevel': 40,
-            'delay': 3,
-            'penalty': 'warn',
-            'duration': 5,
-            'reason': 'spawnkilling is not allowed on this server!'
+    def __init__(self, console, config=None):
+        super().__init__(console, config)
+        self.adminPlugin = console.getPlugin('admin')
+        self.penalties = {}
+        self.settings = {
+            'hit': {
+                'maxlevel': 40,
+                'delay': 2,
+                'penalty': 'warn',
+                'duration': 3,
+                'reason': 'do not shoot to spawning players!'
+            },
+            'kill': {
+                'maxlevel': 40,
+                'delay': 3,
+                'penalty': 'warn',
+                'duration': 5,
+                'reason': 'spawnkilling is not allowed on this server!'
+            }
         }
-    }
 
     def onLoadConfig(self):
         """
@@ -55,9 +57,6 @@ class SpawnkillPlugin(b3.plugin.Plugin):
         """
         Initialize plugin settings.
         """
-        # get the admin plugin
-        self.adminPlugin = self.console.getPlugin('admin')
-
         self.register_commands_from_config()
 
         # register the events needed
