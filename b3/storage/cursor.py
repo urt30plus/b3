@@ -11,8 +11,8 @@ class Cursor:
         """
         self._cursor = cursor
         self._conn = conn
-        self.rowcount = self._cursor.rowcount
-        self.lastrowid = self._cursor.lastrowid
+        self.rowcount = cursor.rowcount
+        self.lastrowid = cursor.lastrowid
         self.fields = None
         try:
             self.EOF = self.moveNext()
@@ -54,9 +54,7 @@ class Cursor:
         """
         if self.EOF:
             return {}
-        fields = self.fields
-        columns = self.columns
-        return dict(zip(columns, fields))
+        return dict(zip(self.columns, self.fields))
 
     def getValue(self, key, default=None):
         """
