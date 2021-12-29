@@ -8,4 +8,4 @@ class Test_events(NaderPluginTestCase):
                                                       client=self.mike,
                                                       target=self.bill,
                                                       data=(100, self.console.UT_MOD_HEGRENADE)))
-        self.assertDictEqual(self.p._nadeKillers, {self.mike.cid: self.mike})
+        self.assertDictEqual(self.p._killers, {self.mike.cid: self.mike})
