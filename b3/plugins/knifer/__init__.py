@@ -14,17 +14,20 @@ class KniferPlugin(b3.plugin.Plugin):
     def __init__(self, console, config=None):
         super().__init__(console, config)
         self._admin_plugin = None
-        self._weapon_id = 12
         self._active = True
         self._stfu = False  # if True, no bigtexts
         self._total_kills = 0
-        self._top_n = 5
+        self._top_n = 3
         self._msg_levels = set()
         self._killers = {}
         self._challenges = {}
         self._max_challenges = 5
         self._challenge_duration = 300
         self._hof_plugin_name = 'knifer'
+        self._weapons = (
+            console.UT_MOD_KNIFE,
+            console.UT_MOD_KNIFE_THROWN,
+        )
 
     def onLoadConfig(self):
         self._admin_plugin = self.console.getPlugin('admin')
@@ -44,13 +47,6 @@ class KniferPlugin(b3.plugin.Plugin):
             'enabled',
             b3.BOOLEAN,
             self._active,
-        )
-
-        self._weapon_id = self.getSetting(
-            'settings',
-            'weapon_id',
-            b3.INTEGER,
-            self._weapon_id,
         )
 
         self._challenge_duration = self.getSetting(
@@ -81,10 +77,10 @@ class KniferPlugin(b3.plugin.Plugin):
             c.setvar(self, 'knifeKills', 0)
 
     def on_client_kill(self, event):
-        if event.data[1] == self.console.UT_MOD_KNIFE:
-            self.on_knife_kill(event.client, event.target, event.data)
+        if event.data[1] in self._weapons:
+            self.handle_kill(event.client, event.target, event.data)
 
-    def on_knife_kill(self, client, target, data=None):
+    def handle_kill(self, client, target, data=None):
         self._total_kills += 1
         if self._total_kills == 1:
             self.console.write(
