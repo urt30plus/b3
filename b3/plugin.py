@@ -29,9 +29,7 @@ class Plugin:
     >>> class MyPlugin(Plugin):
     >>>
     >>>     def __init__(self, console, config=None):
-    >>>         Plugin.__init__(self, console, config)
-    >>>         # you can get the admin plugin object instance here too
-    >>>         self._admin_plugin = self.console.getPlugin('admin')
+    >>>         super().__init__(self, console, config)
     >>>         self._my_attribute_1 = 'something'
     >>>         self._my_attribute_2 = 1337
     """
@@ -75,6 +73,8 @@ class Plugin:
     _default_messages = {}
     """:type: dict"""
 
+    _parseUserCmdRE = re.compile(r"^(?P<cid>'[^']{2,}'|[0-9]+|[^\s]{2,}|@[0-9]+)(\s+(?P<parms>.*))?$")
+
     events = []
 
     def __init__(self, console, config=None):
@@ -84,6 +84,7 @@ class Plugin:
         :param config: The plugin configuration file
         """
         self.console = console
+        self.__admin_plugin = None
         self.eventmanager = b3.events.eventManager
         self.eventmap = defaultdict(list)
         self._messages = {}
@@ -102,6 +103,12 @@ class Plugin:
         self.registerEvent('EVT_STOP', self.onStop)
         self.registerEvent('EVT_EXIT', self.onExit)
         self._stop_events = (console.getEventID('EVT_EXIT'), console.getEventID('EVT_STOP'))
+
+    @property
+    def admin_plugin(self):
+        if self.__admin_plugin is None:
+            self.__admin_plugin = self.console.getPlugin('admin')
+        return self.__admin_plugin
 
     def start(self):
         """
@@ -417,7 +424,6 @@ class Plugin:
         """
         if "commands" not in self.config.sections():
             return
-        admin_plugin = self.console.getPlugin("admin")
         for cmd in self.config.options("commands"):
             level = self.config.get("commands", cmd)
             sp = cmd.split("-")
@@ -425,7 +431,56 @@ class Plugin:
             if len(sp) == 2:
                 cmd, alias = sp
             if func := b3.functions.getCmd(self, cmd):
-                admin_plugin.registerCommand(self, cmd, level, func, alias)
+                self.admin_plugin.registerCommand(self, cmd, level, func, alias)
+
+    def findClientPrompt(self, handle, client=None):
+        """
+        Find a client matching the given input.
+        :param handle: The search handle
+        :param client: The client who to notify search results
+        """
+        if matches := self.console.clients.getByMagic(handle):
+            if len(matches) > 1:
+                names = []
+                for c in matches:
+                    if c.name == c.cid:
+                        names.append(f'^7{c.name}')
+                    else:
+                        names.append(f'^7{c.name} [^2{c.cid}^7]')
+
+                if client:
+                    client.message(
+                        f'^7Players matching {handle} {", ".join(names)}'
+                    )
+                return None
+            else:
+                return matches[0]
+        else:
+            if client:
+                client.message(f'^7No players found matching {handle}')
+            return None
+
+    def parseUserCmd(self, cmd, req=False):
+        """
+        Return a tuple of two elements extracted from cmd :
+         - a player identifier
+         - optional parameters
+        req: set to True if parameters is required.
+        Return None if could cmd is not in the expected format
+        """
+        if m := re.match(self._parseUserCmdRE, cmd):
+            parms = m['parms']
+
+            if req and not parms:
+                return None
+
+            cid = m['cid']
+            if cid[:1] == "'" and cid[-1:] == "'":
+                cid = cid[1:-1]
+
+            return cid, parms
+        else:
+            return None
 
     def error(self, msg, *args, **kwargs):
         """

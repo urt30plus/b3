@@ -42,7 +42,6 @@ class FlagstatsPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._adminPlugin = console.getPlugin('admin')
         self._reset_flagstats_stats = False
         self._show_awards = False
         self._separate_awards = False
@@ -245,8 +244,8 @@ class FlagstatsPlugin(b3.plugin.Plugin):
         """
         sclient = client
         if data:
-            if args := self._adminPlugin.parseUserCmd(data):
-                if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
+            if args := self.parseUserCmd(data):
+                if not (sclient := self.findClientPrompt(args[0], client)):
                     return
             else:
                 client.message('^7Invalid data, try !help flag')

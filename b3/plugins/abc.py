@@ -12,7 +12,6 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._admin_plugin = self.console.getPlugin('admin')
         self._active = True
         self._stfu = False  # if True, no bigtexts
         self._total_kills = 0
@@ -193,8 +192,8 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
             else:
                 msg = f'^7No {self.weapon_name} kill yet... try again'
         else:
-            if m := self._admin_plugin.parseUserCmd(data):
-                if sclient := self._admin_plugin.findClientPrompt(m[0], client):
+            if m := self.parseUserCmd(data):
+                if sclient := self.findClientPrompt(m[0], client):
                     kills = sclient.var(self, 'kills', 0).value
                     msg = f'{sclient.exactName} : ^2{kills} ^7{self.weapon_name} kills'
                 else:
@@ -225,13 +224,13 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
             )
             return
 
-        if not (m := self._admin_plugin.parseUserCmd(data)):
+        if not (m := self.parseUserCmd(data)):
             client.message(
                 f'^7Invalid data, try !help {self.cmd_msg_prefix}challenge'
             )
             return
 
-        if not (sclient := self._admin_plugin.findClientPrompt(m[0], client)):
+        if not (sclient := self.findClientPrompt(m[0], client)):
             return
 
         if self._challenges.get(sclient.cid):

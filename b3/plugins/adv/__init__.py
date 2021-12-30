@@ -15,7 +15,6 @@ class AdvPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._admin_plugin = console.getPlugin('admin')
         self._crontab = None
         self._file_name = None
         self._rate = '2'
@@ -82,7 +81,7 @@ class AdvPlugin(b3.plugin.Plugin):
             w = w.strip()
             if len(w) > 1:
                 if w[:6] == '/spam#':
-                    w = self._admin_plugin.getSpam(w[6:])
+                    w = self.admin_plugin.getSpam(w[6:])
                 ad_list.append(w)
         self._update_ad_list(ad_list)
 
@@ -105,7 +104,7 @@ class AdvPlugin(b3.plugin.Plugin):
             ad = "^2Time: ^3" + self.console.formatTime(time.time())
         elif ad == "@admins":
             try:
-                command = self._admin_plugin._commands['admins']
+                command = self.admin_plugin._commands['admins']
                 command.executeLoud(data=None, client=None)
                 ad = None
             except Exception as err:
@@ -118,7 +117,7 @@ class AdvPlugin(b3.plugin.Plugin):
                     ad = None
         elif ad == "@regulars":
             try:
-                command = self._admin_plugin._commands['regulars']
+                command = self.admin_plugin._commands['regulars']
                 command.executeLoud(data=None, client=None)
                 ad = None
             except Exception as err:

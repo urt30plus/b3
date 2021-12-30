@@ -24,7 +24,6 @@ class AdminPlugin(b3.plugin.Plugin):
     _commands = {}
 
     _tkPlugin = None
-    _parseUserCmdRE = re.compile(r"^(?P<cid>'[^']{2,}'|[0-9]+|[^\s]{2,}|@[0-9]+)(\s+(?P<parms>.*))?$")
     _long_tempban_max_duration = 1440  # 60m/h x 24h = 1440m = 1d
     _warn_command_abusers = False
     _announce_registration = True
@@ -617,53 +616,6 @@ class AdminPlugin(b3.plugin.Plugin):
         Return a list of online regular players.
         """
         return self.console.clients.getClientsByLevel(min=2, max=2)
-
-    def findClientPrompt(self, handle, client=None):
-        """
-        Find a client matching the given input.
-        :param handle: The search handle
-        :param client: The client who to notify search results
-        """
-        if matches := self.console.clients.getByMagic(handle):
-            if len(matches) > 1:
-                names = []
-                for c in matches:
-                    if c.name == c.cid:
-                        names.append('^7%s' % c.name)
-                    else:
-                        names.append('^7%s [^2%s^7]' % (c.name, c.cid))
-
-                if client:
-                    client.message(self.getMessage('players_matched', handle, ', '.join(names)))
-                return None
-            else:
-                return matches[0]
-        else:
-            if client:
-                client.message(self.getMessage('no_players', handle))
-            return None
-
-    def parseUserCmd(self, cmd, req=False):
-        """
-        Return a tuple of two elements extracted from cmd :
-         - a player identifier
-         - optional parameters
-        req: set to True if parameters is required.
-        Return None if could cmd is not in the expected format
-        """
-        if m := re.match(self._parseUserCmdRE, cmd):
-            parms = m['parms']
-
-            if req and not parms:
-                return None
-
-            cid = m['cid']
-            if cid[:1] == "'" and cid[-1:] == "'":
-                cid = cid[1:-1]
-
-            return cid, parms
-        else:
-            return None
 
     def getGroupLevel(self, level):
         """

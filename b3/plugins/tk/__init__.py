@@ -106,7 +106,6 @@ class TkPlugin(b3.plugin.Plugin):
         :param config: The plugin configuration
         """
         super().__init__(console, config)
-        self._admin_plugin = self.console.getPlugin('admin')
 
         # game types that have no team based game play and for which there should be no tk detected
         self._ffa = ['dm', 'ffa', 'syc-ffa', 'lms', 'gungame']
@@ -265,15 +264,15 @@ class TkPlugin(b3.plugin.Plugin):
         self.registerEvent('EVT_GAME_ROUND_END')
         self.registerEvent('EVT_GAME_ROUND_START')
 
-        self._admin_plugin.registerCommand(self, 'forgive', 0, self.cmd_forgive, 'f')
-        self._admin_plugin.registerCommand(self, 'forgivelist', 0, self.cmd_forgivelist, 'fl')
-        self._admin_plugin.registerCommand(self, 'forgiveall', 0, self.cmd_forgiveall, 'fa')
-        self._admin_plugin.registerCommand(self, 'forgiveinfo', 20, self.cmd_forgiveinfo, 'fi')
-        self._admin_plugin.registerCommand(self, 'forgiveclear', 60, self.cmd_forgiveclear, 'fc')
-        self._admin_plugin.registerCommand(self, 'forgiveprev', 0, self.cmd_forgivelast, 'fp')
+        self.admin_plugin.registerCommand(self, 'forgive', 0, self.cmd_forgive, 'f')
+        self.admin_plugin.registerCommand(self, 'forgivelist', 0, self.cmd_forgivelist, 'fl')
+        self.admin_plugin.registerCommand(self, 'forgiveall', 0, self.cmd_forgiveall, 'fa')
+        self.admin_plugin.registerCommand(self, 'forgiveinfo', 20, self.cmd_forgiveinfo, 'fi')
+        self.admin_plugin.registerCommand(self, 'forgiveclear', 60, self.cmd_forgiveclear, 'fc')
+        self.admin_plugin.registerCommand(self, 'forgiveprev', 0, self.cmd_forgivelast, 'fp')
 
         if self._grudge_enable:
-            self._admin_plugin.registerCommand(self, 'grudge', self._grudge_level, self.cmd_grudge, 'grudge')
+            self.admin_plugin.registerCommand(self, 'grudge', self._grudge_level, self.cmd_grudge, 'grudge')
 
         if self._tk_points_halflife > 0:
             minute, sec = self.crontab_time()
@@ -448,13 +447,13 @@ class TkPlugin(b3.plugin.Plugin):
                 self.console.game.roundTime() < self._round_grace and \
                 a.lastwarntime + 60 < self.console.time():
             a.lastwarntime = self.console.time()
-            self._admin_plugin.warnClient(attacker, self._issue_warning, None, False)
+            self.admin_plugin.warnClient(attacker, self._issue_warning, None, False)
         elif points > self._damage_threshold and \
                 attacker.maxLevel < self._warn_level and \
                 a.lastwarntime + 180 < self.console.time():
             a.lastwarntime = self.console.time()
             msg = self.getMessage('tk_warning_reason', {'vname': victim.exactName, 'points': points})
-            warning = self._admin_plugin.warnClient(attacker, msg, None, False, newDuration=self._tk_warn_duration)
+            warning = self.admin_plugin.warnClient(attacker, msg, None, False, newDuration=self._tk_warn_duration)
             a.warn(v.cid, warning)
             victim.message(self.getMessage('tk_request_action', attacker.exactName))
 
@@ -678,7 +677,7 @@ class TkPlugin(b3.plugin.Plugin):
             client.message('^7Invalid parameters')
             return
 
-        if sclient := self._admin_plugin.findClientPrompt(data, client):
+        if sclient := self.findClientPrompt(data, client):
             tkinfo = self.client_tkinfo(sclient)
             msg = ''
             if len(tkinfo.attacked) > 0:
@@ -718,7 +717,7 @@ class TkPlugin(b3.plugin.Plugin):
             client.message('^7Invalid parameters')
             return False
 
-        if sclient := self._admin_plugin.findClientPrompt(data, client):
+        if sclient := self.findClientPrompt(data, client):
             points = self.forgive_all(sclient.cid)
             if self._private_messages:
                 client.message(self.getMessage('forgive_clear', {'name': sclient.exactName, 'points': points}))

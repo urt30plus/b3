@@ -16,7 +16,7 @@ class Test_keywords(AdvTestCase):
         # GIVEN
         joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=128)
         joe.connects(0)
-        when(self.p._admin_plugin).getAdmins().thenReturn([joe])
+        when(self.p.admin_plugin).getAdmins().thenReturn([joe])
         with patch.object(self.console, "say") as say_mock:
             # WHEN
             self.p.print_ad('@admins')
@@ -27,7 +27,7 @@ class Test_keywords(AdvTestCase):
         # GIVEN
         joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=2)
         joe.connects(0)
-        when(self.p._admin_plugin).getRegulars().thenReturn([joe])
+        when(self.p.admin_plugin).getRegulars().thenReturn([joe])
         with patch.object(self.console, "say") as say_mock:
             # WHEN
             self.p.print_ad('@regulars')

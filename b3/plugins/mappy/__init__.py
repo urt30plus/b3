@@ -24,7 +24,6 @@ class MappyPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None) -> None:
         super().__init__(console, config)
-        self._admin_plugin = console.getPlugin('admin')
 
     def onLoadConfig(self) -> None:
         pass

@@ -11,7 +11,6 @@ class StatsPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._adminPlugin = console.getPlugin('admin')
         self.mapstatslevel = 0
         self.testscorelevel = 0
         self.topstatslevel = 2
@@ -265,7 +264,7 @@ class StatsPlugin(b3.plugin.Plugin):
         [<name>] - list a players stats for the map
         """
         if data:
-            if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
+            if not (sclient := self.findClientPrompt(data, client)):
                 return
         else:
             sclient = client
@@ -287,7 +286,7 @@ class StatsPlugin(b3.plugin.Plugin):
             client.message('^7You must supply a player name to test')
             return
 
-        if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
+        if not (sclient := self.findClientPrompt(data, client)):
             return
         elif sclient == client:
             client.message("^7You don't get points for killing yourself")

@@ -31,7 +31,6 @@ class SpreePlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None) -> None:
         super().__init__(console, config)
-        self._admin_plugin = console.getPlugin('admin')
         self._killing_messages = {}
         self._losing_messages = {}
         self._reset_spree_stats = False
@@ -141,7 +140,7 @@ class SpreePlugin(b3.plugin.Plugin):
             targm = '^7You have'
             targmns = '^7You are'
         else:
-            if sclient := self._admin_plugin.findClientPrompt(data, client):
+            if sclient := self.findClientPrompt(data, client):
                 targm = f'{sclient.name} has'
                 targmns = f'{sclient.name} is'
             else:

@@ -22,7 +22,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
     # this regexp designed to make sure either one is sanitized before namecomparison in onNameChange()
     _reClean = re.compile(r'(\^.)|[\x00-\x20]|[\x7E-\xff]', re.I)
 
-    _adminPlugin = None
     _ignoreTill = 0
     _checkdupes = True
     _checkunknown = True
@@ -190,9 +189,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         Initialize plugin settings
         """
-        # get the admin plugin so we can register commands
-        self._adminPlugin = self.console.getPlugin('admin')
-
         try:
             self._hitlocations['HL_HEAD'] = self.console.HL_HEAD
         except AttributeError as e:
@@ -216,7 +212,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self.debug("HL_TORSO is %s", self._hitlocations['HL_TORSO'])
 
         self.register_commands_from_config()
-        self._adminPlugin.registerCommand(self, 'paversion', 0, self.cmd_paversion, 'paver')
+        self.admin_plugin.registerCommand(self, 'paversion', 0, self.cmd_paversion, 'paver')
 
         # register our events
         self.registerEvents()
@@ -807,9 +803,9 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         using the command is swapped with player1. Doesn't work with spectators (exception for calling admin).
         """
         # check for input. If none, exist with a message.
-        if args := self._adminPlugin.parseUserCmd(data):
+        if args := self.parseUserCmd(data):
             # check if the first player exists. If none, exit.
-            if not (client1 := self._adminPlugin.findClientPrompt(args[0], client)):
+            if not (client1 := self.findClientPrompt(args[0], client)):
                 return
         else:
             client.message("Invalid parameters, try !help paswap")
@@ -817,7 +813,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         # if the specified player doesn't exist, exit.
         if args[1] is not None:
-            if not (client2 := self._adminPlugin.findClientPrompt(args[1], client)):
+            if not (client2 := self.findClientPrompt(args[1], client)):
                 return
         else:
             client2 = client
@@ -984,9 +980,9 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         # this will split the player name and the message
-        if args := self._adminPlugin.parseUserCmd(data):
+        if args := self.parseUserCmd(data):
             # args[0] is the player id
-            if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
+            if not (sclient := self.findClientPrompt(args[0], client)):
                 # a player matchin the name was not found, a list of closest matches will be displayed
                 # we can exit here and the user will retry with a more specific player
                 return
@@ -1019,9 +1015,9 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         # this will split the player name and the message
-        if args := self._adminPlugin.parseUserCmd(data):
+        if args := self.parseUserCmd(data):
             # args[0] is the player id
-            if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
+            if not (sclient := self.findClientPrompt(args[0], client)):
                 # a player matchin the name was not found, a list of closest matches will be displayed
                 # we can exit here and the user will retry with a more specific player
                 return
@@ -1054,9 +1050,9 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         # this will split the player name and the message
-        if args := self._adminPlugin.parseUserCmd(data):
+        if args := self.parseUserCmd(data):
             # args[0] is the player id
-            if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
+            if not (sclient := self.findClientPrompt(args[0], client)):
                 # a player matchin the name was not found, a list of closest matches will be displayed
                 # we can exit here and the user will retry with a more specific player
                 return
@@ -1094,7 +1090,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         # this will split the player name and the message
-        if args := self._adminPlugin.parseUserCmd(data):
+        if args := self.parseUserCmd(data):
             # check if all Locks should be released
             if args[0] == "all" and args[1] == "free":
                 self.resetTeamLocks()
@@ -1102,7 +1098,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 return
 
             # args[0] is the player id
-            if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
+            if not (sclient := self.findClientPrompt(args[0], client)):
                 # a player matchin the name was not found, a list of closest matches will be displayed
                 # we can exit here and the user will retry with a more specific player
                 return
@@ -1350,12 +1346,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         <name> - show the ip and guid and authname of a player
         (You can safely use the command without the 'pa' at the beginning)
         """
-        if not (args := self._adminPlugin.parseUserCmd(data)):
+        if not (args := self.parseUserCmd(data)):
             cmd.sayLoudOrPM(client, 'Your id is ^2@%s' % client.id)
             return
 
         # args[0] is the player id
-        if not (sclient := self._adminPlugin.findClientPrompt(args[0], client)):
+        if not (sclient := self.findClientPrompt(args[0], client)):
             # a player matching the name was not found, a list of closest matches will be displayed
             # we can exit here and the user will retry with a more specific player
             return
@@ -1372,17 +1368,17 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         <client> - kick a client that has an interrupted connection
         """
-        if not (m := self._adminPlugin.parseUserCmd(data)):
+        if not (m := self.parseUserCmd(data)):
             client.message('^7Missing data, try !help ci')
             return False
 
-        if not (sclient := self._adminPlugin.findClientPrompt(m[0], client)):
+        if not (sclient := self.findClientPrompt(m[0], client)):
             return
 
         try:
             players = self.console.getPlayerPings()
             if players[str(sclient.cid)] > 500:
-                sclient.kick(self._adminPlugin.getReason('ci'), 'ci', client)
+                sclient.kick(self.admin_plugin.getReason('ci'), 'ci', client)
             else:
                 client.message(f'^7{sclient.exactName} ^7is not CI')
         except KeyError:
@@ -1627,21 +1623,21 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
                     for cid in cidlist:
                         client = self.console.clients.getByCID(cid)
-                        self._adminPlugin.warnClient(client, 'badname')
+                        self.admin_plugin.warnClient(client, 'badname')
 
                 if self._checkunknown and pname == self.console.stripColors('New UrT Player'):
                     for cid in cidlist:
                         client = self.console.clients.getByCID(cid)
                         self.warning("warning player %s <%s> @%s for using forbidden name 'New UrT Player'" %
                                     (client.exactName, client.cid, client.id))
-                        self._adminPlugin.warnClient(client, 'badname')
+                        self.admin_plugin.warnClient(client, 'badname')
 
                 if self._checkbadnames and pname == 'all':
                     for cid in cidlist:
                         client = self.console.clients.getByCID(cid)
                         self.warning("warning player %s <%s> @%s for using forbidden name 'all'" %
                                     (client.exactName, client.cid, client.id))
-                        self._adminPlugin.warnClient(client, 'badname')
+                        self.admin_plugin.warnClient(client, 'badname')
 
     def onNameChange(self, event):
         """
@@ -1701,7 +1697,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     continue
                 elif c.team == b3.TEAM_SPEC and (self.console.time() - c.var(self, 'teamtime').value) > \
                         (self._smaxspectime * 60):
-                    self._adminPlugin.warnClient(c, 'spec')
+                    self.admin_plugin.warnClient(c, 'spec')
 
     def botsupport(self, data=None):
         """
@@ -2065,7 +2061,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             client.message('^7invalid data, try !help pakill')
             return
 
-        if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
+        if not (sclient := self.findClientPrompt(data, client)):
             # a player matchin the name was not found, a list of closest matches will be displayed
             # we can exit here and the user will retry with a more specific player
             return
@@ -2237,7 +2233,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if not data:
             sclient = client
         else:
-            if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
+            if not (sclient := self.findClientPrompt(data, client)):
                 return
 
         if sclient.team == b3.TEAM_SPEC:
@@ -2264,7 +2260,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if not data:
             sclient = client
         else:
-            if not (sclient := self._adminPlugin.findClientPrompt(data, client)):
+            if not (sclient := self.findClientPrompt(data, client)):
                 return
 
         if sclient.team == b3.TEAM_SPEC:

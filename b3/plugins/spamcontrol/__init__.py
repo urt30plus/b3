@@ -13,7 +13,6 @@ class SpamcontrolPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._adminPlugin = console.getPlugin('admin')
         self._maxSpamins = 10
         self._modLevel = 20
         self._falloffRate = 6.5
@@ -76,7 +75,7 @@ class SpamcontrolPlugin(b3.plugin.Plugin):
         # should we warn ?
         if spamins >= self._maxSpamins:
             client.setvar(self, 'ignore_till', now + 2)
-            self._adminPlugin.warnClient(client, 'spam')
+            self.admin_plugin.warnClient(client, 'spam')
             spamins = int(spamins / 1.5)
             client.setvar(self, 'spamins', spamins)
             raise b3.events.VetoEvent
@@ -123,7 +122,7 @@ class SpamcontrolPlugin(b3.plugin.Plugin):
         [<name>] - display a spamins level
         """
         if data:
-            sclient = self._adminPlugin.findClientPrompt(data, client)
+            sclient = self.findClientPrompt(data, client)
             if not sclient:
                 return
         else:

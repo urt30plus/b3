@@ -12,7 +12,6 @@ class SpawnkillPlugin(b3.plugin.Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self.adminPlugin = console.getPlugin('admin')
         self.penalties = {}
         self.settings = {
             'hit': {
@@ -142,7 +141,7 @@ class SpawnkillPlugin(b3.plugin.Plugin):
         Warn a client for spawnkilling
         """
         self.debug('applying warn penalty on client <@%s>: spawn%s detected!' % (client.id, index))
-        self.adminPlugin.warnClient(client, self.settings[index]['reason'], admin=None,
+        self.admin_plugin.warnClient(client, self.settings[index]['reason'], admin=None,
                                     timer=False, newDuration=self.settings[index]['duration'])
 
     def kick_client(self, index, client):

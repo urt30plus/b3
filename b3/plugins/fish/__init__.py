@@ -12,7 +12,6 @@ class FishPlugin(Plugin):
 
     def __init__(self, console, config=None):
         super().__init__(console, config)
-        self._adminPlugin = console.getPlugin("admin")
         self._fish_cmd = self._fish_commands[0]
         self._target_name = None
         self._target_team = None
@@ -65,8 +64,7 @@ class FishPlugin(Plugin):
         off - disable fishing
         <command: smite (default), nuke, slap> <player> - fish for this player
         """
-        input = self._adminPlugin.parseUserCmd(data)
-        if input is None:
+        if not (input := self.parseUserCmd(data)):
             cmd.sayLoudOrPM(client, f"fishing for {self._target_name} with {self._fish_cmd}")
             return
         if input[0] == "off":
@@ -80,7 +78,7 @@ class FishPlugin(Plugin):
         if fish_command not in self._fish_commands or len(input) != 2:
             client.message("invalid command, type !help fish")
             return
-        if sclient := self._adminPlugin.findClientPrompt(input[1], client):
+        if sclient := self.findClientPrompt(input[1], client):
             self._fish_cmd = fish_command
             self._target_name = sclient.name
             client.message(f"now fishing for {self._target_name} with {self._fish_cmd}")
@@ -92,8 +90,7 @@ class FishPlugin(Plugin):
         off - disable fishing
         <command: smite (default), nuke, slap> <team: blue|red> - fish for this team
         """
-        input = self._adminPlugin.parseUserCmd(data)
-        if input is None:
+        if not (input := self.parseUserCmd(data)):
             if self._target_team:
                 cmd.sayLoudOrPM(client, f"fishing for {self.__team_name()} team with {self._fish_cmd}")
             else:
