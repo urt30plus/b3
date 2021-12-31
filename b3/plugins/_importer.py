@@ -1,4 +1,5 @@
 import glob
+import graphlib
 import importlib
 import os
 import sys
@@ -250,19 +251,16 @@ def _sort_plugins(console, plugin_data: dict[str, PluginData]) -> list:
 
     # Ensure admin plugin is always listed first
     sorted_plugin_list = [plugin_data.pop('admin')]
-    plugin_graph = [
-        (
-            x.name,
-            set(
-                x.clazz.requiresPlugins +
-                [z for z in x.clazz.loadAfterPlugins if z in plugin_data]
-            )
+    plugin_graph = {
+        name: set(
+            plugin.clazz.requiresPlugins +
+            [z for z in plugin.clazz.loadAfterPlugins if z in plugin_data]
         )
-        for x in plugin_data.values()
-    ]
+        for name, plugin in plugin_data.items()
+    }
     sorted_plugin_list += [
         plugin_data[x]
-        for x in b3.functions.topological_sort(plugin_graph)
+        for x in graphlib.TopologicalSorter(plugin_graph).static_order()
     ]
     return sorted_plugin_list
 

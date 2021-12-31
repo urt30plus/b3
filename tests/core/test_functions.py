@@ -195,18 +195,6 @@ class Test_getStuffSoundingLike(unittest.TestCase):
                                                                            'william'])))
 
 
-class Test_topologicalSort(unittest.TestCase):
-
-    def test_topological_sort(self):
-        dep_list = [('myplugin4', {'myplugin2', 'myplugin1'}),
-                    ('myplugin2', {'myplugin1'}),
-                    ('myplugin3', {}),
-                    ('myplugin1', {}),
-                    ('myplugin5', {'myplugin1', 'myplugin3', 'myplugin4'})]
-        sorted_list = [x for x in functions.topological_sort(dep_list)]
-        self.assertListEqual(sorted_list, ['myplugin3', 'myplugin1', 'myplugin2', 'myplugin4', 'myplugin5'])
-
-
 class Test_utils(unittest.TestCase):
 
     def cmd_foo(self):
