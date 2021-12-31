@@ -1,5 +1,4 @@
 import logging
-import importlib
 import os
 from textwrap import dedent
 from unittest.mock import ANY, call, patch
@@ -370,16 +369,7 @@ class Test_Plugin_requiresParser(B3TestCase):
         ]
 
 
-        pluginModule1 = importlib.import_module('tests.plugins.fakeplugins.testplugin1')
-
-        pluginModule2 = importlib.import_module('tests.plugins.fakeplugins.testplugin2')
-
-        adminModule = importlib.import_module('b3.plugins.admin')
-
         mockito.when(self.console.config).get_plugins().thenReturn(self.plugin_list)
-        mockito.when(self.console).pluginImport('admin', mockito.ANY).thenReturn(adminModule)
-        mockito.when(self.console).pluginImport('testplugin1', mockito.ANY).thenReturn(pluginModule1)
-        mockito.when(self.console).pluginImport('testplugin2', mockito.ANY).thenReturn(pluginModule2)
 
     def tearDown(self):
         B3TestCase.tearDown(self)
@@ -489,16 +479,7 @@ class Test_Plugin_requiresStorage(B3TestCase):
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'path': None, 'disabled': False},
         ]
 
-        pluginModule1 = importlib.import_module('tests.plugins.fakeplugins.testplugin1')
-
-        pluginModule3 = importlib.import_module('tests.plugins.fakeplugins.testplugin3')
-
-        adminModule = importlib.import_module('b3.plugins.admin')
-
         mockito.when(self.console.config).get_plugins().thenReturn(self.plugin_list)
-        mockito.when(self.console).pluginImport('admin', mockito.ANY).thenReturn(adminModule)
-        mockito.when(self.console).pluginImport('testplugin1', mockito.ANY).thenReturn(pluginModule1)
-        mockito.when(self.console).pluginImport('testplugin3', mockito.ANY).thenReturn(pluginModule3)
 
     def tearDown(self):
         B3TestCase.tearDown(self)

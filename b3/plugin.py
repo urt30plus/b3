@@ -587,27 +587,3 @@ class Plugin:
         Deprecated. Use onStartup().
         """
         self.warning('use of deprecated method: startup()')
-
-
-class PluginData:
-    """
-    Class used to hold plugin data needed for plugin instance initialization.
-    """
-
-    def __init__(self, name, module=None, clazz=None, conf=None, disabled=False):
-        """
-        Inizialize a new PluginData object instance
-        :param name: The plugin name as string
-        :param module: The reference of the module implementing the plugin
-        :param clazz: The class implementing the plugin
-        :param conf: The configuration file instance of the plugin (if any)
-        :param disabled: Whether this plugin needs to be initialized as disabled
-        """
-        self.name = name.lower()
-        self.module = module
-        self.clazz = clazz
-        self.conf = conf
-        self.disabled = disabled
-
-    def __repr__(self):
-        return f"PluginData<{self.name}>"
