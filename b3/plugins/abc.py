@@ -23,10 +23,6 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         self._challenge_duration = 300
 
     @property
-    def plugin_name(self):
-        return self.__class__.__name__.removesuffix('Plugin').lower()
-
-    @property
     @abc.abstractmethod
     def cmd_msg_prefix(self) -> str:
         raise NotImplementedError

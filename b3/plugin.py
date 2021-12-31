@@ -121,7 +121,7 @@ class Plugin:
         Enable the plugin.
         """
         self._enabled = True
-        name = self.__get_plugin_name()
+        name = self.plugin_name
         self.console.queueEvent(self.console.getEvent('EVT_PLUGIN_ENABLED', data=name))
         self.onEnable()
 
@@ -130,11 +130,12 @@ class Plugin:
         Disable the plugin.
         """
         self._enabled = False
-        name = self.__get_plugin_name()
+        name = self.plugin_name
         self.console.queueEvent(self.console.getEvent('EVT_PLUGIN_DISABLED', data=name))
         self.onDisable()
 
-    def __get_plugin_name(self):
+    @property
+    def plugin_name(self):
         return self.__class__.__name__.removesuffix('Plugin').lower()
 
     def isEnabled(self):
