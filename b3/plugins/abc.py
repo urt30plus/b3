@@ -167,7 +167,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         """\
         Enable/disable silent mode (no more bigtexts)
         """
-        self._stfu = False if self._stfu else True
+        self._stfu = not self._stfu
         msg = 'on' if self._stfu else 'off'
         cmd.sayLoudOrPM(
             client,
