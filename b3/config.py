@@ -618,7 +618,9 @@ def get_main_config(config_path):
     if config_path:
         config = b3.functions.getAbsolutePath(config_path, True)
         if not os.path.isfile(config):
-            b3.functions.console_exit(f'ERROR: configuration file not found ({config}).')
+            b3.functions.console_exit(
+                f'ERROR: configuration file not found ({config}).'
+            )
     else:
         home_dir = b3.functions.get_home_path(create=False)
         for p in ('b3.%s', 'conf/b3.%s', 'b3/conf/b3.%s',
@@ -629,10 +631,12 @@ def get_main_config(config_path):
                 if os.path.isfile(path):
                     print(f"Using configuration file: {path}")
                     config = path
-                    time.sleep(3)
                     break
-
-    if not config:
-        b3.functions.console_exit('ERROR: could not find any valid configuration file.')
+            if config:
+                break
+        else:
+            b3.functions.console_exit(
+                'ERROR: could not find any valid configuration file.'
+            )
 
     return b3.config.MainConfig(load(config))
