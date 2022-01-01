@@ -282,12 +282,15 @@ class FlagstatsPlugin(b3.plugin.Plugin):
                 client.var(self, 'flagreturned', 0).value +
                 client.var(self, 'flagcarrierkill', 0).value
         )
-        best_time = self.show_time(client.var(self, 'flagbesttime', -1).value)
-        return (
+        msg = (
             f'^7{client.name} took ^5{flags} ^7flags, returned ^5{returns}^7, '
-            f'captured ^5{caps}^7, def ^5{defends}^7, '
-            f'best capture time ^5{best_time} ^7'
+            f'captured ^5{caps}^7, def ^5{defends}^7'
         )
+        if caps > 0:
+            if best_time := client.var(self, 'flagbesttime', -1).value > 0:
+                best_time = self.show_time(best_time)
+                msg += f', best capture time ^5{best_time} ^7'
+        return msg
 
     def game_reinit(self, event) -> None:
         self.red_team = TeamData(b3.TEAM_RED)
