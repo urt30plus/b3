@@ -314,8 +314,8 @@ class FlagstatsPlugin(b3.plugin.Plugin):
         """
         Convert a time in seconds into minutes and hours
         """
-        if sec < 0:
-            result = 'None'
+        if sec < 60:
+            result = '%0.2f s' % sec
         else:
             hrs = int(sec / 3600)
             sec -= hrs * 3600
