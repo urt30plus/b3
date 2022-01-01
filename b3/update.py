@@ -1,7 +1,6 @@
+import functools
 import os
 import time
-
-import packaging.version
 
 import b3
 import b3.config
@@ -9,21 +8,32 @@ import b3.functions
 import b3.storage
 
 
-class B3version(packaging.version.Version):
-    """
-    Version numbering for BigBrotherBot.
-    Compared to version.StrictVersion this class allows version numbers such as :
-        1.0dev
-        1.0dev2
-        1.0d3
-        1.0a
-        1.0a
-        1.0a34
-        1.0b
-        1.0b1
-        1.0b3
-    And make sure that any 'dev' prerelease is inferior to any 'alpha' prerelease
-    """
+@functools.total_ordering
+class B3version:
+
+    def __init__(self, version: str) -> None:
+        self._version_info = list(map(int, version.split('.')))
+        if len(self._version_info) == 2:
+            self._version_info.append(0)
+
+    def __eq__(self, other):
+        if isinstance(other, B3version):
+            return other._version_info == self._version_info
+        elif isinstance(other, list):
+            return other == self._version_info
+        else:
+            return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, B3version):
+            return self._version_info < other._version_info
+        elif isinstance(other, list):
+            return self._version_info < other
+        else:
+            return NotImplemented
+
+    def __repr__(self):
+        return f'B3Version<{".".join(map(str, self._version_info))}'
 
 
 class DBUpdate:
