@@ -19,7 +19,6 @@ __version__ = '1.35'
 __author__ = 'ThorN, xlr8or, Courgette, Ozon, Fenix'
 
 
-# pylint: disable-msg=E1103
 class AdminPlugin(b3.plugin.Plugin):
     _commands = {}
 
