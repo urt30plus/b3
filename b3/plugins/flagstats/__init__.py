@@ -225,12 +225,9 @@ class FlagstatsPlugin(b3.plugin.Plugin):
             self.warning('on_flag_return: unhandled value [%s]', event.data)
 
     def show_message_to_client(self, client, time_capture, best_time=False):
-        caps = client.var(self, 'flagcaptured', 0).value
         cap_time = self.show_time(time_capture)
-        plural = 's' if caps > 1 else ''
         self.console.write(
-            f'{client.name}^3 captured ^5{caps}^3 flag{plural} in '
-            f'^5{cap_time}^3'
+            f'{client.name}^3 captured the flag in ^5{cap_time}^3'
         )
         if best_time and self._show_personal_best:
             client.message(
