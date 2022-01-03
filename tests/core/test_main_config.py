@@ -18,8 +18,8 @@ class CommonDefaultTestMethodsMixin:
         self.assertEqual('b3', self.conf.get('b3', 'bot_name'))
         self.assertEqual('^0(^2b3^0)^7:', self.conf.get('b3', 'bot_prefix'))
         self.assertEqual('%I:%M%p %Z %m/%d/%y', self.conf.get('b3', 'time_format'))
-        self.assertEqual('LOCAL', self.conf.get('b3', 'time_zone'))
-        self.assertEqual('9', self.conf.get('b3', 'log_level'))
+        self.assertEqual('UTC', self.conf.get('b3', 'time_zone'))
+        self.assertEqual('20', self.conf.get('b3', 'log_level'))
         self.assertEqual('b3.log', self.conf.get('b3', 'logfile'))
 
     def test_server_section(self):
@@ -30,15 +30,6 @@ class CommonDefaultTestMethodsMixin:
         self.assertEqual('127.0.0.1', self.conf.get('server', 'rcon_ip'))
         self.assertEqual('0.33', self.conf.get('server', 'delay'))
         self.assertEqual('50', self.conf.get('server', 'lines_per_second'))
-
-    def test_autodoc_section(self):
-        self.assertEqual('html', self.conf.get('autodoc', 'type'))
-        self.assertEqual('100', self.conf.get('autodoc', 'maxlevel'))
-        with self.assertRaises(configparser.NoOptionError):
-            self.conf.get('autodoc', 'destination')
-
-    def test_update_section(self):
-        self.assertEqual('stable', self.conf.get('update', 'channel'))
 
     def test_messages_section(self):
         self.assertEqual("""$clientname^7 was kicked by $adminname^7 $reason""", self.conf.get("messages", "kicked_by"))
@@ -64,23 +55,10 @@ class CommonDefaultTestMethodsMixin:
             {'name': 'spree', 'conf': '@b3/conf/plugin_spree.ini', 'disabled': False, 'path': None},
             {'name': 'stats', 'conf': '@b3/conf/plugin_stats.ini', 'disabled': False, 'path': None},
             {'name': 'welcome', 'conf': '@b3/conf/plugin_welcome.ini', 'disabled': False, 'path': None},
+            {'name': 'knifer', 'conf': '@b3/conf/plugin_knifer.ini', 'disabled': False, 'path': None},
+            {'name': 'nader', 'conf': '@b3/conf/plugin_nader.ini', 'disabled': False, 'path': None},
+            {'name': 'flagstats', 'conf': '@b3/conf/plugin_flagstats.ini', 'disabled': False, 'path': None},
         ], self.conf.get_plugins())
-
-
-class Test_XmlMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase):
-
-    def setUp(self):
-        self.conf = MainConfig(load(getAbsolutePath('@b3/conf/b3.distribution.xml')))
-        log = logging.getLogger('output')
-        log.setLevel(logging.DEBUG)
-
-    def test_plugins_order(self):
-        """
-        Vefify that the plugins are return in the same order as found in the config file
-        """
-        self.assertListEqual(
-            ['admin', 'adv', 'poweradminurt', 'spree', 'stats', 'welcome'],
-            list([x.get('name') for x in self.conf._config_parser.get('plugins/plugin')]))
 
 
 class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase):
@@ -95,7 +73,7 @@ class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
         Vefify that the plugins are return in the same order as found in the config file
         """
         self.assertListEqual(
-            ['admin', 'adv', 'poweradminurt', 'spree', 'stats', 'welcome'], self.conf._config_parser.options('plugins'))
+            ['admin', 'adv', 'poweradminurt', 'spree', 'stats', 'welcome', 'knifer', 'nader', 'flagstats'], self.conf._config_parser.options('plugins'))
 
 
 class TestConfig(unittest.TestCase):
