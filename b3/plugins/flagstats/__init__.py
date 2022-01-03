@@ -129,8 +129,8 @@ class FlagstatsPlugin(b3.plugin.Plugin):
                 )
             else:
                 message = (
-                    f'^7Flag record on this map: ^1{record.client.exactName} '
-                    f'^2{record.score} ^caps'
+                    f'^7Flag record on this map: ^3{record.client.exactName} '
+                    f'^2{record.score} caps'
                 )
             self.console.say(message)
 
@@ -163,8 +163,8 @@ class FlagstatsPlugin(b3.plugin.Plugin):
                 )
             else:
                 message = (
-                    f'^7Flag record on this map: ^1{record.client.exactName} '
-                    f'^2{score} ^cap time'
+                    f'^7Flag record on this map: ^3{record.client.exactName} '
+                    f'^2{score} cap time'
                 )
             self.console.say(message)
 
@@ -267,9 +267,9 @@ class FlagstatsPlugin(b3.plugin.Plugin):
             record_time = self.show_time(abs(time_record.score / 1000))
             messages = [
                 f'^7Flag record most caps: '
-                f'^1{caps_record.client.exactName} ^2{caps_record.score}',
+                f'^3{caps_record.client.exactName} ^2{caps_record.score}',
                 f'^7Flag record fastest cap: '
-                f'^1{time_record.client.exactName} ^2{record_time}',
+                f'^3{time_record.client.exactName} ^2{record_time}',
             ]
         for message in messages:
             client.message(message)
@@ -414,7 +414,7 @@ class FlagstatsPlugin(b3.plugin.Plugin):
             elif best_client.team == b3.TEAM_RED:
                 team_name = '^1Red'
             else:
-                team_name = '^1Free'
+                team_name = '^2Free'
             msg += (
                 f'Best Defender: {best_client.name} [{team_name}^3] '
                 f'(def ^5{best_score}^3) - '
