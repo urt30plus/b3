@@ -20,7 +20,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         self._killers = {}
         self._challenges = {}
         self._max_challenges = 5
-        self._challenge_duration = 300
+        self._challenge_duration = 120
 
     @property
     @abc.abstractmethod
