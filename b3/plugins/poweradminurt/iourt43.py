@@ -1,4 +1,5 @@
 import functools
+import operator
 import random
 import re
 import os
@@ -18,8 +19,9 @@ from . import __version__
 class Poweradminurt43Plugin(b3.plugin.Plugin):
     requiresParsers = ['iourt43']
 
-    # ClientUserInfo and ClientUserInfoChanged lines return different names, unsanitized and sanitized
-    # this regexp designed to make sure either one is sanitized before namecomparison in onNameChange()
+    # ClientUserInfo and ClientUserInfoChanged lines return different names,
+    # unsanitized and sanitized this regexp designed to make sure either one is
+    # sanitized before name comparison in onNameChange()
     _reClean = re.compile(r'(\^.)|[\x00-\x20]|[\x7E-\xff]', re.I)
 
     _ignoreTill = 0
@@ -36,8 +38,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
     _tinterval = 0
     _sinterval = 0
     _skinterval = 0
-    _minbalinterval = 2  # minimum time in minutes between !bal or !sk for non-mods
-    _lastbal = 0  # time since last !bal or !sk
+    _minbalinterval = 2  # minimum time in minutes between !bal/!sk for non-mods
+    _lastbal = 0  # time since last !bal/!sk
     _oldadv = (None, None, None)
     _teamred = 0
     _teamblue = 0
@@ -186,9 +188,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
     _rsp_maxSpamins = 10
 
     def onStartup(self):
-        """
-        Initialize plugin settings
-        """
         try:
             self._hitlocations['HL_HEAD'] = self.console.HL_HEAD
         except AttributeError as e:
@@ -212,12 +211,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self.debug("HL_TORSO is %s", self._hitlocations['HL_TORSO'])
 
         self.register_commands_from_config()
-        self.admin_plugin.registerCommand(self, 'paversion', 0, self.cmd_paversion, 'paver')
-
-        # register our events
         self.registerEvents()
-
-        # create event
         self.createEvent('EVT_CLIENT_PUBLIC', 'Server Public Mode Changed')
 
         # don't run cron-checks on startup
@@ -248,13 +242,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self._gears['reset'] = self.console.getCvar('g_gear').getString()
         self._gears['none'] = ''.join(self._weapons.values())
 
-        self.debug('plugin started')
-
     def registerEvents(self):
-        """
-        Register events needed
-        """
-        self.verbose('registering events')
         self.registerEvent('EVT_GAME_ROUND_START', self.onGameRoundStart)
         self.registerEvent('EVT_GAME_ROUND_END', self.onGameRoundEnd)
         self.registerEvent('EVT_GAME_EXIT', self.onGameExit)
@@ -270,10 +258,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self.registerEvent('EVT_CLIENT_RADIO', self.onRadio)
 
     def installCrontabs(self):
-        """
-        CRONTABS INSTALLATION
-        Cleanup and Create the crontabs
-        """
         if self._ncronTab:
             # remove existing crontab
             self.console.cron - self._ncronTab
@@ -300,9 +284,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.console.cron + self._skcronTab
 
     def onLoadConfig(self):
-        """
-        Load plugin configuration
-        """
         self.loadNameChecker()
         self.loadTeamBalancer()
         self.loadVoteDelayer()
@@ -318,9 +299,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self.loadRadioSpamProtection()
 
     def loadNameChecker(self):
-        """
-        Setup the name checker
-        """
         self._ninterval = self.getSetting('namechecker', 'ninterval', b3.INT, self._ninterval,
                                           lambda x: clamp(x, maxv=59))
         self._checkdupes = self.getSetting('namechecker', 'checkdupes', b3.BOOL, self._checkdupes)
@@ -331,19 +309,14 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                                                     self._checkallowedchanges, lambda x: clamp(x, minv=1))
 
     def loadTeamBalancer(self):
-        """
-        Setup the teambalancer
-        """
         self._tinterval = self.getSetting('teambalancer', 'tinterval', b3.INT, self._tinterval,
                                           lambda x: clamp(x, maxv=59))
         self._teamdiff = self.getSetting('teambalancer', 'teamdifference', b3.INT, self._teamdiff,
                                          lambda x: clamp(x, minv=1, maxv=9))
         self._tmaxlevel = self.getSetting('teambalancer', 'maxlevel', b3.LEVEL, self._tmaxlevel)
         self._announce = self.getSetting('teambalancer', 'announce', b3.INT, self._announce)
-        # 10/21/2008 - 1.4.0b9 - mindriot
         self._team_change_force_balance_enable = self.getSetting('teambalancer', 'team_change_force_balance_enable',
                                                                  b3.BOOL, self._team_change_force_balance_enable)
-        # 10/22/2008 - 1.4.0b10 - mindriot
         self._autobalance_gametypes = self.getSetting('teambalancer', 'autobalance_gametypes', b3.STR,
                                                       self._autobalance_gametypes, lambda x: x.lower())
         self._autobalance_gametypes_array = re.split(r'[\s,]+', self._autobalance_gametypes)
@@ -352,9 +325,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self._ignorePlus = self.getSetting('teambalancer', 'timedelay', b3.INT, self._ignorePlus)
 
     def loadSkillBalancer(self):
-        """
-        Setup the skill balancer
-        """
         self._skinterval = self.getSetting('skillbalancer', 'interval', b3.INT, self._skinterval,
                                            lambda x: clamp(x, maxv=59))
         self._skilldiff = self.getSetting('skillbalancer', 'difference', b3.FLOAT, self._skilldiff,
@@ -363,9 +333,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self._minbalinterval = self.getSetting('skillbalancer', 'min_bal_interval', b3.INT, self._minbalinterval)
 
     def loadVoteDelayer(self):
-        """
-        Setup the vote delayer
-        """
         self._votedelay = self.getSetting('votedelay', 'votedelay', b3.INT, self._votedelay)
         # set a max delay, setting it larger than timelimit would be foolish
         timelimit = self.console.getCvar('timelimit').getInt()
@@ -377,9 +344,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self._votedelay = timelimit - 1
 
     def loadSpecChecker(self):
-        """
-        Setup the spec checker
-        """
         self._sinterval = self.getSetting('speccheck', 'sinterval', b3.INT, self._sinterval,
                                           lambda x: clamp(x, maxv=59))
         self._smaxspectime = self.getSetting('speccheck', 'maxspectime', b3.INT, self._smaxspectime)
@@ -390,24 +354,14 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self._smaxplayers = self.getSetting('speccheck', 'maxplayers', b3.INT, smaxplayers)
 
     def loadMoonMode(self):
-        """
-        Setup the moon mode
-        """
         self._moon_on_gravity = self.getSetting('moonmode', 'gravity_on', b3.INT, self._moon_on_gravity)
         self._moon_off_gravity = self.getSetting('moonmode', 'gravity_off', b3.INT, self._moon_off_gravity)
 
     def loadPublicMode(self):
-        """
-        Setup the public mode
-        """
         self._randnum = self.getSetting('publicmode', 'randnum', b3.INT, self._randnum)
-
         try:
-
-            padic = self.getSetting('publicmode', 'usedic', b3.BOOL, False)
-            if padic:
+            if self.getSetting('publicmode', 'usedic', b3.BOOL, False):
                 padicfile = self.config.getpath('publicmode', 'dicfile')
-                self.debug('trying to use password dictionnary %s' % padicfile)
                 if os.path.exists(padicfile):
                     stinfo = os.stat(padicfile)
                     if stinfo.st_size > self._max_dic_size:
@@ -420,35 +374,28 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                             self.warning('dictionary file is empty: switching to default')
                         else:
                             self._pass_lines = text.splitlines()
-                    self.debug('using dictionary password')
                 else:
-                    self.warning('dictionary is enabled but the file doesn\'t exists: switching to default')
-
+                    self.warning(
+                        "dictionary is enabled but the file doesn't exists: "
+                        "switching to default"
+                    )
         except Exception as e:
-            self.error('could not load dictionary config: %s' % e)
-            self.debug('using default dictionary')
+            self.error('could not load dictionary config: %s', e)
 
         self._papublic_password = self.getSetting('publicmode', 'g_password', b3.STR, None)
         if self._papublic_password is None:
             self.warning('could not setup papublic command because there is no password set in config')
 
     def loadMatchMode(self):
-        """
-        Setup the match mode
-        """
         self._match_plugin_disable = self.getSetting('matchmode', 'plugins_disable', b3.LIST, [])
-
         try:
             # load all the configuration files into a dict
             for key, value in self.config.items('matchmode_configs'):
                 self._gameconfig[key] = value
         except (b3.config.NoSectionError, b3.config.NoOptionError, KeyError) as e:
-            self.warning('could not read matchmode configs: %s' % e)
+            self.warning('could not read matchmode configs: %s', e)
 
     def loadBotSupport(self):
-        """
-        Setup the bot support
-        """
         self._botenable = self.getSetting('botsupport', 'bot_enable', b3.BOOL, self._botenable)
         self._botskill = self.getSetting('botsupport', 'bot_skill', b3.INT, self._botskill,
                                          lambda x: clamp(x, minv=1, maxv=5))
@@ -466,10 +413,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self.botsupport()
 
     def loadHeadshotCounter(self):
-        """
-        Setup the headshot counter
-        """
-
         def validate_reset_vars(x):
             acceptable = ('no', 'map', 'round')
             if x.lower() not in acceptable:
@@ -493,9 +436,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.console.write('set g_loghits 1')
 
     def loadRotationManager(self):
-        """
-        Setup the rotation manager
-        """
         self._rmenable = self.getSetting('rotationmanager', 'rm_enable', b3.BOOL, self._rmenable)
         if self._rmenable:
             self._switchcount1 = self.getSetting('rotationmanager', 'switchcount1', b3.INT, self._switchcount1)
@@ -505,37 +445,23 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self._rotation_medium = self.getSetting('rotationmanager', 'mediumrotation', b3.STR, self._rotation_medium)
             self._rotation_large = self.getSetting('rotationmanager', 'largerotation', b3.STR, self._rotation_large)
             self._gamepath = self.getSetting('rotationmanager', 'gamepath', b3.STR, self._gamepath)
-        else:
-            self.debug('Rotation Manager is disabled')
 
     def loadSpecial(self):
-        """
-        Setup special configs
-        """
         self._slapSafeLevel = self.getSetting('special', 'slap_safe_level', b3.LEVEL, self._slapSafeLevel)
         self._full_ident_level = self.getSetting('special', 'paident_full_level', b3.LEVEL, self._full_ident_level)
 
     def loadRadioSpamProtection(self):
-        """
-        Setup the radio spam protection
-        """
         self._rsp_enable = self.getSetting('radio_spam_protection', 'enable', b3.BOOL, self._rsp_enable)
         self._rsp_mute_duration = self.getSetting('radio_spam_protection', 'mute_duration', b3.INT,
                                                   self._rsp_mute_duration, lambda x: clamp(x, minv=1))
         self._rsp_maxlevel = self.getSetting('radio_spam_protection', 'maxlevel', b3.LEVEL, self._rsp_maxlevel)
 
     def onClientDisconnect(self, _):
-        """
-        Handle EVT_CLIENT_DISCONNECT.
-        """
         if self._rmenable and self.console.time() > self._dontcount and self._mapchanged:
             self._playercount -= 1
             self.adjustrotation(-1)
 
     def onClientAuth(self, event):
-        """
-        Handle EVT_CLIENT_AUTH.
-        """
         if self._hsenable:
             self.setupVars(event.client)
         if self._rmenable and self.console.time() > self._dontcount and self._mapchanged:
@@ -543,53 +469,39 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.adjustrotation(+1)
 
     def onGameRoundStart(self, _):
-        """
-        Handle EVT_GAME_ROUND_START.
-        """
         self._is_round_end = False
         self._forgetTeamContrib()
         self._killhistory = []
         self._lastbal = self.console.time()
 
-        # check for botsupport
         if self._botenable:
             self.botsdisable()
             self.botsupport()
 
-        # reset headshotcounter (per round) if applicable
         if self._hsresetvars == 'round':
             self.resetVars()
 
-        # ignore teambalance checking for 1 minute
         self.ignoreSet(self._ignorePlus)
         self._teamred = 0
         self._teamblue = 0
 
-        # vote delay init
         if self._votedelay > 0 and self.console.getCvar('g_allowvote').getInt() != 0:
-            # delay voting
             data = 'off'
             self.votedelay(data)
-            # re-enable voting
             tm = self._votedelay * 60
             t1 = threading.Timer(tm, self.votedelay)
             t1.start()
 
     def onGameExit(self, _):
-        """
-        Handle EVT_GAME_EXIT.
-        """
         self._mapchanged = True
         if self._botenable:
             self.botsdisable()
 
         self.ignoreSet(self._ignorePlus)
 
-        # reset headshotcounter (per map) if applicable
         if self._hsresetvars == 'map':
             self.resetVars()
 
-        # reset number of name changes per client
         self.resetNameChanges()
         if not self._teamLocksPermanent:
             # release TeamLocks
@@ -603,16 +515,10 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             t2.start()
 
     def onGameMapChange(self, _):
-        """
-        Handle EVT_GAME_MAP_CHANGE.
-        """
         if matchmode := self.console.getCvar('g_matchmode'):
             self._matchmode = matchmode.getBoolean()
 
     def onKill(self, event):
-        """
-        Handle EVT_CLIENT_KILL.
-        """
         killer = event.client
         victim = event.target
         killer.var(self, 'kills', 0).value += 1
@@ -623,24 +529,15 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self._killhistory.append((now, killer.team))
 
     def onKillTeam(self, event):
-        """
-        Handle EVT_CLIENT_KILL_TEA;.
-        """
         event.client.var(self, 'teamkills', 0).value += 1
 
     def onAction(self, event):
-        """
-        Handle EVT_CLIENT_ACTION.
-        """
         if event.data in ('flag_captured', 'flag_dropped', 'flag_returned', 'bomb_planted', 'bomb_defused'):
             event.client.var(self, event.data, 0).value += 1
         if event.data in ('team_CTF_redflag', 'team_CTF_blueflag'):
             event.client.var(self, 'flag_taken', 0).value += 1
 
     def onRadio(self, event):
-        """
-        Handle radio events
-        """
         if not self._rsp_enable:
             return
 
@@ -706,7 +603,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         clients = self.console.clients.getList()
         scores = self._getScores(clients)
         decorated = [(scores.get(c.id, 0), c) for c in clients if c.team in (b3.TEAM_BLUE, b3.TEAM_RED)]
-        decorated.sort(key=lambda x: x[0])
+        decorated.sort(key=operator.itemgetter(0))
         players = [c for score, c in decorated]
         n = len(players) // 2
         blue = players[:n]
@@ -819,29 +716,29 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             client2 = client
 
         if client1.team == b3.TEAM_SPEC:
-            client.message("%s is a spectator! - Can't be swapped" % client1.name)
+            client.message(f"{client1.name} is a spectator! - Can't be swapped")
             return
 
         if client2.team == b3.TEAM_SPEC:
-            client.message("%s is a spectator! - Can't be swapped" % client2.name)
+            client.message(f"{client2.name} is a spectator! - Can't be swapped")
             return
 
         if client1.team == client2.team:
-            client.message("%s and %s are on the same team!" % (client1.name, client2.name))
+            client.message(f"{client1.name} and {client2.name} are on the same team!")
             return
 
         # /rcon swap <clientA> <clientB>
-        self.console.write('swap %s %s' % (client1.cid, client2.cid))
+        self.console.write(f'swap {client1.cid} {client2.cid}')
 
         # No need to send the message twice to the switching admin :-)
 
         if client1 != client:
-            client1.message("^4You were swapped with %s by the admin" % client2.name)
+            client1.message(f"^4You were swapped with {client2.name} by the admin")
 
         if client2 != client:
-            client2.message("^4You were swapped with %s by the admin" % client1.name)
+            client2.message(f"^4You were swapped with {client1.name} by the admin")
 
-        client.message("^3Successfully swapped %s and %s" % (client1.name, client2.name))
+        client.message(f"^3Successfully swapped {client1.name} and {client2.name}")
 
     def cmd_pateams(self, data, client, cmd=None):
         """
@@ -906,17 +803,17 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             return
 
         if re.match('^[a-z0-9_.]+.cfg$', data, re.I):
-            result = self.console.write('exec %s' % data)
+            result = self.console.write(f'exec {data}')
             cmd.sayLoudOrPM(client, result)
         else:
-            self.error('%s is not a valid configfile' % data)
+            self.error('%s is not a valid configfile', data)
 
     def cmd_pacyclemap(self, data, client, cmd=None):
         """
         Cycle to the next map.
         (You can safely use the command without the 'pa' at the beginning)
         """
-        time.sleep(1)
+        time.sleep(0.5)
         self.console.write('cyclemap')
 
     def cmd_pamaprestart(self, data, client, cmd=None):
@@ -972,7 +869,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             return
 
         # are we still here? Let's write it to console
-        self.console.write('bigtext "%s"' % data)
+        self.console.write(f'bigtext "{data}"')
 
     def cmd_pamute(self, data, client, cmd=None):
         """
@@ -1000,7 +897,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             duration = ''
 
         # are we still here? Let's write it to console
-        self.console.write('mute %s %s' % (sclient.cid, duration))
+        self.console.write(f'mute {sclient.cid} {duration}')
 
     def cmd_papause(self, data, client, cmd=None):
         """
@@ -1042,7 +939,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             else:
                 client.message('^7Number of punishments out of range, must be 1 to 25')
         else:
-            self.console.write('slap %s' % sclient.cid)
+            self.console.write(f'slap {sclient.cid}')
 
     def cmd_panuke(self, data, client, cmd=None):
         """
@@ -1073,7 +970,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             else:
                 client.message('^7Number of punishments out of range, must be 1 to 25')
         else:
-            self.console.write('nuke %s' % sclient.cid)
+            self.console.write(f'nuke {sclient.cid}')
 
     def cmd_paveto(self, data, client, cmd=None):
         """
@@ -1132,17 +1029,17 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if team == 'free':
             if sclient.isvar(self, 'paforced'):
                 sclient.message('^3Your have been released by the admin')
-                client.message('^7%s ^3has been released' % sclient.name)
+                client.message(f'^7{sclient.name} ^3has been released')
                 sclient.delvar(self, 'paforced')
                 return
             else:
-                client.message('^3There was no lock on ^7%s' % sclient.name)
+                client.message(f'^3There was no lock on ^7{sclient.name}')
 
         elif team in ('red', 'blue', 's') and lock:
-            sclient.message('^3Your are forced and locked to: ^7%s' % teamname)
+            sclient.message(f'^3Your are forced and locked to: ^7{teamname}')
 
         elif team in ('red', 'blue', 's'):
-            sclient.message('^3Your are forced to: ^7%s' % teamname)
+            sclient.message(f'^3Your are forced to: ^7{teamname}')
 
         else:
             client.message('^7Invalid data, try !help paforce')
@@ -1154,8 +1051,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             sclient.delvar(self, 'paforced')
 
         # are we still here? Let's write it to console
-        self.console.write('forceteam %s %s' % (sclient.cid, team))
-        client.message('^3%s ^7forced to ^3%s' % (sclient.name, teamname))
+        self.console.write(f'forceteam {sclient.cid} {team}')
+        client.message(f'^3{sclient.name} ^7forced to ^3{teamname}')
 
     def cmd_paswapteams(self, data, client, cmd=None):
         """
@@ -1204,7 +1101,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.console.setCvar('g_password', '')
             self.console.say('^7public mode: ^2ON')
             self.console.queueEvent(self.console.getEvent('EVT_CLIENT_PUBLIC', '', client))
-
         elif data == 'off':
             newpassword = self._papublic_password
             if self._pass_lines is not None:
@@ -1214,16 +1110,14 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             for i in range(0, self._randnum):
                 newpassword += str(random.randint(1, 9))
 
-            self.debug('private password set to: %s' % newpassword)
-
             if newpassword is None:
                 client.message('^1ERROR: ^7could not set public mode off because \
                                 there is no password specified in the config file')
                 return
 
-            self.console.setCvar('g_password', '%s' % newpassword)
+            self.console.setCvar('g_password', newpassword)
             self.console.say('^7public mode: ^1OFF')
-            client.message('^7password is \'^4%s^7\'' % newpassword)
+            client.message(f'^7password is \'^4{newpassword}^7\'')
             client.message('^7type ^5!mapreload^7 to apply change')
             self.console.write('bigtext "^7Server going ^3PRIVATE ^7soon!!"')
             self.console.queueEvent(self.console.getEvent('EVT_CLIENT_PUBLIC', newpassword, client))
@@ -1246,7 +1140,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 self.info('disabling plugin %s' % e)
                 if plugin := self.console.getPlugin(e):
                     plugin.disable()
-                    client.message('^7plugin %s disabled' % e)
+                    client.message(f'^7plugin {e} disabled')
             client.message('^7type ^5!mapreload^7 to apply change')
             self.console.write('bigtext "^7MATCH starting soon !!"')
 
@@ -1256,10 +1150,10 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.console.say('^7Match mode: ^1OFF')
 
             for e in self._match_plugin_disable:
-                self.info('enabling plugin %s' % e)
+                self.info('enabling plugin %s', e)
                 if plugin := self.console.getPlugin(e):
                     plugin.enable()
-                    client.message('^7plugin %s enabled' % e)
+                    client.message(f'^7plugin {e} enabled')
             client.message('^7type ^5!mapreload^7 to apply change')
 
         self.set_configmode(None)
@@ -1347,7 +1241,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         (You can safely use the command without the 'pa' at the beginning)
         """
         if not (args := self.parseUserCmd(data)):
-            cmd.sayLoudOrPM(client, 'Your id is ^2@%s' % client.id)
+            cmd.sayLoudOrPM(client, f'Your id is ^2@{client.id}')
             return
 
         # args[0] is the player id
@@ -1416,13 +1310,11 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if not self._matchmode and client.isvar(self, 'paforced'):
             forcedteam = client.var(self, 'paforced').value
             if team != b3.TEAM_UNKNOWN and team != self.console.getTeam(forcedteam):
-                self.console.write('forceteam %s %s' % (client.cid, forcedteam))
+                self.console.write(f'forceteam {client.cid} {forcedteam}')
                 client.message('^1You are LOCKED! You are NOT allowed to switch!')
             # break out of this function, nothing more to do here
             return None
 
-        # 10/21/2008 - 1.4.0b9 - mindriot
-        # 10/23/2008 - 1.4.0b12 - mindriot
         if self._team_change_force_balance_enable and not self._matchmode:
 
             # if the round just started, don't do anything
@@ -1472,10 +1364,10 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
                     if self._teamred > self._teamblue:
                         # join the blue team
-                        self.console.write('forceteam %s blue' % client.cid)
+                        self.console.write(f'forceteam {client.cid} blue')
                     else:
                         # join the red team
-                        self.console.write('forceteam %s red' % client.cid)
+                        self.console.write(f'forceteam {client.cid} red')
 
                 # done balancing
                 self._balancing = False
@@ -1487,20 +1379,26 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         Count the amount of players in RED and BLUE team.
         """
+        self._teamred = 0
+        self._teamblue = 0
+        red = 0
+        blue = 0
         try:
-            self._teamred = 0
-            self._teamblue = 0
             data = self.console.write('players')
+            pattern = self.console._rePlayerScore
             for line in data.splitlines()[3:]:
-                m = re.match(self.console._rePlayerScore, line.strip())
-                if m:
-                    if m.group('team').upper() == 'RED':
-                        self._teamred += 1
-                    elif m.group('team').upper() == 'BLUE':
-                        self._teamblue += 1
-            return True
+                if m := re.match(pattern, line.strip()):
+                    team = m['team'].upper()
+                    if team == 'RED':
+                        red += 1
+                    elif team == 'BLUE':
+                        blue += 1
         except Exception:
             return False
+        else:
+            self._teamred = red
+            self._teamblue = blue
+        return True
 
     def _getGameType(self):
         # g_gametype //0 = FreeForAll = dm, 3 = TeamDeathMatch = tdm, 4 = Team Survivor = ts,
@@ -1528,9 +1426,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             self.teambalance()
 
     def teambalance(self):
-        """
-        Balance current teams.
-        """
         if not self.isEnabled() or self._balancing or self._matchmode:
             return True
 
@@ -1552,18 +1447,19 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         elif self._announce == 2:
             self.console.write('bigtext "Autobalancing Teams!"')
 
-        if self._teamred > self._teamblue:
-            newteam = 'blue'
-            oldteam = b3.TEAM_RED
-        else:
-            newteam = 'red'
-            oldteam = b3.TEAM_BLUE
-
         count = 25  # endless loop protection
         while abs(self._teamred - self._teamblue) > self._teamdiff and count > 0:
+            count -= 1
             stime = self.console.upTime()
             now = self.console.time()
             forceclient = None
+            if self._teamred > self._teamblue:
+                newteam = 'blue'
+                oldteam = b3.TEAM_RED
+            else:
+                newteam = 'red'
+                oldteam = b3.TEAM_BLUE
+
             for c in self.console.clients.getList():
                 if (
                         c.team == oldteam
@@ -1575,29 +1471,19 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
             if forceclient:
                 self.console.write(f'forceteam {forceclient} {newteam}')
-
-            count -= 1
-            # recount the teams... do we need to balance once more?
-            if not self.countteams():
-                self._balancing = False
-                self.error('aborting teambalance: counting teams failed!')
-                return False
-
-            if self._teamred > self._teamblue:
-                newteam = 'blue'
-                oldteam = b3.TEAM_RED
-            else:
-                newteam = 'red'
-                oldteam = b3.TEAM_BLUE
+                if newteam == 'blue':
+                    self._teamblue += 1
+                    self._teamred -= 1
+                else:
+                    self._teamred += 1
+                    self._teamblue -= 1
 
         self._balancing = False
-
         return True
 
     def resetTeamLocks(self):
         if self.isEnabled():
-            clients = self.console.clients.getList()
-            for c in clients:
+            for c in self.console.clients.getList():
                 if c.isvar(self, 'paforced'):
                     c.delvar(self, 'paforced')
         return None
@@ -1739,8 +1625,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
     def resetVars(self):
         if self.isEnabled() and self._hsenable:
-            clients = self.console.clients.getList()
-            for c in clients:
+            for c in self.console.clients.getList():
                 if c.isvar(self, 'hitvars'):
                     c.setvar(self, 'totalhits', 0.00)
                     c.setvar(self, 'totalhitted', 0.00)
@@ -1748,8 +1633,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     c.setvar(self, 'headhitted', 0.00)
                     c.setvar(self, 'helmethits', 0.00)
                     c.setvar(self, 'torsohitted', 0.00)
-
-        return None
 
     def headshotcounter(self, event):
         """
@@ -1931,11 +1814,11 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 mapname = match
                 self.console.setCvar('g_nextmap', mapname)
                 if client:
-                    client.message('^7nextmap set to %s' % mapname)
+                    client.message(f'^7nextmap set to {mapname}')
             elif isinstance(match, list):
-                client.message('do you mean : %s ?' % ', '.join(match[:5]))
+                client.message(f'do you mean : {", ".join(match[:5])} ?')
             else:
-                client.message('^7cannot find any map like [^4%s^7]' % data)
+                client.message(f'^7cannot find any map like [^4{data}^7]')
 
     def cmd_parespawngod(self, data, client, cmd=None):
         """
@@ -2029,17 +1912,17 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             if data.lower() in ('def', 'reset'):
                 data = 800
             self.console.setCvar('g_gravity', data)
-            client.message('^7Gravity: %s' % data)
+            client.message(f'^7Gravity: {data}')
 
     def set_configmode(self, mode=None):
         if mode:
-            modestring = 'mode_%s' % mode
+            modestring = f'mode_{mode}'
             if modestring in self._gameconfig:
                 cfgfile = self._gameconfig.get(modestring)
                 filename = os.path.join(self.console.game.fs_homepath, self.console.game.fs_game, cfgfile)
                 if os.path.isfile(filename):
                     self.info('executing config file: %s', cfgfile)
-                    self.console.write('exec %s' % cfgfile)
+                    self.console.write(f'exec {cfgfile}')
 
         if self._matchmode:
             cfgfile = self._gameconfig.get('matchon', None)
@@ -2050,7 +1933,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             filename = os.path.join(self.console.game.fs_homepath, self.console.game.fs_game, cfgfile)
             if os.path.isfile(filename):
                 self.info('executing configfile: %s', cfgfile)
-                self.console.write('exec %s' % cfgfile)
+                self.console.write(f'exec {cfgfile}')
 
     def cmd_pakill(self, data, client, cmd=None):
         """
@@ -2066,7 +1949,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             # we can exit here and the user will retry with a more specific player
             return
 
-        self.console.write('smite %s' % sclient.cid)
+        self.console.write(f'smite {sclient.cid}')
 
     def cmd_palms(self, data, client, cmd=None):
         """
@@ -2237,16 +2120,16 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 return
 
         if sclient.team == b3.TEAM_SPEC:
-            client.message("%s is a spectator! - Can't set captain status" % sclient.name)
+            client.message(f"{sclient.name} is a spectator! - Can't set captain status")
             return
 
-        self.console.write("forcecaptain %s" % sclient.cid)
+        self.console.write(f"forcecaptain {sclient.cid}")
 
         # only give  notice if the client is not the admin who issued the command:
         # urban terror already display a server message when the captain flag is changed
         if sclient != client:
             team = "^1RED" if sclient.team == b3.TEAM_RED else "^4BLUE"
-            sclient.message("^7You were set as captain for the %s ^7team by the Admin" % team)
+            sclient.message(f"^7You were set as captain for the {team} ^7team by the Admin")
 
     def cmd_pasub(self, data, client, cmd=None):
         """
@@ -2264,16 +2147,16 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 return
 
         if sclient.team == b3.TEAM_SPEC:
-            client.message("%s is a spectator! - Can't set substitute status" % sclient.name)
+            client.message(f"{sclient.name} is a spectator! - Can't set substitute status")
             return
 
-        self.console.write("forcesub %s" % sclient.cid)
+        self.console.write(f"forcesub {sclient.cid}")
 
         # only give  notice if the client is not the admin who issued the command:
         # urban terror already display a server message when the substitute flag is changed
         if sclient != client:
             team = "^1RED" if sclient.team == b3.TEAM_RED else "^4BLUE"
-            sclient.message("^7You were set as substitute for the %s ^7team by the Admin" % team)
+            sclient.message(f"^7You were set as substitute for the {team} ^7team by the Admin")
 
     def cmd_pagungame(self, data, client, cmd=None):
         """
@@ -2325,11 +2208,12 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             # if not explicitly passed get it form the server
             gearstr = self.console.getCvar('g_gear').getString()
 
-        lines = []
-        for key in self._weapons:
-            lines.append('%s:%s' % (key, '^2ON' if self._weapons[key] not in gearstr else '^1OFF'))
+        lines = [
+            f'{k}:{"^2ON" if v not in gearstr else "^1OFF"}'
+            for k, v in self._weapons.items()
+        ]
 
-        cmd.sayLoudOrPM(client, '^3current gear: ^7%s' % '^7, '.join(sorted(lines)))
+        cmd.sayLoudOrPM(client, f'^3current gear: ^7{"^7, ".join(sorted(lines))}')
 
     def getTime(self):
         """ just to ease automated tests """
@@ -2539,13 +2423,11 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         bs = float(sum(recentcontrib[c.id] for c in blue[:n])) / n / tm
         rs = float(sum(recentcontrib[c.id] for c in red[:n])) / n / tm
-        self.debug('recent: n=%d tm=%.2f %.2f %.2f' % (n, tm, bs, rs))
         return bs, rs
 
     def _forgetTeamContrib(self):
         self._oldadv = (None, None, None)
-        clients = self.console.clients.getList()
-        for c in clients:
+        for c in self.console.clients.getList():
             c.setvar(self, 'teamcontribhist', [])
             self._saveTeamvars(c)
 
@@ -2716,7 +2598,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         if unbalanced or self._skill_balance_mode == 1:
             if absdiff > 0.2:
-                self.console.say('Avg kill ratio diff is %.2f, skill diff is %.2f' % (avgdiff, diff))
+                self.console.say(f'Avg kill ratio diff is {avgdiff:.2f}, skill diff is {diff:.2f}')
                 if self._skill_balance_mode == 1:
                     # give advice if teams are unfair
                     self._advise(avgdiff, 2)
@@ -2781,7 +2663,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     # FIXME (Fenix): here 'msg' is not initialized thus it produces a warning
                     return
             else:
-                msg = '%s team is now %s' % (team, word)
+                msg = f'{team} team is now {word}'
 
             if unfair and (mode == 1 or mode == 2):
                 msg += ', use !bal to balance the teams'
