@@ -1,4 +1,3 @@
-import functools
 import operator
 import random
 import re
@@ -2412,11 +2411,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                         d += 1
             recentcontrib[c.id] = k / (1.0 + d)
 
-        def contribcmp(a, b):
-            return b3.functions.cmp(recentcontrib[b.id], recentcontrib[a.id])
-
-        blue = sorted(blue, key=functools.cmp_to_key(contribcmp))
-        red = sorted(red, key=functools.cmp_to_key(contribcmp))
+        blue = sorted(blue, key=lambda x: recentcontrib[x.id], reverse=True)
+        red = sorted(red, key=lambda x: recentcontrib[x.id], reverse=True)
         n = min(len(blue), len(red))
         if n > 3:
             n = 3 + int((n - 3) / 2)

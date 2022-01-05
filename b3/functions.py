@@ -497,10 +497,6 @@ def start_daemon_thread(target, args=(), kwargs=None, name=None):
     return t
 
 
-def cmp(a, b):
-    return (a > b) - (a < b)
-
-
 _escape_table = [chr(x) for x in range(128)]
 _escape_table[0] = u'\\0'
 _escape_table[ord('\\')] = u'\\\\'
