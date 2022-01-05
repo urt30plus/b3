@@ -1,26 +1,22 @@
 __author__ = 'ThorN'
-__version__ = '2022.1.1'
+__version__ = '22.1.4'
 
-versionEdition = "Winter"
-versionId = f'v{__version__}'
-version = f'^0(^8b3^0) ^9{versionId} ^9[{versionEdition}^9]^3'
+version = f'^2(b3) ^3v{__version__}'
 
 confdir = None
 console = None
 
-# TEAMS
 TEAM_UNKNOWN = -1
 TEAM_FREE = 0
 TEAM_SPEC = 1
 TEAM_RED = 2
 TEAM_BLUE = 3
 
-# PLAYER STATE
 STATE_DEAD = 1
 STATE_ALIVE = 2
 STATE_UNKNOWN = 3
 
-# CUSTOM TYPES FOR DYNAMIC CASTING
+# Custom types for dynamic casting
 STRING = STR = 1
 INTEGER = INT = 2
 BOOLEAN = BOOL = 3
