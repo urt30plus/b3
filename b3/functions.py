@@ -179,16 +179,6 @@ def vars2printf(inputstr):
         return ''
 
 
-def escape(text, esc):
-    """
-    Return a copy of 'text' with 'esc' character escaped
-    :param text: The text where to execute the escape
-    :param esc: The character to escape
-    :return: string
-    """
-    return text.replace(esc, '\\%s' % esc)
-
-
 def clamp(value, minv=None, maxv=None):
     """
     Clamp a value so it's bounded within min and max
