@@ -157,10 +157,10 @@ class SpreePlugin(b3.plugin.Plugin):
                 return
 
         spree_stats = self.get_spree_stats(sclient)
-        if spree_stats.kills > 0:
+        if spree_stats.kills > 1:
             cmd.sayLoudOrPM(client,
                             f'{targm} ^2{spree_stats.kills}^7 kills in a row')
-        elif spree_stats.deaths > 0:
+        elif spree_stats.deaths > 1:
             cmd.sayLoudOrPM(client,
                             f'{targm} ^1{spree_stats.deaths}^7 deaths in a row')
         else:
