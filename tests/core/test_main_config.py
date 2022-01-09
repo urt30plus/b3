@@ -57,6 +57,7 @@ class CommonDefaultTestMethodsMixin:
             {'name': 'welcome', 'conf': '@b3/conf/plugin_welcome.ini', 'disabled': False, 'path': None},
             {'name': 'knifer', 'conf': '@b3/conf/plugin_knifer.ini', 'disabled': False, 'path': None},
             {'name': 'nader', 'conf': '@b3/conf/plugin_nader.ini', 'disabled': False, 'path': None},
+            {'name': 'booter', 'conf': '@b3/conf/plugin_booter.ini', 'disabled': False, 'path': None},
             {'name': 'flagstats', 'conf': '@b3/conf/plugin_flagstats.ini', 'disabled': False, 'path': None},
         ], self.conf.get_plugins())
 
@@ -73,7 +74,20 @@ class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
         Vefify that the plugins are return in the same order as found in the config file
         """
         self.assertListEqual(
-            ['admin', 'adv', 'poweradminurt', 'spree', 'stats', 'welcome', 'knifer', 'nader', 'flagstats'], self.conf._config_parser.options('plugins'))
+            self.conf._config_parser.options('plugins'),
+            [
+                'admin',
+                'adv',
+                'poweradminurt',
+                'spree',
+                'stats',
+                'welcome',
+                'knifer',
+                'nader',
+                'booter',
+                'flagstats',
+            ]
+        )
 
 
 class TestConfig(unittest.TestCase):
