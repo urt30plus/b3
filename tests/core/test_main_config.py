@@ -50,7 +50,7 @@ class CommonDefaultTestMethodsMixin:
     def test_get_plugins(self):
         self.assertListEqual([
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'disabled': False, 'path': None},
-            {'name': 'adv', 'conf': '@b3/conf/plugin_adv.xml', 'disabled': False, 'path': None},
+            {'name': 'adv', 'conf': '@b3/conf/plugin_adv.ini', 'disabled': False, 'path': None},
             {'name': 'poweradminurt', 'conf': '@b3/conf/plugin_poweradminurt.ini', 'disabled': False, 'path': None},
             {'name': 'spree', 'conf': '@b3/conf/plugin_spree.ini', 'disabled': False, 'path': None},
             {'name': 'stats', 'conf': '@b3/conf/plugin_stats.ini', 'disabled': False, 'path': None},
@@ -166,7 +166,7 @@ class TestConfig(unittest.TestCase):
             <configuration>
                 <plugins>
                     <plugin name="admin" config="@b3/conf/plugin_admin.ini" />
-                    <plugin name="adv" config="@b3/conf/plugin_adv.xml" disabled="yes" />
+                    <plugin name="adv" config="@b3/conf/plugin_adv.ini" disabled="yes" />
                     <plugin name="censor" config="@b3/conf/plugin_censor.xml" disabled="no" />
                     <plugin name="cmdmanager" config="@b3/conf/plugin_cmdmanager.ini" path="/somewhere/else" />
                     <plugin name="tk" config="@b3/conf/plugin_tk.ini" disabled="1" />
@@ -178,7 +178,7 @@ class TestConfig(unittest.TestCase):
 
             [plugins]
             admin: @b3/conf/plugin_admin.ini
-            adv: @b3/conf/plugin_adv.xml
+            adv: @b3/conf/plugin_adv.ini
             censor: @b3/conf/plugin_censor.xml
             cmdmanager: @b3/conf/plugin_cmdmanager.ini
             tk: @b3/conf/plugin_tk.ini
@@ -189,7 +189,7 @@ class TestConfig(unittest.TestCase):
         # normalized path for empty string is the current directory ('.')
         expected_result = [
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'disabled': False, 'path': None},
-            {'name': 'adv', 'conf': '@b3/conf/plugin_adv.xml', 'disabled': True, 'path': None},
+            {'name': 'adv', 'conf': '@b3/conf/plugin_adv.ini', 'disabled': True, 'path': None},
             {'name': 'censor', 'conf': '@b3/conf/plugin_censor.xml', 'disabled': False, 'path': None},
             {'name': 'cmdmanager', 'conf': '@b3/conf/plugin_cmdmanager.ini', 'disabled': False,
              'path': '/somewhere/else'},

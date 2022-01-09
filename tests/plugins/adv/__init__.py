@@ -6,13 +6,13 @@ from unittest.mock import patch, Mock
 from mockito import when, unstub
 
 from b3 import __file__ as b3_module__file__
-from b3.config import XmlConfigParser, CfgConfigParser
+from b3.config import CfgConfigParser
 from b3.plugins.admin import AdminPlugin
 from b3.plugins.adv import AdvPlugin
 from tests import B3TestCase
 
 ADMIN_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(b3_module__file__), "conf/plugin_admin.ini"))
-ADV_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../b3/conf/plugin_adv.xml"))
+ADV_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../b3/conf/plugin_adv.ini"))
 ADV_CONFIG_CONTENT = None
 
 timer_patcher = None
@@ -56,11 +56,11 @@ class AdvTestCase(B3TestCase):
     def init_plugin(self, config_content=None):
         conf = None
         if config_content:
-            conf = XmlConfigParser()
-            conf.setXml(config_content)
+            conf = CfgConfigParser()
+            conf.loadFromString(config_content)
         elif ADV_CONFIG_CONTENT:
-            conf = XmlConfigParser()
-            conf.setXml(ADV_CONFIG_CONTENT)
+            conf = CfgConfigParser()
+            conf.loadFromString(ADV_CONFIG_CONTENT)
         else:
             unittest.skip("cannot get default plugin config file at %s" % ADV_CONFIG_FILE)
 

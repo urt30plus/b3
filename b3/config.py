@@ -496,7 +496,7 @@ class MainConfig(B3ConfigParserMixin):
             I.E.:
             [
                 {'name': 'admin', 'conf': @conf/plugin_admin.ini, 'path': None, 'disabled': False},
-                {'name': 'adv', 'conf': @conf/plugin_adv.xml, 'path': None, 'disabled': False},
+                {'name': 'adv', 'conf': @conf/plugin_adv.ini, 'path': None, 'disabled': False},
             ]
         """
         return self._plugins

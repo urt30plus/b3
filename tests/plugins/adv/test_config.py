@@ -22,7 +22,7 @@ class Test_config(AdvTestCase):
         ], self.p.ad_list)
 
     def test_empty(self):
-        self.init_plugin("""<configuration plugin="adv" />""")
+        self.init_plugin(" ")
         self.assertEqual(self.p._rate, '2')
         self.assertIsNone(self.p._file_name)
         self.assertEqual(0, len(self.p.ad_list))
@@ -30,12 +30,9 @@ class Test_config(AdvTestCase):
 
     def test_rate_nominal(self):
         self.init_plugin("""\
-<configuration plugin="adv">
-    <settings name="settings">
-        <set name="rate">1</set>
-    </settings>
-</configuration>
-""")
+            [settings]
+            rate: 1
+        """)
         self.assertEqual('1', self.p._rate)
         self.assertIsNotNone(self.p._crontab)
         self.assertTupleEqual((list(range(60)), -1, -1, -1, -1),
@@ -45,12 +42,9 @@ class Test_config(AdvTestCase):
     def test_rate_junk(self):
         try:
             self.init_plugin("""\
-<configuration plugin="adv">
-    <settings name="settings">
-        <set name="rate">f00</set>
-    </settings>
-</configuration>
-""")
+                [settings]
+                rate: f00
+            """)
         except TypeError as err:
             print(err)
         except Exception:

@@ -58,7 +58,7 @@ class AdvPlugin(b3.plugin.Plugin):
                     if msg:
                         f.write(msg + "\n")
         else:
-            raise Exception('save to XML config not supported')
+            raise Exception('save to config not supported')
 
     def load_from_file(self, filename):
         if not os.path.isfile(filename):
@@ -69,7 +69,12 @@ class AdvPlugin(b3.plugin.Plugin):
             self.load(f.readlines())
 
     def load_from_config(self):
-        self.load([e.text for e in self.config.get('ads/ad')])
+        if self.config.has_section('messages'):
+            messages = [v for _, v in self.config.items('messages')]
+            if messages:
+                self.load(messages)
+                return
+        self.error('adv config has no messages')
 
     def load(self, items=None):
         if not items:

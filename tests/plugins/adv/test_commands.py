@@ -10,13 +10,8 @@ class Test_commands(AdvTestCase):
 
     def test_advlist_empty(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">3</set>
-                </settings>
-                <ads>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 3
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advlist(data=None, client=self.joe)
@@ -25,14 +20,11 @@ class Test_commands(AdvTestCase):
 
     def test_advlist_one_item(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">3</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 3
+
+            [messages]
+            ad1: f00
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advlist(data=None, client=self.joe)
@@ -41,16 +33,13 @@ class Test_commands(AdvTestCase):
 
     def test_advlist_many_items(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">3</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 3
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advlist(data=None, client=self.joe)
@@ -59,16 +48,13 @@ class Test_commands(AdvTestCase):
 
     def test_advrate_no_arg_3min(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">3</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 3
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advrate(data='', client=self.joe)
@@ -77,16 +63,13 @@ class Test_commands(AdvTestCase):
 
     def test_advrate_no_arg_2min(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">2</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 2
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.joe.clearMessageHistory()
         self.p.cmd_advrate(data=None, client=self.joe)
@@ -95,16 +78,13 @@ class Test_commands(AdvTestCase):
 
     def test_advrate_set_2min(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">4</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 4
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.assertEqual('4', self.p._rate)
         self.joe.clearMessageHistory()
@@ -114,16 +94,13 @@ class Test_commands(AdvTestCase):
 
     def test_advrate_set_3min(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">4</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 4
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.assertEqual('4', self.p._rate)
         self.joe.clearMessageHistory()
@@ -133,16 +110,13 @@ class Test_commands(AdvTestCase):
 
     def test_advrem_nominal(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">4</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 4
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.joe.clearMessageHistory()
@@ -152,16 +126,13 @@ class Test_commands(AdvTestCase):
 
     def test_advrem_no_arg(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">4</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 4
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.joe.clearMessageHistory()
@@ -171,16 +142,13 @@ class Test_commands(AdvTestCase):
 
     def test_advrem_junk(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">4</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 4
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.joe.clearMessageHistory()
@@ -191,16 +159,13 @@ class Test_commands(AdvTestCase):
 
     def test_advrem_invalid_index(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">4</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                    <ad>bar</ad>
-                    <ad>test</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 4
+
+            [messages]
+            ad1: f00
+            ad2: bar
+            ad3: test
         """)
         self.assertEqual(['f00', 'bar', 'test'], self.p.ad_list)
         self.joe.clearMessageHistory()
@@ -211,14 +176,11 @@ class Test_commands(AdvTestCase):
 
     def test_advadd_nominal(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">4</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 4
+
+            [messages]
+            ad1: f00
         """)
         self.assertEqual(['f00'], self.p.ad_list)
         self.joe.clearMessageHistory()
@@ -228,14 +190,11 @@ class Test_commands(AdvTestCase):
 
     def test_advadd_no_arg(self):
         self.init_plugin("""
-            <configuration>
-                <settings name="settings">
-                    <set name="rate">4</set>
-                </settings>
-                <ads>
-                    <ad>f00</ad>
-                </ads>
-            </configuration>
+            [settings]
+            rate: 4
+
+            [messages]
+            ad1: f00
         """)
         self.assertEqual(['f00'], self.p.ad_list)
         self.joe.clearMessageHistory()
