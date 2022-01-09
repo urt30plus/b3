@@ -82,12 +82,14 @@ class SpreePlugin(b3.plugin.Plugin):
 
         if victim:
             spree_stats = self.get_spree_stats(victim)
+            kills = spree_stats.kills
             deaths = spree_stats.register_death()
             if spree_stats.end_killing_spree_message:
                 self.show_message(
                     killer,
                     victim,
                     spree_stats.end_killing_spree_message,
+                    kills,
                 )
                 spree_stats.end_killing_spree_message = None
 
@@ -121,7 +123,13 @@ class SpreePlugin(b3.plugin.Plugin):
             message = None
         return message
 
-    def show_message(self, client, victim=None, message: str = None) -> None:
+    def show_message(
+            self,
+            client,
+            victim=None,
+            message: str = None,
+            spree_kills: int = 0,
+    ) -> None:
         """
         Replace variables and display the message
         """
@@ -129,6 +137,8 @@ class SpreePlugin(b3.plugin.Plugin):
             message = message.replace('%player%', client.name)
             if victim:
                 message = message.replace('%victim%', victim.name)
+                if spree_kills:
+                    message = message.replace('%spree%', str(spree_kills))
             self.console.say(message)
 
     def cmd_spree(self, data, client, cmd=None):
