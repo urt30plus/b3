@@ -15,7 +15,7 @@ class BooterPlugin(WeaponKillPlugin):
 
     @property
     def cmd_msg_prefix(self) -> str:
-        return 'bt'
+        return 'boot'
 
     @property
     def weapon_name(self) -> str:
@@ -23,7 +23,7 @@ class BooterPlugin(WeaponKillPlugin):
 
     @property
     def weapon_action(self) -> str:
-        return 'booted'
+        return 'boot'
 
     @property
     def weapons_handled(self) -> tuple[int, ...]:
