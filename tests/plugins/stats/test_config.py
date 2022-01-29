@@ -32,7 +32,7 @@ class Test_config(B3TestCase):
         conf.loadFromString(dedent(r"""
             [commands]
             mapstats-stats: 2
-            testscore-ts: 2
+            testscore: 2
             topstats-top: 20
             topxp: 20
 

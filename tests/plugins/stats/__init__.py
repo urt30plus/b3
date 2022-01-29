@@ -26,7 +26,7 @@ class StatPluginTestCase(B3TestCase):
         conf.loadFromString(dedent(r"""
             [commands]
             mapstats-stats: 0
-            testscore-ts: 0
+            testscore: 0
             topstats-top: 0
             topxp: 0
 
