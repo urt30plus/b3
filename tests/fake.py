@@ -46,7 +46,7 @@ class FakeConsole(b3.parser.Parser):
         self.log = logging.getLogger('output')
         self.config = config
 
-        if isinstance(config, (b3.config.XmlConfigParser, b3.config.CfgConfigParser)):
+        if isinstance(config, b3.config.CfgConfigParser):
             self.config = b3.config.MainConfig(config)
         elif isinstance(config, b3.config.MainConfig):
             self.config = config

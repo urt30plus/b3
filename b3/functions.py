@@ -540,7 +540,7 @@ def getAbsolutePath(path, decode=False, conf=None):
     Return an absolute path name and expand the user prefix (~).
     :param path: the relative path we want to expand
     :param decode: if True will decode the path string using the default file system encoding before returning it
-    :param conf: the current configuration being used :type XmlConfigParser|CfgConfigParser|MainConfig|str:
+    :param conf: the current configuration being used :type CfgConfigParser|MainConfig|str:
     """
     if path.startswith('@'):
         if path[1:4] in ('b3\\', 'b3/'):

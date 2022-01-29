@@ -1,34 +1,10 @@
 import configparser
 import logging
-import os
 import unittest
 from unittest import TestCase
 
-from b3.config import XmlConfigParser, CfgConfigParser, ConfigFileNotValid
+from b3.config import CfgConfigParser, ConfigFileNotValid
 from tests import B3TestCase
-
-
-class Test_XmlConfigParser_outputfile(B3TestCase):
-
-    def setUp(self):
-        B3TestCase.setUp(self)
-        self.conf = XmlConfigParser()
-        self.conf.setXml("""
-            <configuration plugin="test">
-                <settings name="settings">
-                    <set name="output_file">@conf/status.xml</set>
-                </settings>
-            </configuration>
-        """)
-
-    def test_getpath(self):
-        status_file = os.path.join("tmp", "status.xml")
-        self.console.config.fileName = os.path.join("tmp", "b3.xml")
-        self.assertEqual(status_file, self.conf.getpath('settings', 'output_file'))
-
-    def test_issue_xlr8or_18(self):
-        self.console.config.fileName = r"b3.xml"
-        self.assertEqual(r"status.xml", self.conf.getpath('settings', 'output_file'))
 
 
 class CommonTestMethodsMixin:
@@ -133,28 +109,6 @@ class CommonTestMethodsMixin:
         self.assert_getDuration(0.5, '30s')
 
 
-class Test_XmlConfigParser(CommonTestMethodsMixin, B3TestCase):
-    assert_func_template = """
-        <configuration>
-            <settings name="section_foo">
-                <set name="foo">%s</set>
-            </settings>
-        </configuration>"""
-
-    def setUp(self):
-        B3TestCase.setUp(self)
-        self.conf = XmlConfigParser()
-        self.conf.loadFromString("""<configuration/>""")
-        log = logging.getLogger('output')
-        log.setLevel(logging.DEBUG)
-
-    def test_get_missing(self):
-        self.assert_get_raises(configparser.NoOptionError, 'section_foo', 'bar',
-                               """<configuration><settings name="section_foo"><set name="foo"/></settings></configuration>""")
-        self.assert_get_raises(configparser.NoOptionError, 'section_bar', 'foo',
-                               """<configuration><settings name="section_foo"><set name="foo"/></settings></configuration>""")
-
-
 class Test_ConfigFileNotValid(TestCase):
 
     def test_exception_message(self):
@@ -164,11 +118,11 @@ class Test_ConfigFileNotValid(TestCase):
             self.assertEqual(repr("f00"), str(e))
 
     def test_loading_invalid_conf(self):
-        config = XmlConfigParser()
+        config = CfgConfigParser()
         try:
-            config.loadFromString(r"""<configuration """)
+            config.loadFromString(r"""[server""")
         except ConfigFileNotValid as e:
-            self.assertEqual("'unclosed token: line 1, column 0'", str(e))
+            self.assertEqual('"File contains no section headers.\\nfile: \'<???>\', line: 1\\n\'[server\'"', str(e))
         except Exception as e:
             self.fail("unexpected exception %r" % e)
         else:

@@ -90,7 +90,7 @@ class Plugin:
         self._messages = {}
         self._enabled = True
         self.config = None
-        if isinstance(config, (b3.config.XmlConfigParser, b3.config.CfgConfigParser)):
+        if isinstance(config, b3.config.CfgConfigParser):
             self.config = config
         else:
             if config is not None:

@@ -6,17 +6,13 @@ desktop.ini
 *.orig
 *.patch
 *.lnk
-b3.egg-info
 build
 dist
 releases/*
-b3.test.xml
 b3.database.sqlite
 venv*/
 scratch.py
 .pytest_cache
 .tox
-b3/conf/b3.xml
 b3/conf/b3.ini
-b3/conf/status.xml
 .venv*/

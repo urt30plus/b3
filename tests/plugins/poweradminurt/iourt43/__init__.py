@@ -4,7 +4,7 @@ from mockito import when
 
 from b3 import TEAM_UNKNOWN
 from b3.clients import Cvar
-from b3.config import XmlConfigParser
+from b3.config import CfgConfigParser
 from b3.parsers.iourt43 import Iourt43Parser
 from b3.plugins.admin import AdminPlugin
 from tests import logging_disabled
@@ -24,9 +24,11 @@ class Iourt43TestCase(unittest.TestCase):
 
     def setUp(self):
         with logging_disabled():
-            self.parser_conf = XmlConfigParser()
-            self.parser_conf.loadFromString(
-                """<configuration><settings name="server"><set name="game_log"></set></settings></configuration>""")
+            self.parser_conf = CfgConfigParser()
+            self.parser_conf.loadFromString("""\
+                [server]
+                game_log:
+            """)
             self.console = Iourt43Parser(self.parser_conf)
             self.console.startup()
 

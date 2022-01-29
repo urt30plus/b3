@@ -5,7 +5,6 @@ from textwrap import dedent
 
 from b3.config import CfgConfigParser
 from b3.config import MainConfig
-from b3.config import XmlConfigParser
 from b3.config import load
 from b3.functions import getAbsolutePath
 
@@ -91,95 +90,56 @@ class Test_CfgMainConfigParser(CommonDefaultTestMethodsMixin, unittest.TestCase)
 
 
 class TestConfig(unittest.TestCase):
-    def init(self, xml_content, cfg_content):
-        xml_parser = XmlConfigParser()
-        xml_parser.loadFromString(xml_content)
-        conf_xml = MainConfig(xml_parser)
+    def init(self, cfg_content):
         cfg_parser = CfgConfigParser(allow_no_value=True)
         cfg_parser.loadFromString(cfg_content)
         conf_cfg = MainConfig(cfg_parser)
 
-        return conf_xml, conf_cfg
+        return conf_cfg
 
     def test_empty_conf(self):
-        self.init(r"""<configuration/>""", "")
+        self.init("")
 
     def test_external_dir_missing(self):
-        conf_xml, conf_cfg = self.init(dedent(r"""
-            <configuration>
-                <settings name="plugins">
-                </settings>
-            </configuration>
-        """), dedent(r"""
+        conf_cfg = self.init(dedent(r"""
             [b3]
         """))
         # normalized path for empty string is the current directory ('.')
-        with self.assertRaises(configparser.NoOptionError):
-            conf_xml.get_external_plugins_dir()
         with self.assertRaises(configparser.NoOptionError):
             conf_cfg.get_external_plugins_dir()
 
     def test_external_dir_empty(self):
-        conf_xml, conf_cfg = self.init(dedent(r"""
-            <configuration>
-                <settings name="plugins">
-                    <set name="external_dir" />
-                </settings>
-            </configuration>
-        """), dedent(r"""
+        conf_cfg = self.init(dedent(r"""
             [b3]
             external_plugins_dir:
         """))
         # normalized path for empty string is the current directory ('.')
-        self.assertEqual(".", conf_xml.get_external_plugins_dir())
         self.assertEqual(".", conf_cfg.get_external_plugins_dir())
 
     def test_external_dir(self):
-        conf_xml, conf_cfg = self.init(dedent(r"""
-            <configuration>
-                <settings name="plugins">
-                    <set name="external_dir">f00</set>
-                </settings>
-            </configuration>
-        """), dedent(r"""
+        conf_cfg = self.init(dedent(r"""
             [b3]
             external_plugins_dir: f00
         """))
         # normalized path for empty string is the current directory ('.')
-        self.assertEqual("f00", conf_xml.get_external_plugins_dir())
         self.assertEqual("f00", conf_cfg.get_external_plugins_dir())
 
     def test_plugins_missing(self):
-        conf_xml, conf_cfg = self.init(dedent(r"""
-            <configuration>
-                <plugins />
-            </configuration>
-        """), dedent(r"""
+        conf_cfg = self.init(dedent(r"""
             [plugins]
         """))
         # normalized path for empty string is the current directory ('.')
-        self.assertListEqual([], conf_xml.get_plugins())
         self.assertListEqual([], conf_cfg.get_plugins())
 
     def test_plugins(self):
-        conf_xml, conf_cfg = self.init(dedent(r"""
-            <configuration>
-                <plugins>
-                    <plugin name="admin" config="@b3/conf/plugin_admin.ini" />
-                    <plugin name="adv" config="@b3/conf/plugin_adv.ini" disabled="yes" />
-                    <plugin name="censor" config="@b3/conf/plugin_censor.xml" disabled="no" />
-                    <plugin name="cmdmanager" config="@b3/conf/plugin_cmdmanager.ini" path="/somewhere/else" />
-                    <plugin name="tk" config="@b3/conf/plugin_tk.ini" disabled="1" />
-                </plugins>
-            </configuration>
-        """), dedent(r"""
+        conf_cfg = self.init(dedent(r"""
             [b3]
             disabled_plugins: adv, tk
 
             [plugins]
             admin: @b3/conf/plugin_admin.ini
             adv: @b3/conf/plugin_adv.ini
-            censor: @b3/conf/plugin_censor.xml
+            censor: @b3/conf/plugin_censor.ini
             cmdmanager: @b3/conf/plugin_cmdmanager.ini
             tk: @b3/conf/plugin_tk.ini
 
@@ -190,10 +150,9 @@ class TestConfig(unittest.TestCase):
         expected_result = [
             {'name': 'admin', 'conf': '@b3/conf/plugin_admin.ini', 'disabled': False, 'path': None},
             {'name': 'adv', 'conf': '@b3/conf/plugin_adv.ini', 'disabled': True, 'path': None},
-            {'name': 'censor', 'conf': '@b3/conf/plugin_censor.xml', 'disabled': False, 'path': None},
+            {'name': 'censor', 'conf': '@b3/conf/plugin_censor.ini', 'disabled': False, 'path': None},
             {'name': 'cmdmanager', 'conf': '@b3/conf/plugin_cmdmanager.ini', 'disabled': False,
              'path': '/somewhere/else'},
             {'name': 'tk', 'conf': '@b3/conf/plugin_tk.ini', 'disabled': True, 'path': None},
         ]
-        self.assertListEqual(expected_result, conf_xml.get_plugins())
         self.assertListEqual(expected_result, conf_cfg.get_plugins())

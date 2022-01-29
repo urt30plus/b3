@@ -5,7 +5,7 @@ import os
 import sys
 import types
 from collections.abc import Callable
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 import b3.config
 import b3.functions
@@ -13,7 +13,7 @@ import b3.plugin
 from b3 import __version__ as b3_version
 from b3.update import B3version
 
-B3ConfigType = Union[b3.config.XmlConfigParser, b3.config.CfgConfigParser]
+B3ConfigType = b3.config.CfgConfigParser
 B3PluginType = Callable[[Any, B3ConfigType], b3.plugin.Plugin]
 
 

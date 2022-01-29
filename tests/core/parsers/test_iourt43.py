@@ -6,7 +6,7 @@ from mockito import mock, when, unstub, any as anything
 
 import b3
 from b3.clients import Client
-from b3.config import XmlConfigParser
+from b3.config import CfgConfigParser
 from b3.events import Event
 from b3.output import VERBOSE2
 from b3.parsers.iourt43 import Iourt43Parser
@@ -31,12 +31,11 @@ class Iourt43TestCase(unittest.TestCase):
         # Iourt43TestCase -> AbstractParser -> FakeConsole -> Parser
 
     def setUp(self):
-        self.parser_conf = XmlConfigParser()
-        self.parser_conf.loadFromString("""<configuration>
-                <settings name="server">
-                    <set name="game_log"/>
-                </settings>
-            </configuration>""")
+        self.parser_conf = CfgConfigParser()
+        self.parser_conf.loadFromString("""
+            [server]
+            game_log:
+        """)
         with logging_disabled():
             self.console = Iourt43Parser(self.parser_conf)
 
@@ -1114,12 +1113,11 @@ class Test_config(unittest.TestCase):
         logging.getLogger('output').setLevel(logging.ERROR)
 
     def setUp(self):
-        self.parser_conf = XmlConfigParser()
-        self.parser_conf.loadFromString("""<configuration>
-                <settings name="server">
-                    <set name="game_log"/>
-                </settings>
-            </configuration>""")
+        self.parser_conf = CfgConfigParser()
+        self.parser_conf.loadFromString("""
+            [server]
+            game_log:
+        """)
         self.console = Iourt43Parser(self.parser_conf)
 
     def tearDown(self):

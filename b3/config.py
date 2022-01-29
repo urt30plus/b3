@@ -3,7 +3,6 @@ import os
 import re
 import time
 from io import StringIO
-from xml.etree import ElementTree
 
 import b3
 import b3.functions
@@ -114,183 +113,6 @@ class B3ConfigParserMixin:
         if kwargs:
             return value % kwargs
         return value
-
-
-class XmlConfigParser(B3ConfigParserMixin):
-    """
-    A config parser class that mimics the ConfigParser
-    settings but reads from an XML format.
-    """
-    _xml = None
-    _settings = None
-
-    fileName = ''
-    fileMtime = 0
-
-    def __init__(self):
-        """
-        Object constructor.
-        """
-        pass
-
-    def _loadSettings(self):
-        """
-        Load settings section from the configuration
-        file into a dictionary.
-        """
-        self._settings = {}
-        for settings in self._xml.findall("./settings"):
-            section = settings.get('name')
-            self._settings[section] = {}
-            for setting in settings.findall("./set"):
-                name = setting.get('name')
-                value = setting.text
-                self._settings[section][name] = value
-
-    def readfp(self, fp):
-        """
-        Read the XML config file from a file pointer.
-        :param fp: The XML file pointer.
-        """
-        try:
-            self._xml = ElementTree.parse(fp)
-        except Exception as e:
-            raise ConfigFileNotValid("%s" % e)
-
-        self._loadSettings()
-
-    def setXml(self, xml):
-        """
-        Read the xml config file from a string.
-        :param xml: The XML string.
-        """
-        self._xml = ElementTree.fromstring(xml)
-
-        self._loadSettings()
-
-    def get(self, section, setting=None, dummy=False):
-        """
-        Return a configuration value as a string.
-        :param section: The configuration file section.
-        :param setting: The configuration file setting.
-        :param dummy: not used
-        :return basestring
-        """
-        if setting is None:
-            # parse as xpath
-            return self._xml.findall(section)
-        else:
-            try:
-                data = self._settings[section][setting]
-                return '' if data is None else data
-            except KeyError:
-                raise NoOptionError(setting, section)
-
-    def getint(self, section, setting):
-        """
-        Return a configuration value as an integer.
-        :param section: The configuration file section.
-        :param setting: The configuration file setting.
-        :return int
-        """
-        value = self.get(section, setting)
-        if value is None:
-            raise ValueError("%s.%s : is not an integer" % (section, setting))
-        return int(value)
-
-    def getfloat(self, section, setting):
-        """
-        Return a configuration value as a floating point number.
-        :param section: The configuration file section.
-        :param setting: The configuration file setting.
-        :return float
-        """
-        value = self.get(section, setting)
-        if value is None:
-            raise ValueError("%s.%s : is not a number" % (section, setting))
-        return float(value)
-
-    def sections(self):
-        """
-        Return the list of sections of the configuration file.
-        :return list
-        """
-        return list(self._settings.keys())
-
-    def options(self, section):
-        """
-        Return the list of options in the given section.
-        :return list
-        """
-        return list(self._settings[section].keys())
-
-    def has_section(self, section):
-        """
-        Tells whether the given section exists in the configuration file.
-        :return True if the section exists, False otherwise.
-        """
-        try:
-            self._settings[section]
-        except KeyError:
-            return False
-        else:
-            return True
-
-    def has_option(self, section, setting):
-        """
-        Tells whether the given section/setting combination exists in the configuration file.
-        :return True if the section/settings combination exists, False otherwise.
-        """
-        try:
-            self._settings[section][setting]
-        except KeyError:
-            return False
-        else:
-            return True
-
-    def items(self, section):
-        """
-        Return all the elements of the given section.
-        """
-        return list(self._settings[section].items())
-
-    def load(self, filename):
-        """
-        Load a configuration file.
-        :param filename: The configuration file name.
-        """
-        if not os.path.isfile(filename):
-            raise ConfigFileNotFound(filename)
-
-        with open(filename, 'r') as f:
-            self.readfp(f)
-
-        self.fileName = filename
-        self.fileMtime = os.path.getmtime(self.fileName)
-        return True
-
-    def loadFromString(self, xmlstring):
-        """
-        Read the XML config from a string.
-        """
-        self.fileName = None
-        self.fileMtime = time.time()
-
-        try:
-            self._xml = ElementTree.XML(xmlstring)
-        except Exception as e:
-            raise ConfigFileNotValid("%s" % e)
-
-        self._loadSettings()
-        return True
-
-    def save(self):
-        # not implemented
-        return True
-
-    def set(self, section, option, value):
-        # not implemented
-        pass
 
 
 class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
@@ -426,11 +248,8 @@ def load(filename):
     Load a configuration file.
     Will instantiate the correct configuration object parser.
     """
-    if os.path.splitext(filename)[1].lower() == '.xml':
-        config = XmlConfigParser()
-    else:
-        # allow the use of empty keys to support the new b3.ini configuration file
-        config = CfgConfigParser(allow_no_value=True)
+    # allow the use of empty keys to support the new b3.ini configuration file
+    config = CfgConfigParser(allow_no_value=True)
 
     filename = b3.functions.getAbsolutePath(filename, True)
 
@@ -441,29 +260,16 @@ def load(filename):
 class MainConfig(B3ConfigParserMixin):
     """
     Class to use to parse the B3 main config file.
-    Responsible for reading the file either in xml or ini format.
+    Responsible for reading the file in ini format.
     """
 
     def __init__(self, config_parser):
         self._config_parser = config_parser
         self._plugins = []
-        if isinstance(self._config_parser, XmlConfigParser):
-            self._init_plugins_from_xml()
-        elif isinstance(self._config_parser, CfgConfigParser):
+        if isinstance(self._config_parser, CfgConfigParser):
             self._init_plugins_from_cfg()
         else:
             raise NotImplementedError("unexpected config type: %r" % self._config_parser.__class__)
-
-    def _init_plugins_from_xml(self):
-        self._plugins = []
-        for p in self._config_parser.get('plugins/plugin'):
-            x = p.get('disabled')
-            self._plugins.append({
-                'name': p.get('name'),
-                'conf': p.get('config'),
-                'path': p.get('path'),
-                'disabled': x is not None and x not in MUST_HAVE_PLUGINS and x.lower() in ('yes', '1', 'on', 'true')
-            })
 
     def _init_plugins_from_cfg(self):
         # Load the list of disabled plugins
@@ -506,9 +312,7 @@ class MainConfig(B3ConfigParserMixin):
         the directory path (as a string) where additional plugin modules can be found
         :return: str or configparser.NoOptionError
         """
-        if isinstance(self._config_parser, XmlConfigParser):
-            return self._config_parser.getpath("plugins", "external_dir")
-        elif isinstance(self._config_parser, CfgConfigParser):
+        if isinstance(self._config_parser, CfgConfigParser):
             return self._config_parser.getpath("b3", "external_plugins_dir")
         else:
             raise NotImplementedError("unexpected config type: %r" % self._config_parser.__class__)
@@ -594,17 +398,17 @@ def getConfPath(decode=False, conf=None):
     """
     Return the path to the B3 main configuration directory.
     :param decode: if True will decode the path string using the default file system encoding before returning it.
-    :param conf: the current configuration being used :type XmlConfigParser|CfgConfigParser|MainConfig|str:
+    :param conf: the current configuration being used :type CfgConfigParser|MainConfig|str:
     """
     if conf:
         if isinstance(conf, str):
             path = os.path.dirname(conf)
-        elif isinstance(conf, XmlConfigParser) or isinstance(conf, CfgConfigParser) or isinstance(conf, MainConfig):
+        elif isinstance(conf, CfgConfigParser) or isinstance(conf, MainConfig):
             path = os.path.dirname(conf.fileName)
         else:
             raise TypeError(
                 "Invalid configuration type specified: expected "
-                "str|XmlConfigParser|CfgConfigParser|MainConfig, "
+                "str|CfgConfigParser|MainConfig, "
                 f"got {type(conf)} instead"
             )
     else:
@@ -623,16 +427,13 @@ def get_main_config(config_path):
             )
     else:
         home_dir = b3.functions.get_home_path(create=False)
-        for p in ('b3.%s', 'conf/b3.%s', 'b3/conf/b3.%s',
-                  os.path.join(home_dir, 'b3.%s'), os.path.join(home_dir, 'conf', 'b3.%s'),
-                  os.path.join(home_dir, 'b3', 'conf', 'b3.%s'), '@b3/conf/b3.%s'):
-            for e in ('ini', 'cfg', 'xml'):
-                path = b3.functions.getAbsolutePath(p % e, True)
-                if os.path.isfile(path):
-                    print(f"Using configuration file: {path}")
-                    config = path
-                    break
-            if config:
+        for p in ('b3.ini', 'conf/b3.ini', 'b3/conf/b3.ini',
+                  os.path.join(home_dir, 'b3.ini'), os.path.join(home_dir, 'conf', 'b3.ini'),
+                  os.path.join(home_dir, 'b3', 'conf', 'b3.ini'), '@b3/conf/b3.ini'):
+            path = b3.functions.getAbsolutePath(p, True)
+            if os.path.isfile(path):
+                print(f"Using configuration file: {path}")
+                config = path
                 break
         else:
             b3.functions.console_exit(

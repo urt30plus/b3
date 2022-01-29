@@ -13,9 +13,9 @@ class Test_getConfPath(B3TestCase):
         self.assertTrue(os.path.exists(b3_path))
 
     def test_getConfPath(self):
-        self.console.config.fileName = "/some/where/conf/b3.xml"
+        self.console.config.fileName = "/some/where/conf/b3.ini"
         self.assertEqual('/some/where/conf', b3.config.getConfPath())
-        self.console.config.fileName = "./b3.xml"
+        self.console.config.fileName = "./b3.ini"
         self.assertEqual('.', b3.config.getConfPath())
 
     def test_getConfPath_invalid(self):
