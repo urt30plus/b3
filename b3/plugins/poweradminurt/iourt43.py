@@ -801,11 +801,15 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             client.message('^7Missing data, try !help paexec')
             return
 
-        if re.match('^[a-z0-9_.]+.cfg$', data, re.I):
+        if re.match(r'^[a-z0-9_.]+(\.cfg)?$', data, re.I):
+            if not data.endswith('.cfg'):
+                data += '.cfg'
+            cmd.sayLoudOrPM(client, f'trying to execute {data}')
+            time.sleep(0.25)
             result = self.console.write(f'exec {data}')
             cmd.sayLoudOrPM(client, result)
         else:
-            self.error('%s is not a valid configfile', data)
+            cmd.sayLoudOrPM(client, f'{data} is not a valid configfile')
 
     def cmd_pacyclemap(self, data, client, cmd=None):
         """
