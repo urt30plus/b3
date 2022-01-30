@@ -234,36 +234,36 @@ class Test_warn_reasons_default_config(Admin_functional_test):
                 # THEN
                 warn_mock.assert_has_calls([call(float(duration), text, keyword, self.joe, '')])
 
-            assertWarn("rule1", 14400, '^3Rule #1: No racism of any kind')
-            assertWarn("rule2", 1440, '^3Rule #2: No clan stacking, members must split evenly between the teams')
-            assertWarn("rule3", 1440, '^3Rule #3: No arguing with admins (listen and learn or leave)')
+            assertWarn("rule1", 20160, '^3Rule #1: No racism of any kind')
+            assertWarn("rule2", 120, '^3Rule #2: No clan stacking, members must split evenly between the teams')
+            assertWarn("rule3", 120, '^3Rule #3: No arguing with admins (listen and learn or leave)')
             assertWarn("rule4", 1440, '^3Rule #4: No abusive language or behavior towards admins or other players')
             assertWarn("rule5", 60,
                        '^3Rule #5: No offensive or potentially offensive names, annoying names, or in-game (double caret (^)) color in names')
-            assertWarn("rule6", 1440, '^3Rule #6: No recruiting for your clan, your server, or anything else')
-            assertWarn("rule7", 1440, '^3Rule #7: No advertising or spamming of websites or servers')
-            assertWarn("rule8", 4320, '^3Rule #8: No profanity or offensive language (in any language)')
-            assertWarn("rule9", 180, '^3Rule #9: Do ^1NOT ^3fire at teammates or within 10 seconds of spawning')
-            assertWarn("rule10", 4320, '^3Rule #10: Offense players must play for the objective and support their team')
-            assertWarn("stack", 1440,
+            assertWarn("rule6", 60, '^3Rule #6: No recruiting for your clan, your server, or anything else')
+            assertWarn("rule7", 120, '^3Rule #7: No advertising or spamming of websites or servers')
+            assertWarn("rule8", 2880, '^3Rule #8: No profanity or offensive language (in any language)')
+            assertWarn("rule9", 120, '^3Rule #9: Do ^1NOT ^3fire at teammates or within 10 seconds of spawning')
+            assertWarn("rule10", 60, '^3Rule #10: Offense players must play for the objective and support their team')
+            assertWarn("stack", 120,
                        '^3Rule #2: No clan stacking, members must split evenly between the teams')
-            assertWarn("lang", 4320, '^3Rule #8: No profanity or offensive language (in any language)')
-            assertWarn("language", 4320, '^3Rule #8: No profanity or offensive language (in any language)')
-            assertWarn("cuss", 4320, '^3Rule #8: No profanity or offensive language (in any language)')
-            assertWarn("profanity", 4320, '^3Rule #8: No profanity or offensive language (in any language)')
+            assertWarn("lang", 2880, '^3Rule #8: No profanity or offensive language (in any language)')
+            assertWarn("language", 2880, '^3Rule #8: No profanity or offensive language (in any language)')
+            assertWarn("cuss", 2880, '^3Rule #8: No profanity or offensive language (in any language)')
+            assertWarn("profanity", 2880, '^3Rule #8: No profanity or offensive language (in any language)')
             assertWarn("name", 60,
                        '^3Rule #5: No offensive or potentially offensive names, annoying names, or in-game (double caret (^)) color in names')
             assertWarn("color", 60, '^7No in-game (double caret (^)) color in names')
             assertWarn("badname", 60, '^7No offensive, potentially offensive, or annoying names')
             assertWarn("spec", 5, '^7spectator too long on full server')
-            assertWarn("adv", 1440, '^3Rule #7: No advertising or spamming of websites or servers')
-            assertWarn("racism", 14400, '^3Rule #1: No racism of any kind')
-            assertWarn("stack", 1440,
+            assertWarn("adv", 120, '^3Rule #7: No advertising or spamming of websites or servers')
+            assertWarn("racism", 20160, '^3Rule #1: No racism of any kind')
+            assertWarn("stack", 120,
                        '^3Rule #2: No clan stacking, members must split evenly between the teams')
-            assertWarn("recruit", 1440, '^3Rule #6: No recruiting for your clan, your server, or anything else')
-            assertWarn("argue", 1440, '^3Rule #3: No arguing with admins (listen and learn or leave)')
-            assertWarn("sfire", 180, '^3Rule #9: Do ^1NOT ^3fire at teammates or within 10 seconds of spawning')
-            assertWarn("spawnfire", 180, '^3Rule #9: Do ^1NOT ^3fire at teammates or within 10 seconds of spawning')
+            assertWarn("recruit", 60, '^3Rule #6: No recruiting for your clan, your server, or anything else')
+            assertWarn("argue", 120, '^3Rule #3: No arguing with admins (listen and learn or leave)')
+            assertWarn("sfire", 120, '^3Rule #9: Do ^1NOT ^3fire at teammates or within 10 seconds of spawning')
+            assertWarn("spawnfire", 120, '^3Rule #9: Do ^1NOT ^3fire at teammates or within 10 seconds of spawning')
             assertWarn("jerk", 1440, '^3Rule #4: No abusive language or behavior towards admins or other players')
             assertWarn("afk", 5, '^7you appear to be away from your keyboard')
             assertWarn("tk", 1440, '^7stop team killing!')
@@ -318,12 +318,12 @@ class Test_reason_keywords(Admin_functional_test):
     def test_ban_with_keyword(self):
         with patch.object(self.mike, "tempban") as tempban_mock:
             self.joe.says('!ban mike adv')
-            tempban_mock.assert_has_calls([call(self.adv_text, 'adv', 20160.0, self.joe)])
+            tempban_mock.assert_has_calls([call(self.adv_text, 'adv', 2880.0, self.joe)])
 
     def test_ban_with_unknown_keyword(self):
         with patch.object(self.mike, "tempban") as tempban_mock:
             self.joe.says('!ban mike f00')
-            tempban_mock.assert_has_calls([call('f00', 'f00', 20160.0, self.joe)])
+            tempban_mock.assert_has_calls([call('f00', 'f00', 2880.0, self.joe)])
 
     def test_permban_with_keyword(self):
         with patch.object(self.mike, "ban") as permban_mock:
