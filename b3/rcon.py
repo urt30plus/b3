@@ -122,15 +122,10 @@ class Rcon:
         """
         Write multiple RCON commands on the socket.
         """
-        queue_get = self.queue.get
-        stop_event = self._stopEvent
         send_rcon = self.send_rcon
         sock = self.socket
         sock_lock = self.lock
-        while True:
-            lines = queue_get()
-            if lines is stop_event:
-                break
+        for lines in iter(self.queue.get, self._stopEvent):
             for cmd in lines:
                 if cmd:
                     with sock_lock:
