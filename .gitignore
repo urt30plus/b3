@@ -16,3 +16,4 @@ scratch.py
 .tox
 b3/conf/b3.ini
 .venv*/
+.*cache
