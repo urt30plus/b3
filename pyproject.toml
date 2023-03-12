@@ -1,0 +1,40 @@
+[tool.black]
+target-version = ["py311"]
+
+[tool.mypy]
+packages = "b3"
+strict = true
+warn_unreachable = true
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+extend-exclude = [".*"]
+extend-select = [
+    "A",  # shadowing builtins
+    "ARG",  # unused arguments
+    "B",  # bugbear
+    "C4",  # comprehensions
+    "DTZ",  # checks for naive datetimes
+    "E",  # pycodestyle (errors)
+    "ERA",  # eradicate (commented out code)
+    "F",  # Pyflakes
+    "FBT",  # boolean trap
+    "I",   # isort
+    "ISC",  # Implicit String Concat
+    "N",  # pep8-naming
+    "PIE",  # misc lints
+    "PL",  # Pylint
+    "PTH",  # favor pahtlib.Path
+    "Q",  # quotes
+    "RET",  # returns
+    "RUF",  # Ruff-specific rules
+    "S",  # bandit
+    "SIM",  # simplify
+    "T20",  # print statements
+    "TRY",  # tryceratops
+    "UP",  # pyupgrade
+    "W",  # pycodestyle (warnings)
+    "YTT",  # flake8-2020
+]
+ignore = ["TRY003"]
