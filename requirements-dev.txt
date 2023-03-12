@@ -1,5 +1,6 @@
 -r requirements.txt
 
 mockito
-mypy
+mypy~=1.1.1
+pre-commit~=3.1.1
 pytest
