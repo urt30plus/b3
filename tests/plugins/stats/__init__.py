@@ -11,7 +11,6 @@ from tests.fake import FakeClient
 
 
 class StatPluginTestCase(B3TestCase):
-
     def setUp(self):
         B3TestCase.setUp(self)
 
@@ -20,10 +19,12 @@ class StatPluginTestCase(B3TestCase):
             admin_plugin = AdminPlugin(self.console, admin_conf)
             admin_plugin.onLoadConfig()
             admin_plugin.onStartup()
-            when(self.console).getPlugin('admin').thenReturn(admin_plugin)
+            when(self.console).getPlugin("admin").thenReturn(admin_plugin)
 
         conf = CfgConfigParser()
-        conf.loadFromString(dedent(r"""
+        conf.loadFromString(
+            dedent(
+                r"""
             [commands]
             mapstats-stats: 0
             testscore: 0
@@ -36,12 +37,18 @@ class StatPluginTestCase(B3TestCase):
             resetxp: no
             show_awards: no
             show_awards_xp: no
-        """))
+        """
+            )
+        )
         self.p = StatsPlugin(self.console, conf)
         self.p.onLoadConfig()
         self.p.onStartup()
 
-        self.joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=1, team=TEAM_RED)
-        self.mike = FakeClient(self.console, name="Mike", guid="mikeguid", groupBits=1, team=TEAM_RED)
+        self.joe = FakeClient(
+            self.console, name="Joe", guid="joeguid", groupBits=1, team=TEAM_RED
+        )
+        self.mike = FakeClient(
+            self.console, name="Mike", guid="mikeguid", groupBits=1, team=TEAM_RED
+        )
         self.joe.connects(1)
         self.mike.connects(2)

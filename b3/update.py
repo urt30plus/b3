@@ -10,9 +10,8 @@ import b3.storage
 
 @functools.total_ordering
 class B3version:
-
     def __init__(self, version: str) -> None:
-        self._version_info = list(map(int, version.split('.')))
+        self._version_info = list(map(int, version.split(".")))
         if len(self._version_info) == 2:
             self._version_info.append(0)
 
@@ -50,19 +49,18 @@ class DBUpdate:
             self.config = b3.config.get_main_config(config)
             if analysis := self.config.analyze():
                 raise b3.config.ConfigFileNotValid(
-                    'Invalid configuration file specified: ' +
-                    '\n >>> '.join(analysis)
+                    "Invalid configuration file specified: " + "\n >>> ".join(analysis)
                 )
         except b3.config.ConfigFileNotValid as cerr:
             print(cerr)
-            b3.functions.console_exit(
-                f'ERROR: configuration file not valid ({config})')
+            b3.functions.console_exit(f"ERROR: configuration file not valid ({config})")
 
     def run(self):
         """
         Run the DB update
         """
-        print(r"""
+        print(
+            r"""
                         _\|/_
                         (o o)    {:>32}
                 +----oOO---OOo----------------------------------+
@@ -71,7 +69,10 @@ class DBUpdate:
                 |                                               |
                 +-----------------------------------------------+
 
-        """.format('B3 : %s' % b3.__version__))
+        """.format(
+                "B3 : %s" % b3.__version__
+            )
+        )
 
         input("press any key to start the update...")
 
@@ -83,23 +84,23 @@ class DBUpdate:
             """
             if B3version(b3.__version__) >= update_version:
                 sql = b3.functions.getAbsolutePath(
-                    f'@b3/sql/{storage.protocol}/b3-update-{update_version}.sql')
+                    f"@b3/sql/{storage.protocol}/b3-update-{update_version}.sql"
+                )
                 if os.path.isfile(sql):
                     try:
-                        print(
-                            f'>>> updating database to version {update_version}')
-                        time.sleep(.5)
+                        print(f">>> updating database to version {update_version}")
+                        time.sleep(0.5)
                         storage.queryFromFile(sql)
                     except Exception as err:
-                        print(
-                            f'WARNING: could not update database properly: {err}')
+                        print(f"WARNING: could not update database properly: {err}")
                         time.sleep(3)
 
-        dsn = self.config.get('b3', 'database')
+        dsn = self.config.get("b3", "database")
         dsndict = b3.functions.splitDSN(dsn)
         from b3.parser import StubParser
+
         database = b3.storage.getStorage(dsn, dsndict, StubParser())
 
-        _update_database(database, '3.99.99')
+        _update_database(database, "3.99.99")
 
-        b3.functions.console_exit('B3 database update completed!')
+        b3.functions.console_exit("B3 database update completed!")

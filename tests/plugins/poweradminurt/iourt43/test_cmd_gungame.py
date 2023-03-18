@@ -6,14 +6,15 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
 class Test_cmd_gungame(Iourt43TestCase):
-
     def setUp(self):
         super(Test_cmd_gungame, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 pagungame-gungame: 20           ; change game type to Gun Game
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
@@ -28,4 +29,6 @@ pagungame-gungame: 20           ; change game type to Gun Game
         self.moderator.message_history = []
         self.moderator.says("!gungame")
         self.console.write.assert_has_calls([call('set g_gametype "11"')])
-        self.assertEqual(['game type changed to Gun Game'], self.moderator.message_history)
+        self.assertEqual(
+            ["game type changed to Gun Game"], self.moderator.message_history
+        )

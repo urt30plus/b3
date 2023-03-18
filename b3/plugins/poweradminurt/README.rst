@@ -279,13 +279,13 @@ Commands specific to Urban Terror 4.2
 
 !pafreeze (!freeze)
   change game type to *Freeze Tag*
-  
+
 !pagoto (!goto) <on/off>
   activate/deactivate the *goto* (Jump mode feature)
-  
+
 !paskins (!skins) <on/off>
   activate/deactivate the use of client skins
-  
+
 !pafunstuff (!funstuff) <on/off>
   activate/deactivate the use of funstuff
 
@@ -297,7 +297,7 @@ Commands specific to Urban Terror 4.2
 
 !pasub (!sub) <player>
   set the given client as a substitute for its team (only in match mode)
-  
+
 
 Other features
 --------------

@@ -11,24 +11,24 @@ from tests import logging_disabled
 
 
 class SpreeTestCase(unittest.TestCase):
-
     def setUp(self):
         # create a FakeConsole parser
         parser_ini_conf = CfgConfigParser()
-        parser_ini_conf.loadFromString(r'''''')
+        parser_ini_conf.loadFromString(r"""""")
         self.parser_main_conf = MainConfig(parser_ini_conf)
 
         with logging_disabled():
             from tests.fake import FakeConsole
+
             self.console = FakeConsole(self.parser_main_conf)
 
         with logging_disabled():
-            self.adminPlugin = AdminPlugin(self.console, '@b3/conf/plugin_admin.ini')
+            self.adminPlugin = AdminPlugin(self.console, "@b3/conf/plugin_admin.ini")
             self.adminPlugin._commands = {}
             self.adminPlugin.onStartup()
 
         # make sure the admin plugin obtained by other plugins is our admin plugin
-        when(self.console).getPlugin('admin').thenReturn(self.adminPlugin)
+        when(self.console).getPlugin("admin").thenReturn(self.adminPlugin)
 
         # create our plugin instance
         self.p = SpreePlugin(self.console, CfgConfigParser())
@@ -36,8 +36,12 @@ class SpreeTestCase(unittest.TestCase):
         with logging_disabled():
             from tests.fake import FakeClient
 
-        self.mike = FakeClient(console=self.console, name="Mike", guid="MIKEGUID", groupBits=1)
-        self.bill = FakeClient(console=self.console, name="Bill", guid="BILLGUID", groupBits=1)
+        self.mike = FakeClient(
+            console=self.console, name="Mike", guid="MIKEGUID", groupBits=1
+        )
+        self.bill = FakeClient(
+            console=self.console, name="Bill", guid="BILLGUID", groupBits=1
+        )
 
     def tearDown(self):
         unstub()
@@ -47,7 +51,8 @@ class SpreeTestCase(unittest.TestCase):
         Initialize the plugin using the given configuration file content
         """
         if not config_content:
-            config_content = dedent(r"""
+            config_content = dedent(
+                r"""
                 [settings]
                 reset_spree: yes
 
@@ -60,7 +65,8 @@ class SpreeTestCase(unittest.TestCase):
 
                 [commands]
                 spree: user
-            """)
+            """
+            )
 
         self.p.config.loadFromString(config_content)
         self.p.onLoadConfig()

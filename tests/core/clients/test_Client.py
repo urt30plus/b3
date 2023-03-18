@@ -9,7 +9,6 @@ from tests import B3TestCase
 
 
 class Test_Client(B3TestCase):
-
     def setUp(self):
         B3TestCase.setUp(self)
         self.client = Client(console=self.console)
@@ -22,9 +21,9 @@ class Test_Client(B3TestCase):
         self.assertEqual(c.team, TEAM_UNKNOWN)
         self.assertTrue(c.connected)
         self.assertFalse(c.hide)
-        self.assertEqual(c.ip, '')
-        self.assertEqual(c.greeting, '')
-        self.assertEqual(c.pbid, '')
+        self.assertEqual(c.ip, "")
+        self.assertEqual(c.greeting, "")
+        self.assertEqual(c.pbid, "")
 
     def test_team(self):
         m = Mock()
@@ -35,14 +34,21 @@ class Test_Client(B3TestCase):
         # GIVEN
         self.client._team = TEAM_RED
         # THEN
-        with self.assertRaiseEvent(event_type='EVT_CLIENT_TEAM_CHANGE', event_client=self.client, event_data=TEAM_BLUE):
+        with self.assertRaiseEvent(
+            event_type="EVT_CLIENT_TEAM_CHANGE",
+            event_client=self.client,
+            event_data=TEAM_BLUE,
+        ):
             # WHEN
             self.client.team = TEAM_BLUE
         # GIVEN
         self.client._team = TEAM_RED
         # THEN
-        with self.assertRaiseEvent(event_type='EVT_CLIENT_TEAM_CHANGE2', event_client=self.client,
-                                   event_data={'previous': TEAM_RED, 'new': TEAM_BLUE}):
+        with self.assertRaiseEvent(
+            event_type="EVT_CLIENT_TEAM_CHANGE2",
+            event_client=self.client,
+            event_data={"previous": TEAM_RED, "new": TEAM_BLUE},
+        ):
             # WHEN
             self.client.team = TEAM_BLUE
 
@@ -50,7 +56,11 @@ class Test_Client(B3TestCase):
         # GIVEN
         self.client.authed = True
         # THEN
-        with self.assertRaiseEvent(event_type='EVT_CLIENT_NAME_CHANGE', event_client=self.client, event_data="cucurb"):
+        with self.assertRaiseEvent(
+            event_type="EVT_CLIENT_NAME_CHANGE",
+            event_client=self.client,
+            event_data="cucurb",
+        ):
             # WHEN
             self.client.name = "cucurb"
 
@@ -120,7 +130,6 @@ class Test_Client(B3TestCase):
 
 
 class Test_Client_groups(B3TestCase):
-
     def setUp(self):
         B3TestCase.setUp(self)
         self.client = Client(console=self.console)
@@ -130,13 +139,21 @@ class Test_Client_groups(B3TestCase):
         self.group_mod = self.console.storage.getGroup(Group(keyword="mod"))
         self.group_admin = self.console.storage.getGroup(Group(keyword="admin"))
         self.group_fulladmin = self.console.storage.getGroup(Group(keyword="fulladmin"))
-        self.group_senioradmin = self.console.storage.getGroup(Group(keyword="senioradmin"))
-        self.group_superadmin = self.console.storage.getGroup(Group(keyword="superadmin"))
+        self.group_senioradmin = self.console.storage.getGroup(
+            Group(keyword="senioradmin")
+        )
+        self.group_superadmin = self.console.storage.getGroup(
+            Group(keyword="superadmin")
+        )
 
     def assertGroups(self, groups):
-        keywords = list(map(operator.attrgetter('keyword'), groups))
-        self.assertListEqual(keywords, list(map(operator.attrgetter('keyword'), self.client.groups)))
-        self.assertListEqual(keywords, list(map(operator.attrgetter('keyword'), self.client.getGroups())))
+        keywords = list(map(operator.attrgetter("keyword"), groups))
+        self.assertListEqual(
+            keywords, list(map(operator.attrgetter("keyword"), self.client.groups))
+        )
+        self.assertListEqual(
+            keywords, list(map(operator.attrgetter("keyword"), self.client.getGroups()))
+        )
 
     def test_addGroup(self):
         # GIVEN
@@ -193,10 +210,9 @@ class Test_Client_groups(B3TestCase):
 
 
 class Test_Client_events(B3TestCase):
-
     def setUp(self):
         B3TestCase.setUp(self)
-        self.queueEvent_patcher = patch.object(self.console, 'queueEvent')
+        self.queueEvent_patcher = patch.object(self.console, "queueEvent")
         self.queueEvent_mock = self.queueEvent_patcher.start()
 
         self.admin = Client(console=self.console)
@@ -208,23 +224,40 @@ class Test_Client_events(B3TestCase):
         self.queueEvent_patcher.stop()
 
     def test_warn(self):
-        with self.assertRaiseEvent(event_type="EVT_CLIENT_WARN", event_client=self.client, event_data={
-            'reason': 'insulting admin',
-            'duration': 5 * 60,
-            'data': 'foobar',
-            'admin': self.admin,
-            'timeExpire': ANY
-        }, event_target=None):
-            self.client.warn(duration='5h', warning='insulting admin', keyword=None, admin=self.admin, data='foobar')
+        with self.assertRaiseEvent(
+            event_type="EVT_CLIENT_WARN",
+            event_client=self.client,
+            event_data={
+                "reason": "insulting admin",
+                "duration": 5 * 60,
+                "data": "foobar",
+                "admin": self.admin,
+                "timeExpire": ANY,
+            },
+            event_target=None,
+        ):
+            self.client.warn(
+                duration="5h",
+                warning="insulting admin",
+                keyword=None,
+                admin=self.admin,
+                data="foobar",
+            )
 
     def test_notice(self):
-        with self.assertRaiseEvent(event_type="EVT_CLIENT_NOTICE", event_client=self.client, event_data={
-            'notice': "keep a eye on this guy",
-            'admin': self.admin,
-            'timeAdd': ANY
-        }):
-            self.client.notice(notice="keep a eye on this guy", spare=None, admin=self.admin)
+        with self.assertRaiseEvent(
+            event_type="EVT_CLIENT_NOTICE",
+            event_client=self.client,
+            event_data={
+                "notice": "keep a eye on this guy",
+                "admin": self.admin,
+                "timeAdd": ANY,
+            },
+        ):
+            self.client.notice(
+                notice="keep a eye on this guy", spare=None, admin=self.admin
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

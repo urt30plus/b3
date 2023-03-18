@@ -1,7 +1,7 @@
-__author__ = 'ThorN'
-__version__ = '23.2.27'
+__author__ = "ThorN"
+__version__ = "23.2.27"
 
-version = f'^2(b3) ^3v{__version__}'
+version = f"^2(b3) ^3v{__version__}"
 
 confdir = None
 console = None
@@ -33,4 +33,5 @@ def getB3versionString():
     Return the B3 version as a string.
     """
     import re
-    return re.sub(r'\^[0-9a-z]', '', version)
+
+    return re.sub(r"\^[0-9a-z]", "", version)

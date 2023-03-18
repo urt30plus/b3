@@ -14,10 +14,10 @@ class SpamcontrolTestCase(B3TestCase):
     """
 
     def setUp(self):
-        self.timer_patcher = patch('threading.Timer')
+        self.timer_patcher = patch("threading.Timer")
         self.timer_patcher.start()
 
-        self.log = logging.getLogger('output')
+        self.log = logging.getLogger("output")
         self.log.propagate = False
 
         B3TestCase.setUp(self)
@@ -35,7 +35,11 @@ class SpamcontrolTestCase(B3TestCase):
         self.p = SpamcontrolPlugin(self.console, self.conf)
 
         self.log.setLevel(logging.DEBUG)
-        self.log.info("============================= Spamcontrol plugin: loading config ============================")
+        self.log.info(
+            "============================= Spamcontrol plugin: loading config ============================"
+        )
         self.p.onLoadConfig()
-        self.log.info("============================= Spamcontrol plugin: starting  =================================")
+        self.log.info(
+            "============================= Spamcontrol plugin: starting  ================================="
+        )
         self.p.onStartup()

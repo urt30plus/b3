@@ -8,27 +8,26 @@ from collections import deque
 
 import b3.functions
 
-__author__ = 'ThorN, Courgette'
-__version__ = '1.5'
+__author__ = "ThorN, Courgette"
+__version__ = "1.5"
 
 
 class DayOfWeek(enum.IntEnum):
-    MONDAY = 0,
-    TUESDAY = 1,
-    WEDNESDAY = 2,
-    THURSDAY = 3,
-    FRIDAY = 4,
-    SATURDAY = 5,
+    MONDAY = (0,)
+    TUESDAY = (1,)
+    WEDNESDAY = (2,)
+    THURSDAY = (3,)
+    FRIDAY = (4,)
+    SATURDAY = (5,)
     SUNDAY = 6
 
     @staticmethod
     def range(*args):
-        return ','.join([str(x.value) for x in args])
+        return ",".join([str(x.value) for x in args])
 
 
 class CronTab:
-
-    def __init__(self, command, minute='*', hour='*', day='*', month='*', dow='*'):
+    def __init__(self, command, minute="*", hour="*", day="*", month="*", dow="*"):
         """
         Object constructor.
         """
@@ -112,12 +111,12 @@ class CronTab:
         ValueError: */90 cannot be over every 59
         """
         if isinstance(rate, str):
-            if ',' in rate:
+            if "," in rate:
                 # 10,20,30 = [10, 20, 30]
                 # 5,6,7,20,30 = [5-7, 20, 30]
                 # 5,7,9,11,30,40,41,42 = [5-12/2, 30, 40-42]
                 myset = set()
-                for fragment in rate.split(','):
+                for fragment in rate.split(","):
                     result = CronTab._getRateFromFragment(fragment.strip(), maxrate)
                     if isinstance(result, int):
                         myset.add(result)
@@ -131,45 +130,47 @@ class CronTab:
                 return CronTab._getRateFromFragment(rate, maxrate)
         elif isinstance(rate, int):
             if rate < 0 or rate >= maxrate:
-                raise ValueError(f'accepted range is 0-{(maxrate - 1)}')
+                raise ValueError(f"accepted range is 0-{(maxrate - 1)}")
             return rate
         elif isinstance(rate, float):
             if int(rate) < 0 or int(rate) >= maxrate:
-                raise ValueError(f'accepted range is 0-{(maxrate - 1)}')
+                raise ValueError(f"accepted range is 0-{(maxrate - 1)}")
             return int(rate)
 
         raise TypeError(f'"{rate}" is not a known cron rate type')
 
     @staticmethod
     def _getRateFromFragment(rate, maxrate):
-        if rate == '*':
+        if rate == "*":
             return -1
 
-        if re.match(r'^([0-9]+)$', rate):
+        if re.match(r"^([0-9]+)$", rate):
             if int(rate) >= maxrate:
-                raise ValueError(f'{rate} cannot be over {maxrate - 1}')
+                raise ValueError(f"{rate} cannot be over {maxrate - 1}")
             return int(rate)
-        elif r := re.match(r'^\*/([0-9]+)$', rate):
+        elif r := re.match(r"^\*/([0-9]+)$", rate):
             # */10 = [0, 10, 20, 30, 40, 50]
             step = int(r.group(1))
             if step > maxrate:
-                raise ValueError(f'{rate} cannot be over every {maxrate - 1}')
+                raise ValueError(f"{rate} cannot be over every {maxrate - 1}")
             return list(range(0, maxrate, step))
-        elif r := re.match(r'^(?P<lmin>[0-9]+)-(?P<lmax>[0-9]+)(/(?P<step>[0-9]+))?$', rate):
+        elif r := re.match(
+            r"^(?P<lmin>[0-9]+)-(?P<lmax>[0-9]+)(/(?P<step>[0-9]+))?$", rate
+        ):
             # 10-20 = [0, 10, 20, 30, 40, 50]
-            lmin = int(r.group('lmin'))
-            lmax = int(r.group('lmax'))
-            step = r.group('step')
+            lmin = int(r.group("lmin"))
+            lmax = int(r.group("lmax"))
+            step = r.group("step")
             if step is None:
                 step = 1
             else:
                 step = int(step)
             if step > maxrate:
-                raise ValueError(f'{step} is out of accepted range 0-{maxrate}')
+                raise ValueError(f"{step} is out of accepted range 0-{maxrate}")
             if lmin < 0 or lmax > maxrate:
-                raise ValueError(f'{rate} is out of accepted range 0-{maxrate - 1}')
+                raise ValueError(f"{rate} is out of accepted range 0-{maxrate - 1}")
             if lmin > lmax:
-                raise ValueError(f'{lmin} cannot be greater than {lmax} in {rate}')
+                raise ValueError(f"{lmin} cannot be greater than {lmax} in {rate}")
             return list(range(lmin, lmax + 1, step))
 
         raise TypeError(f'"{rate}" is not a known cron rate type')
@@ -191,8 +192,7 @@ class CronTab:
 
 
 class OneTimeCronTab(CronTab):
-
-    def __init__(self, command, minute='*', hour='*', day='*', month='*', dow='*'):
+    def __init__(self, command, minute="*", hour="*", day="*", month="*", dow="*"):
         """
         Object constructor.
         """
@@ -201,8 +201,9 @@ class OneTimeCronTab(CronTab):
 
 
 class PluginCronTab(CronTab):
-
-    def __init__(self, plugin, command, minute='*', hour='*', day='*', month='*', dow='*'):
+    def __init__(
+        self, plugin, command, minute="*", hour="*", day="*", month="*", dow="*"
+    ):
         """
         Object constructor.
         """
@@ -228,7 +229,6 @@ class PluginCronTab(CronTab):
 
 
 class Cron:
-
     def __init__(self, console):
         """
         Object constructor.
@@ -240,7 +240,7 @@ class Cron:
         self._stopEvent = threading.Event()
         self._cron_thread = None
 
-    def create(self, command, minute='*', hour='*', day='*', month='*', dow='*'):
+    def create(self, command, minute="*", hour="*", day="*", month="*", dow="*"):
         """
         Create a new CronTab and add it to the active cron tabs.
         """
@@ -253,7 +253,7 @@ class Cron:
         """
         tab_id = id(tab)
         self._tabs[tab_id] = tab
-        self.console.info('Added crontab %s', tab)
+        self.console.info("Added crontab %s", tab)
         return tab_id
 
     def entries(self):
@@ -264,9 +264,9 @@ class Cron:
         Remove a CronTab from the list of active cron tabs.
         """
         if tab := self._tabs.pop(tab_id, None):
-            self.console.info('Removed crontab %s', tab)
+            self.console.info("Removed crontab %s", tab)
         else:
-            self.console.info('Crontab %s not found', tab_id)
+            self.console.info("Crontab %s not found", tab_id)
 
     def __add__(self, tab):
         self.add(tab)
@@ -289,7 +289,7 @@ class Cron:
         Start the cron scheduler in a separate thread.
         """
         self._cron_thread = b3.functions.start_daemon_thread(
-            target=self.run, name='crontab'
+            target=self.run, name="crontab"
         )
 
     def stop(self):
@@ -316,8 +316,12 @@ class Cron:
                     try:
                         c.run()
                     except Exception as msg:
-                        self.console.error('Exception raised while executing crontab %s: %s\n%s',
-                                           c, msg, traceback.extract_tb(sys.exc_info()[2]))
+                        self.console.error(
+                            "Exception raised while executing crontab %s: %s\n%s",
+                            c,
+                            msg,
+                            traceback.extract_tb(sys.exc_info()[2]),
+                        )
                     if 0 < c.maxRuns <= c.numRuns:
                         # reached max executions, remove tab
                         self - c
@@ -329,9 +333,13 @@ class Cron:
             if t2.tm_min == t.tm_min:
                 delay = 62 - t2.tm_sec
             else:
-                self.console.warning('Cron run crossed the minute mark: '
-                                     'start %s:%s / end %s:%s',
-                                     t.tm_min, t.tm_sec, t2.tm_min, t2.tm_sec)
+                self.console.warning(
+                    "Cron run crossed the minute mark: " "start %s:%s / end %s:%s",
+                    t.tm_min,
+                    t.tm_sec,
+                    t2.tm_min,
+                    t2.tm_sec,
+                )
                 # since the next minute has arrived we only add a small delay
                 delay = 0.1
 

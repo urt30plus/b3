@@ -9,10 +9,12 @@ class Test_cmd_goto(Iourt43TestCase):
     def setUp(self):
         super(Test_cmd_goto, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 paskins-skins: 20       ; set the use of client skins <on/off>
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
@@ -26,12 +28,18 @@ paskins-skins: 20       ; set the use of client skins <on/off>
     def test_missing_parameter(self):
         self.moderator.message_history = []
         self.moderator.says("!skins")
-        self.assertListEqual(["invalid or missing data, try !help paskins"], self.moderator.message_history)
+        self.assertListEqual(
+            ["invalid or missing data, try !help paskins"],
+            self.moderator.message_history,
+        )
 
     def test_junk(self):
         self.moderator.message_history = []
         self.moderator.says("!skins qsdf")
-        self.assertListEqual(["invalid or missing data, try !help paskins"], self.moderator.message_history)
+        self.assertListEqual(
+            ["invalid or missing data, try !help paskins"],
+            self.moderator.message_history,
+        )
 
     def test_on(self):
         self.moderator.says("!skins on")

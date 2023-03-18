@@ -6,14 +6,15 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
 class Test_cmd_instagib(Iourt43TestCase):
-
     def setUp(self):
         super(Test_cmd_instagib, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 painstagib-instagib: 20           ; change game mode to Instagib
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()

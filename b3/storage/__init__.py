@@ -1,7 +1,7 @@
-__author__ = 'Courgette'
-__version__ = '1.2'
+__author__ = "Courgette"
+__version__ = "1.2"
 
-PROTOCOLS = ('sqlite',)
+PROTOCOLS = ("sqlite",)
 
 
 class Storage:
@@ -47,7 +47,7 @@ class Storage:
     def getClientIpAddresses(self, client):
         raise NotImplementedError
 
-    def getLastPenalties(self, types='Ban', num=5):
+    def getLastPenalties(self, types="Ban", num=5):
         raise NotImplementedError
 
     def setClientPenalty(self, penalty):
@@ -56,19 +56,19 @@ class Storage:
     def getClientPenalty(self, penalty):
         raise NotImplementedError
 
-    def getClientPenalties(self, client, type='Ban'):
+    def getClientPenalties(self, client, type="Ban"):
         raise NotImplementedError
 
-    def getClientLastPenalty(self, client, type='Ban'):
+    def getClientLastPenalty(self, client, type="Ban"):
         raise NotImplementedError
 
-    def getClientFirstPenalty(self, client, type='Ban'):
+    def getClientFirstPenalty(self, client, type="Ban"):
         raise NotImplementedError
 
-    def disableClientPenalties(self, client, type='Ban'):
+    def disableClientPenalties(self, client, type="Ban"):
         raise NotImplementedError
 
-    def numPenalties(self, client, type='Ban'):
+    def numPenalties(self, client, type="Ban"):
         raise NotImplementedError
 
     def getGroups(self):
@@ -104,9 +104,11 @@ def getStorage(dsn, dsnDict, console):
     if not dsnDict:
         raise AttributeError(f"invalid database configuration specified: {dsn}")
 
-    if dsnDict['protocol'] not in PROTOCOLS:
-        raise AttributeError(f"invalid storage protocol specified: {dsnDict['protocol']}: supported storage "
-                             f"protocols are: {','.join(PROTOCOLS)}")
+    if dsnDict["protocol"] not in PROTOCOLS:
+        raise AttributeError(
+            f"invalid storage protocol specified: {dsnDict['protocol']}: supported storage "
+            f"protocols are: {','.join(PROTOCOLS)}"
+        )
 
     construct = globals()[f"{dsnDict['protocol'].title()}Storage"]
     return construct(dsn, dsnDict, console)

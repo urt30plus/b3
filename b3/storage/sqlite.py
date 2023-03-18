@@ -5,7 +5,7 @@ from b3.storage.common import DatabaseStorage
 
 
 class SqliteStorage(DatabaseStorage):
-    protocol = 'sqlite'
+    protocol = "sqlite"
 
     def __init__(self, dsn, dsnDict, console):
         """
@@ -24,6 +24,7 @@ class SqliteStorage(DatabaseStorage):
         """
         try:
             import sqlite3
+
             path = b3.functions.getWritableFilePath(self.dsn[9:])
             self.console.bot("Using database file: %s", path)
             is_new_database = not os.path.isfile(path)
@@ -31,18 +32,21 @@ class SqliteStorage(DatabaseStorage):
             self.db.isolation_level = None  # set autocommit mode
         except Exception as e:
             self.db = None
-            self.console.error('Database connection failed: %s', e)
+            self.console.error("Database connection failed: %s", e)
             if self._consoleNotice:
-                self.console.screen.write('Connecting to DB : FAILED\n')
+                self.console.screen.write("Connecting to DB : FAILED\n")
                 self._consoleNotice = False
         else:
             # import SQL script if necessary
-            if path == ':memory:' or is_new_database:
-                self.console.info("Importing SQL file: %s...", b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql"))
+            if path == ":memory:" or is_new_database:
+                self.console.info(
+                    "Importing SQL file: %s...",
+                    b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql"),
+                )
                 self.queryFromFile("@b3/sql/sqlite/b3.sql")
 
             if self._consoleNotice:
-                self.console.screen.write('Connecting to DB : OK\n')
+                self.console.screen.write("Connecting to DB : OK\n")
                 self._consoleNotice = False
         finally:
             return self.db
@@ -62,7 +66,7 @@ class SqliteStorage(DatabaseStorage):
         """
         if self.db:
             # checking 'open' will prevent exception raising
-            self.console.bot('Closing connection with SQLite database...')
+            self.console.bot("Closing connection with SQLite database...")
             self.db.close()
         self.db = None
 
@@ -71,8 +75,10 @@ class SqliteStorage(DatabaseStorage):
         List the tables of the current database.
         :return: List of strings.
         """
-        with self.query("SELECT tbl_name FROM sqlite_master WHERE type='table'") as cursor:
-            return [row['tbl_name'] for row in cursor]
+        with self.query(
+            "SELECT tbl_name FROM sqlite_master WHERE type='table'"
+        ) as cursor:
+            return [row["tbl_name"] for row in cursor]
 
     def truncateTable(self, table):
         """

@@ -8,22 +8,23 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 
 class mixin_name_checker:
-
     def setUp(self):
         super(mixin_name_checker, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [namechecker]
 checkdupes: True
 checkunknown: True
 checkbadnames: True
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
         self.p.onStartup()
 
-        self.sleep_patcher = patch.object(time, 'sleep')
+        self.sleep_patcher = patch.object(time, "sleep")
         self.sleep_patcher.start()
 
         self.console.say = Mock()
@@ -62,8 +63,8 @@ checkbadnames: True
         self.assertTrue(p1.name == p2.name)
         self.p.namecheck()
         # THEN
-        p1.warn.assert_has_calls([call(ANY, ANY, 'badname', None, '')])
-        p2.warn.assert_has_calls([call(ANY, ANY, 'badname', None, '')])
+        p1.warn.assert_has_calls([call(ANY, ANY, "badname", None, "")])
+        p2.warn.assert_has_calls([call(ANY, ANY, "badname", None, "")])
 
     def test_checkdupes_with_player_reconnecting(self):
         # GIVEN
@@ -85,7 +86,7 @@ checkbadnames: True
         # WHEN
         self.p.namecheck()
         # THEN
-        p1.warn.assert_has_calls([call(ANY, ANY, 'badname', None, '')])
+        p1.warn.assert_has_calls([call(ANY, ANY, "badname", None, "")])
 
     def test_checkbadnames(self):
         # GIVEN
@@ -95,7 +96,7 @@ checkbadnames: True
         # WHEN
         self.p.namecheck()
         # THEN
-        p1.warn.assert_has_calls([call(ANY, ANY, 'badname', None, '')])
+        p1.warn.assert_has_calls([call(ANY, ANY, "badname", None, "")])
 
 
 class Test_cmd_nuke_41(mixin_name_checker, Iourt43TestCase):

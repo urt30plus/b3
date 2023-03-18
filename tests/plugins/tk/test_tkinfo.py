@@ -5,7 +5,6 @@ from tests.plugins.tk import Tk_functional_test
 
 
 class Test_TkInfo(Tk_functional_test):
-
     def setUp(self):
         super().setUp()
         self.my_cid = 1
@@ -61,7 +60,7 @@ class Test_TkInfo(Tk_functional_test):
         cid3 = 3
         infos = {
             cid2: TkInfo(self.mock_plugin, cid2),
-            cid3: TkInfo(self.mock_plugin, cid3)
+            cid3: TkInfo(self.mock_plugin, cid3),
         }
         self.mock_plugin.console.clients.getByCID = Mock(side_effect=lambda cid: cid)
         self.mock_plugin.client_tkinfo = Mock(side_effect=lambda cid: infos[cid])

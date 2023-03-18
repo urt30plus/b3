@@ -6,7 +6,6 @@ __version__ = "1.1.0"
 
 
 class FishPlugin(Plugin):
-
     _fish_commands = ("smite", "nuke", "slap")
     _team_map = {"blue": b3.TEAM_BLUE, "red": b3.TEAM_RED}
 
@@ -50,8 +49,11 @@ class FishPlugin(Plugin):
                 self.getMessage("fish_nap", {"name": event.client.exactName})
             )
 
-        if self._target_team and event.client.team == self._target_team and \
-                event.client.cid not in self._target_team_fished:
+        if (
+            self._target_team
+            and event.client.team == self._target_team
+            and event.client.cid not in self._target_team_fished
+        ):
             self.console.write(f"{self._fish_cmd} {event.client.cid}")
             self._target_team_fished.append(event.client.cid)
             event.client.message(
@@ -65,11 +67,15 @@ class FishPlugin(Plugin):
         <command: smite (default), nuke, slap> <player> - fish for this player
         """
         if not (input := self.parseUserCmd(data)):
-            cmd.sayLoudOrPM(client, f"fishing for {self._target_name} with {self._fish_cmd}")
+            cmd.sayLoudOrPM(
+                client, f"fishing for {self._target_name} with {self._fish_cmd}"
+            )
             return
         if input[0] == "off":
             if self._target_name is not None:
-                client.message(f"no more fishing for {self._target_name} with {self._fish_cmd}")
+                client.message(
+                    f"no more fishing for {self._target_name} with {self._fish_cmd}"
+                )
                 self._target_name = None
             return
         fish_command = input[0]
@@ -92,13 +98,18 @@ class FishPlugin(Plugin):
         """
         if not (input := self.parseUserCmd(data)):
             if self._target_team:
-                cmd.sayLoudOrPM(client, f"fishing for {self.__team_name()} team with {self._fish_cmd}")
+                cmd.sayLoudOrPM(
+                    client,
+                    f"fishing for {self.__team_name()} team with {self._fish_cmd}",
+                )
             else:
                 cmd.sayLoudOrPM(client, f"no team is being fished")
             return
         if input[0] == "off":
             if self._target_team is not None:
-                client.message(f"no more fishing for {self.__team_name()} team with {self._fish_cmd}")
+                client.message(
+                    f"no more fishing for {self.__team_name()} team with {self._fish_cmd}"
+                )
                 self._target_team = None
             else:
                 client.message(f"ignored, no team was being fished")
@@ -111,7 +122,9 @@ class FishPlugin(Plugin):
             return
         self._target_team = self._team_map.get(input[1])
         if not self._target_team:
-            client.message(f"Unknown team [{input[1]}], valid values are 'blue' or 'red'")
+            client.message(
+                f"Unknown team [{input[1]}], valid values are 'blue' or 'red'"
+            )
             return
         self._fish_cmd = fish_command
         client.message(f"now fishing for {input[1]} team with {self._fish_cmd}")

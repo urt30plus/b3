@@ -6,12 +6,15 @@ from tests import B3TestCase
 
 
 class Test_config(B3TestCase):
-
     def test_empty(self):
         # GIVEN
         conf = CfgConfigParser()
-        conf.loadFromString(dedent(r"""
-        """))
+        conf.loadFromString(
+            dedent(
+                r"""
+        """
+            )
+        )
         self.p = StatsPlugin(self.console, conf)
         # WHEN
         self.p.onLoadConfig()
@@ -29,7 +32,9 @@ class Test_config(B3TestCase):
     def test_nominal(self):
         # GIVEN
         conf = CfgConfigParser()
-        conf.loadFromString(dedent(r"""
+        conf.loadFromString(
+            dedent(
+                r"""
             [commands]
             mapstats-stats: 2
             testscore: 2
@@ -42,7 +47,9 @@ class Test_config(B3TestCase):
             resetxp: yes
             show_awards: yes
             show_awards_xp: yes
-        """))
+        """
+            )
+        )
         self.p = StatsPlugin(self.console, conf)
         # WHEN
         self.p.onLoadConfig()

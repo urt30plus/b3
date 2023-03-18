@@ -8,12 +8,11 @@ import b3.events
 import b3.plugin
 from b3.config import NoOptionError
 
-__version__ = '1.5'
-__author__ = 'ThorN, mindriot, Courgette, xlr8or, SGT, 82ndab-Bravo17, ozon, Fenix'
+__version__ = "1.5"
+__author__ = "ThorN, mindriot, Courgette, xlr8or, SGT, 82ndab-Bravo17, ozon, Fenix"
 
 
 class TkInfo:
-
     def __init__(self, plugin, cid):
         self._attackers = {}
         self._attacked = {}
@@ -89,15 +88,16 @@ class TkInfo:
             for cid, bol in self._attacked.items():
                 try:
                     client = self.plugin.console.clients.getByCID(cid)
-                    points += self.plugin.client_tkinfo(client).attacker_points(self.cid)
+                    points += self.plugin.client_tkinfo(client).attacker_points(
+                        self.cid
+                    )
                 except:
                     pass
         return points
 
 
 class TkPlugin(b3.plugin.Plugin):
-
-    loadAfterPlugins = ['spawnkill']
+    loadAfterPlugins = ["spawnkill"]
 
     def __init__(self, console, config=None):
         """
@@ -108,20 +108,20 @@ class TkPlugin(b3.plugin.Plugin):
         super().__init__(console, config)
 
         # game types that have no team based game play and for which there should be no tk detected
-        self._ffa = ['dm', 'ffa', 'syc-ffa', 'lms', 'gungame']
+        self._ffa = ["dm", "ffa", "syc-ffa", "lms", "gungame"]
 
         self._default_messages = {
-            'ban': '^7team damage over limit',
-            'forgive': '^7$vname^7 has forgiven $aname [^3$points^7]',
-            'grudged': '^7$vname^7 has a ^1grudge ^7against $aname [^3$points^7]',
-            'forgive_many': '^7$vname^7 has forgiven $attackers',
-            'forgive_warning': '^1ALERT^7: $name^7 auto-kick if not forgiven. Type ^3!forgive $cid ^7to forgive. [^3damage: $points^7]',
-            'no_forgive': '^7no one to forgive',
-            'players': '^7Forgive who? %s',
-            'forgive_info': '^7$name^7 has ^3$points^7 TK points',
-            'forgive_clear': '^7$name^7 cleared of ^3$points^7 TK points',
-            'tk_warning_reason': '^3Do not attack teammates, ^1Attacked: ^7$vname ^7[^3$points^7]',
-            'tk_request_action': '^7type ^3!fp ^7 to forgive ^3%s',
+            "ban": "^7team damage over limit",
+            "forgive": "^7$vname^7 has forgiven $aname [^3$points^7]",
+            "grudged": "^7$vname^7 has a ^1grudge ^7against $aname [^3$points^7]",
+            "forgive_many": "^7$vname^7 has forgiven $attackers",
+            "forgive_warning": "^1ALERT^7: $name^7 auto-kick if not forgiven. Type ^3!forgive $cid ^7to forgive. [^3damage: $points^7]",
+            "no_forgive": "^7no one to forgive",
+            "players": "^7Forgive who? %s",
+            "forgive_info": "^7$name^7 has ^3$points^7 TK points",
+            "forgive_clear": "^7$name^7 cleared of ^3$points^7 TK points",
+            "tk_warning_reason": "^3Do not attack teammates, ^1Attacked: ^7$vname ^7[^3$points^7]",
+            "tk_request_action": "^7type ^3!fp ^7 to forgive ^3%s",
         }
 
         # settings
@@ -131,7 +131,7 @@ class TkPlugin(b3.plugin.Plugin):
             1: (2.0, 1.0, 2),
             2: (1.0, 0.5, 1),
             20: (1.0, 0.5, 0),
-            40: (0.75, 0.5, 0)
+            40: (0.75, 0.5, 0),
         }
 
         self._max_level = 40
@@ -144,35 +144,59 @@ class TkPlugin(b3.plugin.Plugin):
         self._warn_level = 2
         self._tk_points_halflife = 0
         self._crontab_tkhalflife = None
-        self._tk_warn_duration = '1h'
+        self._tk_warn_duration = "1h"
 
     def onLoadConfig(self):
         """
         Load plugin configuration.
         """
-        self._issue_warning = self.getSetting('settings', 'issue_warning', b3.STR, self._issue_warning)
-        self._round_grace = self.getSetting('settings', 'round_grace', b3.INT, self._round_grace)
-        self._max_points = self.getSetting('settings', 'max_points', b3.INT, self._max_points)
-        self._private_messages = self.getSetting('settings', 'private_messages', b3.BOOL, self._private_messages)
-        self._damage_threshold = self.getSetting('settings', 'damage_threshold', b3.INT, self._damage_threshold)
-        self._tk_warn_duration = self.getSetting('settings', 'warn_duration', b3.STR, self._tk_warn_duration)
-        self._warn_level = self.getSetting('settings', 'warn_level', b3.INT, self._warn_level)
-        self._tk_points_halflife = self.getSetting('settings', 'halflife', b3.INT, self._tk_points_halflife)
-        self._grudge_enable = self.getSetting('settings', 'grudge_enable', b3.BOOL, self._grudge_enable)
-        self._grudge_level = self.getSetting('settings', 'grudge_level', b3.INT, self._grudge_level)
+        self._issue_warning = self.getSetting(
+            "settings", "issue_warning", b3.STR, self._issue_warning
+        )
+        self._round_grace = self.getSetting(
+            "settings", "round_grace", b3.INT, self._round_grace
+        )
+        self._max_points = self.getSetting(
+            "settings", "max_points", b3.INT, self._max_points
+        )
+        self._private_messages = self.getSetting(
+            "settings", "private_messages", b3.BOOL, self._private_messages
+        )
+        self._damage_threshold = self.getSetting(
+            "settings", "damage_threshold", b3.INT, self._damage_threshold
+        )
+        self._tk_warn_duration = self.getSetting(
+            "settings", "warn_duration", b3.STR, self._tk_warn_duration
+        )
+        self._warn_level = self.getSetting(
+            "settings", "warn_level", b3.INT, self._warn_level
+        )
+        self._tk_points_halflife = self.getSetting(
+            "settings", "halflife", b3.INT, self._tk_points_halflife
+        )
+        self._grudge_enable = self.getSetting(
+            "settings", "grudge_enable", b3.BOOL, self._grudge_enable
+        )
+        self._grudge_level = self.getSetting(
+            "settings", "grudge_level", b3.INT, self._grudge_level
+        )
 
         try:
             self._levels = self.load_config_for_levels()
-            self.debug('loaded levels: %s' % ','.join(map(str, self._levels.keys())))
+            self.debug("loaded levels: %s" % ",".join(map(str, self._levels.keys())))
         except NoOptionError:
-            self.warning('could not find levels in config file, '
-                         'using default: %s' % ','.join(map(str, self._levels.keys())))
+            self.warning(
+                "could not find levels in config file, "
+                "using default: %s" % ",".join(map(str, self._levels.keys()))
+            )
         except ValueError as e:
-            self.error('could not load levels from config value: %s' % e)
-            self.debug('using default levels: %s' % ','.join(map(str, self._levels.keys())))
+            self.error("could not load levels from config value: %s" % e)
+            self.debug(
+                "using default levels: %s" % ",".join(map(str, self._levels.keys()))
+            )
 
         self._max_level = max(self._levels.keys())
-        self.debug('teamkill max level is %s', self._max_level)
+        self.debug("teamkill max level is %s", self._max_level)
 
     def load_config_for_levels(self):
         """
@@ -182,7 +206,7 @@ class TkPlugin(b3.plugin.Plugin):
         is_valid = True
 
         levels = []
-        raw_levels = self.config.get('settings', 'levels').split(',')
+        raw_levels = self.config.get("settings", "levels").split(",")
 
         def level_section_name(level):
             """
@@ -190,10 +214,10 @@ class TkPlugin(b3.plugin.Plugin):
 
             :return None if section not found, or the section name
             """
-            if f'level_{level}' in self.config.sections():
-                return f'level_{level}'
-            elif f'level_{self.console.getGroupLevel(level)}' in self.config.sections():
-                return f'level_{self.console.getGroupLevel(level)}'
+            if f"level_{level}" in self.config.sections():
+                return f"level_{level}"
+            elif f"level_{self.console.getGroupLevel(level)}" in self.config.sections():
+                return f"level_{self.console.getGroupLevel(level)}"
 
         for lev in raw_levels:
             # check the level number is valid
@@ -208,7 +232,9 @@ class TkPlugin(b3.plugin.Plugin):
             # check if we have a config section named after this level
             section_name = level_section_name(lev)
             if section_name is None:
-                self.error("section %r is missing from the config file" % ('level_%s' % lev))
+                self.error(
+                    "section %r is missing from the config file" % ("level_%s" % lev)
+                )
                 is_valid = False
                 continue
 
@@ -218,25 +244,31 @@ class TkPlugin(b3.plugin.Plugin):
             ban_length = 0
 
             try:
-                kill_multiplier = self.config.getfloat(section_name, 'kill_multiplier')
+                kill_multiplier = self.config.getfloat(section_name, "kill_multiplier")
             except NoOptionError:
-                self.error("option kill_multiplier is missing in section %s" % section_name)
+                self.error(
+                    "option kill_multiplier is missing in section %s" % section_name
+                )
                 is_valid = False
             except ValueError as err:
                 self.error("value for kill_multiplier is invalid. %s" % err)
                 is_valid = False
 
             try:
-                damage_multiplier = self.config.getfloat(section_name, 'damage_multiplier')
+                damage_multiplier = self.config.getfloat(
+                    section_name, "damage_multiplier"
+                )
             except NoOptionError:
-                self.error("option damage_multiplier is missing in section %s" % section_name)
+                self.error(
+                    "option damage_multiplier is missing in section %s" % section_name
+                )
                 is_valid = False
             except ValueError as err:
                 self.error("value for damage_multiplier is invalid. %s" % err)
                 is_valid = False
 
             try:
-                ban_length = self.config.getint(section_name, 'ban_length')
+                ban_length = self.config.getint(section_name, "ban_length")
             except NoOptionError:
                 self.error("option ban_length is missing in section %s" % section_name)
                 is_valid = False
@@ -245,7 +277,11 @@ class TkPlugin(b3.plugin.Plugin):
                 is_valid = False
 
             if is_valid:
-                levels_data[level_number] = (kill_multiplier, damage_multiplier, ban_length)
+                levels_data[level_number] = (
+                    kill_multiplier,
+                    damage_multiplier,
+                    ban_length,
+                )
 
         if not is_valid:
             raise ValueError
@@ -257,28 +293,42 @@ class TkPlugin(b3.plugin.Plugin):
         Plugin startup
         """
         # register events needed
-        self.registerEvent('EVT_CLIENT_DAMAGE_TEAM')
-        self.registerEvent('EVT_CLIENT_KILL_TEAM')
-        self.registerEvent('EVT_CLIENT_DISCONNECT')
-        self.registerEvent('EVT_GAME_EXIT')
-        self.registerEvent('EVT_GAME_ROUND_END')
-        self.registerEvent('EVT_GAME_ROUND_START')
+        self.registerEvent("EVT_CLIENT_DAMAGE_TEAM")
+        self.registerEvent("EVT_CLIENT_KILL_TEAM")
+        self.registerEvent("EVT_CLIENT_DISCONNECT")
+        self.registerEvent("EVT_GAME_EXIT")
+        self.registerEvent("EVT_GAME_ROUND_END")
+        self.registerEvent("EVT_GAME_ROUND_START")
 
-        self.admin_plugin.registerCommand(self, 'forgive', 0, self.cmd_forgive, 'f')
-        self.admin_plugin.registerCommand(self, 'forgivelist', 0, self.cmd_forgivelist, 'fl')
-        self.admin_plugin.registerCommand(self, 'forgiveall', 0, self.cmd_forgiveall, 'fa')
-        self.admin_plugin.registerCommand(self, 'forgiveinfo', 20, self.cmd_forgiveinfo, 'fi')
-        self.admin_plugin.registerCommand(self, 'forgiveclear', 60, self.cmd_forgiveclear, 'fc')
-        self.admin_plugin.registerCommand(self, 'forgiveprev', 0, self.cmd_forgivelast, 'fp')
+        self.admin_plugin.registerCommand(self, "forgive", 0, self.cmd_forgive, "f")
+        self.admin_plugin.registerCommand(
+            self, "forgivelist", 0, self.cmd_forgivelist, "fl"
+        )
+        self.admin_plugin.registerCommand(
+            self, "forgiveall", 0, self.cmd_forgiveall, "fa"
+        )
+        self.admin_plugin.registerCommand(
+            self, "forgiveinfo", 20, self.cmd_forgiveinfo, "fi"
+        )
+        self.admin_plugin.registerCommand(
+            self, "forgiveclear", 60, self.cmd_forgiveclear, "fc"
+        )
+        self.admin_plugin.registerCommand(
+            self, "forgiveprev", 0, self.cmd_forgivelast, "fp"
+        )
 
         if self._grudge_enable:
-            self.admin_plugin.registerCommand(self, 'grudge', self._grudge_level, self.cmd_grudge, 'grudge')
+            self.admin_plugin.registerCommand(
+                self, "grudge", self._grudge_level, self.cmd_grudge, "grudge"
+            )
 
         if self._tk_points_halflife > 0:
             minute, sec = self.crontab_time()
-            self._crontab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, minute=minute)
+            self._crontab_tkhalflife = b3.cron.OneTimeCronTab(
+                self.halveTKPoints, minute=minute
+            )
             self.console.cron + self._crontab_tkhalflife
-            self.debug('TK Crontab started')
+            self.debug("TK Crontab started")
 
     def onEvent(self, event):
         """
@@ -287,34 +337,36 @@ class TkPlugin(b3.plugin.Plugin):
         if self.console.game.gameType in self._ffa:
             # game type is deathmatch, ignore
             return
-        elif event.type == self.console.getEventID('EVT_CLIENT_DAMAGE_TEAM'):
+        elif event.type == self.console.getEventID("EVT_CLIENT_DAMAGE_TEAM"):
             if event.client.maxLevel <= self._max_level:
                 self.clientDamage(event.client, event.target, int(event.data[0]))
 
-        elif event.type == self.console.getEventID('EVT_CLIENT_KILL_TEAM'):
+        elif event.type == self.console.getEventID("EVT_CLIENT_KILL_TEAM"):
             if event.client.maxLevel <= self._max_level:
                 self.clientDamage(event.client, event.target, int(event.data[0]), True)
 
-        elif event.type == self.console.getEventID('EVT_CLIENT_DISCONNECT'):
+        elif event.type == self.console.getEventID("EVT_CLIENT_DISCONNECT"):
             self.forgive_all(event.data)
             return
 
-        elif event.type == self.console.getEventID('EVT_GAME_EXIT'):
+        elif event.type == self.console.getEventID("EVT_GAME_EXIT"):
             if self._crontab_tkhalflife:
                 # remove existing crontab
                 self.console.cron - self._crontab_tkhalflife
-            self.halveTKPoints('map end: cutting all teamkill points in half')
+            self.halveTKPoints("map end: cutting all teamkill points in half")
             return
 
-        elif event.type == self.console.getEventID('EVT_GAME_ROUND_START'):
+        elif event.type == self.console.getEventID("EVT_GAME_ROUND_START"):
             if self._tk_points_halflife > 0:
                 if self._crontab_tkhalflife:
                     # remove existing crontab
                     self.console.cron - self._crontab_tkhalflife
                 (m, s) = self.crontab_time()
-                self._crontab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, minute=m)
+                self._crontab_tkhalflife = b3.cron.OneTimeCronTab(
+                    self.halveTKPoints, minute=m
+                )
                 self.console.cron + self._crontab_tkhalflife
-                self.debug('TK crontab started')
+                self.debug("TK crontab started")
 
             return
         else:
@@ -325,11 +377,13 @@ class TkPlugin(b3.plugin.Plugin):
         if points >= self._max_points:
             if points >= self._max_points + (self._max_points / 2):
                 self.forgive_all(event.client.cid)
-                event.client.tempban(self.getMessage('ban'), 'tk', self.getMultipliers(event.client)[2])
-            elif event.client.var(self, 'checkBan').value:
+                event.client.tempban(
+                    self.getMessage("ban"), "tk", self.getMultipliers(event.client)[2]
+                )
+            elif event.client.var(self, "checkBan").value:
                 pass
             else:
-                msg = ''
+                msg = ""
                 if len(tkinfo.attacked) > 0:
                     myvictims = []
                     for cid, bol in tkinfo.attacked.items():
@@ -338,14 +392,26 @@ class TkPlugin(b3.plugin.Plugin):
                             continue
 
                         v = self.client_tkinfo(victim)
-                        myvictims.append('%s ^7(^1%s^7)' % (victim.name, v.attacker_points(event.client.cid)))
+                        myvictims.append(
+                            "%s ^7(^1%s^7)"
+                            % (victim.name, v.attacker_points(event.client.cid))
+                        )
 
                     if myvictims:
-                        msg += ', ^1Attacked^7: %s' % ', '.join(myvictims)
+                        msg += ", ^1Attacked^7: %s" % ", ".join(myvictims)
 
-                self.console.say(self.getMessage('forgive_warning', {'name': event.client.exactName,
-                                                                     'points': points, 'cid': event.client.cid}) + msg)
-                event.client.setvar(self, 'checkBan', True)
+                self.console.say(
+                    self.getMessage(
+                        "forgive_warning",
+                        {
+                            "name": event.client.exactName,
+                            "points": points,
+                            "cid": event.client.cid,
+                        },
+                    )
+                    + msg
+                )
+                event.client.setvar(self, "checkBan", True)
                 t = threading.Timer(30, self.checkTKBan, (event.client,))
                 t.start()
 
@@ -354,7 +420,7 @@ class TkPlugin(b3.plugin.Plugin):
         Check if we have to tempban a client for teamkilling.
         :param client: The client on who perform the check
         """
-        client.setvar(self, 'checkBan', False)
+        client.setvar(self, "checkBan", False)
         tkinfo = self.client_tkinfo(client)
         if tkinfo.points >= self._max_points:
             self.forgive_all(client.cid)
@@ -366,14 +432,14 @@ class TkPlugin(b3.plugin.Plugin):
             for cid, a in list(tkinfo.attacked.items()):
                 self.forgive(cid, client, True)
 
-            client.tempban(self.getMessage('ban'), 'tk', duration)
+            client.tempban(self.getMessage("ban"), "tk", duration)
 
     def halveTKPoints(self, msg=None):
         """
         Halve all the teamkill points
         """
         if msg is None:
-            msg = 'halving all TK Points'
+            msg = "halving all TK Points"
         self.debug(msg)
         for cid, c in self.console.clients.items():
             tkinfo = self.client_tkinfo(c)
@@ -392,14 +458,16 @@ class TkPlugin(b3.plugin.Plugin):
                 # remove existing crontab
                 self.console.cron - self._crontab_tkhalflife
             m, s = self.crontab_time()
-            self._crontab_tkhalflife = b3.cron.OneTimeCronTab(self.halveTKPoints, minute=m)
+            self._crontab_tkhalflife = b3.cron.OneTimeCronTab(
+                self.halveTKPoints, minute=m
+            )
             self.console.cron + self._crontab_tkhalflife
-            self.debug('TK crontab re-started')
+            self.debug("TK crontab re-started")
 
     def crontab_time(self):
         s = self._tk_points_halflife
-        m = int(time.strftime('%M'))
-        s += int(time.strftime('%S'))
+        m = int(time.strftime("%M"))
+        s += int(time.strftime("%S"))
         while s > 59:
             m += 1
             s -= 60
@@ -440,32 +508,49 @@ class TkPlugin(b3.plugin.Plugin):
         a.damage(v.cid, points)
         v.damaged(a.cid, points)
 
-        self.debug('attacker: %s, TK points: %s, attacker.maxLevel: %s, last warn time: %s, console time: %s' % (
-            attacker.exactName, points, attacker.maxLevel, a.lastwarntime, self.console.time()))
+        self.debug(
+            "attacker: %s, TK points: %s, attacker.maxLevel: %s, last warn time: %s, console time: %s"
+            % (
+                attacker.exactName,
+                points,
+                attacker.maxLevel,
+                a.lastwarntime,
+                self.console.time(),
+            )
+        )
 
-        if self._round_grace and self._issue_warning and \
-                self.console.game.roundTime() < self._round_grace and \
-                a.lastwarntime + 60 < self.console.time():
+        if (
+            self._round_grace
+            and self._issue_warning
+            and self.console.game.roundTime() < self._round_grace
+            and a.lastwarntime + 60 < self.console.time()
+        ):
             a.lastwarntime = self.console.time()
             self.admin_plugin.warnClient(attacker, self._issue_warning, None, False)
-        elif points > self._damage_threshold and \
-                attacker.maxLevel < self._warn_level and \
-                a.lastwarntime + 180 < self.console.time():
+        elif (
+            points > self._damage_threshold
+            and attacker.maxLevel < self._warn_level
+            and a.lastwarntime + 180 < self.console.time()
+        ):
             a.lastwarntime = self.console.time()
-            msg = self.getMessage('tk_warning_reason', {'vname': victim.exactName, 'points': points})
-            warning = self.admin_plugin.warnClient(attacker, msg, None, False, newDuration=self._tk_warn_duration)
+            msg = self.getMessage(
+                "tk_warning_reason", {"vname": victim.exactName, "points": points}
+            )
+            warning = self.admin_plugin.warnClient(
+                attacker, msg, None, False, newDuration=self._tk_warn_duration
+            )
             a.warn(v.cid, warning)
-            victim.message(self.getMessage('tk_request_action', attacker.exactName))
+            victim.message(self.getMessage("tk_request_action", attacker.exactName))
 
     def client_tkinfo(self, client):
         """
         Return client teamkill info.
         """
-        if not client.isvar(self, 'tkinfo'):
-            client.setvar(self, 'tkinfo', TkInfo(self, client.cid))
-        if not client.isvar(self, 'checkBan'):
-            client.setvar(self, 'checkBan', False)
-        return client.var(self, 'tkinfo').value
+        if not client.isvar(self, "tkinfo"):
+            client.setvar(self, "tkinfo", TkInfo(self, client.cid))
+        if not client.isvar(self, "checkBan"):
+            client.setvar(self, "checkBan", False)
+        return client.var(self, "tkinfo").value
 
     def forgive(self, acid, victim, silent=False):
         """
@@ -482,20 +567,32 @@ class TkPlugin(b3.plugin.Plugin):
 
             if not silent:
                 if self._private_messages:
-                    variables = {'vname': victim.exactName, 'aname': attacker.name, 'points': points}
-                    victim.message(self.getMessage('forgive', variables))
-                    variables = {'vname': victim.exactName, 'aname': attacker.name, 'points': points}
-                    attacker.message(self.getMessage('forgive', variables))
+                    variables = {
+                        "vname": victim.exactName,
+                        "aname": attacker.name,
+                        "points": points,
+                    }
+                    victim.message(self.getMessage("forgive", variables))
+                    variables = {
+                        "vname": victim.exactName,
+                        "aname": attacker.name,
+                        "points": points,
+                    }
+                    attacker.message(self.getMessage("forgive", variables))
                 else:
-                    variables = {'vname': victim.exactName, 'aname': attacker.name, 'points': points}
-                    self.console.say(self.getMessage('forgive', variables))
+                    variables = {
+                        "vname": victim.exactName,
+                        "aname": attacker.name,
+                        "points": points,
+                    }
+                    self.console.say(self.getMessage("forgive", variables))
         elif not silent:
             if self._private_messages:
-                variables = {'vname': victim.exactName, 'aname': acid, 'points': points}
-                victim.message(self.getMessage('forgive', variables))
+                variables = {"vname": victim.exactName, "aname": acid, "points": points}
+                victim.message(self.getMessage("forgive", variables))
             else:
-                variables = {'vname': victim.exactName, 'aname': acid, 'points': points}
-                self.console.say(self.getMessage('forgive', variables))
+                variables = {"vname": victim.exactName, "aname": acid, "points": points}
+                self.console.say(self.getMessage("forgive", variables))
 
         return points
 
@@ -513,13 +610,25 @@ class TkPlugin(b3.plugin.Plugin):
 
             if not silent:
                 if self._private_messages:
-                    variables = {'vname': victim.exactName, 'aname': attacker.name, 'points': points}
-                    victim.message(self.getMessage('grudged', variables))
-                    variables = {'vname': victim.exactName, 'aname': attacker.name, 'points': points}
-                    attacker.message(self.getMessage('grudged', variables))
+                    variables = {
+                        "vname": victim.exactName,
+                        "aname": attacker.name,
+                        "points": points,
+                    }
+                    victim.message(self.getMessage("grudged", variables))
+                    variables = {
+                        "vname": victim.exactName,
+                        "aname": attacker.name,
+                        "points": points,
+                    }
+                    attacker.message(self.getMessage("grudged", variables))
                 else:
-                    variables = {'vname': victim.exactName, 'aname': attacker.name, 'points': points}
-                    self.console.say(self.getMessage('grudged', variables))
+                    variables = {
+                        "vname": victim.exactName,
+                        "aname": attacker.name,
+                        "points": points,
+                    }
+                    self.console.say(self.getMessage("grudged", variables))
             return points
         return False
 
@@ -548,7 +657,7 @@ class TkPlugin(b3.plugin.Plugin):
         """
         v = self.client_tkinfo(client)
         if not v.attackers:
-            client.message(self.getMessage('no_forgive'))
+            client.message(self.getMessage("no_forgive"))
             return
 
         if not data:
@@ -557,9 +666,9 @@ class TkPlugin(b3.plugin.Plugin):
                     self.grudge(cid, client)
             else:
                 self.cmd_forgivelist(data, client)
-        elif data == 'last':
+        elif data == "last":
             self.grudge(v.last_attacker, client)
-        elif re.match(r'^[0-9]+$', data):
+        elif re.match(r"^[0-9]+$", data):
             self.grudge(data, client)
         else:
             data = data.lower()
@@ -574,7 +683,7 @@ class TkPlugin(b3.plugin.Plugin):
         """
         v = self.client_tkinfo(client)
         if not v.attackers:
-            client.message(self.getMessage('no_forgive'))
+            client.message(self.getMessage("no_forgive"))
             return
 
         if not data:
@@ -583,9 +692,9 @@ class TkPlugin(b3.plugin.Plugin):
                     self.forgive(cid, client)
             else:
                 self.cmd_forgivelist(data, client)
-        elif data == 'last':
+        elif data == "last":
             self.forgive(v.last_attacker, client)
-        elif re.match(r'^[0-9]+$', data):
+        elif re.match(r"^[0-9]+$", data):
             self.forgive(data, client)
         else:
             data = data.lower()
@@ -602,13 +711,13 @@ class TkPlugin(b3.plugin.Plugin):
         if len(v.attackers) == 1:
             for cid, attacker in list(v.attackers.items()):
                 if v.is_grudged(cid):
-                    client.message(self.getMessage('no_forgive'))
+                    client.message(self.getMessage("no_forgive"))
                 else:
                     self.forgive(cid, client)
         elif v.last_attacker and not v.is_grudged(v.last_attacker):
             self.forgive(v.last_attacker, client)
         else:
-            client.message(self.getMessage('no_forgive'))
+            client.message(self.getMessage("no_forgive"))
 
     def cmd_forgiveall(self, data, client, cmd=None):
         """
@@ -624,22 +733,35 @@ class TkPlugin(b3.plugin.Plugin):
                 attacker = self.console.clients.getByCID(cid)
                 points = self.forgive(cid, client, True)
                 if attacker and points:
-                    forgave.append('%s^7 [^3%s^7]' % (attacker.name, points))
+                    forgave.append("%s^7 [^3%s^7]" % (attacker.name, points))
                     if self._private_messages:
-                        attacker.message(self.getMessage('forgive_many', {'vname': client.exactName,
-                                                                          'attackers': attacker.exactName}))
+                        attacker.message(
+                            self.getMessage(
+                                "forgive_many",
+                                {
+                                    "vname": client.exactName,
+                                    "attackers": attacker.exactName,
+                                },
+                            )
+                        )
 
             if forgave:
                 if self._private_messages:
-                    variables = {'vname': client.exactName, 'attackers': ', '.join(forgave)}
-                    client.message(self.getMessage('forgive_many', variables))
+                    variables = {
+                        "vname": client.exactName,
+                        "attackers": ", ".join(forgave),
+                    }
+                    client.message(self.getMessage("forgive_many", variables))
                 else:
-                    variables = {'vname': client.exactName, 'attackers': ', '.join(forgave)}
-                    self.console.say(self.getMessage('forgive_many', variables))
+                    variables = {
+                        "vname": client.exactName,
+                        "attackers": ", ".join(forgave),
+                    }
+                    self.console.say(self.getMessage("forgive_many", variables))
             else:
-                client.message(self.getMessage('no_forgive'))
+                client.message(self.getMessage("no_forgive"))
         else:
-            client.message(self.getMessage('no_forgive'))
+            client.message(self.getMessage("no_forgive"))
 
     def cmd_forgivelist(self, data, client, cmd=None):
         """
@@ -658,28 +780,34 @@ class TkPlugin(b3.plugin.Plugin):
                     continue
 
                 if v.is_grudged(cid):
-                    myattackers.append('^7[^2%s^7] ^1%s ^7(^1%s^7)' % (attacker.cid, attacker.name, points))
+                    myattackers.append(
+                        "^7[^2%s^7] ^1%s ^7(^1%s^7)"
+                        % (attacker.cid, attacker.name, points)
+                    )
                 else:
-                    myattackers.append('^7[^2%s^7] %s ^7[^3%s^7]' % (attacker.cid, attacker.name, points))
+                    myattackers.append(
+                        "^7[^2%s^7] %s ^7[^3%s^7]"
+                        % (attacker.cid, attacker.name, points)
+                    )
 
             if myattackers:
-                client.message(self.getMessage('players', ', '.join(myattackers)))
+                client.message(self.getMessage("players", ", ".join(myattackers)))
             else:
-                client.message(self.getMessage('no_forgive'))
+                client.message(self.getMessage("no_forgive"))
         else:
-            client.message(self.getMessage('no_forgive'))
+            client.message(self.getMessage("no_forgive"))
 
     def cmd_forgiveinfo(self, data, client, cmd=None):
         """
         <name> - display a user's tk points
         """
-        if not (m := re.match('^([a-z0-9]+)$', data)):
-            client.message('^7Invalid parameters')
+        if not (m := re.match("^([a-z0-9]+)$", data)):
+            client.message("^7Invalid parameters")
             return
 
         if sclient := self.findClientPrompt(data, client):
             tkinfo = self.client_tkinfo(sclient)
-            msg = ''
+            msg = ""
             if len(tkinfo.attacked) > 0:
                 myvictims = []
                 for cid, bol in tkinfo.attacked.items():
@@ -687,10 +815,12 @@ class TkPlugin(b3.plugin.Plugin):
                         continue
 
                     v = self.client_tkinfo(victim)
-                    myvictims.append('%s ^7(^1%s^7)' % (victim.name, v.attacker_points(sclient.cid)))
+                    myvictims.append(
+                        "%s ^7(^1%s^7)" % (victim.name, v.attacker_points(sclient.cid))
+                    )
 
                 if myvictims:
-                    msg += ', ^1Attacked^7: %s' % ', '.join(myvictims)
+                    msg += ", ^1Attacked^7: %s" % ", ".join(myvictims)
 
             if len(tkinfo.attackers) > 0:
                 myattackers = []
@@ -699,30 +829,47 @@ class TkPlugin(b3.plugin.Plugin):
                         continue
 
                     if tkinfo.is_grudged(attacker.cid):
-                        myattackers.append('^1%s ^7[^3%s^7]' % (attacker.name, points))
+                        myattackers.append("^1%s ^7[^3%s^7]" % (attacker.name, points))
                     else:
-                        myattackers.append('%s ^7[^3%s^7]' % (attacker.name, points))
+                        myattackers.append("%s ^7[^3%s^7]" % (attacker.name, points))
 
                 if myattackers:
-                    msg += ', ^3Attacked By^7: %s' % ', '.join(myattackers)
+                    msg += ", ^3Attacked By^7: %s" % ", ".join(myattackers)
 
-            cmd.sayLoudOrPM(client, self.getMessage('forgive_info', {'name': sclient.exactName,
-                                                                     'points': tkinfo.points}) + msg)
+            cmd.sayLoudOrPM(
+                client,
+                self.getMessage(
+                    "forgive_info", {"name": sclient.exactName, "points": tkinfo.points}
+                )
+                + msg,
+            )
 
     def cmd_forgiveclear(self, data, client, cmd=None):
         """
         <name> - clear a user's tk points
         """
-        if not (m := re.match('^([a-z0-9]+)$', data)):
-            client.message('^7Invalid parameters')
+        if not (m := re.match("^([a-z0-9]+)$", data)):
+            client.message("^7Invalid parameters")
             return False
 
         if sclient := self.findClientPrompt(data, client):
             points = self.forgive_all(sclient.cid)
             if self._private_messages:
-                client.message(self.getMessage('forgive_clear', {'name': sclient.exactName, 'points': points}))
-                sclient.message(self.getMessage('forgive_clear', {'name': sclient.exactName, 'points': points}))
+                client.message(
+                    self.getMessage(
+                        "forgive_clear", {"name": sclient.exactName, "points": points}
+                    )
+                )
+                sclient.message(
+                    self.getMessage(
+                        "forgive_clear", {"name": sclient.exactName, "points": points}
+                    )
+                )
             else:
-                self.console.say(self.getMessage('forgive_clear', {'name': sclient.exactName, 'points': points}))
+                self.console.say(
+                    self.getMessage(
+                        "forgive_clear", {"name": sclient.exactName, "points": points}
+                    )
+                )
 
             return True

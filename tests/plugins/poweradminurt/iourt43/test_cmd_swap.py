@@ -11,10 +11,12 @@ class Test_cmd_swap(Iourt43TestCase):
     def setUp(self):
         super(Test_cmd_swap, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 paswap-swap: 20
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
@@ -28,4 +30,6 @@ paswap-swap: 20
         self.admin.team = TEAM_RED
         self.moderator.team = TEAM_BLUE
         self.admin.says("!swap 2 3")
-        self.console.write.assert_has_calls([call('swap %s %s' % (self.admin.cid, self.moderator.cid))])
+        self.console.write.assert_has_calls(
+            [call("swap %s %s" % (self.admin.cid, self.moderator.cid))]
+        )

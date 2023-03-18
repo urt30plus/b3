@@ -7,7 +7,6 @@ from tests.plugins.adv import AdvTestCase
 
 
 class Test_keywords(AdvTestCase):
-
     def setUp(self):
         AdvTestCase.setUp(self)
         self.init_plugin()
@@ -19,9 +18,9 @@ class Test_keywords(AdvTestCase):
         when(self.p.admin_plugin).getAdmins().thenReturn([joe])
         with patch.object(self.console, "say") as say_mock:
             # WHEN
-            self.p.print_ad('@admins')
+            self.p.print_ad("@admins")
         # THEN
-        say_mock.assert_has_calls([call('^7Admins online: Joe^7^7 [^3100^7]')])
+        say_mock.assert_has_calls([call("^7Admins online: Joe^7^7 [^3100^7]")])
 
     def test_regulars(self):
         # GIVEN
@@ -30,9 +29,9 @@ class Test_keywords(AdvTestCase):
         when(self.p.admin_plugin).getRegulars().thenReturn([joe])
         with patch.object(self.console, "say") as say_mock:
             # WHEN
-            self.p.print_ad('@regulars')
+            self.p.print_ad("@regulars")
         # THEN
-        say_mock.assert_has_calls([call('^7Regular players online: Joe^7')])
+        say_mock.assert_has_calls([call("^7Regular players online: Joe^7")])
 
     def test_time(self):
         when(self.console).formatTime(ANY()).thenReturn("f00")
@@ -40,9 +39,9 @@ class Test_keywords(AdvTestCase):
         joe.connects(0)
         with patch.object(self.console, "say") as say_mock:
             # WHEN
-            self.p.print_ad('@time')
+            self.p.print_ad("@time")
         # THEN
-        say_mock.assert_has_calls([call('^2Time: ^3f00')])
+        say_mock.assert_has_calls([call("^2Time: ^3f00")])
 
     def test_nextmap(self):
         when(self.console).getNextMap().thenReturn("f00")
@@ -50,6 +49,6 @@ class Test_keywords(AdvTestCase):
         joe.connects(0)
         with patch.object(self.console, "say") as say_mock:
             # WHEN
-            self.p.print_ad('@nextmap')
+            self.p.print_ad("@nextmap")
         # THEN
-        say_mock.assert_has_calls([call('^2Next map: ^3f00')])
+        say_mock.assert_has_calls([call("^2Next map: ^3f00")])

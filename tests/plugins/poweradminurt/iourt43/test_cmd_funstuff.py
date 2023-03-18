@@ -9,10 +9,12 @@ class Test_cmd_funstuff(Iourt43TestCase):
     def setUp(self):
         super(Test_cmd_funstuff, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 pafunstuff-funstuff: 20 ; set the use of funstuff <on/off>
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
@@ -26,12 +28,18 @@ pafunstuff-funstuff: 20 ; set the use of funstuff <on/off>
     def test_missing_parameter(self):
         self.moderator.message_history = []
         self.moderator.says("!funstuff")
-        self.assertListEqual(["invalid or missing data, try !help pafunstuff"], self.moderator.message_history)
+        self.assertListEqual(
+            ["invalid or missing data, try !help pafunstuff"],
+            self.moderator.message_history,
+        )
 
     def test_junk(self):
         self.moderator.message_history = []
         self.moderator.says("!funstuff qsdf")
-        self.assertListEqual(["invalid or missing data, try !help pafunstuff"], self.moderator.message_history)
+        self.assertListEqual(
+            ["invalid or missing data, try !help pafunstuff"],
+            self.moderator.message_history,
+        )
 
     def test_on(self):
         self.moderator.says("!funstuff on")

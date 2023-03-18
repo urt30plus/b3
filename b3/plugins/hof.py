@@ -17,9 +17,9 @@ class Record:
 
 
 def record_holder(
-        console: b3.parser.Parser,
-        plugin_name: str,
-        map_name: str = None,
+    console: b3.parser.Parser,
+    plugin_name: str,
+    map_name: str = None,
 ) -> Record:
     if map_name is None:
         map_name = console.game.mapName
@@ -34,25 +34,26 @@ def record_holder(
                     plugin_name=plugin_name,
                     map_name=map_name,
                     client=clients[0],
-                    score=int(r['score']),
+                    score=int(r["score"]),
                     is_new=False,
                 )
-    raise LookupError(f'Record not found: {plugin_name} / {map_name}')
+    raise LookupError(f"Record not found: {plugin_name} / {map_name}")
 
 
 def update_hall_of_fame(
-        console: b3.parser.Parser,
-        plugin_name: str,
-        map_name: str,
-        client: b3.clients.Client,
-        score: int,
+    console: b3.parser.Parser,
+    plugin_name: str,
+    map_name: str,
+    client: b3.clients.Client,
+    score: int,
 ) -> Record:
     try:
         curr_record = record_holder(console, plugin_name, map_name)
     except LookupError:
         q = (
             f"INSERT INTO plugin_hof(plugin_name, map_name, player_id, score) "
-            f"VALUES('{plugin_name}', '{map_name}', {client.id}, {score})"""
+            f"VALUES('{plugin_name}', '{map_name}', {client.id}, {score})"
+            ""
         )
     else:
         if curr_record.score >= score:

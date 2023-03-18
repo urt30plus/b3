@@ -6,14 +6,14 @@ import threading
 
 import b3.functions
 
-__author__ = 'ThorN'
-__version__ = '1.11'
+__author__ = "ThorN"
+__version__ = "1.11"
 
 
 class Rcon:
     socket_timeout = 0.8
     socket_timeout2 = 0.225
-    rconreplystring = b'\377\377\377\377print\n'
+    rconreplystring = b"\377\377\377\377print\n"
 
     def __init__(self, console, host, password):
         """
@@ -33,7 +33,7 @@ class Rcon:
         self._stopEvent = object()
         self.queue = queue.Queue(maxsize=100)
         self._writelines_thread = b3.functions.start_daemon_thread(
-            target=self._writelines, name='rcon'
+            target=self._writelines, name="rcon"
         )
 
     def send_rcon(self, sock, data, maxRetries=None, socketTimeout=None):
@@ -51,7 +51,7 @@ class Rcon:
             maxRetries = 2
 
         data = data.strip()
-        payload = self.rconsendstring + data.encode(self.console.encoding) + b'\n'
+        payload = self.rconsendstring + data.encode(self.console.encoding) + b"\n"
 
         retries = 0
         while retries < maxRetries:
@@ -59,23 +59,23 @@ class Rcon:
             try:
                 sock.sendall(payload)
             except Exception as msg:
-                self.console.warning('RCON: send(%s) error: %r', data, msg)
+                self.console.warning("RCON: send(%s) error: %r", data, msg)
             else:
                 try:
                     return self.read_socket(sock, socketTimeout=socketTimeout)
                 except Exception as msg:
-                    self.console.warning('RCON: read(%s) error: %r', data, msg)
+                    self.console.warning("RCON: read(%s) error: %r", data, msg)
 
-            if re.match(r'^quit|map(_rotate)?.*', data):
+            if re.match(r"^quit|map(_rotate)?.*", data):
                 # do not retry quits and map changes since they prevent the
                 # server from responding
-                return ''
+                return ""
 
             retries += 1
-            self.console.warning('RCON: send(%s) retry %s', data, retries)
+            self.console.warning("RCON: send(%s) retry %s", data, retries)
 
-        self.console.error('RCON: send(%s) too many tries, aborting', data)
-        return ''
+        self.console.error("RCON: send(%s) too many tries, aborting", data)
+        return ""
 
     def read_socket(self, sock, size=4096, socketTimeout=0.5):
         """
@@ -84,7 +84,7 @@ class Rcon:
         :param size: The read size
         :param socketTimeout: The socket timeout value
         """
-        data = b''
+        data = b""
         while True:
             readables, _, errors = select.select([sock], [], [sock], socketTimeout)
             if errors:
@@ -92,12 +92,12 @@ class Rcon:
             if not readables:
                 break
             payload = sock.recv(size)
-            data += payload.replace(self.rconreplystring, b'')
+            data += payload.replace(self.rconreplystring, b"")
             # lower timeout for subsequent calls
             socketTimeout = self.socket_timeout2
 
-        if data == b'':
-            return ''
+        if data == b"":
+            return ""
         return data.decode(encoding=self.console.encoding)
 
     def write(self, cmd, maxRetries=None, socketTimeout=None):
@@ -108,8 +108,10 @@ class Rcon:
         :param socketTimeout: The socket timeout value
         """
         with self.lock:
-            data = self.send_rcon(self.socket, cmd, maxRetries=maxRetries, socketTimeout=socketTimeout)
-        return data or ''
+            data = self.send_rcon(
+                self.socket, cmd, maxRetries=maxRetries, socketTimeout=socketTimeout
+            )
+        return data or ""
 
     def writelines(self, lines):
         """
@@ -145,7 +147,6 @@ class Rcon:
 
     def __str__(self):
         return (
-            f'Rcon({self.host}, '
-            f'timeout={self.socket_timeout}, timeout2={self.socket_timeout2})'
+            f"Rcon({self.host}, "
+            f"timeout={self.socket_timeout}, timeout2={self.socket_timeout2})"
         )
-

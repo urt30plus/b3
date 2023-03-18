@@ -19,20 +19,30 @@ class Test_commands(Tk_functional_test):
 
         self.superadmin.clearMessageHistory()
         self.superadmin.says("!forgiveinfo joe")
-        self.assertEqual(['Joe has 200 TK points, Attacked: Mike (200)'], self.superadmin.message_history)
+        self.assertEqual(
+            ["Joe has 200 TK points, Attacked: Mike (200)"],
+            self.superadmin.message_history,
+        )
 
         self.joe.damages(self.bill, points=6)
 
         self.superadmin.clearMessageHistory()
         self.superadmin.says("!forgiveinfo joe")
-        self.assertEqual(['Joe has 206 TK points, Attacked: Mike (200), Bill (6)'], self.superadmin.message_history)
+        self.assertEqual(
+            ["Joe has 206 TK points, Attacked: Mike (200), Bill (6)"],
+            self.superadmin.message_history,
+        )
 
         self.mike.damages(self.joe, points=27)
 
         self.superadmin.clearMessageHistory()
         self.superadmin.says("!forgiveinfo joe")
-        self.assertEqual(['Joe has 206 TK points, Attacked: Mike (200), Bill (6), Attacked By: Mike [27]'],
-                         self.superadmin.message_history)
+        self.assertEqual(
+            [
+                "Joe has 206 TK points, Attacked: Mike (200), Bill (6), Attacked By: Mike [27]"
+            ],
+            self.superadmin.message_history,
+        )
 
     def test_forgive(self, timer_patch):
         self.superadmin.connects(99)
@@ -46,7 +56,10 @@ class Test_commands(Tk_functional_test):
 
         self.superadmin.clearMessageHistory()
         self.superadmin.says("!forgiveinfo joe")
-        self.assertEqual(['Joe has 200 TK points, Attacked: Mike (200)'], self.superadmin.message_history)
+        self.assertEqual(
+            ["Joe has 200 TK points, Attacked: Mike (200)"],
+            self.superadmin.message_history,
+        )
 
         self.mike.says("!forgive")
 
@@ -67,7 +80,10 @@ class Test_commands(Tk_functional_test):
 
         self.superadmin.clearMessageHistory()
         self.superadmin.says("!forgiveinfo joe")
-        self.assertEqual(['Joe has 200 TK points, Attacked: Mike (200)'], self.superadmin.message_history)
+        self.assertEqual(
+            ["Joe has 200 TK points, Attacked: Mike (200)"],
+            self.superadmin.message_history,
+        )
 
         self.superadmin.says("!forgiveclear joe")
 
@@ -89,12 +105,14 @@ class Test_commands(Tk_functional_test):
         self.mike.damages(self.joe, points=14)
         self.joe.clearMessageHistory()
         self.joe.says("!forgivelist")
-        self.assertEqual(['Forgive who? [1] Mike [14]'], self.joe.message_history)
+        self.assertEqual(["Forgive who? [1] Mike [14]"], self.joe.message_history)
 
         self.bill.damages(self.joe, points=84)
         self.joe.clearMessageHistory()
         self.joe.says("!forgivelist")
-        self.assertEqual(['Forgive who? [1] Mike [14], [2] Bill [84]'], self.joe.message_history)
+        self.assertEqual(
+            ["Forgive who? [1] Mike [14], [2] Bill [84]"], self.joe.message_history
+        )
 
     def test_forgiveall(self, timer_patcher):
         self.p._round_grace = 0
@@ -108,7 +126,9 @@ class Test_commands(Tk_functional_test):
 
         self.joe.clearMessageHistory()
         self.joe.says("!forgivelist")
-        self.assertEqual(['Forgive who? [1] Mike [14], [2] Bill [84]'], self.joe.message_history)
+        self.assertEqual(
+            ["Forgive who? [1] Mike [14], [2] Bill [84]"], self.joe.message_history
+        )
 
         self.joe.says("!forgiveall")
         self.joe.clearMessageHistory()
@@ -128,9 +148,11 @@ class Test_commands(Tk_functional_test):
 
         self.joe.clearMessageHistory()
         self.joe.says("!forgivelist")
-        self.assertEqual(['Forgive who? [1] Mike [14], [2] Bill [84]'], self.joe.message_history)
+        self.assertEqual(
+            ["Forgive who? [1] Mike [14], [2] Bill [84]"], self.joe.message_history
+        )
 
         self.joe.says("!forgiveprev")
         self.joe.clearMessageHistory()
         self.joe.says("!forgivelist")
-        self.assertEqual(['Forgive who? [1] Mike [14]'], self.joe.message_history)
+        self.assertEqual(["Forgive who? [1] Mike [14]"], self.joe.message_history)

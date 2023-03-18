@@ -43,7 +43,9 @@ class Test_Storage(B3TestCase):
         self.assertRaises(NotImplementedError, self.storage.getClientIpAddress, Mock())
 
     def test_getClientIpAddresses(self):
-        self.assertRaises(NotImplementedError, self.storage.getClientIpAddresses, Mock())
+        self.assertRaises(
+            NotImplementedError, self.storage.getClientIpAddresses, Mock()
+        )
 
     def test_setClientPenalty(self):
         self.assertRaises(NotImplementedError, self.storage.setClientPenalty, Mock())
@@ -55,13 +57,19 @@ class Test_Storage(B3TestCase):
         self.assertRaises(NotImplementedError, self.storage.getClientPenalties, Mock())
 
     def test_getClientLastPenalty(self):
-        self.assertRaises(NotImplementedError, self.storage.getClientLastPenalty, Mock())
+        self.assertRaises(
+            NotImplementedError, self.storage.getClientLastPenalty, Mock()
+        )
 
     def test_getClientFirstPenalty(self):
-        self.assertRaises(NotImplementedError, self.storage.getClientFirstPenalty, Mock())
+        self.assertRaises(
+            NotImplementedError, self.storage.getClientFirstPenalty, Mock()
+        )
 
     def test_disableClientPenalties(self):
-        self.assertRaises(NotImplementedError, self.storage.disableClientPenalties, Mock())
+        self.assertRaises(
+            NotImplementedError, self.storage.disableClientPenalties, Mock()
+        )
 
     def test_numPenalties(self):
         self.assertRaises(NotImplementedError, self.storage.numPenalties, Mock())
@@ -74,7 +82,6 @@ class Test_Storage(B3TestCase):
 
 
 class Test_getStorage(unittest.TestCase):
-
     def test_sqlite(self):
-        storage = getStorage('sqlite://:memory:', splitDSN('sqlite://:memory:'), Mock())
+        storage = getStorage("sqlite://:memory:", splitDSN("sqlite://:memory:"), Mock())
         self.assertIsInstance(storage, SqliteStorage)

@@ -6,23 +6,26 @@ import sys
 import tempfile
 import threading
 
-__author__ = 'ThorN, xlr8or, courgette'
-__version__ = '1.23'
+__author__ = "ThorN, xlr8or, courgette"
+__version__ = "1.23"
 
 try:
     import pkg_resources
 except ImportError:
+
     def resource_directory(module):
         """
         Use this if pkg_resources is NOT installed
         """
         return os.path.dirname(sys.modules[module].__file__)
+
 else:
+
     def resource_directory(module):
         """
         Use this if pkg_resources is installed
         """
-        return pkg_resources.resource_filename(module, '')
+        return pkg_resources.resource_filename(module, "")
 
 
 def decode_text(text):
@@ -31,13 +34,13 @@ def decode_text(text):
     :param text: the text to decode
     :return: string
     """
-    if hasattr(text, 'decode'):
+    if hasattr(text, "decode"):
         return text.decode(sys.getfilesystemencoding())
     return text
 
 
 def is_windows():
-    return sys.platform.startswith('win')
+    return sys.platform.startswith("win")
 
 
 def getModule(name):
@@ -63,42 +66,45 @@ def splitDSN(url):
     Return a dict containing the database connection
     arguments specified in the given input url.
     """
-    m = re.match(r'^(?:(?P<protocol>[a-z]+)://)?'
-                 r'(?:(?P<user>[^:]+)'
-                 r'(?::'
-                 r'(?P<password>[^@]*?))?@)?'
-                 r'(?P<host>[^/:]+)?(?::'
-                 r'(?P<port>\d+))?'
-                 r'(?P<path>.*)', url)
+    m = re.match(
+        r"^(?:(?P<protocol>[a-z]+)://)?"
+        r"(?:(?P<user>[^:]+)"
+        r"(?::"
+        r"(?P<password>[^@]*?))?@)?"
+        r"(?P<host>[^/:]+)?(?::"
+        r"(?P<port>\d+))?"
+        r"(?P<path>.*)",
+        url,
+    )
 
     if not m:
         return None
 
     g = m.groupdict()
 
-    if not g['protocol']:
-        g['protocol'] = 'file'
-    if g['protocol'] == 'file':
-        if g['host'] and g['path']:
-            g['path'] = f"{g['host']}{g['path']}"
-            g['host'] = None
-        elif g['host']:
-            g['path'] = g['host']
-            g['host'] = None
-    elif g['protocol'] == 'exec':
-        if g['host'] and g['path']:
-            g['path'] = f"{g['host']}/{g['path']}"
-            g['host'] = None
-        elif g['host']:
-            g['path'] = g['host']
-            g['host'] = None
+    if not g["protocol"]:
+        g["protocol"] = "file"
+    if g["protocol"] == "file":
+        if g["host"] and g["path"]:
+            g["path"] = f"{g['host']}{g['path']}"
+            g["host"] = None
+        elif g["host"]:
+            g["path"] = g["host"]
+            g["host"] = None
+    elif g["protocol"] == "exec":
+        if g["host"] and g["path"]:
+            g["path"] = f"{g['host']}/{g['path']}"
+            g["host"] = None
+        elif g["host"]:
+            g["path"] = g["host"]
+            g["host"] = None
 
-    if g['port']:
-        g['port'] = int(g['port'])
-    elif g['protocol'] == 'ftp':
-        g['port'] = 21
-    elif g['protocol'] == 'sftp':
-        g['port'] = 22
+    if g["port"]:
+        g["port"] = int(g["port"])
+    elif g["protocol"] == "ftp":
+        g["port"] = 21
+    elif g["protocol"] == "sftp":
+        g["port"] = 22
     return g
 
 
@@ -106,7 +112,7 @@ def minutes2int(mins):
     """
     Convert a given string to a float value which represents it.
     """
-    if re.match('^[0-9.]+$', mins):
+    if re.match("^[0-9.]+$", mins):
         return round(float(mins), 2)
     return 0
 
@@ -124,15 +130,15 @@ def time2minutes(timestr):
     timestr = str(timestr)
     if not timestr:
         return 0
-    elif timestr[-1:] == 'h':
+    elif timestr[-1:] == "h":
         return minutes2int(timestr[:-1]) * 60
-    elif timestr[-1:] == 'm':
+    elif timestr[-1:] == "m":
         return minutes2int(timestr[:-1])
-    elif timestr[-1:] == 's':
+    elif timestr[-1:] == "s":
         return minutes2int(timestr[:-1]) / 60
-    elif timestr[-1:] == 'd':
+    elif timestr[-1:] == "d":
         return minutes2int(timestr[:-1]) * 60 * 24
-    elif timestr[-1:] == 'w':
+    elif timestr[-1:] == "w":
         return minutes2int(timestr[:-1]) * 60 * 24 * 7
     else:
         return minutes2int(timestr)
@@ -146,37 +152,37 @@ def minutesStr(timestr):
 
     if mins < 1:
         num = round(mins * 60, 1)
-        s = '%s second'
+        s = "%s second"
     elif mins < 60:
         num = round(mins, 1)
-        s = '%s minute'
+        s = "%s minute"
     elif mins < 1440:
         num = round(mins / 60, 1)
-        s = '%s hour'
+        s = "%s hour"
     elif mins < 10080:
         num = round((mins / 60) / 24, 1)
-        s = '%s day'
+        s = "%s day"
     elif mins < 525600:
         num = round(((mins / 60) / 24) / 7, 1)
-        s = '%s week'
+        s = "%s week"
     else:
         num = round(((mins / 60) / 24) / 365, 1)
-        s = '%s year'
+        s = "%s year"
 
     # convert to int if num is whole
     num = int(num) if num % 1 == 0 else num
 
     if num >= 2:
-        s += 's'
+        s += "s"
 
     return s % num
 
 
 def vars2printf(inputstr):
-    if inputstr is not None and inputstr != '':
-        return re.sub(r'\$([a-zA-Z_]+)', r'%(\1)s', inputstr)
+    if inputstr is not None and inputstr != "":
+        return re.sub(r"\$([a-zA-Z_]+)", r"%(\1)s", inputstr)
     else:
-        return ''
+        return ""
 
 
 def clamp(value, minv=None, maxv=None):
@@ -194,7 +200,7 @@ def clamp(value, minv=None, maxv=None):
     return value
 
 
-def console_exit(message=''):
+def console_exit(message=""):
     """
     Terminate the current console application displaying the given message.
     Will make sure that the user is able to see the exit message.
@@ -236,7 +242,9 @@ def soundex(s1):
     Return the soundex value to a string argument.
     """
     ignore = r"~!@#$%^&*()_+=-`[]\|;:'/?.,<>\" \t\f\v"
-    table = str.maketrans('ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202', ignore)
+    table = str.maketrans(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "01230120022455012623010202", ignore
+    )
 
     s1 = s1.upper().strip()
     if not s1:
@@ -263,6 +271,7 @@ def meanstdv(x):
     credit: http://www.physics.rutgers.edu/~masud/computing/WPark_recipes_in_python.html
     """
     from math import sqrt
+
     n, mean, std = len(x), 0, 0
     for a in x:
         mean = mean + a
@@ -317,7 +326,7 @@ def getStuffSoundingLike(stuff, expected_stuff):
         Return a lowercased copy of the given string
         with non-alpha characters removed.
         """
-        return re.sub(re_not_text, '', txt.lower())
+        return re.sub(re_not_text, "", txt.lower())
 
     clean_stuff = clean(stuff)
     soundex1 = soundex(stuff)
@@ -334,7 +343,13 @@ def getStuffSoundingLike(stuff, expected_stuff):
         match = [clean_expected_stuff[clean_stuff]]
     else:
         # stuff could be a substring of one of the expected value
-        matching_subset = list([x for x in list(clean_expected_stuff.keys()) if x.lower().find(clean_stuff) >= 0])
+        matching_subset = list(
+            [
+                x
+                for x in list(clean_expected_stuff.keys())
+                if x.lower().find(clean_stuff) >= 0
+            ]
+        )
         if len(matching_subset) == 1:
             match = [clean_expected_stuff[matching_subset[0]]]
         elif len(matching_subset) > 1:
@@ -362,7 +377,7 @@ def corrent_spell(c_word, wordbook):
     """
 
     def words(text):
-        return re.findall('[a-z]+', text.lower())
+        return re.findall("[a-z]+", text.lower())
 
     def train(features):
         model = collections.defaultdict(lambda: 1)
@@ -371,7 +386,7 @@ def corrent_spell(c_word, wordbook):
         return model
 
     nwords = train(words(wordbook))
-    alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
 
     def edits1(word):
         splits = [(word[:i], word[i:]) for i in range(len(word) + 1)]
@@ -388,7 +403,9 @@ def corrent_spell(c_word, wordbook):
         return set(w for w in word if w in nwords)
 
     def correct(word):
-        candidates = known([word]) or known(edits1(word)) or known_edits2(word) or [word]
+        candidates = (
+            known([word]) or known(edits1(word)) or known_edits2(word) or [word]
+        )
         return max(candidates, key=nwords.get)
 
     result = correct(c_word)
@@ -420,12 +437,12 @@ def prefixText(prefixes, text):
     >>> prefixText(['p1'], '')
     ''
     """
-    buff = ''
+    buff = ""
     if text:
         if prefixes:
             for prefix in prefixes:
                 if prefix:
-                    buff += prefix + ' '
+                    buff += prefix + " "
         buff += text
     return buff
 
@@ -454,47 +471,51 @@ def getBytes(size):
     1073741824
     """
     size = str(size).upper()
-    r = re.compile(r'''^(?P<size>\d+)\s*(?P<mult>KB|MB|GB|TB|K|M|G|T?)$''')
+    r = re.compile(r"""^(?P<size>\d+)\s*(?P<mult>KB|MB|GB|TB|K|M|G|T?)$""")
     m = r.match(size)
     if not m:
-        raise TypeError(f'invalid input given: {size}')
+        raise TypeError(f"invalid input given: {size}")
 
     multipliers = {
-        'K': 1024, 'KB': 1024,
-        'M': 1048576, 'MB': 1048576,
-        'G': 1073741824, 'GB': 1073741824,
-        'T': 1099511627776, 'TB': 1099511627776,
+        "K": 1024,
+        "KB": 1024,
+        "M": 1048576,
+        "MB": 1048576,
+        "G": 1073741824,
+        "GB": 1073741824,
+        "T": 1099511627776,
+        "TB": 1099511627776,
     }
 
     try:
-        return int(m.group('size')) * multipliers[m.group('mult')]
+        return int(m.group("size")) * multipliers[m.group("mult")]
     except KeyError:
-        return int(m.group('size'))
+        return int(m.group("size"))
 
 
 def start_daemon_thread(target, args=(), kwargs=None, name=None):
     """Start a new daemon thread"""
     opts = {
-        'target': target,
-        'daemon': True,
-        'args': args,
-        'kwargs': kwargs,
+        "target": target,
+        "daemon": True,
+        "args": args,
+        "kwargs": kwargs,
     }
     if name:
-        opts['name'] = name
+        opts["name"] = name
     t = threading.Thread(**opts)
     t.start()
     return t
 
 
 _escape_table = [chr(x) for x in range(128)]
-_escape_table[0] = u'\\0'
-_escape_table[ord('\\')] = u'\\\\'
-_escape_table[ord('\n')] = u'\\n'
-_escape_table[ord('\r')] = u'\\r'
-_escape_table[ord('\032')] = u'\\Z'
-_escape_table[ord('"')] = u'\\"'
-_escape_table[ord("'")] = u"\\'"
+_escape_table[0] = "\\0"
+_escape_table[ord("\\")] = "\\\\"
+_escape_table[ord("\n")] = "\\n"
+_escape_table[ord("\r")] = "\\r"
+_escape_table[ord("\032")] = "\\Z"
+_escape_table[ord('"')] = '\\"'
+_escape_table[ord("'")] = "\\'"
 
 
 def escape_string(value):
@@ -511,15 +532,15 @@ def loadParser(pname):
     :param pname: The parser name
     :return The parser module
     """
-    mod = getModule(f'b3.parsers.{pname}')
-    return getattr(mod, f'{pname.title()}Parser')
+    mod = getModule(f"b3.parsers.{pname}")
+    return getattr(mod, f"{pname.title()}Parser")
 
 
 def get_home_path(create=True):
     """
     Return the path to the B3 home directory.
     """
-    path = os.path.normpath(os.path.expanduser('~/.b3'))
+    path = os.path.normpath(os.path.expanduser("~/.b3"))
     if create and not os.path.isdir(path):
         os.mkdir(path)
     return path
@@ -542,13 +563,16 @@ def getAbsolutePath(path, decode=False, conf=None):
     :param decode: if True will decode the path string using the default file system encoding before returning it
     :param conf: the current configuration being used :type CfgConfigParser|MainConfig|str:
     """
-    if path.startswith('@'):
-        if path[1:4] in ('b3\\', 'b3/'):
+    if path.startswith("@"):
+        if path[1:4] in ("b3\\", "b3/"):
             path = os.path.join(getB3Path(decode=False), path[4:])
-        elif path[1:6] in ('conf\\', 'conf/'):
+        elif path[1:6] in ("conf\\", "conf/"):
             import b3.config
-            path = os.path.join(b3.config.getConfPath(decode=False, conf=conf), path[6:])
-        elif path[1:6] in ('home\\', 'home/'):
+
+            path = os.path.join(
+                b3.config.getConfPath(decode=False, conf=conf), path[6:]
+            )
+        elif path[1:6] in ("home\\", "home/"):
             home_dir = get_home_path(create=True)
             path = os.path.join(home_dir, path[6:])
     path = os.path.normpath(os.path.expanduser(path))
@@ -589,18 +613,18 @@ def getShortPath(filepath, decode=False, first_time=True):
     :return: string
     """
     # NOTE: make sure to have os.path.sep at the end otherwise also files starting with 'b3' will be matched
-    homepath = getAbsolutePath('@home/', decode) + os.path.sep
+    homepath = getAbsolutePath("@home/", decode) + os.path.sep
     if filepath.startswith(homepath):
-        return filepath.replace(homepath, '@home' + os.path.sep)
-    confpath = getAbsolutePath('@conf/', decode) + os.path.sep
+        return filepath.replace(homepath, "@home" + os.path.sep)
+    confpath = getAbsolutePath("@conf/", decode) + os.path.sep
     if filepath.startswith(confpath):
-        return filepath.replace(confpath, '@conf' + os.path.sep)
-    b3path = getAbsolutePath('@b3/', decode) + os.path.sep
+        return filepath.replace(confpath, "@conf" + os.path.sep)
+    b3path = getAbsolutePath("@b3/", decode) + os.path.sep
     if filepath.startswith(b3path):
-        return filepath.replace(b3path, '@b3' + os.path.sep)
-    userpath = getAbsolutePath('~', decode) + os.path.sep
+        return filepath.replace(b3path, "@b3" + os.path.sep)
+    userpath = getAbsolutePath("~", decode) + os.path.sep
     if filepath.startswith(userpath):
-        return filepath.replace(userpath, '~' + os.path.sep)
+        return filepath.replace(userpath, "~" + os.path.sep)
     if first_time:
         return getShortPath(filepath, not decode, False)
     return filepath

@@ -9,10 +9,12 @@ class Test_cmd_lms(Iourt43TestCase):
     def setUp(self):
         super(Test_cmd_lms, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 palms-lms: 20           ; change game type to Last Man Standing
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
@@ -27,4 +29,6 @@ palms-lms: 20           ; change game type to Last Man Standing
         self.moderator.message_history = []
         self.moderator.says("!lms")
         self.console.write.assert_has_calls([call('set g_gametype "1"')])
-        self.assertEqual(['game type changed to Last Man Standing'], self.moderator.message_history)
+        self.assertEqual(
+            ["game type changed to Last Man Standing"], self.moderator.message_history
+        )

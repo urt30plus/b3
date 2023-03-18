@@ -8,14 +8,14 @@ import b3
 import b3.functions
 import b3.storage
 
-__author__ = 'ThorN, Courgette, Fenix'
-__version__ = '1.7.9'
+__author__ = "ThorN, Courgette, Fenix"
+__version__ = "1.7.9"
 
 NoOptionError = configparser.NoOptionError
 NoSectionError = configparser.NoSectionError
 
 # list of plugins that cannot be loaded as disabled from configuration file
-MUST_HAVE_PLUGINS = ('admin',)
+MUST_HAVE_PLUGINS = ("admin",)
 
 
 class ConfigFileNotFound(Exception):
@@ -53,7 +53,7 @@ class MissingRequirement(Exception):
 
     def __str__(self):
         if self.throwable:
-            return '%s - %r' % (self.args[0], repr(self.throwable))
+            return "%s - %r" % (self.args[0], repr(self.throwable))
         return repr(self.args[0])
 
 
@@ -75,13 +75,15 @@ class B3ConfigParserMixin:
         :param setting: The configuration file setting.
         """
         value_raw = self.get(section, setting)
-        value = value_raw.lower() if value_raw else ''
-        if value in ('yes', '1', 'on', 'true'):
+        value = value_raw.lower() if value_raw else ""
+        if value in ("yes", "1", "on", "true"):
             return True
-        elif value in ('no', '0', 'off', 'false'):
+        elif value in ("no", "0", "off", "false"):
             return False
         else:
-            raise ValueError("%s.%s : '%s' is not a boolean value" % (section, setting, value))
+            raise ValueError(
+                "%s.%s : '%s' is not a boolean value" % (section, setting, value)
+            )
 
     def getDuration(self, section, setting=None):
         """
@@ -119,7 +121,8 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
     """
     A config parser class that mimics the ConfigParser, reads the cfg format.
     """
-    fileName = ''
+
+    fileName = ""
     fileMtime = 0
 
     def __init__(self, allow_no_value=False):
@@ -130,7 +133,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         opts = {
             "allow_no_value": allow_no_value,
             "inline_comment_prefixes": ";",
-            "interpolation": None
+            "interpolation": None,
         }
         configparser.ConfigParser.__init__(self, **opts)
 
@@ -147,7 +150,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
                 sectdict = self._sections[section]
             except KeyError:
                 raise NoSectionError(section)
-        sectdict['; %s' % (comment,)] = None
+        sectdict["; %s" % (comment,)] = None
 
     def get(self, section, option, *args, **kwargs):
         """
@@ -160,15 +163,19 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         opts = kwargs
         if args:
             if opts:
-                print(f"ERROR: CfgConfigParser.get(option={option}) args and kwargs: args={args} / kwargs={opts}")
+                print(
+                    f"ERROR: CfgConfigParser.get(option={option}) args and kwargs: args={args} / kwargs={opts}"
+                )
             else:
                 opts = {"raw": args[0]}
                 if len(args) > 1:
-                    print(f"ERROR: CfgConfigParser.get(option={option}) too many values: {args}")
+                    print(
+                        f"ERROR: CfgConfigParser.get(option={option}) too many values: {args}"
+                    )
                     opts["vars"] = args[1]
         try:
             value = configparser.ConfigParser.get(self, section, option, **opts)
-            return '' if value is None else value
+            return "" if value is None else value
         except NoSectionError:
             # plugins are used to only catch NoOptionError
             raise NoOptionError(option, section)
@@ -177,7 +184,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         Load a configuration file.
         """
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             self.readfp(f)
         self.fileName = filename
         self.fileMtime = os.path.getmtime(self.fileName)
@@ -207,7 +214,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         Save the configuration file.
         """
-        with open(self.fileName, 'w') as f:
+        with open(self.fileName, "w") as f:
             self.write(f)
         return True
 
@@ -219,26 +226,26 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         if self._defaults:
             fp.write("[%s]\n" % configparser.DEFAULTSECT)
-            for (key, value) in self._defaults.items():
+            for key, value in self._defaults.items():
                 self._write_item(fp, key, value)
             fp.write("\n")
         for section in self._sections:
             fp.write("[%s]\n" % section)
-            for (key, value) in self._sections[section].items():
+            for key, value in self._sections[section].items():
                 self._write_item(fp, key, value)
             fp.write("\n")
 
     @staticmethod
     def _write_item(fp, key, value):
-        if (key.startswith(';') or key.startswith('#')) and value is None:
+        if (key.startswith(";") or key.startswith("#")) and value is None:
             # consider multiline comments
-            for line in key.split('\n'):
-                line = line.removeprefix(';')
-                line = line.removeprefix('#')
+            for line in key.split("\n"):
+                line = line.removeprefix(";")
+                line = line.removeprefix("#")
                 fp.write("; %s\n" % (line.strip(),))
         else:
-            if value is not None and str(value).strip() != '':
-                fp.write("%s: %s\n" % (key, str(value).replace('\n', '\n\t')))
+            if value is not None and str(value).strip() != "":
+                fp.write("%s: %s\n" % (key, str(value).replace("\n", "\n\t")))
             else:
                 fp.write("%s: \n" % key)
 
@@ -269,32 +276,37 @@ class MainConfig(B3ConfigParserMixin):
         if isinstance(self._config_parser, CfgConfigParser):
             self._init_plugins_from_cfg()
         else:
-            raise NotImplementedError("unexpected config type: %r" % self._config_parser.__class__)
+            raise NotImplementedError(
+                "unexpected config type: %r" % self._config_parser.__class__
+            )
 
     def _init_plugins_from_cfg(self):
         # Load the list of disabled plugins
         try:
-            disabled_plugins_raw = self._config_parser.get('b3', 'disabled_plugins')
+            disabled_plugins_raw = self._config_parser.get("b3", "disabled_plugins")
         except NoOptionError:
             disabled_plugins = []
         else:
-            disabled_plugins = re.split(r'\W+', disabled_plugins_raw.lower())
+            disabled_plugins = re.split(r"\W+", disabled_plugins_raw.lower())
 
         def get_custom_plugin_path(plugin_name):
             try:
-                return self._config_parser.get('plugins_custom_path', plugin_name)
+                return self._config_parser.get("plugins_custom_path", plugin_name)
             except NoOptionError:
                 return None
 
         self._plugins = []
-        if self._config_parser.has_section('plugins'):
-            for name in self._config_parser.options('plugins'):
-                self._plugins.append({
-                    'name': name,
-                    'conf': self._config_parser.get('plugins', name),
-                    'path': get_custom_plugin_path(name),
-                    'disabled': name.lower() in disabled_plugins and name.lower() not in MUST_HAVE_PLUGINS
-                })
+        if self._config_parser.has_section("plugins"):
+            for name in self._config_parser.options("plugins"):
+                self._plugins.append(
+                    {
+                        "name": name,
+                        "conf": self._config_parser.get("plugins", name),
+                        "path": get_custom_plugin_path(name),
+                        "disabled": name.lower() in disabled_plugins
+                        and name.lower() not in MUST_HAVE_PLUGINS,
+                    }
+                )
 
     def get_plugins(self):
         """
@@ -315,7 +327,9 @@ class MainConfig(B3ConfigParserMixin):
         if isinstance(self._config_parser, CfgConfigParser):
             return self._config_parser.getpath("b3", "external_plugins_dir")
         else:
-            raise NotImplementedError("unexpected config type: %r" % self._config_parser.__class__)
+            raise NotImplementedError(
+                "unexpected config type: %r" % self._config_parser.__class__
+            )
 
     def get(self, *args, **kwargs):
         """
@@ -335,42 +349,52 @@ class MainConfig(B3ConfigParserMixin):
 
         def _mandatory_option(section, option):
             if not self.has_option(section, option):
-                analysis.append('missing configuration value %s::%s' % (section, option))
+                analysis.append(
+                    "missing configuration value %s::%s" % (section, option)
+                )
 
-        _mandatory_option('b3', 'parser')
-        _mandatory_option('b3', 'database')
-        _mandatory_option('b3', 'bot_name')
+        _mandatory_option("b3", "parser")
+        _mandatory_option("b3", "database")
+        _mandatory_option("b3", "bot_name")
 
         # PARSER CHECK
-        if self.has_option('b3', 'parser'):
+        if self.has_option("b3", "parser"):
             try:
-                b3.functions.getModule('b3.parsers.%s' % self.get('b3', 'parser'))
+                b3.functions.getModule("b3.parsers.%s" % self.get("b3", "parser"))
             except ImportError as ie:
-                analysis.append('invalid parser specified in b3::parser (%s-%s)' % (self.get('b3', 'parser'), ie))
+                analysis.append(
+                    "invalid parser specified in b3::parser (%s-%s)"
+                    % (self.get("b3", "parser"), ie)
+                )
 
         # DSN DICT
-        if self.has_option('b3', 'database'):
-            if not (dsndict := b3.functions.splitDSN(self.get('b3', 'database'))):
+        if self.has_option("b3", "database"):
+            if not (dsndict := b3.functions.splitDSN(self.get("b3", "database"))):
                 analysis.append(
-                    'invalid database source name specified in b3::database (%s)' % self.get('b3', 'database'))
-            elif dsndict['protocol'] not in b3.storage.PROTOCOLS:
-                analysis.append('invalid storage protocol specified in b3::database (%s) : '
-                                'valid protocols are : %s' % (dsndict['protocol'], ', '.join(b3.storage.PROTOCOLS)))
+                    "invalid database source name specified in b3::database (%s)"
+                    % self.get("b3", "database")
+                )
+            elif dsndict["protocol"] not in b3.storage.PROTOCOLS:
+                analysis.append(
+                    "invalid storage protocol specified in b3::database (%s) : "
+                    "valid protocols are : %s"
+                    % (dsndict["protocol"], ", ".join(b3.storage.PROTOCOLS))
+                )
 
         # ADMIN PLUGIN CHECK
         has_admin = False
         has_admin_config = False
         for plugin in self.get_plugins():
-            if plugin['name'] == 'admin':
+            if plugin["name"] == "admin":
                 has_admin = True
-                if plugin['conf']:
+                if plugin["conf"]:
                     has_admin_config = True
                 break
 
         if not has_admin:
-            analysis.append('missing admin plugin in plugins section')
+            analysis.append("missing admin plugin in plugins section")
         elif not has_admin_config:
-            analysis.append('missing configuration file for admin plugin')
+            analysis.append("missing configuration file for admin plugin")
 
         return analysis
 
@@ -383,7 +407,8 @@ class MainConfig(B3ConfigParserMixin):
         """
         if hasattr(self._config_parser, name):
             attr = getattr(self._config_parser, name)
-            if hasattr(attr, '__call__'):
+            if hasattr(attr, "__call__"):
+
                 def newfunc(*args, **kwargs):
                     return attr(*args, **kwargs)
 
@@ -423,13 +448,19 @@ def get_main_config(config_path):
         config = b3.functions.getAbsolutePath(config_path, True)
         if not os.path.isfile(config):
             b3.functions.console_exit(
-                f'ERROR: configuration file not found ({config}).'
+                f"ERROR: configuration file not found ({config})."
             )
     else:
         home_dir = b3.functions.get_home_path(create=False)
-        for p in ('b3.ini', 'conf/b3.ini', 'b3/conf/b3.ini',
-                  os.path.join(home_dir, 'b3.ini'), os.path.join(home_dir, 'conf', 'b3.ini'),
-                  os.path.join(home_dir, 'b3', 'conf', 'b3.ini'), '@b3/conf/b3.ini'):
+        for p in (
+            "b3.ini",
+            "conf/b3.ini",
+            "b3/conf/b3.ini",
+            os.path.join(home_dir, "b3.ini"),
+            os.path.join(home_dir, "conf", "b3.ini"),
+            os.path.join(home_dir, "b3", "conf", "b3.ini"),
+            "@b3/conf/b3.ini",
+        ):
             path = b3.functions.getAbsolutePath(p, True)
             if os.path.isfile(path):
                 print(f"Using configuration file: {path}")
@@ -437,7 +468,7 @@ def get_main_config(config_path):
                 break
         else:
             b3.functions.console_exit(
-                'ERROR: could not find any valid configuration file.'
+                "ERROR: could not find any valid configuration file."
             )
 
     return b3.config.MainConfig(load(config))

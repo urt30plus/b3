@@ -8,16 +8,20 @@ from unittest.mock import Mock, patch
 
 from mockito import unstub
 
-import b3.output # unused but we need to to add the `bot` log level
+import b3.output  # unused but we need to to add the `bot` log level
 from b3.config import CfgConfigParser
 from b3.config import MainConfig
 from b3.events import Event
 
-logging.raiseExceptions = False  # get rid of 'No handlers could be found for logger output' message
-log = logging.getLogger('output')
+logging.raiseExceptions = (
+    False  # get rid of 'No handlers could be found for logger output' message
+)
+log = logging.getLogger("output")
 log.setLevel(logging.WARNING)
 
-testcase_lock = threading.Lock()  # together with flush_console_streams, helps getting logging output related to the
+testcase_lock = (
+    threading.Lock()
+)  # together with flush_console_streams, helps getting logging output related to the
 
 
 class logging_disabled:
@@ -28,6 +32,7 @@ class logging_disabled:
         with logging_disabled():
             # do stuff
     """
+
     DISABLED = False
 
     def __init__(self):
@@ -35,12 +40,12 @@ class logging_disabled:
 
     def __enter__(self):
         if not self.nested:
-            logging.getLogger('output').propagate = False
+            logging.getLogger("output").propagate = False
             logging_disabled.DISABLED = True
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if not self.nested:
-            logging.getLogger('output').propagate = True
+            logging.getLogger("output").propagate = True
             logging_disabled.DISABLED = False
 
 
@@ -54,7 +59,6 @@ def _start_daemon_thread(callable, *args, **kwargs):
 
 
 class B3TestCase(unittest.TestCase):
-
     def setUp(self):
         testcase_lock.acquire()
         flush_console_streams()
@@ -64,6 +68,7 @@ class B3TestCase(unittest.TestCase):
         self.parser_conf.loadFromString(r"""""")
         with logging_disabled():
             from tests.fake import FakeConsole
+
             self.console = FakeConsole(self.parser_conf)
 
         self.console.screen = Mock()
@@ -83,7 +88,9 @@ class B3TestCase(unittest.TestCase):
         testcase_lock.release()
 
     @contextmanager
-    def assertRaiseEvent(self, event_type, event_client=None, event_data=None, event_target=None):
+    def assertRaiseEvent(
+        self, event_type, event_client=None, event_data=None, event_target=None
+    ):
         """
         USAGE:
             def test_team_change(self):
@@ -99,9 +106,11 @@ class B3TestCase(unittest.TestCase):
                 self.client.team = 24
         """
         event_type_name = self.console.getEventName(event_type)
-        self.assertIsNotNone(event_type_name, f"could not find event with name '{event_type}'")
+        self.assertIsNotNone(
+            event_type_name, f"could not find event with name '{event_type}'"
+        )
 
-        with patch.object(self.console, 'queueEvent') as queueEvent:
+        with patch.object(self.console, "queueEvent") as queueEvent:
             yield
             if event_type is None:
                 assert not queueEvent.called
@@ -110,18 +119,26 @@ class B3TestCase(unittest.TestCase):
 
         def assertEvent(queueEvent_call_args):
             eventraised = queueEvent_call_args[0][0]
-            return type(eventraised) == Event \
-                   and self.console.getEventName(eventraised.type) == event_type_name \
-                   and eventraised.data == event_data \
-                   and eventraised.target == event_target \
-                   and eventraised.client == event_client
+            return (
+                type(eventraised) == Event
+                and self.console.getEventName(eventraised.type) == event_type_name
+                and eventraised.data == event_data
+                and eventraised.target == event_target
+                and eventraised.client == event_client
+            )
 
         if not any(map(assertEvent, queueEvent.call_args_list)):
-            raise AssertionError("Event %s(%r) not fired" % (self.console.getEventName(event_type), {
-                'event_client': event_client,
-                'event_data': event_data,
-                'event_target': event_target
-            }))
+            raise AssertionError(
+                "Event %s(%r) not fired"
+                % (
+                    self.console.getEventName(event_type),
+                    {
+                        "event_client": event_client,
+                        "event_data": event_data,
+                        "event_target": event_target,
+                    },
+                )
+            )
 
 
 class InstantTimer:

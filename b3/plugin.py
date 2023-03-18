@@ -7,8 +7,8 @@ import b3.events
 import b3.functions
 from b3 import __version__ as b3_version
 
-__author__ = 'ThorN, Courgette'
-__version__ = '1.30.1'
+__author__ = "ThorN, Courgette"
+__version__ = "1.30.1"
 
 
 class Plugin:
@@ -73,7 +73,9 @@ class Plugin:
     _default_messages = {}
     """:type: dict"""
 
-    _parseUserCmdRE = re.compile(r"^(?P<cid>'[^']{2,}'|[0-9]+|[^\s]{2,}|@[0-9]+)(\s+(?P<parms>.*))?$")
+    _parseUserCmdRE = re.compile(
+        r"^(?P<cid>'[^']{2,}'|[0-9]+|[^\s]{2,}|@[0-9]+)(\s+(?P<parms>.*))?$"
+    )
 
     events = []
 
@@ -100,14 +102,17 @@ class Plugin:
                 except b3.config.ConfigFileNotValid as e:
                     self.critical("The configuration file syntax is broken: %s", e)
 
-        self.registerEvent('EVT_STOP', self.onStop)
-        self.registerEvent('EVT_EXIT', self.onExit)
-        self._stop_events = (console.getEventID('EVT_EXIT'), console.getEventID('EVT_STOP'))
+        self.registerEvent("EVT_STOP", self.onStop)
+        self.registerEvent("EVT_EXIT", self.onExit)
+        self._stop_events = (
+            console.getEventID("EVT_EXIT"),
+            console.getEventID("EVT_STOP"),
+        )
 
     @property
     def admin_plugin(self):
         if self.__admin_plugin is None:
-            self.__admin_plugin = self.console.getPlugin('admin')
+            self.__admin_plugin = self.console.getPlugin("admin")
         return self.__admin_plugin
 
     def start(self):
@@ -122,7 +127,7 @@ class Plugin:
         """
         self._enabled = True
         name = self.plugin_name
-        self.console.queueEvent(self.console.getEvent('EVT_PLUGIN_ENABLED', data=name))
+        self.console.queueEvent(self.console.getEvent("EVT_PLUGIN_ENABLED", data=name))
         self.onEnable()
 
     def disable(self):
@@ -131,12 +136,12 @@ class Plugin:
         """
         self._enabled = False
         name = self.plugin_name
-        self.console.queueEvent(self.console.getEvent('EVT_PLUGIN_DISABLED', data=name))
+        self.console.queueEvent(self.console.getEvent("EVT_PLUGIN_DISABLED", data=name))
         self.onDisable()
 
     @property
     def plugin_name(self):
-        return self.__class__.__name__.removesuffix('Plugin').lower()
+        return self.__class__.__name__.removesuffix("Plugin").lower()
 
     def isEnabled(self):
         """
@@ -151,25 +156,35 @@ class Plugin:
         :param filename: The plugin configuration file name
         """
         if filename:
-            self.bot('loading config %s for %s', filename, self.__class__.__name__)
+            self.bot("loading config %s for %s", filename, self.__class__.__name__)
             try:
                 self.config = b3.config.load(filename)
             except b3.config.ConfigFileNotFound:
                 if self.requiresConfigFile:
-                    self.critical('could not find config file %s', filename)
+                    self.critical("could not find config file %s", filename)
                     return False
                 else:
-                    self.bot('no config file found for %s: was not required either', self.__class__.__name__)
+                    self.bot(
+                        "no config file found for %s: was not required either",
+                        self.__class__.__name__,
+                    )
                     return True
         elif self.config:
-            self.bot('loading config %s for %s', self.config.fileName, self.__class__.__name__)
+            self.bot(
+                "loading config %s for %s",
+                self.config.fileName,
+                self.__class__.__name__,
+            )
             self.config = b3.config.load(self.config.fileName)
         else:
             if self.requiresConfigFile:
-                self.error('could not load config for %s', self.__class__.__name__)
+                self.error("could not load config for %s", self.__class__.__name__)
                 return False
             else:
-                self.bot('no config file found for %s: was not required either', self.__class__.__name__)
+                self.bot(
+                    "no config file found for %s: was not required either",
+                    self.__class__.__name__,
+                )
                 return True
 
         # empty message cache
@@ -179,7 +194,7 @@ class Plugin:
         """
         Save the plugin configuration file.
         """
-        self.bot('saving config %s', self.config.fileName)
+        self.bot("saving config %s", self.config.fileName)
         return self.config.save()
 
     def isSetting(self, section, option):
@@ -192,7 +207,9 @@ class Plugin:
         """
         return self.config.has_option(section, option)
 
-    def getSetting(self, section, option, value_type=b3.STRING, default=None, validate=None):
+    def getSetting(
+        self, section, option, value_type=b3.STRING, default=None, validate=None
+    ):
         """
         Safely return a setting value from the configuration file.
         Will print in the log file information about the value being loaded
@@ -207,43 +224,43 @@ class Plugin:
 
         def _get_string(value):
             """convert the given value to str"""
-            self.verbose('trying to convert value to string : %s', value)
+            self.verbose("trying to convert value to string : %s", value)
             return str(value)
 
         def _get_integer(value):
             """convert the given value to int"""
-            self.verbose('trying to convert value to integer : %s', value)
+            self.verbose("trying to convert value to integer : %s", value)
             return int(str(value))
 
         def _get_boolean(value):
             """convert the given value to bool"""
-            self.verbose('trying to convert value to boolean : %s', value)
+            self.verbose("trying to convert value to boolean : %s", value)
             x = str(value).lower()
-            if x in ('yes', '1', 'on', 'true'):
+            if x in ("yes", "1", "on", "true"):
                 return True
-            elif x in ('no', '0', 'off', 'false'):
+            elif x in ("no", "0", "off", "false"):
                 return False
             else:
-                raise ValueError(f'{x} is not a boolean value')
+                raise ValueError(f"{x} is not a boolean value")
 
         def _get_float(value):
             """convert the given value to float"""
-            self.verbose('trying to convert value to float : %s', value)
+            self.verbose("trying to convert value to float : %s", value)
             return float(str(value))
 
         def _get_level(value):
             """convert the given value to a b3 group level"""
-            self.verbose('trying to convert value to b3 group level : %s', value)
+            self.verbose("trying to convert value to b3 group level : %s", value)
             return self.console.getGroupLevel(str(value).lower().strip())
 
         def _get_duration(value):
             """convert the given value using b3.functions.time2minutes"""
-            self.verbose('trying to convert value to time duration : %s', value)
+            self.verbose("trying to convert value to time duration : %s", value)
             return b3.functions.time2minutes(str(value).strip())
 
         def _get_path(value):
             """convert the given path using b3.functions.getAbsolutePath"""
-            self.verbose('trying to convert value to absolute path : %s', value)
+            self.verbose("trying to convert value to absolute path : %s", value)
             return b3.functions.getAbsolutePath(str(value), decode=True)
 
         def _get_template(value):
@@ -252,7 +269,7 @@ class Plugin:
 
         def _get_list(value):
             """process the given value by extracting tokens"""
-            return [x for x in re.split(r'\W+', value) if x]
+            return [x for x in re.split(r"\W+", value) if x]
 
         handlers = {
             b3.STRING: _get_string,
@@ -267,42 +284,69 @@ class Plugin:
         }
 
         if not self.config:
-            self.warning('could not find %s::%s : no configuration file loaded, using default : %s',
-                         section, option, default)
+            self.warning(
+                "could not find %s::%s : no configuration file loaded, using default : %s",
+                section,
+                option,
+                default,
+            )
             return default
 
         try:
             val = self.config.get(section, option, value_type == b3.TEMPLATE)
         except b3.config.NoOptionError:
-            self.warning('could not find %s::%s in configuration file, using default : %s',
-                         section, option, default)
+            self.warning(
+                "could not find %s::%s in configuration file, using default : %s",
+                section,
+                option,
+                default,
+            )
             val = default
         else:
             try:
                 func = handlers[value_type]
             except KeyError:
                 val = default
-                self.warning('could not convert %s::%s : invalid value type specified (%s) : expecting one of (%s), '
-                             'using default : %s', section, option, value_type, ', '.join(map(str, handlers.keys())),
-                             default)
+                self.warning(
+                    "could not convert %s::%s : invalid value type specified (%s) : expecting one of (%s), "
+                    "using default : %s",
+                    section,
+                    option,
+                    value_type,
+                    ", ".join(map(str, handlers.keys())),
+                    default,
+                )
             else:
                 try:
                     val = func(val)
                 except (ValueError, KeyError) as e:
-                    self.warning('could not convert %s::%s (%s) : %s, using default : %s',
-                                 section, option, val, e, default)
+                    self.warning(
+                        "could not convert %s::%s (%s) : %s, using default : %s",
+                        section,
+                        option,
+                        val,
+                        e,
+                        default,
+                    )
                     val = default
 
         if validate:
             try:
                 val = validate(val)
             except ValueError as e:
-                self.warning('invalid value specified for %s::%s (%s) : %s,  using default : %s',
-                             section, option, val, e, default)
+                self.warning(
+                    "invalid value specified for %s::%s (%s) : %s,  using default : %s",
+                    section,
+                    option,
+                    val,
+                    e,
+                    default,
+                )
                 val = default
 
-        self.debug('loaded value from configuration file : %s::%s = %s',
-                   section, option, val)
+        self.debug(
+            "loaded value from configuration file : %s::%s = %s", section, option, val
+        )
         return val
 
     def getMessage(self, msg, *args):
@@ -315,11 +359,13 @@ class Plugin:
             _msg = self._messages[msg]
         except KeyError:
             try:
-                self._messages[msg] = self.config.getTextTemplate('messages', msg)
+                self._messages[msg] = self.config.getTextTemplate("messages", msg)
             except b3.config.NoOptionError:
                 self.warning("config file is missing %r in section 'messages'", msg)
                 if msg in self._default_messages:
-                    self._messages[msg] = b3.functions.vars2printf(self._default_messages[msg]).strip()
+                    self._messages[msg] = b3.functions.vars2printf(
+                        self._default_messages[msg]
+                    ).strip()
                 else:
                     raise
             _msg = self._messages[msg]
@@ -328,14 +374,26 @@ class Plugin:
             try:
                 return _msg % args[0]
             except KeyError as err:
-                self.error("failed to format message %r (%r) with parameters %r: "
-                           "missing value for %s", msg, _msg, args, err)
+                self.error(
+                    "failed to format message %r (%r) with parameters %r: "
+                    "missing value for %s",
+                    msg,
+                    _msg,
+                    args,
+                    err,
+                )
                 raise
         else:
             try:
                 return _msg % args
             except TypeError as err:
-                self.error("failed to format message %r (%r) with parameters %r: %s", msg, _msg, args, err)
+                self.error(
+                    "failed to format message %r (%r) with parameters %r: %s",
+                    msg,
+                    _msg,
+                    args,
+                    err,
+                )
                 raise
 
     def registerEventHook(self, event_id, hook):
@@ -348,17 +406,21 @@ class Plugin:
         event_name = self.console.getEventName(event_id)
         if event_id not in self.events:
             # make sure the event we are going to map has been registered already
-            raise AssertionError(f"{event_name} is not an event registered for plugin {self.__class__.__name__}")
+            raise AssertionError(
+                f"{event_name} is not an event registered for plugin {self.__class__.__name__}"
+            )
 
         hook = getattr(self, hook.__name__, None)
         if not callable(hook):
             # make sure the given hook to be a valid method of our plugin
-            raise AttributeError(f"{hook.__name__} is not a valid method of class {self.__class__.__name__}")
+            raise AttributeError(
+                f"{hook.__name__} is not a valid method of class {self.__class__.__name__}"
+            )
 
         if hook not in self.eventmap[event_id]:
             self.eventmap[event_id].append(hook)
 
-        self.info('Created event mapping: <%s:%s>', event_name, hook.__name__)
+        self.info("Created event mapping: <%s:%s>", event_name, hook.__name__)
 
     def registerEvent(self, name, *args):
         """
@@ -377,14 +439,14 @@ class Plugin:
                 try:
                     self.registerEventHook(event_id, hook)
                 except (AssertionError, AttributeError) as e:
-                    self.error('could not create mapping for event %s: %s',
-                               event_name, e)
+                    self.error(
+                        "could not create mapping for event %s: %s", event_name, e
+                    )
         else:
             try:
                 self.registerEventHook(event_id, self.onEvent)
             except (AssertionError, AttributeError) as e:
-                self.error('could not create mapping for event %s: %s',
-                           event_name, e)
+                self.error("could not create mapping for event %s: %s", event_name, e)
 
     def createEvent(self, key, name):
         """
@@ -403,7 +465,7 @@ class Plugin:
             try:
                 func(event)
             except TypeError as e:
-                self.error('could not parse event %s: %s', event.key, e)
+                self.error("could not parse event %s: %s", event.key, e)
 
     def register_commands_from_config(self):
         """Registers the commands for this plugin as defined in its config
@@ -445,20 +507,18 @@ class Plugin:
                 names = []
                 for c in matches:
                     if c.name == c.cid:
-                        names.append(f'^7{c.name}')
+                        names.append(f"^7{c.name}")
                     else:
-                        names.append(f'^7{c.name} [^2{c.cid}^7]')
+                        names.append(f"^7{c.name} [^2{c.cid}^7]")
 
                 if client:
-                    client.message(
-                        f'^7Players matching {handle} {", ".join(names)}'
-                    )
+                    client.message(f'^7Players matching {handle} {", ".join(names)}')
                 return None
             else:
                 return matches[0]
         else:
             if client:
-                client.message(f'^7No players found matching {handle}')
+                client.message(f"^7No players found matching {handle}")
             return None
 
     def parseUserCmd(self, cmd, req=False):
@@ -470,12 +530,12 @@ class Plugin:
         Return None if could cmd is not in the expected format
         """
         if m := re.match(self._parseUserCmdRE, cmd):
-            parms = m['parms']
+            parms = m["parms"]
 
             if req and not parms:
                 return None
 
-            cid = m['cid']
+            cid = m["cid"]
             if cid[:1] == "'" and cid[-1:] == "'":
                 cid = cid[1:-1]
 
@@ -487,49 +547,53 @@ class Plugin:
         """
         Log an ERROR message to the main log.
         """
-        self.console.error('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.error("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
 
     def debug(self, msg, *args, **kwargs):
         """
         Log a DEBUG message to the main log.
         """
-        self.console.debug('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.debug("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
 
     def bot(self, msg, *args, **kwargs):
         """
         Log a BOT message to the main log.
         """
-        self.console.bot('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.bot("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
 
     def verbose(self, msg, *args, **kwargs):
         """
         Log a VERBOSE message to the main log. More "chatty" than a debug message.
         """
-        self.console.verbose('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.verbose("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):
         """
         Log a WARNING message to the main log.
         """
-        self.console.warning('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.warning("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
         """
         Log an INFO message to the main log.
         """
-        self.console.info('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.info("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
 
     def exception(self, msg, *args, **kwargs):
         """
         Log an EXCEPTION message to the main log.
         """
-        self.console.exception('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.exception(
+            "%s: %s" % (self.__class__.__name__, msg), *args, **kwargs
+        )
 
     def critical(self, msg, *args, **kwargs):
         """
         Log a CRITICAL message to the main log.
         """
-        self.console.critical('%s: %s' % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.critical(
+            "%s: %s" % (self.__class__.__name__, msg), *args, **kwargs
+        )
 
     def onLoadConfig(self):
         """
@@ -581,10 +645,10 @@ class Plugin:
         """
         Deprecated. Use onEvent().
         """
-        self.warning('use of deprecated method: handle()')
+        self.warning("use of deprecated method: handle()")
 
     def startup(self):
         """
         Deprecated. Use onStartup().
         """
-        self.warning('use of deprecated method: startup()')
+        self.warning("use of deprecated method: startup()")

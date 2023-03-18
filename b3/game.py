@@ -1,5 +1,5 @@
-__author__ = 'ThorN'
-__version__ = '1.6'
+__author__ = "ThorN"
+__version__ = "1.6"
 
 
 class Game:
@@ -38,9 +38,9 @@ class Game:
     def game_type(self):
         if self.gameType is None:
             try:
-                value = self.console.getCvar('g_gametype').getString()
+                value = self.console.getCvar("g_gametype").getString()
             except Exception:
-                self.console.warning('unable to determine current gametype')
+                self.console.warning("unable to determine current gametype")
             else:
                 self.gameType = self.console.defineGameType(value)
         return self.gameType
@@ -62,7 +62,9 @@ class Game:
     def mapName(self, newmap):
         if self._mapName != newmap:
             # generate EVT_GAME_MAP_CHANGE so plugins can detect that a new game is starting
-            event = self.console.getEvent('EVT_GAME_MAP_CHANGE', data={'old': self._mapName, 'new': newmap})
+            event = self.console.getEvent(
+                "EVT_GAME_MAP_CHANGE", data={"old": self._mapName, "new": newmap}
+            )
             self.console.queueEvent(event)
         self._mapName = newmap
 

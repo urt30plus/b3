@@ -27,8 +27,8 @@ from b3.functions import splitDSN
 from b3.functions import start_daemon_thread
 from b3.functions import vars2printf
 
-__author__ = 'ThorN, Courgette, xlr8or, Bakes, Ozon, Fenix'
-__version__ = '1.43.6'
+__author__ = "ThorN, Courgette, xlr8or, Bakes, Ozon, Fenix"
+__version__ = "1.43.6"
 
 
 class Parser:
@@ -40,9 +40,11 @@ class Parser:
     _cron_stats_crontab = None  # crontab used to log cron run statistics
     _timezone_crontab = None  # force recache of timezone info
     _handlers = defaultdict(list)  # event handlers
-    _lineFormat = re.compile('^([a-z ]+): (.*?)', re.IGNORECASE)
-    _lineClear = re.compile(r'^(?:[0-9:]+\s?)?')
-    _line_color_prefix = ''  # a color code prefix to be added to every line resulting from getWrap
+    _lineFormat = re.compile("^([a-z ]+): (.*?)", re.IGNORECASE)
+    _lineClear = re.compile(r"^(?:[0-9:]+\s?)?")
+    _line_color_prefix = (
+        ""  # a color code prefix to be added to every line resulting from getWrap
+    )
     _line_length = 80  # max wrap length
     _messages = {}  # message template cache
     _multiline = False  # whether linebreaks \n can be manually used in messages
@@ -51,11 +53,11 @@ class Parser:
     _pauseNotice = False  # whether to notice B3 being paused
     _plugins = OrderedDict()  # plugin instances
     _port = 0  # the port used by the gameserver for clients connection
-    _publicIp = ''  # game server public ip address
-    _rconIp = ''  # the ip address where to forward RCON commands
+    _publicIp = ""  # game server public ip address
+    _rconIp = ""  # the ip address where to forward RCON commands
     _rconPort = None  # the virtual port where to forward RCON commands
-    _rconPassword = ''  # the rcon password set on the server
-    _reColor = re.compile(r'(\^[0-9a-z])|[\x80-\xff]')
+    _rconPassword = ""  # the rcon password set on the server
+    _reColor = re.compile(r"(\^[0-9a-z])|[\x80-\xff]")
     _timeStart = None  # timestamp when B3 has first started
     _tz_offset = None
     _tz_name = None
@@ -65,11 +67,11 @@ class Parser:
     config = None  # parser configuration file instance
     delay = 0.33  # time between each game log lines fetching
     delay2 = 0.02  # time between each game log line processing: max number of lines processed in one second
-    encoding = 'latin-1'
+    encoding = "latin-1"
     game = None
     gameName = None  # console name
     log = None  # logger instance
-    name = 'b3'  # bot name
+    name = "b3"  # bot name
     output = None  # used to send data to the game server (default to b3.parsers.q3a.rcon.Rcon)
     queue = None  # event queue
     rconTest = True  # whether to perform RCON testing or not
@@ -78,9 +80,9 @@ class Parser:
     type = None
     wrapper = None  # textwrapper instance
 
-    msgPrefix = ''  # say prefix
-    pmPrefix = '^8[pm]^7'  # private message prefix
-    prefix = '^2%s:^3'  # B3 prefix
+    msgPrefix = ""  # say prefix
+    pmPrefix = "^8[pm]^7"  # private message prefix
+    prefix = "^2%s:^3"  # B3 prefix
 
     # default messages in case one is missing from config file
     _messages_default = {
@@ -134,11 +136,11 @@ class Parser:
         self._timeStart = self.time()
 
         if not self.loadConfig(conf):
-            print('CRITICAL ERROR : COULD NOT LOAD CONFIG')
+            print("CRITICAL ERROR : COULD NOT LOAD CONFIG")
             raise SystemExit(2)
 
-        if self.config.has_option('server', 'encoding'):
-            self.encoding = self.config.get('server', 'encoding')
+        if self.config.has_option("server", "encoding"):
+            self.encoding = self.config.get("server", "encoding")
         self.__init_logging()
         self.__init_ipaddress()
         self.__init_print_startmessage()
@@ -151,7 +153,7 @@ class Parser:
         self.__init_rcon()
         self.__init_rcon_test()
         self.loadEvents()
-        self.screen.write(f'Loading events   : {len(self._events)} events loaded\n')
+        self.screen.write(f"Loading events   : {len(self._events)} events loaded\n")
         self.clients = Clients(self)
         self.loadPlugins()
         self.game = b3.game.Game(self, self.gameName)
@@ -159,101 +161,118 @@ class Parser:
         atexit.register(self.shutdown)
 
     def __init_logging(self):
-        logfile = self.config.getpath('b3', 'logfile')
-        log2console = self.config.has_option('devmode', 'log2console') and \
-                      self.config.getboolean('devmode', 'log2console')
+        logfile = self.config.getpath("b3", "logfile")
+        log2console = self.config.has_option(
+            "devmode", "log2console"
+        ) and self.config.getboolean("devmode", "log2console")
         logfile = b3.functions.getWritableFilePath(logfile, True)
-        log_level = self.config.getint('b3', 'log_level')
+        log_level = self.config.getint("b3", "log_level")
         try:
-            logsize = b3.functions.getBytes(self.config.get('b3', 'logsize'))
+            logsize = b3.functions.getBytes(self.config.get("b3", "logsize"))
         except (TypeError, b3.config.NoOptionError):
-            logsize = b3.functions.getBytes('10MB')
+            logsize = b3.functions.getBytes("10MB")
         self.log = b3.output.getInstance(logfile, log_level, logsize, log2console)
         self.screen = sys.stdout
-        log_short_path = b3.functions.getShortPath(os.path.abspath(b3.functions.getAbsolutePath(logfile, True)))
-        self.screen.write(f'Activating log   : {log_short_path}\n')
+        log_short_path = b3.functions.getShortPath(
+            os.path.abspath(b3.functions.getAbsolutePath(logfile, True))
+        )
+        self.screen.write(f"Activating log   : {log_short_path}\n")
         self.screen.flush()
         sys.stdout = b3.output.STDOutLogger(self.log)
         sys.stderr = b3.output.STDErrLogger(self.log)
 
     def __init_print_startmessage(self):
-        self.bot('%s', b3.getB3versionString())
-        self.bot('Python: %s', sys.version.replace('\n', ''))
-        self.bot('Default encoding: %s', sys.getdefaultencoding())
-        self.bot('Starting %s v%s for server %s:%s', self.__class__.__name__,
-                 getattr(getModule(self.__module__), '__version__', ' Unknown'),
-                 self._rconIp, self._port)
+        self.bot("%s", b3.getB3versionString())
+        self.bot("Python: %s", sys.version.replace("\n", ""))
+        self.bot("Default encoding: %s", sys.getdefaultencoding())
+        self.bot(
+            "Starting %s v%s for server %s:%s",
+            self.__class__.__name__,
+            getattr(getModule(self.__module__), "__version__", " Unknown"),
+            self._rconIp,
+            self._port,
+        )
 
     def __init_ipaddress(self):
-        self._publicIp = self.config.get('server', 'public_ip')
-        self._port = self.config.getint('server', 'port')
-        self._rconPort = self._port  # if rcon port is the same as the game port, rcon_port can be ommited
-        self._rconIp = self._publicIp  # if rcon ip is the same as the game port, rcon_ip can be ommited
-        if self.config.has_option('server', 'rcon_ip'):
-            self._rconIp = self.config.get('server', 'rcon_ip')
-        if self.config.has_option('server', 'rcon_port'):
-            self._rconPort = self.config.getint('server', 'rcon_port')
-        if self.config.has_option('server', 'rcon_password'):
-            self._rconPassword = self.config.get('server', 'rcon_password')
+        self._publicIp = self.config.get("server", "public_ip")
+        self._port = self.config.getint("server", "port")
+        self._rconPort = (
+            self._port
+        )  # if rcon port is the same as the game port, rcon_port can be ommited
+        self._rconIp = (
+            self._publicIp
+        )  # if rcon ip is the same as the game port, rcon_ip can be ommited
+        if self.config.has_option("server", "rcon_ip"):
+            self._rconIp = self.config.get("server", "rcon_ip")
+        if self.config.has_option("server", "rcon_port"):
+            self._rconPort = self.config.getint("server", "rcon_port")
+        if self.config.has_option("server", "rcon_password"):
+            self._rconPassword = self.config.get("server", "rcon_password")
         try:
             self._rconIp = socket.gethostbyname(self._rconIp)
         except socket.gaierror:
             pass
 
     def __init_bot(self):
-        self.bot('--------------------------------------------')
-        if bot_name := self.config.get('b3', 'bot_name'):
+        self.bot("--------------------------------------------")
+        if bot_name := self.config.get("b3", "bot_name"):
             self.name = bot_name
-        if bot_prefix := self.config.get('b3', 'bot_prefix'):
+        if bot_prefix := self.config.get("b3", "bot_prefix"):
             self.prefix = bot_prefix
         else:
-            self.prefix = ''
+            self.prefix = ""
         self.msgPrefix = self.prefix
 
     def __init_serverconfig(self):
-        if self.config.has_option('server', 'delay'):
-            delay = self.config.getfloat('server', 'delay')
+        if self.config.has_option("server", "delay"):
+            delay = self.config.getfloat("server", "delay")
             if self.delay > 0:
                 self.delay = delay
-        if self.config.has_option('server', 'lines_per_second'):
-            delay2 = self.config.getfloat('server', 'lines_per_second')
+        if self.config.has_option("server", "lines_per_second"):
+            delay2 = self.config.getfloat("server", "lines_per_second")
             if delay2 > 0:
                 self.delay2 = 1 / delay2
-        if self.config.has_option('server', 'max_line_length'):
-            self._line_length = self.config.getint('server', 'max_line_length')
-            self.bot('Setting line_length to: %s', self._line_length)
+        if self.config.has_option("server", "max_line_length"):
+            self._line_length = self.config.getint("server", "max_line_length")
+            self.bot("Setting line_length to: %s", self._line_length)
 
-        if self.config.has_option('server', 'line_color_prefix'):
-            self._line_color_prefix = self.config.get('server', 'line_color_prefix')
+        if self.config.has_option("server", "line_color_prefix"):
+            self._line_color_prefix = self.config.get("server", "line_color_prefix")
             self.bot('Setting line_color_prefix to: "%s"', self._line_color_prefix)
 
-        if self.config.has_option('server', 'multiline'):
-            self._multiline = self.config.getboolean('server', 'multiline')
-            self.bot('Setting multiline to: %s', self._multiline)
+        if self.config.has_option("server", "multiline"):
+            self._multiline = self.config.getboolean("server", "multiline")
+            self.bot("Setting multiline to: %s", self._multiline)
 
-        if self.config.has_option('server', 'multiline_noprefix'):
-            self._multiline_noprefix = self.config.getboolean('server', 'multiline_noprefix')
-            self.bot('Setting multiline_noprefix to: %s', self._multiline_noprefix)
+        if self.config.has_option("server", "multiline_noprefix"):
+            self._multiline_noprefix = self.config.getboolean(
+                "server", "multiline_noprefix"
+            )
+            self.bot("Setting multiline_noprefix to: %s", self._multiline_noprefix)
 
     def __init_storage(self):
         try:
-            dsn = self.config.get('b3', 'database')
-            self.storage = b3.storage.getStorage(dsn=dsn, dsnDict=splitDSN(dsn), console=self)
+            dsn = self.config.get("b3", "database")
+            self.storage = b3.storage.getStorage(
+                dsn=dsn, dsnDict=splitDSN(dsn), console=self
+            )
         except (AttributeError, ImportError) as e:
-            self.critical('Could not setup storage module: %s', e)
+            self.critical("Could not setup storage module: %s", e)
         self.storage.connect()
 
     def __init_gamelog(self):
-        if self.config.has_option('server', 'game_log'):
-            game_log = self.config.get('server', 'game_log')
-            self.bot('Game log is: %s', game_log)
-            f = self.config.getpath('server', 'game_log')
-            self.bot('Starting bot reading file: %s', os.path.abspath(f))
-            self.screen.write(f'Using gamelog    : {b3.functions.getShortPath(os.path.abspath(f))}\n')
+        if self.config.has_option("server", "game_log"):
+            game_log = self.config.get("server", "game_log")
+            self.bot("Game log is: %s", game_log)
+            f = self.config.getpath("server", "game_log")
+            self.bot("Starting bot reading file: %s", os.path.abspath(f))
+            self.screen.write(
+                f"Using gamelog    : {b3.functions.getShortPath(os.path.abspath(f))}\n"
+            )
             if os.path.isfile(f):
-                self.input = open(f, 'r')
-                if self.config.has_option('server', 'seek'):
-                    seek = self.config.getboolean('server', 'seek')
+                self.input = open(f, "r")
+                if self.config.has_option("server", "seek"):
+                    seek = self.config.getboolean("server", "seek")
                     if seek:
                         self.input.seek(0, os.SEEK_END)
                 else:
@@ -269,45 +288,51 @@ class Parser:
 
     def __init_rcon(self):
         try:
-            self.output = b3.rcon.Rcon(self, (self._rconIp, self._rconPort), self._rconPassword)
+            self.output = b3.rcon.Rcon(
+                self, (self._rconIp, self._rconPort), self._rconPassword
+            )
         except Exception as err:
             self.screen.write(f">>> Cannot setup RCON: {err}\n")
             self.screen.flush()
             self.critical("Cannot setup RCON: %s", err, exc_info=err)
 
-        if self.config.has_option('server', 'rcon_timeout'):
-            custom_socket_timeout = self.config.getfloat('server', 'rcon_timeout')
+        if self.config.has_option("server", "rcon_timeout"):
+            custom_socket_timeout = self.config.getfloat("server", "rcon_timeout")
             self.output.socket_timeout = custom_socket_timeout
 
-        if self.config.has_option('server', 'rcon_timeout2'):
-            custom_socket_timeout2 = self.config.getfloat('server', 'rcon_timeout2')
+        if self.config.has_option("server", "rcon_timeout2"):
+            custom_socket_timeout2 = self.config.getfloat("server", "rcon_timeout2")
             self.output.socket_timeout2 = custom_socket_timeout2
 
-        self.bot('RCON client: %s', self.output)
+        self.bot("RCON client: %s", self.output)
 
     def __init_rcon_test(self):
         if self.rconTest:
-            res = self.output.write('status')
-            self.screen.write('Testing RCON     : ')
+            res = self.output.write("status")
+            self.screen.write("Testing RCON     : ")
             self.screen.flush()
-            if res in ['Bad rconpassword.', 'Invalid password.']:
-                self.screen.write('>>> Oops: Bad RCON password\n'
-                                  '>>> Hint: This will lead to errors and render B3 without any power to interact!\n')
+            if res in ["Bad rconpassword.", "Invalid password."]:
+                self.screen.write(
+                    ">>> Oops: Bad RCON password\n"
+                    ">>> Hint: This will lead to errors and render B3 without any power to interact!\n"
+                )
                 self.screen.flush()
                 time.sleep(2)
-            elif res == '':
-                self.screen.write('>>> Oops: No response\n'
-                                  '>>> Could be something wrong with the rcon connection to the server!\n'
-                                  '>>> Hint 1: The server is not running or it is changing maps.\n'
-                                  '>>> Hint 2: Check your server-ip and port.\n')
+            elif res == "":
+                self.screen.write(
+                    ">>> Oops: No response\n"
+                    ">>> Could be something wrong with the rcon connection to the server!\n"
+                    ">>> Hint 1: The server is not running or it is changing maps.\n"
+                    ">>> Hint 2: Check your server-ip and port.\n"
+                )
                 self.screen.flush()
                 time.sleep(2)
             else:
-                self.screen.write('OK\n')
+                self.screen.write("OK\n")
 
     def __init_eventqueue(self):
         try:
-            queuesize = self.config.getint('b3', 'event_queue_size')
+            queuesize = self.config.getint("b3", "event_queue_size")
         except b3.config.NoOptionError:
             queuesize = 50
         except ValueError as err:
@@ -327,7 +352,7 @@ class Parser:
         """
         self.bot("Starting parser..")
         self.startup()
-        self.say(f'{b3.version} ^2[ONLINE]')
+        self.say(f"{b3.version} ^2[ONLINE]")
         self.call_plugins_onLoadConfig()
         self.bot("Starting plugins")
         self.startPlugins()
@@ -336,7 +361,7 @@ class Parser:
         self.pluginsStarted()
         self.bot("Starting event dispatching thread")
         self._event_handling_thread = start_daemon_thread(
-            target=self.handleEvents, name='event_handler'
+            target=self.handleEvents, name="event_handler"
         )
         self.bot("Start reading game events")
         self.run()
@@ -348,27 +373,40 @@ class Parser:
         self._eventsStats.dump_stats()
 
     def _dump_cron_stats(self):
-        self.info('***** CronTab Stats *****')
+        self.info("***** CronTab Stats *****")
         for tab in self.cron.entries():
             if stats := tab.run_stats:
                 mean, stdv = b3.functions.meanstdv(stats)
-                self.info('%s: min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)',
-                           tab, min(stats), max(stats), mean, stdv, len(stats))
+                self.info(
+                    "%s: min(%0.4f), max(%0.4f), mean(%0.4f), stdv(%0.4f), samples(%i)",
+                    tab,
+                    min(stats),
+                    max(stats),
+                    mean,
+                    stdv,
+                    len(stats),
+                )
             else:
-                self.info('%s: no stats available', tab)
+                self.info("%s: no stats available", tab)
 
     def schedule_cron_tasks(self):
         if self.log.isEnabledFor(b3.output.DEBUG):
-            self._cron_stats_events = b3.cron.CronTab(self._dump_events_stats, minute='15')
+            self._cron_stats_events = b3.cron.CronTab(
+                self._dump_events_stats, minute="15"
+            )
             self.cron.add(self._cron_stats_events)
 
-            self._cron_stats_crontab = b3.cron.CronTab(self._dump_cron_stats, minute='30')
+            self._cron_stats_crontab = b3.cron.CronTab(
+                self._dump_cron_stats, minute="30"
+            )
             self.cron.add(self._cron_stats_crontab)
 
         tz_offset, tz_name = self.tz_offset_and_name()
         if tz_name not in ("UTC", "GMT"):
             hour = self.to_utc_hour(2)
-            self._timezone_crontab = b3.cron.CronTab(self._reset_timezone_info, minute=1, hour=hour)
+            self._timezone_crontab = b3.cron.CronTab(
+                self._reset_timezone_info, minute=1, hour=hour
+            )
             self.bot("Timezone reset scheduled daily at UTC %s:%s", hour, "01")
             self.cron.add(self._timezone_crontab)
 
@@ -385,7 +423,7 @@ class Parser:
         Stop B3 with the restart exit status (221)
         """
         self.exitcode = 4
-        self.bot('Restarting...')
+        self.bot("Restarting...")
         self.shutdown()
         self.finalize()
 
@@ -410,7 +448,7 @@ class Parser:
         """
         Save configration changes
         """
-        self.bot('Saving config: %s', self.config.fileName)
+        self.bot("Saving config: %s", self.config.fileName)
         return self.config.save()
 
     def startup(self):
@@ -422,7 +460,7 @@ class Parser:
 
     def pluginsStarted(self):
         """
-        Called after the parser loaded and started all plugins. 
+        Called after the parser loaded and started all plugins.
         Overwrite this in parsers to take actions once plugins are ready
         """
         pass
@@ -431,7 +469,7 @@ class Parser:
         """
         Pause B3 log parsing
         """
-        self.bot('PAUSING')
+        self.bot("PAUSING")
         self._paused = True
 
     def unpause(self):
@@ -496,16 +534,16 @@ class Parser:
         # reload main config
         self.config.load(self.config.fileName)
         for plugin_name, plugin in self._plugins.items():
-            self.bot('Reload configuration file for plugin %s', plugin_name)
+            self.bot("Reload configuration file for plugin %s", plugin_name)
             plugin.loadConfig()
 
     def loadPlugins(self):
-        self.screen.write('Loading plugins  : ')
+        self.screen.write("Loading plugins  : ")
         self.screen.flush()
 
         b3.plugins.import_plugins(self)
 
-        self.screen.write(' (%s)\n' % len(self._plugins))
+        self.screen.write(" (%s)\n" % len(self._plugins))
         self.screen.flush()
 
     def call_plugins_onLoadConfig(self):
@@ -519,34 +557,33 @@ class Parser:
         """
         Start all loaded plugins.
         """
-        self.screen.write('Starting plugins : ')
+        self.screen.write("Starting plugins : ")
         self.screen.flush()
 
         plugin_num = 1
         for plugin_name, plugin in self._plugins.items():
-
             try:
-                self.bot('Starting plugin #%s : %s', plugin_num, plugin_name)
+                self.bot("Starting plugin #%s : %s", plugin_num, plugin_name)
                 plugin.onStartup()
                 plugin.start()
             except Exception as err:
                 self.error("Could not start plugin %s", plugin_name, exc_info=err)
-                self.screen.write('x')
+                self.screen.write("x")
             else:
-                self.screen.write('.')
+                self.screen.write(".")
                 plugin_num += 1
             finally:
                 self.screen.flush()
 
-        self.screen.write(f' ({str(plugin_num - 1)})\n')
+        self.screen.write(f" ({str(plugin_num - 1)})\n")
 
     def disablePlugins(self):
         """
         Disable all plugins except for 'admin'
         """
         for plugin_name, plugin in self._plugins.items():
-            if plugin_name != 'admin':
-                self.bot('Disabling plugin: %s', plugin_name)
+            if plugin_name != "admin":
+                self.bot("Disabling plugin: %s", plugin_name)
                 plugin.disable()
 
     def enablePlugins(self):
@@ -554,8 +591,8 @@ class Parser:
         Enable all plugins except for 'admin'
         """
         for plugin_name, plugin in self._plugins.items():
-            if plugin_name != 'admin':
-                self.bot('Enabling plugin: %s', plugin_name)
+            if plugin_name != "admin":
+                self.bot("Enabling plugin: %s", plugin_name)
                 plugin.enable()
 
     def getMessage(self, msg, *args):
@@ -566,10 +603,10 @@ class Parser:
             msg = self._messages[msg]
         except KeyError:
             try:
-                msg = self._messages[msg] = self.config.getTextTemplate('messages', msg)
+                msg = self._messages[msg] = self.config.getTextTemplate("messages", msg)
             except Exception as err:
                 self.warning("Falling back on default message for '%s': %s", msg, err)
-                msg = vars2printf(self._messages_default.get(msg, '')).strip()
+                msg = vars2printf(self._messages_default.get(msg, "")).strip()
 
         if args:
             if type(args[0]) == dict:
@@ -588,29 +625,33 @@ class Parser:
         for obj in args:
             if obj is None:
                 continue
-            if type(obj).__name__ in ('str', 'unicode'):
+            if type(obj).__name__ in ("str", "unicode"):
                 if obj not in variables:
                     variables[obj] = obj
             else:
                 for attr in vars(obj):
-                    pattern = re.compile(r'[\W_]+')
-                    cleanattr = pattern.sub('', attr)  # trim any underscore or any non alphanumeric character
+                    pattern = re.compile(r"[\W_]+")
+                    cleanattr = pattern.sub(
+                        "", attr
+                    )  # trim any underscore or any non alphanumeric character
                     variables[cleanattr] = getattr(obj, attr)
 
         for key, obj in kwargs.items():
             # self.debug('Type of kwarg %s: %s' % (key, type(obj).__name__))
             if obj is None:
                 continue
-            if type(obj).__name__ in ('str', 'unicode'):
+            if type(obj).__name__ in ("str", "unicode"):
                 if key not in variables:
                     variables[key] = obj
             # elif type(obj).__name__ == 'instance':
             # self.debug('Classname of object %s: %s' % (key, obj.__class__.__name__))
             else:
                 for attr in vars(obj):
-                    pattern = re.compile(r'[\W_]+')
-                    cleanattr = pattern.sub('', attr)  # trim any underscore or any non alphanumeric character
-                    currkey = ''.join([key, cleanattr])
+                    pattern = re.compile(r"[\W_]+")
+                    cleanattr = pattern.sub(
+                        "", attr
+                    )  # trim any underscore or any non alphanumeric character
+                    currkey = "".join([key, cleanattr])
                     variables[currkey] = getattr(obj, attr)
 
         return variables
@@ -701,19 +742,20 @@ class Parser:
             # or make use of the timezone offset autodetection
             tz_offset, tz_name = self.tz_offset_and_name()
 
-        time_format = self.config.get('b3', 'time_format').replace('%Z', tz_name).replace('%z', tz_name)
+        time_format = (
+            self.config.get("b3", "time_format")
+            .replace("%Z", tz_name)
+            .replace("%z", tz_name)
+        )
         return time.strftime(time_format, time.gmtime(gmttime + int(tz_offset * 3600)))
 
     def run(self):
         """
         Main worker thread for B3
         """
+        self.screen.write("Startup complete : B3 is running! Let's get to work!\n\n")
         self.screen.write(
-            "Startup complete : B3 is running! Let's get to work!\n\n"
-        )
-        self.screen.write(
-            'If you run into problems check your B3 log file for '
-            'more information\n'
+            "If you run into problems check your B3 log file for " "more information\n"
         )
         self.screen.flush()
 
@@ -727,7 +769,7 @@ class Parser:
         while self.working:
             if self._paused:
                 if not self._pauseNotice:
-                    self.bot('PAUSED - not parsing any lines')
+                    self.bot("PAUSED - not parsing any lines")
                     self._pauseNotice = True
                 sleep(delay_read_lines)
                 continue
@@ -736,38 +778,47 @@ class Parser:
                     try:
                         parse_line(line)
                     except Exception as msg:
-                        self.error('Could not parse line %s - (%s) %s',
-                                   line, msg, extract_tb(sys.exc_info()[2]))
+                        self.error(
+                            "Could not parse line %s - (%s) %s",
+                            line,
+                            msg,
+                            extract_tb(sys.exc_info()[2]),
+                        )
                     sleep(delay_per_line)
 
             sleep(delay_read_lines)
 
-        self.bot('Stopped parsing')
-        self.bot('Closing games log file')
+        self.bot("Stopped parsing")
+        self.bot("Closing games log file")
         self.input.close()
 
-        self.bot('Send STOP Event to Event Handling Thread')
-        self.queueEvent(self.getEvent('EVT_STOP'))
-        self.bot('Awaiting Event Handling Thread stop')
+        self.bot("Send STOP Event to Event Handling Thread")
+        self.queueEvent(self.getEvent("EVT_STOP"))
+        self.bot("Awaiting Event Handling Thread stop")
         self._event_handling_thread.join(timeout=15.0)
-        self.bot('Event Handling Thread stopped')
+        self.bot("Event Handling Thread stopped")
         if self.exitcode:
             sys.exit(self.exitcode)
-        self.bot('Shutdown Complete')
+        self.bot("Shutdown Complete")
 
     def parseLine(self, line):
         """
         Parse a single line from the log file
         """
         if m := re.match(self._lineFormat, line):
-            self.queueEvent(b3.events.Event(self.getEventID('EVT_UNKNOWN'), m.group(2)[:1]))
+            self.queueEvent(
+                b3.events.Event(self.getEventID("EVT_UNKNOWN"), m.group(2)[:1])
+            )
 
     def registerHandler(self, event_name, event_handler):
         """
         Register an event handler.
         """
-        self.info('%s: register event <%s>',
-                   event_handler.__class__.__name__, self.getEventKey(event_name))
+        self.info(
+            "%s: register event <%s>",
+            event_handler.__class__.__name__,
+            self.getEventKey(event_name),
+        )
         if event_handler not in self._handlers[event_name]:
             self._handlers[event_name].append(event_handler)
 
@@ -777,8 +828,11 @@ class Parser:
         """
         for event_name, handlers in self._handlers.items():
             if event_handler in handlers:
-                self.info('%s: unregister event <%s>',
-                           event_handler.__class__.__name__, self.getEventKey(event_name))
+                self.info(
+                    "%s: unregister event <%s>",
+                    event_handler.__class__.__name__,
+                    self.getEventKey(event_name),
+                )
                 handlers.remove(event_handler)
 
     def queueEvent(self, event, expire=10):
@@ -789,9 +843,9 @@ class Parser:
                 self.queue.put((current_time, current_time + expire, event), timeout=2)
                 return True
         except queue.Full:
-            self.error('**** Event queue was full (%s)', self.queue.qsize())
+            self.error("**** Event queue was full (%s)", self.queue.qsize())
         except AttributeError:
-            self.error('*** Event has no type: %s', event)
+            self.error("*** Event has no type: %s", event)
         return False
 
     def handleEvents(self):
@@ -801,18 +855,23 @@ class Parser:
         timer_func = time.perf_counter
         console_time = self.time
         event_queue_get = self.queue.get
-        stop_events = (self.getEventID('EVT_EXIT'), self.getEventID('EVT_STOP'))
+        stop_events = (self.getEventID("EVT_EXIT"), self.getEventID("EVT_STOP"))
         while True:
             added, expire, event = event_queue_get()
             current_time = console_time()
             if event.type in stop_events:
                 break
             if current_time > expire:
-                self.error('**** %s sat in queue too long: '
-                           'added %s, current %s, '
-                           'expired %s, total (%s)',
-                           event, added, current_time, expire, 
-                           current_time - added)
+                self.error(
+                    "**** %s sat in queue too long: "
+                    "added %s, current %s, "
+                    "expired %s, total (%s)",
+                    event,
+                    added,
+                    current_time,
+                    expire,
+                    current_time - added,
+                )
                 continue
 
             for hfunc in self._handlers[event.type]:
@@ -824,51 +883,60 @@ class Parser:
                     time.sleep(0.001)
                 except b3.events.VetoEvent:
                     # plugin called for a halt to event processing
-                    self.bot('%s vetoed by %s', event, str(hfunc))
+                    self.bot("%s vetoed by %s", event, str(hfunc))
                     break
                 except Exception as msg:
-                    self.error('Handler %s could not handle %s: %s: %s %s',
-                               hfunc.__class__.__name__, event, 
-                               msg.__class__.__name__, msg, 
-                               extract_tb(sys.exc_info()[2]))
+                    self.error(
+                        "Handler %s could not handle %s: %s: %s %s",
+                        hfunc.__class__.__name__,
+                        event,
+                        msg.__class__.__name__,
+                        msg,
+                        extract_tb(sys.exc_info()[2]),
+                    )
                 finally:
                     if (elapsed := timer_func() - timer_plugin_begin) > 1.5:
-                        self.warning('Handler %s took more that 1.5 seconds '
-                                     'to handle %s: total %0.4f',
-                                     hfunc.__class__.__name__, event, elapsed)
-                    self._eventsStats.add_event_handled(hfunc.__class__.__name__,
-                                                        event.key, elapsed)
+                        self.warning(
+                            "Handler %s took more that 1.5 seconds "
+                            "to handle %s: total %0.4f",
+                            hfunc.__class__.__name__,
+                            event,
+                            elapsed,
+                        )
+                    self._eventsStats.add_event_handled(
+                        hfunc.__class__.__name__, event.key, elapsed
+                    )
 
         self.handle_events_shutdown()
 
     def handle_events_shutdown(self):
-        self.bot('Shutting down event handler')
+        self.bot("Shutting down event handler")
 
         if self.working:
             self.working = False
-            self.bot('Working was set, shutdown initiated from outside of main thread')
+            self.bot("Working was set, shutdown initiated from outside of main thread")
 
-        self.bot('Sending EVT_STOP message to all plugins')
-        event = self.getEvent('EVT_STOP')
+        self.bot("Sending EVT_STOP message to all plugins")
+        event = self.getEvent("EVT_STOP")
         for plugin in self._plugins.values():
             try:
                 plugin.parseEvent(event)
             except Exception as e:
                 self.error(e)
 
-        self.bot('Stopping cron')
+        self.bot("Stopping cron")
         try:
             self._cron.stop()
         except Exception as e:
             self.error(e)
 
-        self.bot('Shutting down database connection')
+        self.bot("Shutting down database connection")
         try:
             self.storage.shutdown()
         except Exception as e:
             self.error(e)
 
-        self.bot('Shutting down RCON connection')
+        self.bot("Shutting down RCON connection")
         try:
             self.output.close()
         except Exception as e:
@@ -880,8 +948,13 @@ class Parser:
         """
         s = time.perf_counter()
         r = self.output.write(msg, maxRetries=maxRetries, socketTimeout=socketTimeout)
-        self.info('RCON write(%s) retries=%s, timeout=%s, time=%0.4f', 
-                  msg, maxRetries, socketTimeout, time.perf_counter() - s)
+        self.info(
+            "RCON write(%s) retries=%s, timeout=%s, time=%0.4f",
+            msg,
+            maxRetries,
+            socketTimeout,
+            time.perf_counter() - s,
+        )
         return r
 
     def writelines(self, msg):
@@ -902,10 +975,12 @@ class Parser:
             # there's a problem
             filestats = os.fstat(self.input.fileno())
             if self.input.tell() > filestats.st_size:
-                self.warning('Parser: game log is suddenly smaller than it was '
-                             f'before ({self.input.tell()} bytes, now {filestats.st_size}), '
-                             'the log was probably either rotated or emptied. B3 will now re-adjust to '
-                             'the new size of the log')
+                self.warning(
+                    "Parser: game log is suddenly smaller than it was "
+                    f"before ({self.input.tell()} bytes, now {filestats.st_size}), "
+                    "the log was probably either rotated or emptied. B3 will now re-adjust to "
+                    "the new size of the log"
+                )
                 self.input.seek(0, os.SEEK_END)
                 lines = self.input.readlines()
 
@@ -917,7 +992,7 @@ class Parser:
         """
         if self.working:
             self.working = False
-            self.bot('Shutting down...')
+            self.bot("Shutting down...")
 
     def finalize(self):
         """
@@ -941,14 +1016,18 @@ class Parser:
 
         if not self.wrapper:
             # initialize the text wrapper if not already instantiated
-            self.wrapper = TextWrapper(width=self._line_length, drop_whitespace=True,
-                                       break_long_words=True, break_on_hyphens=False)
+            self.wrapper = TextWrapper(
+                width=self._line_length,
+                drop_whitespace=True,
+                break_long_words=True,
+                break_on_hyphens=False,
+            )
 
         # Apply wrap + manual linebreak
         if self._multiline:
             wrapped_text = []
-            for line in text.split(r'\n'):
-                if line.strip() != '':
+            for line in text.split(r"\n"):
+                if line.strip() != "":
                     wrapped_text.extend(self.wrapper.wrap(line))
         # Apply only wrap
         else:
@@ -959,9 +1038,9 @@ class Parser:
             color = self._line_color_prefix
             for line in wrapped_text:
                 if not lines or self._multiline_noprefix:
-                    lines.append(f'{color}{line}')
+                    lines.append(f"{color}{line}")
                 else:
-                    lines.append(f'^3>{color}{line}')
+                    lines.append(f"^3>{color}{line}")
                 match = re.findall(self._reColor, line)
                 if match:
                     color = match[-1]
@@ -975,7 +1054,7 @@ class Parser:
                 lines = [wrapped_text[0]]
                 if len(wrapped_text) > 1:
                     for line in wrapped_text[1:]:
-                        lines.append(f'>{line}')
+                        lines.append(f">{line}")
             return lines
 
     def error(self, msg, *args, **kwargs):
@@ -1065,7 +1144,7 @@ class Parser:
         :param text: the text to clean from color codes.
         :return: str
         """
-        return re.sub(self._reColor, '', text).strip()
+        return re.sub(self._reColor, "", text).strip()
 
     # INHERITING CLASSES MUST IMPLEMENTS THE FOLLOWING METHODS
     # PLUGINS THAT ARE GAME INDEPENDENT ASSUME THESE METHODS EXIST
@@ -1078,9 +1157,9 @@ class Parser:
 
     def authorizeClients(self):
         """
-        For all connected players, fill the client object with properties allowing to find 
+        For all connected players, fill the client object with properties allowing to find
         the user in the database (usualy guid, or ip) and call the
-        Client.auth() method 
+        Client.auth() method
         """
         raise NotImplementedError
 
@@ -1114,30 +1193,30 @@ class Parser:
         """
         raise NotImplementedError
 
-    def kick(self, client, reason='', admin=None, silent=False, *kwargs):
+    def kick(self, client, reason="", admin=None, silent=False, *kwargs):
         """
         Kick a given player
         """
         raise NotImplementedError
 
-    def ban(self, client, reason='', admin=None, silent=False, *kwargs):
+    def ban(self, client, reason="", admin=None, silent=False, *kwargs):
         """
         Ban a given player on the game server and in case of success
-        fire the event ('EVT_CLIENT_BAN', data={'reason': reason, 
+        fire the event ('EVT_CLIENT_BAN', data={'reason': reason,
         'admin': admin}, client=target)
         """
         raise NotImplementedError
 
-    def unban(self, client, reason='', admin=None, silent=False, *kwargs):
+    def unban(self, client, reason="", admin=None, silent=False, *kwargs):
         """
         Unban a given player on the game server
         """
         raise NotImplementedError
 
-    def tempban(self, client, reason='', duration=2, admin=None, silent=False, *kwargs):
+    def tempban(self, client, reason="", duration=2, admin=None, silent=False, *kwargs):
         """
         Tempban a given player on the game server and in case of success
-        fire the event ('EVT_CLIENT_BAN_TEMP', data={'reason': reason, 
+        fire the event ('EVT_CLIENT_BAN_TEMP', data={'reason': reason,
         'duration': duration, 'admin': admin}, client=target)
         """
         raise NotImplementedError
@@ -1186,10 +1265,12 @@ class Parser:
         """
         raise NotImplementedError
 
-    def inflictCustomPenalty(self, penalty_type, client, reason=None, duration=None, admin=None, data=None):
+    def inflictCustomPenalty(
+        self, penalty_type, client, reason=None, duration=None, admin=None, data=None
+    ):
         """
-        Called if b3.admin.penalizeClient() does not know a given penalty type. 
-        Overwrite this to add customized penalties for your game like 'slap', 'nuke', 
+        Called if b3.admin.penalizeClient() does not know a given penalty type.
+        Overwrite this to add customized penalties for your game like 'slap', 'nuke',
         'mute', 'kill' or anything you want.
         IMPORTANT: This method must return True if the penalty was inflicted.
         """

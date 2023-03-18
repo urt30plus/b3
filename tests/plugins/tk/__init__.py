@@ -11,28 +11,28 @@ from tests.fake import FakeClient
 
 
 class Test_Tk_plugin(B3TestCase):
-
     def setUp(self):
         super(Test_Tk_plugin, self).setUp()
-        self.console.gameName = 'f00'
+        self.console.gameName = "f00"
         self.conf = CfgConfigParser()
         self.p = TkPlugin(self.console, self.conf)
 
 
 class Tk_functional_test(B3TestCase):
-
     def setUp(self):
         B3TestCase.setUp(self)
 
-        self.console.gameName = 'f00'
+        self.console.gameName = "f00"
 
-        self.adminPlugin = AdminPlugin(self.console, '@b3/conf/plugin_admin.ini')
+        self.adminPlugin = AdminPlugin(self.console, "@b3/conf/plugin_admin.ini")
         when(self.console).getPlugin("admin").thenReturn(self.adminPlugin)
         self.adminPlugin.onLoadConfig()
         self.adminPlugin.onStartup()
 
         self.conf = CfgConfigParser()
-        self.conf.loadFromString(dedent(r"""
+        self.conf.loadFromString(
+            dedent(
+                r"""
             [settings]
             max_points: 400
             levels: 0,1,2,20,40
@@ -84,13 +84,26 @@ class Tk_functional_test(B3TestCase):
             kill_multiplier: 0.75
             damage_multiplier: 0.5
             ban_length: 0
-        """))
+        """
+            )
+        )
         self.p = TkPlugin(self.console, self.conf)
         self.p.onLoadConfig()
         self.p.onStartup()
 
-        self.joe = FakeClient(self.console, name="Joe", guid="joeguid", groupBits=1, team=b3.TEAM_RED)
-        self.mike = FakeClient(self.console, name="Mike", guid="mikeguid", groupBits=1, team=b3.TEAM_RED)
-        self.bill = FakeClient(self.console, name="Bill", guid="billguid", groupBits=1, team=b3.TEAM_RED)
-        self.superadmin = FakeClient(self.console, name="superadmin", guid="superadminguid", groupBits=128,
-                                     team=b3.TEAM_RED)
+        self.joe = FakeClient(
+            self.console, name="Joe", guid="joeguid", groupBits=1, team=b3.TEAM_RED
+        )
+        self.mike = FakeClient(
+            self.console, name="Mike", guid="mikeguid", groupBits=1, team=b3.TEAM_RED
+        )
+        self.bill = FakeClient(
+            self.console, name="Bill", guid="billguid", groupBits=1, team=b3.TEAM_RED
+        )
+        self.superadmin = FakeClient(
+            self.console,
+            name="superadmin",
+            guid="superadminguid",
+            groupBits=128,
+            team=b3.TEAM_RED,
+        )

@@ -10,18 +10,20 @@ class mixin_cmd_paset:
     def setUp(self):
         super(mixin_cmd_paset, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 paset: 20
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
         self.p.onStartup()
 
-        self.sleep_patcher = patch.object(time, 'sleep')
+        self.sleep_patcher = patch.object(time, "sleep")
         self.sleep_patcher.start()
-        self.setCvar_patcher = patch.object(self.console, 'setCvar')
+        self.setCvar_patcher = patch.object(self.console, "setCvar")
         self.setCvar_mock = self.setCvar_patcher.start()
 
         self.moderator.connects("2")
@@ -36,23 +38,25 @@ paset: 20
 
     def test_nominal(self):
         # WHEN
-        self.moderator.says('!paset sv_foo bar')
+        self.moderator.says("!paset sv_foo bar")
         # THEN
-        self.assert_setCvar_calls([call('sv_foo', 'bar')])
+        self.assert_setCvar_calls([call("sv_foo", "bar")])
         self.assertListEqual([], self.moderator.message_history)
 
     def test_no_parameter(self):
         # WHEN
-        self.moderator.says('!paset')
+        self.moderator.says("!paset")
         # THEN
         self.assert_setCvar_calls([])
-        self.assertListEqual(['Invalid or missing data, try !help paset'], self.moderator.message_history)
+        self.assertListEqual(
+            ["Invalid or missing data, try !help paset"], self.moderator.message_history
+        )
 
     def test_no_value(self):
         # WHEN
-        self.moderator.says('!paset sv_foo')
+        self.moderator.says("!paset sv_foo")
         # THEN
-        self.assert_setCvar_calls([call('sv_foo', '')])
+        self.assert_setCvar_calls([call("sv_foo", "")])
         self.assertListEqual([], self.moderator.message_history)
 
 

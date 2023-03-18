@@ -3,23 +3,23 @@ import sys
 from logging import CRITICAL, ERROR, INFO, WARNING, DEBUG
 from logging import handlers
 
-__author__ = 'ThorN'
-__version__ = '1.7.2'
+__author__ = "ThorN"
+__version__ = "1.7.2"
 
 CONSOLE = 22
 BOT = 21
 VERBOSE = 9
 VERBOSE2 = 8
 
-logging.addLevelName(CRITICAL, 'CRITICAL')
-logging.addLevelName(ERROR, 'ERROR   ')
-logging.addLevelName(INFO, 'INFO    ')
-logging.addLevelName(WARNING, 'WARNING ')
-logging.addLevelName(DEBUG, 'DEBUG   ')
-logging.addLevelName(CONSOLE, 'CONSOLE ')
-logging.addLevelName(BOT, 'BOT     ')
-logging.addLevelName(VERBOSE, 'VERBOSE ')
-logging.addLevelName(VERBOSE2, 'VERBOS2 ')
+logging.addLevelName(CRITICAL, "CRITICAL")
+logging.addLevelName(ERROR, "ERROR   ")
+logging.addLevelName(INFO, "INFO    ")
+logging.addLevelName(WARNING, "WARNING ")
+logging.addLevelName(DEBUG, "DEBUG   ")
+logging.addLevelName(CONSOLE, "CONSOLE ")
+logging.addLevelName(BOT, "BOT     ")
+logging.addLevelName(VERBOSE, "VERBOSE ")
+logging.addLevelName(VERBOSE2, "VERBOS2 ")
 
 # this has to be done to prevent callstack checking in the logging
 # has been causing problems with threaded applications logging
@@ -30,7 +30,6 @@ __output = None
 
 
 class OutputHandler(logging.Logger):
-
     def __init__(self, name, level=logging.NOTSET):
         """
         Object constructor.
@@ -43,7 +42,7 @@ class OutputHandler(logging.Logger):
         """
         Log 'msg % args' with severity 'CRITICAL' and exit.
         """
-        kwargs['exc_info'] = True
+        kwargs["exc_info"] = True
         logging.Logger.critical(self, msg, *args, **kwargs)
         sys.exit(2)
 
@@ -129,7 +128,7 @@ class STDErrLogger:
 logging.setLoggerClass(OutputHandler)
 
 
-def getInstance(logfile='b3.log', loglevel=21, logsize=10485760, log2console=False):
+def getInstance(logfile="b3.log", loglevel=21, logsize=10485760, log2console=False):
     """
     Return a Logger instance.
     :param logfile: The logfile name.
@@ -140,12 +139,15 @@ def getInstance(logfile='b3.log', loglevel=21, logsize=10485760, log2console=Fal
     global __output
 
     if __output is None:
-
-        __output = logging.getLogger('output')
+        __output = logging.getLogger("output")
 
         # FILE HANDLER
-        file_formatter = logging.Formatter('%(asctime)s %(levelname)s [%(threadName)s] %(message)s')
-        handler = handlers.RotatingFileHandler(logfile, maxBytes=logsize, backupCount=5, encoding="UTF-8")
+        file_formatter = logging.Formatter(
+            "%(asctime)s %(levelname)s [%(threadName)s] %(message)s"
+        )
+        handler = handlers.RotatingFileHandler(
+            logfile, maxBytes=logsize, backupCount=5, encoding="UTF-8"
+        )
         handler.doRollover()
         handler.setFormatter(file_formatter)
 
@@ -153,7 +155,9 @@ def getInstance(logfile='b3.log', loglevel=21, logsize=10485760, log2console=Fal
 
         if log2console:
             # CONSOLE HANDLER
-            console_formatter = logging.Formatter('%(asctime)s\t%(levelname)s\t[%(threadName)s] %(message)s')
+            console_formatter = logging.Formatter(
+                "%(asctime)s\t%(levelname)s\t[%(threadName)s] %(message)s"
+            )
             handler2 = logging.StreamHandler(sys.stdout)
             handler2.setFormatter(console_formatter)
 

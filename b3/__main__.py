@@ -7,8 +7,8 @@ import b3.config
 import b3.functions
 import b3.update
 
-__author__ = 'ThorN'
-__version__ = '1.8'
+__author__ = "ThorN"
+__version__ = "1.8"
 
 
 def start(mainconfig, options):
@@ -19,14 +19,14 @@ def start(mainconfig, options):
     """
     b3.confdir = os.path.dirname(mainconfig.fileName)
 
-    print(f'Starting B3      : {b3.getB3versionString()}', flush=True)
+    print(f"Starting B3      : {b3.getB3versionString()}", flush=True)
 
     # not real loading but the user will get what's configuration he is using
     config_path = b3.functions.getShortPath(mainconfig.fileName, True)
-    print(f'Loading config   : {config_path}', flush=True)
+    print(f"Loading config   : {config_path}", flush=True)
 
-    parser_type = mainconfig.get('b3', 'parser')
-    print(f'Loading parser   : {parser_type}', flush=True)
+    parser_type = mainconfig.get("b3", "parser")
+    print(f"Loading parser   : {parser_type}", flush=True)
 
     parser = b3.functions.loadParser(parser_type)
     b3.console = parser(mainconfig, options)
@@ -67,8 +67,7 @@ def run(options):
     main_config = b3.config.get_main_config(options.config)
     if analysis := main_config.analyze():
         raise b3.config.ConfigFileNotValid(
-            'Invalid configuration file specified: ' +
-            '\n >>> '.join(analysis)
+            "Invalid configuration file specified: " + "\n >>> ".join(analysis)
         )
 
     start(main_config, options)
@@ -77,28 +76,28 @@ def run(options):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument(
-        '-c',
-        '--config',
-        dest='config',
+        "-c",
+        "--config",
+        dest="config",
         default=None,
-        metavar='b3.ini',
-        help='B3 config file. Example: -c b3.ini'
+        metavar="b3.ini",
+        help="B3 config file. Example: -c b3.ini",
     )
     p.add_argument(
-        '-u',
-        '--update',
-        action='store_true',
-        dest='update',
+        "-u",
+        "--update",
+        action="store_true",
+        dest="update",
         default=False,
-        help='Update B3 database to latest version'
+        help="Update B3 database to latest version",
     )
     p.add_argument(
-        '-v',
-        '--version',
-        action='version',
+        "-v",
+        "--version",
+        action="version",
         default=False,
         version=b3.getB3versionString(),
-        help='Show B3 version and exit'
+        help="Show B3 version and exit",
     )
 
     options, args = p.parse_known_args()
@@ -112,5 +111,5 @@ def main():
     run(options)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

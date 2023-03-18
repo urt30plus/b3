@@ -10,30 +10,40 @@ from tests.plugins.spamcontrol import SpamcontrolTestCase
 
 
 class Test_game_specific_spam(SpamcontrolTestCase):
-
     def setUp(self):
         SpamcontrolTestCase.setUp(self)
 
-        with open(getAbsolutePath('@b3/conf/plugin_spamcontrol.ini')) as default_conf:
+        with open(getAbsolutePath("@b3/conf/plugin_spamcontrol.ini")) as default_conf:
             self.init_plugin(default_conf.read())
 
-        self.joe = FakeClient(self.console, name="Joe", exactName="Joe", guid="zaerezarezar", groupBits=1)
+        self.joe = FakeClient(
+            self.console, name="Joe", exactName="Joe", guid="zaerezarezar", groupBits=1
+        )
         self.joe.connects("1")
 
         # let's say our game has a new event : EVT_CLIENT_RADIO
-        EVT_CLIENT_RADIO = self.console.Events.createEvent('EVT_CLIENT_RADIO', 'Event client radio')
+        EVT_CLIENT_RADIO = self.console.Events.createEvent(
+            "EVT_CLIENT_RADIO", "Event client radio"
+        )
 
         # teach the Spamcontrol plugin how to react on such events
         def onRadio(this, event):
-            new_event = Event(type=event.type, client=event.client, target=event.target, data=event.data['text'])
+            new_event = Event(
+                type=event.type,
+                client=event.client,
+                target=event.target,
+                data=event.data["text"],
+            )
             this.onChat(new_event)
 
         self.p.onRadio = MethodType(onRadio, self.p)
-        self.p.registerEvent('EVT_CLIENT_RADIO', self.p.onRadio)
+        self.p.registerEvent("EVT_CLIENT_RADIO", self.p.onRadio)
 
         # patch joe to make him able to send radio messages
         def radios(me, text):
-            me.console.queueEvent(Event(type=EVT_CLIENT_RADIO, client=me, data={'text': text}))
+            me.console.queueEvent(
+                Event(type=EVT_CLIENT_RADIO, client=me, data={"text": text})
+            )
 
         self.joe.radios = MethodType(radios, self.joe)
 

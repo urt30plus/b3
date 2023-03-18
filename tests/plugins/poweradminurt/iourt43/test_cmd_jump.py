@@ -9,10 +9,12 @@ class Test_cmd_jump(Iourt43TestCase):
     def setUp(self):
         super(Test_cmd_jump, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 pajump-jump: 20           ; change game type to Jump
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
@@ -27,4 +29,4 @@ pajump-jump: 20           ; change game type to Jump
         self.moderator.message_history = []
         self.moderator.says("!jump")
         self.console.write.assert_has_calls([call('set g_gametype "9"')])
-        self.assertEqual(['game type changed to Jump'], self.moderator.message_history)
+        self.assertEqual(["game type changed to Jump"], self.moderator.message_history)

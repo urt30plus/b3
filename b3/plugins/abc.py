@@ -9,7 +9,6 @@ import b3.plugins.hof
 
 
 class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
-
     def __init__(self, console, config=None):
         super().__init__(console, config)
         self._active = True
@@ -46,22 +45,22 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         self._total_kills += 1
         if self._total_kills == 1:
             self.console.write(
-                f'bigtext "^3{client.exactName} ^7: '
-                f'first {self.weapon_name} kill"'
+                f'bigtext "^3{client.exactName} ^7: ' f'first {self.weapon_name} kill"'
             )
 
         if client.cid not in self._killers:
             num_cuts = 1
             self._killers[client.cid] = client
         else:
-            num_cuts = client.var(self, 'kills', 0).value + 1
+            num_cuts = client.var(self, "kills", 0).value + 1
 
-        client.setvar(self, 'kills', num_cuts)
+        client.setvar(self, "kills", num_cuts)
 
         if not self._stfu and num_cuts in self._msg_levels:
-            msg = self.getMessage(f'{self.cmd_msg_prefix}kills_{num_cuts}',
-                                  {'name': client.exactName,
-                                   'score': num_cuts})
+            msg = self.getMessage(
+                f"{self.cmd_msg_prefix}kills_{num_cuts}",
+                {"name": client.exactName, "score": num_cuts},
+            )
             self.console.write(f'bigtext "{msg}"')
 
         if self._challenges and target is not None:
@@ -75,28 +74,28 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
     def onLoadConfig(self):
         self._top_n = self.getSetting(
-            'settings',
-            'top_n',
+            "settings",
+            "top_n",
             b3.INTEGER,
             self._top_n,
         )
 
         self._active = self.getSetting(
-            'settings',
-            'enabled',
+            "settings",
+            "enabled",
             b3.BOOLEAN,
             self._active,
         )
 
         self._challenge_duration = self.getSetting(
-            'settings',
-            'challengeduration',
+            "settings",
+            "challengeduration",
             b3.INTEGER,
             self._challenge_duration,
         )
 
-        for m in self.config.options('messages'):
-            sp = m.split('_', maxsplit=1)
+        for m in self.config.options("messages"):
+            sp = m.split("_", maxsplit=1)
             if len(sp) == 2:
                 try:
                     self._msg_levels.add(int(sp[1]))
@@ -108,22 +107,23 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
     def create_missing_command_methods(self):
         wanted_methods = {
-            f'cmd_{self.cmd_msg_prefix}{x[4:]}': getattr(self, x)
-            for x in dir(WeaponKillPlugin) if x.startswith('cmd_')
+            f"cmd_{self.cmd_msg_prefix}{x[4:]}": getattr(self, x)
+            for x in dir(WeaponKillPlugin)
+            if x.startswith("cmd_")
         }
         for name, method in wanted_methods.items():
             if not hasattr(self, name):
                 setattr(self, name, method)
 
     def onStartup(self):
-        self.registerEvent('EVT_GAME_ROUND_START', self.on_round_start)
-        self.registerEvent('EVT_CLIENT_KILL', self.on_client_kill)
-        self.registerEvent('EVT_GAME_EXIT', self.on_round_end)
+        self.registerEvent("EVT_GAME_ROUND_START", self.on_round_start)
+        self.registerEvent("EVT_CLIENT_KILL", self.on_client_kill)
+        self.registerEvent("EVT_GAME_EXIT", self.on_round_end)
 
     def on_round_start(self, event):
         self.cancel_challenges()
         for c in self.console.clients.getList():
-            c.setvar(self, 'kills', 0)
+            c.setvar(self, "kills", 0)
 
     def on_client_kill(self, event):
         if event.data[1] in self.weapons_handled:
@@ -143,20 +143,14 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         """\
         Enable the plugin
         """
-        cmd.sayLoudOrPM(
-            client,
-            f'^7{self.plugin_name.title()} Plugin : enabled'
-        )
+        cmd.sayLoudOrPM(client, f"^7{self.plugin_name.title()} Plugin : enabled")
         self._active = True
 
     def cmd_disable(self, data, client, cmd=None):
         """\
         Disable plugin commands, but still counts kills
         """
-        cmd.sayLoudOrPM(
-            client,
-            f'^7{self.plugin_name.title()} Plugin : disabled'
-        )
+        cmd.sayLoudOrPM(client, f"^7{self.plugin_name.title()} Plugin : disabled")
         self._active = False
 
     def cmd_stfu(self, data, client, cmd=None):
@@ -164,10 +158,9 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         Enable/disable silent mode (no more bigtexts)
         """
         self._stfu = not self._stfu
-        msg = 'on' if self._stfu else 'off'
+        msg = "on" if self._stfu else "off"
         cmd.sayLoudOrPM(
-            client,
-            f'^7{self.weapon_name.title()} plugin : silent mode {msg}'
+            client, f"^7{self.weapon_name.title()} plugin : silent mode {msg}"
         )
 
     def cmd_stats(self, data, client, cmd=None):
@@ -175,25 +168,22 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         <player> Display kills stats for a given client (or yourself)
         """
         if not self._active:
-            cmd.sayLoudOrPM(
-                client,
-                f'^7{self.weapon_name.title()} stats are disabled'
-            )
+            cmd.sayLoudOrPM(client, f"^7{self.weapon_name.title()} stats are disabled")
             return
         msg = None
         if not data:
             if client.cid in self._killers:
-                kills = client.var(self, 'kills', 0).value
-                msg = f'{client.exactName} : ^2{kills} ^7{self.weapon_name} kills'
+                kills = client.var(self, "kills", 0).value
+                msg = f"{client.exactName} : ^2{kills} ^7{self.weapon_name} kills"
             else:
-                msg = f'^7No {self.weapon_name} kill yet... try again'
+                msg = f"^7No {self.weapon_name} kill yet... try again"
         else:
             if m := self.parseUserCmd(data):
                 if sclient := self.findClientPrompt(m[0], client):
-                    kills = sclient.var(self, 'kills', 0).value
-                    msg = f'{sclient.exactName} : ^2{kills} ^7{self.weapon_name} kills'
+                    kills = sclient.var(self, "kills", 0).value
+                    msg = f"{sclient.exactName} : ^2{kills} ^7{self.weapon_name} kills"
                 else:
-                    msg = 'No player found'
+                    msg = "No player found"
         if msg:
             cmd.sayLoudOrPM(client, msg)
 
@@ -202,10 +192,10 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         List the top killers for the current map
         """
         if not self._active:
-            client.message(f'^7{self.weapon_name.title()} stats are disabled')
+            client.message(f"^7{self.weapon_name.title()} stats are disabled")
             return
         if not self._killers:
-            client.message(f'^7No top {self.weapon_name} stats for the moment')
+            client.message(f"^7No top {self.weapon_name} stats for the moment")
         else:
             self.display_scores()
 
@@ -215,15 +205,12 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         """
         if not self._active or self._stfu:
             cmd.sayLoudOrPM(
-                client,
-                f'^7{self.weapon_name.title()} challenges are disabled'
+                client, f"^7{self.weapon_name.title()} challenges are disabled"
             )
             return
 
         if not (m := self.parseUserCmd(data)):
-            client.message(
-                f'^7Invalid data, try !help {self.cmd_msg_prefix}challenge'
-            )
+            client.message(f"^7Invalid data, try !help {self.cmd_msg_prefix}challenge")
             return
 
         if not (sclient := self.findClientPrompt(m[0], client)):
@@ -231,14 +218,13 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
         if self._challenges.get(sclient.cid):
             client.message(
-                f'There is already a challenge underway for {sclient.exactName}'
+                f"There is already a challenge underway for {sclient.exactName}"
             )
             return
 
         if len(self._challenges) >= self._max_challenges:
             client.message(
-                'There are already several challenges underway, '
-                'try again later'
+                "There are already several challenges underway, " "try again later"
             )
             return
 
@@ -264,24 +250,23 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
                 self.plugin_name,
             )
         except LookupError:
-            message = '^7No record found on this map'
+            message = "^7No record found on this map"
         else:
             message = (
-                f'^7{self.weapon_name.title()} kills record on this map: '
-                f'^1{record.client.exactName} ^2{record.score} ^7kills'
+                f"^7{self.weapon_name.title()} kills record on this map: "
+                f"^1{record.client.exactName} ^2{record.score} ^7kills"
             )
 
         client.message(message)
 
     def display_scores(self):
-        if top_kills := self._top_killers(self._killers, 'kills',
-                                          limit=self._top_n):
+        if top_kills := self._top_killers(self._killers, "kills", limit=self._top_n):
             results = [
-                f'^1#{i}. ^4{score[1].name} ^1(^3{score[0]}^1)^7'
+                f"^1#{i}. ^4{score[1].name} ^1(^3{score[0]}^1)^7"
                 for i, score in enumerate(top_kills)
             ]
             self.console.say(
-                f'^1Top {len(top_kills)} {self.weapon_name} killers '
+                f"^1Top {len(top_kills)} {self.weapon_name} killers "
                 f'(total {self._total_kills})  : {" ,".join(results)}'
             )
 
@@ -305,8 +290,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
     def challenge_end(self, target_id=None, target_name=None):
         self.console.write(
-            f'bigtext "^3{target_name} ^7has won the '
-            f'{self.weapon_name} challenge!"'
+            f'bigtext "^3{target_name} ^7has won the ' f'{self.weapon_name} challenge!"'
         )
         try:
             del self._challenges[target_id]
@@ -314,7 +298,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
             pass
 
     def update_hall_of_fame(self, killers, map_name):
-        if top_kills := self._top_killers(killers, 'kills', limit=1):
+        if top_kills := self._top_killers(killers, "kills", limit=1):
             best_score, best_player = top_kills[0]
         else:
             return
@@ -329,21 +313,18 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
         if record.is_new:
             message = (
-                f'^2{record.score} ^{self.weapon_name} kills: congratulations '
-                f'^3{record.client.exactName}^7, new record on this map!!'
+                f"^2{record.score} ^{self.weapon_name} kills: congratulations "
+                f"^3{record.client.exactName}^7, new record on this map!!"
             )
         else:
             message = (
-                f'^7{self.weapon_name.title()} kills record on this map: '
-                f'^1{record.client.exactName} ^2{record.score} ^7kills'
+                f"^7{self.weapon_name.title()} kills record on this map: "
+                f"^1{record.client.exactName} ^2{record.score} ^7kills"
             )
 
         self.console.say(message)
 
     def _top_killers(self, killers, cvar_name, limit=5):
-        scores = [
-            (c.var(self, cvar_name, 0).value, c)
-            for c in killers.values()
-        ]
+        scores = [(c.var(self, cvar_name, 0).value, c) for c in killers.values()]
         scores.sort(key=operator.itemgetter(0), reverse=True)
         return [x for x in scores[:limit] if x[0] > 0]

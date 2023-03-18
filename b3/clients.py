@@ -7,7 +7,6 @@ import b3.functions
 
 
 class Cvar:
-
     def __init__(self, name, **kwargs):
         """
         Object constructor.
@@ -42,10 +41,12 @@ class Cvar:
         String object representation.
         :return A string representing this CVAR.
         """
-        return '<%s name: "%s", value: "%s", default: "%s">' % (self.__class__.__name__,
-                                                                self.name,
-                                                                self.value,
-                                                                self.default)
+        return '<%s name: "%s", value: "%s", default: "%s">' % (
+            self.__class__.__name__,
+            self.name,
+            self.value,
+            self.default,
+        )
 
     def getString(self):
         """
@@ -73,9 +74,9 @@ class Cvar:
         Return the CVAR value as a boolean value.
         :return boolean
         """
-        if self.value in ('yes', '1', 'on', 'true'):
+        if self.value in ("yes", "1", "on", "true"):
             return True
-        elif self.value in ('no', '0', 'off', 'false'):
+        elif self.value in ("no", "0", "off", "false"):
             return False
         else:
             raise ValueError(f"{self.value} is not a boolean value")
@@ -89,7 +90,6 @@ class Cvar:
 
 
 class ClientVar:
-
     def __init__(self, value):
         """
         Object constructor.
@@ -110,7 +110,7 @@ class ClientVar:
         Return the current variable as a string.
         """
         if self.value is None:
-            return ''
+            return ""
         return str(self.value)
 
     def items(self):
@@ -134,23 +134,23 @@ class Client:
     # PVT
     _autoLogin = 1
     _data = None
-    _exactName = ''
-    _greeting = ''
+    _exactName = ""
+    _greeting = ""
     _groupBits = 0
     _groups = None
-    _guid = ''
+    _guid = ""
     _id = 0
-    _ip = ''
+    _ip = ""
     _lastVisit = None
-    _login = ''
+    _login = ""
     _maskGroup = None
     _maskLevel = 0
     _maxGroup = None
     _maxLevel = None
-    _name = ''
-    _password = ''
+    _name = ""
+    _password = ""
     _pluginData = None
-    _pbid = ''
+    _pbid = ""
     _team = b3.TEAM_UNKNOWN
     _tempLevel = None
     _timeAdd = 0
@@ -176,8 +176,8 @@ class Client:
         self._data = {}
 
         # make sure to set console before anything else
-        if 'console' in kwargs:
-            self.console = kwargs['console']
+        if "console" in kwargs:
+            self.console = kwargs["console"]
 
         for k, v in kwargs.items():
             setattr(self, k, v)
@@ -257,7 +257,7 @@ class Client:
     aliases = property(getAliases)
 
     def getBans(self):
-        return self.console.storage.getClientPenalties(self, type=('Ban', 'TempBan'))
+        return self.console.storage.getClientPenalties(self, type=("Ban", "TempBan"))
 
     bans = property(getBans)
 
@@ -273,7 +273,7 @@ class Client:
     def _get_firstWarn(self):
         if not self.id:
             return None
-        return self.console.storage.getClientFirstPenalty(self, 'Warning')
+        return self.console.storage.getClientFirstPenalty(self, "Warning")
 
     firstWarning = property(_get_firstWarn)
 
@@ -309,14 +309,14 @@ class Client:
     def _get_lastBan(self):
         if not self.id:
             return None
-        return self.console.storage.getClientLastPenalty(self, ('Ban', 'TempBan'))
+        return self.console.storage.getClientLastPenalty(self, ("Ban", "TempBan"))
 
     lastBan = property(_get_lastBan)
 
     def _get_lastWarn(self):
         if not self.id:
             return None
-        return self.console.storage.getClientLastPenalty(self, 'Warning')
+        return self.console.storage.getClientLastPenalty(self, "Warning")
 
     lastWarning = property(_get_lastWarn)
 
@@ -331,7 +331,7 @@ class Client:
 
                 self._maxLevel = m
             elif self._tempLevel:
-                self._maxGroup = Group(id=-1, name='Unspecified', level=self._tempLevel)
+                self._maxGroup = Group(id=-1, name="Unspecified", level=self._tempLevel)
                 return self._tempLevel
             else:
                 return 0
@@ -349,14 +349,14 @@ class Client:
     def _get_numBans(self):
         if not self.id:
             return 0
-        return self.console.storage.numPenalties(self, ('Ban', 'TempBan'))
+        return self.console.storage.numPenalties(self, ("Ban", "TempBan"))
 
     numBans = property(_get_numBans)
 
     def _get_numWarns(self):
         if not self.id:
             return 0
-        return self.console.storage.numPenalties(self, 'Warning')
+        return self.console.storage.numPenalties(self, "Warning")
 
     numWarnings = property(_get_numWarns)
 
@@ -365,9 +365,16 @@ class Client:
             previous_team = self.team
             self._team = team
             if self.console:
-                self.console.queueEvent(self.console.getEvent('EVT_CLIENT_TEAM_CHANGE', self.team, self))
-                self.console.queueEvent(self.console.getEvent('EVT_CLIENT_TEAM_CHANGE2', {'previous': previous_team,
-                                                                                          'new': self.team}, self))
+                self.console.queueEvent(
+                    self.console.getEvent("EVT_CLIENT_TEAM_CHANGE", self.team, self)
+                )
+                self.console.queueEvent(
+                    self.console.getEvent(
+                        "EVT_CLIENT_TEAM_CHANGE2",
+                        {"previous": previous_team, "new": self.team},
+                        self,
+                    )
+                )
 
     def _get_team(self):
         return self._team
@@ -375,7 +382,7 @@ class Client:
     team = property(_get_team, _set_team)
 
     def getWarnings(self):
-        return self.console.storage.getClientPenalties(self, type='Warning')
+        return self.console.storage.getClientPenalties(self, type="Warning")
 
     warnings = property(getWarnings)
 
@@ -432,13 +439,15 @@ class Client:
     def _set_guid(self, guid):
         if guid and len(guid) > 2:
             if self._guid and self._guid != guid:
-                self.console.warning('Client has guid but its not the same %s <> %s', self._guid, guid)
+                self.console.warning(
+                    "Client has guid but its not the same %s <> %s", self._guid, guid
+                )
                 self.authed = False
             elif not self._guid:
                 self._guid = guid
         else:
             self.authed = False
-            self._guid = ''
+            self._guid = ""
 
     def _get_guid(self):
         return self._guid
@@ -457,8 +466,8 @@ class Client:
     id = property(_get_id, _set_id)
 
     def _set_ip(self, ip):
-        if ':' in ip:
-            ip = ip[0:ip.find(':')]
+        if ":" in ip:
+            ip = ip[0 : ip.find(":")]
         if self._ip != ip:
             self.makeIpAlias(self._ip)
         self._ip = ip
@@ -487,7 +496,9 @@ class Client:
             try:
                 group = self.console.storage.getGroup(Group(level=self.maskLevel))
             except Exception as err:
-                self.console.error("Could not find group with level %r" % self.maskLevel, exc_info=err)
+                self.console.error(
+                    "Could not find group with level %r" % self.maskLevel, exc_info=err
+                )
                 self.maskLevel = 0
                 return None
             else:
@@ -527,15 +538,17 @@ class Client:
 
         if self._name == newName:
             return
-        if self.cid == '-1' or self.cid == 'Server':  # bfbc2 addition
+        if self.cid == "-1" or self.cid == "Server":  # bfbc2 addition
             return
 
         self.makeAlias(self._name)
         self._name = newName
-        self._exactName = name + '^7'
+        self._exactName = name + "^7"
 
         if self.console and self.authed:
-            self.console.queueEvent(self.console.getEvent('EVT_CLIENT_NAME_CHANGE', self.name, self))
+            self.console.queueEvent(
+                self.console.getEvent("EVT_CLIENT_NAME_CHANGE", self.name, self)
+            )
 
     def _get_name(self):
         return self._name
@@ -591,7 +604,7 @@ class Client:
         """
         self.console.clients.disconnect(self)
 
-    def kick(self, reason='', keyword=None, admin=None, silent=False, data='', *kwargs):
+    def kick(self, reason="", keyword=None, admin=None, silent=False, data="", *kwargs):
         """
         Kick the client.
         :param reason: The reason for this kick
@@ -617,7 +630,7 @@ class Client:
             kick.timeExpire = -1
             kick.save(self.console)
 
-    def ban(self, reason='', keyword=None, admin=None, silent=False, data='', *kwargs):
+    def ban(self, reason="", keyword=None, admin=None, silent=False, data="", *kwargs):
         """
         Permban the client.
         :param reason: The reason for this ban
@@ -650,9 +663,15 @@ class Client:
         if ban.timeExpire == -1:
             self.console.ban(self, ban.reason, None, True)
         elif ban.timeExpire > self.console.time():
-            self.console.tempban(self, ban.reason, int((ban.timeExpire - self.console.time()) / 60), None, True)
+            self.console.tempban(
+                self,
+                ban.reason,
+                int((ban.timeExpire - self.console.time()) / 60),
+                None,
+                True,
+            )
 
-    def unban(self, reason='', admin=None, silent=False, *kwargs):
+    def unban(self, reason="", admin=None, silent=False, *kwargs):
         """
         Unban the client.
         :param reason: The reason for the unban
@@ -664,7 +683,16 @@ class Client:
             ban.inactive = 1
             ban.save(self.console)
 
-    def tempban(self, reason='', keyword=None, duration=2, admin=None, silent=False, data='', *kwargs):
+    def tempban(
+        self,
+        reason="",
+        keyword=None,
+        duration=2,
+        admin=None,
+        silent=False,
+        data="",
+        *kwargs,
+    ):
         """
         Tempban this client.
         :param reason: The reason for this tempban
@@ -701,7 +729,7 @@ class Client:
         """
         self.console.message(self, msg, *args)
 
-    def warn(self, duration, warning, keyword=None, admin=None, data=''):
+    def warn(self, duration, warning, keyword=None, admin=None, data=""):
         """
         Warn this client.
         :param duration: The duration of this warning
@@ -728,13 +756,19 @@ class Client:
             warn.save(self.console)
 
             if self.console:
-                self.console.queueEvent(self.console.getEvent('EVT_CLIENT_WARN', data={
-                    'reason': warn.reason,
-                    'duration': warn.duration,
-                    'data': warn.data,
-                    'admin': admin,
-                    'timeExpire': warn.timeExpire
-                }, client=self))
+                self.console.queueEvent(
+                    self.console.getEvent(
+                        "EVT_CLIENT_WARN",
+                        data={
+                            "reason": warn.reason,
+                            "duration": warn.duration,
+                            "data": warn.data,
+                            "admin": admin,
+                            "timeExpire": warn.timeExpire,
+                        },
+                        client=self,
+                    )
+                )
 
             return warn
 
@@ -759,11 +793,17 @@ class Client:
             notice_object.save(self.console)
 
             if self.console:
-                self.console.queueEvent(self.console.getEvent('EVT_CLIENT_NOTICE', data={
-                    'notice': notice,
-                    'admin': admin,
-                    'timeAdd': notice_object.timeAdd
-                }, client=self))
+                self.console.queueEvent(
+                    self.console.getEvent(
+                        "EVT_CLIENT_NOTICE",
+                        data={
+                            "notice": notice,
+                            "admin": admin,
+                            "timeAdd": notice_object.timeAdd,
+                        },
+                        client=self,
+                    )
+                )
 
             return notice_object
 
@@ -776,7 +816,9 @@ class Client:
             return
 
         try:
-            alias = self.console.storage.getClientAlias(Alias(clientId=self.id, alias=name))
+            alias = self.console.storage.getClientAlias(
+                Alias(clientId=self.id, alias=name)
+            )
         except KeyError:
             alias = None
 
@@ -789,7 +831,9 @@ class Client:
             alias = Alias(clientId=self.id, alias=name)
 
         alias.save(self.console)
-        self.console.bot('Created new alias for client @%s: %s', str(self.id), alias.alias)
+        self.console.bot(
+            "Created new alias for client @%s: %s", str(self.id), alias.alias
+        )
 
     def makeIpAlias(self, ip):
         """
@@ -800,7 +844,9 @@ class Client:
             return
 
         try:
-            alias = self.console.storage.getClientIpAddress(IpAlias(clientId=self.id, ip=ip))
+            alias = self.console.storage.getClientIpAddress(
+                IpAlias(clientId=self.id, ip=ip)
+            )
         except KeyError:
             alias = None
 
@@ -813,23 +859,27 @@ class Client:
             alias = IpAlias(clientId=self.id, ip=ip)
 
         alias.save(self.console)
-        self.console.bot('Created new IP alias for client @%s: %s', str(self.id), alias.ip)
+        self.console.bot(
+            "Created new IP alias for client @%s: %s", str(self.id), alias.ip
+        )
 
     def save(self, console=None):
         """
         Save the current client in the storage.
         """
         self.timeEdit = time.time()
-        if self.guid is None or str(self.guid) == '0':
+        if self.guid is None or str(self.guid) == "0":
             # can't save a client without a guid
             return False
         else:
             # fix missing pbid. Workaround a bug in the database layer that would insert the string "None"
             # in db if pbid is None :/ The empty string being the default value for that db column!! Ã´O
             if self.pbid is None:
-                self.pbid = ''
+                self.pbid = ""
             if console:
-                self.console.queueEvent(self.console.getEvent('EVT_CLIENT_UPDATE', data=self, client=self))
+                self.console.queueEvent(
+                    self.console.getEvent("EVT_CLIENT_UPDATE", data=self, client=self)
+                )
             return self.console.storage.setClient(self)
 
     def auth(self):
@@ -846,7 +896,7 @@ class Client:
 
             if not pbid and self.cid:
                 fsa_info = self.console.queryClientFrozenSandAccount(self.cid)
-                self.pbid = pbid = fsa_info.get('login', None)
+                self.pbid = pbid = fsa_info.get("login", None)
 
             # FSA will be found in pbid
             if not self.pbid:
@@ -854,7 +904,7 @@ class Client:
                 try:
                     in_storage = self.auth_by_guid()
                     # fix up corrupted data due to bug #162
-                    if in_storage and in_storage.pbid == 'None':
+                    if in_storage and in_storage.pbid == "None":
                         in_storage.pbid = None
                 except Exception as e:
                     self.console.error("Auth by guid failed", exc_info=e)
@@ -874,17 +924,26 @@ class Client:
                     try:
                         in_storage = self.auth_by_guid()
                     except Exception as e:
-                        self.console.error("Auth by guid failed (when no known FSA)", exc_info=e)
+                        self.console.error(
+                            "Auth by guid failed (when no known FSA)", exc_info=e
+                        )
                         self.authorizing = False
                         return False
 
             if in_storage:
                 self.lastVisit = self.timeEdit
-                self.console.bot("Client found in the storage @%s: welcome back %s [FSA: '%s']", self.id, self.name,
-                                 self.pbid)
+                self.console.bot(
+                    "Client found in the storage @%s: welcome back %s [FSA: '%s']",
+                    self.id,
+                    self.name,
+                    self.pbid,
+                )
             else:
-                self.console.bot("Client not found in the storage %s [FSA: '%s'], create new", str(self.guid),
-                                 self.pbid)
+                self.console.bot(
+                    "Client not found in the storage %s [FSA: '%s'], create new",
+                    str(self.guid),
+                    self.pbid,
+                )
 
             self.connections = int(self.connections) + 1
             self.name = name
@@ -893,7 +952,6 @@ class Client:
                 self.pbid = pbid
             self.save()
             self.authed = True
-
 
             # check for bans
             if self.numBans > 0:
@@ -904,7 +962,9 @@ class Client:
                     return False
 
             self.refreshLevel()
-            self.console.queueEvent(self.console.getEvent('EVT_CLIENT_AUTH', data=self, client=self))
+            self.console.queueEvent(
+                self.console.getEvent("EVT_CLIENT_AUTH", data=self, client=self)
+            )
             self.authorizing = False
             return self.authed
         else:
@@ -917,16 +977,20 @@ class Client:
         try:
             return self.console.storage.getClient(self)
         except KeyError as msg:
-            self.console.warning('auth_by_guid: user not found %s: %s', self.guid, msg)
+            self.console.warning("auth_by_guid: user not found %s: %s", self.guid, msg)
             return False
 
     def auth_by_pbid(self):
         """
         Authorize this client using his PBID.
         """
-        clients_matching_pbid = self.console.storage.getClientsMatching(dict(pbid=self.pbid))
+        clients_matching_pbid = self.console.storage.getClientsMatching(
+            dict(pbid=self.pbid)
+        )
         if len(clients_matching_pbid) > 1:
-            self.console.warning("Found %s client having FSA '%s'", len(clients_matching_pbid), self.pbid)
+            self.console.warning(
+                "Found %s client having FSA '%s'", len(clients_matching_pbid), self.pbid
+            )
             return self.auth_by_pbid_and_guid()
         elif len(clients_matching_pbid) == 1:
             self.id = clients_matching_pbid[0].id
@@ -943,29 +1007,44 @@ class Client:
                     self._guid = None
             return self.console.storage.getClient(self)
         else:
-            self.console.warning('Frozen Sand account [%s] unknown in database', self.pbid)
+            self.console.warning(
+                "Frozen Sand account [%s] unknown in database", self.pbid
+            )
             return False
 
     def auth_by_pbid_and_guid(self):
         """
         Authorize this client using both his PBID and GUID.
         """
-        clients_matching_pbid = self.console.storage.getClientsMatching({'pbid': self.pbid, 'guid': self.guid})
+        clients_matching_pbid = self.console.storage.getClientsMatching(
+            {"pbid": self.pbid, "guid": self.guid}
+        )
         if clients_matching_pbid:
             self.id = clients_matching_pbid[0].id
             return self.console.storage.getClient(self)
         else:
-            self.console.warning("Frozen Sand account [%s] with guid '%s' unknown in database", self.pbid, self.guid)
+            self.console.warning(
+                "Frozen Sand account [%s] with guid '%s' unknown in database",
+                self.pbid,
+                self.guid,
+            )
             return False
 
     def __str__(self):
-        return "Client<@%s:%s|%s:\"%s\":%s>" % (self.id, self.guid, self.pbid, self.name, self.cid)
+        return 'Client<@%s:%s|%s:"%s":%s>' % (
+            self.id,
+            self.guid,
+            self.pbid,
+            self.name,
+            self.cid,
+        )
 
 
 class Struct:
     """
     Base class for Penalty/Alias/IpAlias/Group classes.
     """
+
     _id = 0
 
     def __init__(self, **kwargs):
@@ -991,11 +1070,12 @@ class Penalty(Struct):
     """
     Represent a penalty.
     """
-    data = ''
+
+    data = ""
     inactive = 0
-    keyword = ''
-    reason = ''
-    type = ''
+    keyword = ""
+    reason = ""
+    type = ""
 
     _adminId = None
     _clientId = None
@@ -1067,7 +1147,8 @@ class ClientWarning(Penalty):
     """
     Represent a Warning.
     """
-    type = 'Warning'
+
+    type = "Warning"
 
     def _get_reason(self):
         return self.reason
@@ -1082,7 +1163,8 @@ class ClientNotice(Penalty):
     """
     Represent a Notice.
     """
-    type = 'Notice'
+
+    type = "Notice"
 
     def _get_reason(self):
         return self.reason
@@ -1097,28 +1179,32 @@ class ClientBan(Penalty):
     """
     Represent a Ban.
     """
-    type = 'Ban'
+
+    type = "Ban"
 
 
 class ClientTempBan(Penalty):
     """
     Represent a TempBan.
     """
-    type = 'TempBan'
+
+    type = "TempBan"
 
 
 class ClientKick(Penalty):
     """
     Represent a Kick.
     """
-    type = 'Kick'
+
+    type = "Kick"
 
 
 class Alias(Struct):
     """
     Represent an Alias.
     """
-    _alias = ''
+
+    _alias = ""
     _clientId = 0
     _numUsed = 1
     _timeAdd = 0
@@ -1175,14 +1261,19 @@ class Alias(Struct):
         return console.storage.setClientAlias(self)
 
     def __str__(self):
-        return "Alias(id=%s, alias=\"%s\", clientId=%s, numUsed=%s)" % (
-            self.id, self.alias, self.clientId, self.numUsed)
+        return 'Alias(id=%s, alias="%s", clientId=%s, numUsed=%s)' % (
+            self.id,
+            self.alias,
+            self.clientId,
+            self.numUsed,
+        )
 
 
 class IpAlias(Struct):
     """
     Represent an Ip Alias.
     """
+
     _ip = None
     _clientId = 0
     _numUsed = 1
@@ -1241,15 +1332,21 @@ class IpAlias(Struct):
         return console.storage.setClientIpAddress(self)
 
     def __str__(self):
-        return "IpAlias(id=%s, ip=\"%s\", clientId=%s, numUsed=%s)" % (self.id, self.ip, self.clientId, self.numUsed)
+        return 'IpAlias(id=%s, ip="%s", clientId=%s, numUsed=%s)' % (
+            self.id,
+            self.ip,
+            self.clientId,
+            self.numUsed,
+        )
 
 
 class Group(Struct):
     """
     Represent a Group.
     """
-    _name = ''
-    _keyword = ''
+
+    _name = ""
+    _keyword = ""
     _level = 0
     _timeAdd = 0
     _timeEdit = 0
@@ -1361,7 +1458,7 @@ class Clients(dict):
         Search a client by matching his exact name.
         :param name: The name to use for the search
         """
-        name = name.lower() + '^7'
+        name = name.lower() + "^7"
         try:
             c = self[self._exactNameIndex[name]]
             return c
@@ -1389,7 +1486,9 @@ class Clients(dict):
         for cid, c in self.items():
             if c.hide:
                 continue
-            elif not masked and c.maskGroup and minlevel <= c.maskGroup.level <= maxlevel:
+            elif (
+                not masked and c.maskGroup and minlevel <= c.maskGroup.level <= maxlevel
+            ):
                 clist.append(c)
             elif not masked and c.maskGroup:
                 continue
@@ -1403,10 +1502,11 @@ class Clients(dict):
         Return a list of clients matching the given name.
         :param name: The name to match
         """
-        needle = re.sub(r'\s', '', name.lower())
+        needle = re.sub(r"\s", "", name.lower())
         return [
-            c for _, c in self.items()
-            if not c.hide and needle in re.sub(r'\s', '', c.name.lower())
+            c
+            for _, c in self.items()
+            if not c.hide and needle in re.sub(r"\s", "", c.name.lower())
         ]
 
     def getClientLikeName(self, name):
@@ -1430,9 +1530,13 @@ class Clients(dict):
         """
         Return the client matching the given database id.
         """
-        if m := re.match(r'^@([0-9]+)$', client_id):
+        if m := re.match(r"^@([0-9]+)$", client_id):
             try:
-                if not (sclient := self.console.storage.getClientsMatching({'id': m.group(1)})):
+                if not (
+                    sclient := self.console.storage.getClientsMatching(
+                        {"id": m.group(1)}
+                    )
+                ):
                     return []
 
                 collection = []
@@ -1459,24 +1563,28 @@ class Clients(dict):
         :param handle: The handle to use for the search
         """
         handle = handle.strip()
-        if re.match(r'^[0-9]+$', handle):
+        if re.match(r"^[0-9]+$", handle):
             client = self.getByCID(handle)
             if client:
                 return [client]
             return []
-        elif re.match(r'^@([0-9]+)$', handle):
+        elif re.match(r"^@([0-9]+)$", handle):
             return self.getByDB(handle)
-        elif handle[:1] == '\\':
+        elif handle[:1] == "\\":
             c = self.getByName(handle[1:])
             if c and not c.hide:
                 return [c]
             return []
         else:
             clients = []
-            needle = re.sub(r'\s', '', handle.lower())
+            needle = re.sub(r"\s", "", handle.lower())
             for cid, c in self.items():
-                cleanname = re.sub(r'\s', '', c.name.lower())
-                if not c.hide and (needle in cleanname or needle in c.pbid) and c not in clients:
+                cleanname = re.sub(r"\s", "", c.name.lower())
+                if (
+                    not c.hide
+                    and (needle in cleanname or needle in c.pbid)
+                    and c not in clients
+                ):
                     clients.append(c)
             return clients
 
@@ -1507,7 +1615,7 @@ class Clients(dict):
         except KeyError:
             return None
         except Exception as e:
-            self.console.error('Unexpected error getByCID(%s) - %s', cid, e)
+            self.console.error("Unexpected error getByCID(%s) - %s", cid, e)
         else:
             if c.cid == cid:
                 return c
@@ -1525,7 +1633,7 @@ class Clients(dict):
 
         name = b3.functions.escape_string(name)
 
-        if sclient := self.console.storage.getClientsMatching({'%name%': name}):
+        if sclient := self.console.storage.getClientsMatching({"%name%": name}):
             clients = []
             for c in sclient:
                 c.clients = self
@@ -1544,13 +1652,15 @@ class Clients(dict):
         Will search in the storage only.
         """
         try:
-            group = Group(keyword='superadmin')
+            group = Group(keyword="superadmin")
             group = self.console.storage.getGroup(group)
         except Exception as e:
-            self.console.error('Could not get superadmin group: %s', e)
+            self.console.error("Could not get superadmin group: %s", e)
             return False
 
-        if sclient := self.console.storage.getClientsMatching({'&group_bits': group.id}):
+        if sclient := self.console.storage.getClientsMatching(
+            {"&group_bits": group.id}
+        ):
             clients = []
             for c in sclient:
                 c.clients = self
@@ -1575,7 +1685,9 @@ class Clients(dict):
         if cid in self:
             self[cid] = None
             del self[cid]
-            self.console.queueEvent(self.console.getEvent('EVT_CLIENT_DISCONNECT', data=cid, client=client))
+            self.console.queueEvent(
+                self.console.getEvent("EVT_CLIENT_DISCONNECT", data=cid, client=client)
+            )
 
         self.resetIndex()
 
@@ -1593,10 +1705,14 @@ class Clients(dict):
         :param cid: The client slot number
         :param kwargs: The client attributes
         """
-        client = Client(console=self.console, cid=cid, timeAdd=self.console.time(), **kwargs)
+        client = Client(
+            console=self.console, cid=cid, timeAdd=self.console.time(), **kwargs
+        )
         self[client.cid] = client
         self.resetIndex()
-        self.console.queueEvent(self.console.getEvent('EVT_CLIENT_CONNECT', data=client, client=client))
+        self.console.queueEvent(
+            self.console.getEvent("EVT_CLIENT_CONNECT", data=client, client=client)
+        )
 
         if client.guid and not client.bot:
             client.auth()

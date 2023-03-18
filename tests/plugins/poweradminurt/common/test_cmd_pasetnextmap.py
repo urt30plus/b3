@@ -12,16 +12,18 @@ class mixin_cmd_pasetnextmap:
     def setUp(self):
         super(mixin_cmd_pasetnextmap, self).setUp()
         self.conf = CfgConfigParser()
-        self.conf.loadFromString("""
+        self.conf.loadFromString(
+            """
 [commands]
 pasetnextmap-snmap: 20
-        """)
+        """
+        )
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()
         self.p.onLoadConfig()
         self.p.onStartup()
 
-        self.sleep_patcher = patch.object(time, 'sleep')
+        self.sleep_patcher = patch.object(time, "sleep")
         self.sleep_patcher.start()
 
         self.console.say = Mock()
@@ -37,27 +39,30 @@ pasetnextmap-snmap: 20
     def test_missing_parameter(self):
         self.moderator.clearMessageHistory()
         self.moderator.says("!snmap")
-        self.assertEqual(['Invalid or missing data, try !help pasetnextmap'], self.moderator.message_history)
+        self.assertEqual(
+            ["Invalid or missing data, try !help pasetnextmap"],
+            self.moderator.message_history,
+        )
 
     def test_existing_map(self):
         # GIVEN
-        when(self.console).getMapsSoundingLike('f00').thenReturn('f00')
+        when(self.console).getMapsSoundingLike("f00").thenReturn("f00")
         # WHEN
         self.moderator.clearMessageHistory()
         self.moderator.says("!snmap f00")
         # THEN
-        verify(self.console).getMapsSoundingLike('f00')
-        self.assertEqual(['nextmap set to f00'], self.moderator.message_history)
+        verify(self.console).getMapsSoundingLike("f00")
+        self.assertEqual(["nextmap set to f00"], self.moderator.message_history)
 
     def test_suggestions(self):
         # GIVEN
-        when(self.console).getMapsSoundingLike('f00').thenReturn(['f001', 'foo2'])
+        when(self.console).getMapsSoundingLike("f00").thenReturn(["f001", "foo2"])
         # WHEN
         self.moderator.clearMessageHistory()
         self.moderator.says("!snmap f00")
         # THEN
-        verify(self.console).getMapsSoundingLike('f00')
-        self.assertEqual(['do you mean : f001, foo2 ?'], self.moderator.message_history)
+        verify(self.console).getMapsSoundingLike("f00")
+        self.assertEqual(["do you mean : f001, foo2 ?"], self.moderator.message_history)
 
 
 class Test_cmd_nuke_43(mixin_cmd_pasetnextmap, Iourt43TestCase):

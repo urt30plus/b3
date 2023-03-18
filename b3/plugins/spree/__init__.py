@@ -2,12 +2,11 @@ import b3
 import b3.events
 import b3.plugin
 
-__author__ = 'Walker, ThorN'
-__version__ = '1.2.3'
+__author__ = "Walker, ThorN"
+__version__ = "1.2.3"
 
 
 class SpreeStats:
-
     def __init__(self) -> None:
         self.kills = 0
         self.deaths = 0
@@ -26,8 +25,7 @@ class SpreeStats:
 
 
 class SpreePlugin(b3.plugin.Plugin):
-
-    VAR_NAME = 'spree_info'
+    VAR_NAME = "spree_info"
 
     def __init__(self, console, config=None) -> None:
         super().__init__(console, config)
@@ -37,28 +35,27 @@ class SpreePlugin(b3.plugin.Plugin):
 
     def onLoadConfig(self) -> None:
         self._reset_spree_stats = self.getSetting(
-            'settings',
-            'reset_spree',
+            "settings",
+            "reset_spree",
             b3.BOOL,
             self._reset_spree_stats,
         )
-        self.load_messages(self._killing_messages, 'killing_spree_messages')
-        self.load_messages(self._losing_messages, 'losing_spree_messages')
+        self.load_messages(self._killing_messages, "killing_spree_messages")
+        self.load_messages(self._losing_messages, "losing_spree_messages")
 
     def load_messages(self, mapping: dict, msg_type: str) -> None:
         for count, message in self.config.items(msg_type):
-            start_msg, msg_sep, stop_msg = message.partition('#')
+            start_msg, msg_sep, stop_msg = message.partition("#")
             if msg_sep:
                 mapping[int(count)] = (start_msg.strip(), stop_msg.strip())
             else:
-                self.warning("ignoring %s %r due to missing '#'",
-                             msg_type, message)
+                self.warning("ignoring %s %r due to missing '#'", msg_type, message)
 
     def onStartup(self) -> None:
         self.register_commands_from_config()
-        self.registerEvent('EVT_CLIENT_KILL', self.on_client_kill)
+        self.registerEvent("EVT_CLIENT_KILL", self.on_client_kill)
         if self._reset_spree_stats:
-            self.registerEvent('EVT_GAME_EXIT', self.on_game_exit)
+            self.registerEvent("EVT_GAME_EXIT", self.on_game_exit)
 
     def on_client_kill(self, event):
         killer = event.client
@@ -124,21 +121,21 @@ class SpreePlugin(b3.plugin.Plugin):
         return message
 
     def show_message(
-            self,
-            client,
-            victim=None,
-            message: str = None,
-            spree_kills: int = 0,
+        self,
+        client,
+        victim=None,
+        message: str = None,
+        spree_kills: int = 0,
     ) -> None:
         """
         Replace variables and display the message
         """
         if message and not client.hide:
-            message = message.replace('%player%', client.name)
+            message = message.replace("%player%", client.name)
             if victim:
-                message = message.replace('%victim%', victim.name)
+                message = message.replace("%victim%", victim.name)
                 if spree_kills:
-                    message = message.replace('%spree%', str(spree_kills))
+                    message = message.replace("%spree%", str(spree_kills))
             self.console.say(message)
 
     def cmd_spree(self, data, client, cmd=None):
@@ -147,21 +144,19 @@ class SpreePlugin(b3.plugin.Plugin):
         """
         if not data:
             sclient = client
-            targm = '^7You have'
-            targmns = '^7You are'
+            targm = "^7You have"
+            targmns = "^7You are"
         else:
             if sclient := self.findClientPrompt(data, client):
-                targm = f'{sclient.name} has'
-                targmns = f'{sclient.name} is'
+                targm = f"{sclient.name} has"
+                targmns = f"{sclient.name} is"
             else:
                 return
 
         spree_stats = self.get_spree_stats(sclient)
         if spree_stats.kills > 1:
-            cmd.sayLoudOrPM(client,
-                            f'{targm} ^2{spree_stats.kills}^7 kills in a row')
+            cmd.sayLoudOrPM(client, f"{targm} ^2{spree_stats.kills}^7 kills in a row")
         elif spree_stats.deaths > 1:
-            cmd.sayLoudOrPM(client,
-                            f'{targm} ^1{spree_stats.deaths}^7 deaths in a row')
+            cmd.sayLoudOrPM(client, f"{targm} ^1{spree_stats.deaths}^7 deaths in a row")
         else:
-            cmd.sayLoudOrPM(client, f'{targmns} not having a spree right now')
+            cmd.sayLoudOrPM(client, f"{targmns} not having a spree right now")

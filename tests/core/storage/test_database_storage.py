@@ -9,12 +9,13 @@ from b3.storage.common import DatabaseStorage
 from b3.storage.sqlite import SqliteStorage
 
 # checks whether we can perform tests on SQL script file parsing
-B3_SQL_FILE_AVAILABLE = os.path.exists(b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql"))
-B3_DEFAULT_TABLES = ['aliases', 'clients', 'data', 'groups', 'ipaliases', 'penalties']
+B3_SQL_FILE_AVAILABLE = os.path.exists(
+    b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql")
+)
+B3_DEFAULT_TABLES = ["aliases", "clients", "data", "groups", "ipaliases", "penalties"]
 
 
 class Test_DatabaseStorage(unittest.TestCase):
-
     def test_getClient_connectionfailed(self):
         mock_storage = Mock(spec=SqliteStorage)
         mock_storage.getClient = SqliteStorage.getClient
@@ -35,8 +36,13 @@ class Test_DatabaseStorage(unittest.TestCase):
         mock_storage.console.config.has_option = Mock(return_value=False)
         self.assertRaises(KeyError, mock_storage.getClient, mock_storage, Mock(id=666))
 
-    @unittest.skipUnless(B3_SQL_FILE_AVAILABLE, "B3 SQL script not found @ %s" % b3.functions.getAbsolutePath("@b3/sql/b3.sql"))
+    @unittest.skipUnless(
+        B3_SQL_FILE_AVAILABLE,
+        "B3 SQL script not found @ %s" % b3.functions.getAbsolutePath("@b3/sql/b3.sql"),
+    )
     def test_b3_sql_file_parsing(self):
-        with open(b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql"), 'r') as sql_file:
+        with open(
+            b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql"), "r"
+        ) as sql_file:
             statements = DatabaseStorage.getQueriesFromFile(sql_file)
             self.assertEqual(15, len(statements))

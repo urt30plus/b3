@@ -55,7 +55,9 @@ class Test_tk_detected(Tk_functional_test):
 
         self.joe.kills(self.mike)
         self.assertEqual(1, self.joe.warn.call_count)
-        self.assertIsNotNone(self.mike.getMessageHistoryLike("^7type ^3!fp ^7 to forgive"))
+        self.assertIsNotNone(
+            self.mike.getMessageHistoryLike("^7type ^3!fp ^7 to forgive")
+        )
 
     def test_multikill(self, timer_patch):
         self.p._round_grace = 0
@@ -69,11 +71,21 @@ class Test_tk_detected(Tk_functional_test):
             self.mike.clearMessageHistory()
             self.joe.kills(self.mike)
             self.assertEqual(1, self.joe.warn.call_count)
-            self.assertEqual(1, len(self.mike.getAllMessageHistoryLike("^7type ^3!fp ^7 to forgive")))
+            self.assertEqual(
+                1, len(self.mike.getAllMessageHistoryLike("^7type ^3!fp ^7 to forgive"))
+            )
 
             self.joe.kills(self.mike)
-            self.assertEqual(1, len([call_args[0][0] for call_args in patched_say.call_args_list if
-                                     "auto-kick if not forgiven" in call_args[0][0]]))
+            self.assertEqual(
+                1,
+                len(
+                    [
+                        call_args[0][0]
+                        for call_args in patched_say.call_args_list
+                        if "auto-kick if not forgiven" in call_args[0][0]
+                    ]
+                ),
+            )
 
             self.joe.kills(self.mike)
             self.assertEqual(1, self.joe.tempban.call_count)

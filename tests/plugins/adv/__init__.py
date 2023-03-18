@@ -11,8 +11,12 @@ from b3.plugins.admin import AdminPlugin
 from b3.plugins.adv import AdvPlugin
 from tests import B3TestCase
 
-ADMIN_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(b3_module__file__), "conf/plugin_admin.ini"))
-ADV_CONFIG_FILE = os.path.normpath(os.path.join(os.path.dirname(__file__), "../../../b3/conf/plugin_adv.ini"))
+ADMIN_CONFIG_FILE = os.path.normpath(
+    os.path.join(os.path.dirname(b3_module__file__), "conf/plugin_admin.ini")
+)
+ADV_CONFIG_FILE = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), "../../../b3/conf/plugin_adv.ini")
+)
 ADV_CONFIG_CONTENT = None
 
 timer_patcher = None
@@ -24,14 +28,14 @@ class AdvTestCase(B3TestCase):
     """
 
     def setUp(self):
-        self.log = logging.getLogger('output')
+        self.log = logging.getLogger("output")
         self.log.propagate = False
 
         B3TestCase.setUp(self)
 
         global ADV_CONFIG_CONTENT, ADV_CONFIG_FILE, ADMIN_CONFIG_FILE, timer_patcher
         if os.path.exists(ADV_CONFIG_FILE):
-            with open(ADV_CONFIG_FILE, 'r') as f:
+            with open(ADV_CONFIG_FILE, "r") as f:
                 ADV_CONFIG_CONTENT = f.read()
 
         self.adminPluginConf = CfgConfigParser()
@@ -45,7 +49,7 @@ class AdvTestCase(B3TestCase):
         self.console.startup()
         self.log.propagate = True
 
-        timer_patcher = patch('threading.Timer')
+        timer_patcher = patch("threading.Timer")
         timer_patcher.start()
 
     def tearDown(self):
@@ -62,13 +66,19 @@ class AdvTestCase(B3TestCase):
             conf = CfgConfigParser()
             conf.loadFromString(ADV_CONFIG_CONTENT)
         else:
-            unittest.skip("cannot get default plugin config file at %s" % ADV_CONFIG_FILE)
+            unittest.skip(
+                "cannot get default plugin config file at %s" % ADV_CONFIG_FILE
+            )
 
         self.p = AdvPlugin(self.console, conf)
         self.p.save = Mock()
         self.conf = self.p.config
         self.log.setLevel(logging.DEBUG)
-        self.log.info("============================= Adv plugin: loading config ============================")
+        self.log.info(
+            "============================= Adv plugin: loading config ============================"
+        )
         self.p.onLoadConfig()
-        self.log.info("============================= Adv plugin: starting  =================================")
+        self.log.info(
+            "============================= Adv plugin: starting  ================================="
+        )
         self.p.onStartup()
