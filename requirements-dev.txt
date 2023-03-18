@@ -2,5 +2,4 @@
 
 mockito
 mypy~=1.1.1
-pre-commit~=3.1.1
 pytest
