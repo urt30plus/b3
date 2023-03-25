@@ -88,7 +88,7 @@ class Rcon:
         while True:
             readables, _, errors = select.select([sock], [], [sock], socketTimeout)
             if errors:
-                raise socket.error
+                raise OSError
             if not readables:
                 break
             payload = sock.recv(size)

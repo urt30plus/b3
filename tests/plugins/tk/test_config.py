@@ -460,7 +460,7 @@ class Test_get_config_for_levels(Test_Tk_plugin):
 
 class Test_Tk_default_config(B3TestCase):
     def setUp(self):
-        super(Test_Tk_default_config, self).setUp()
+        super().setUp()
         self.console.gameName = "f00"
         self.conf = CfgConfigParser()
         self.conf.load(b3.functions.getAbsolutePath("@b3/conf/plugin_tk.ini"))

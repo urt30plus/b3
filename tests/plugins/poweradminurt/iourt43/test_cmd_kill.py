@@ -7,7 +7,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class Test_cmd_kill(Iourt43TestCase):
     def setUp(self):
-        super(Test_cmd_kill, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """
@@ -26,7 +26,7 @@ pakill-kill: 20
         self.moderator.connects("2")
 
     def tearDown(self):
-        super(Test_cmd_kill, self).tearDown()
+        super().tearDown()
 
     def test_no_argument(self):
         self.moderator.message_history = []

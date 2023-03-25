@@ -14,7 +14,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class mixin_cmd_version:
     def setUp(self):
-        super(mixin_cmd_version, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """
@@ -37,14 +37,14 @@ paversion-version: 20
         self.moderator.connects("2")
 
     def tearDown(self):
-        super(mixin_cmd_version, self).tearDown()
+        super().tearDown()
         self.sleep_patcher.stop()
 
     def test_nominal(self):
         self.moderator.message_history = []
         self.moderator.says("!version")
         self.assertEqual(
-            ["I am PowerAdminUrt version %s by %s" % (plugin_version, plugin_author)],
+            [f"I am PowerAdminUrt version {plugin_version} by {plugin_author}"],
             self.moderator.message_history,
         )
 

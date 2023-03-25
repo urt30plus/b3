@@ -65,7 +65,7 @@ class Test_getGroupLevel(Admin_TestCase):
         }.items():
             result = self.p.getGroupLevel(test_data)
             if expected != result:
-                self.fail("%r, expecting %r but got %r" % (test_data, expected, result))
+                self.fail(f"{test_data!r}, expecting {expected!r} but got {result!r}")
 
     def test_failures(self):
         self.p.error = Mock()

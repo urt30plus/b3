@@ -729,7 +729,7 @@ class TkPlugin(b3.plugin.Plugin):
                 attacker = self.console.clients.getByCID(cid)
                 points = self.forgive(cid, client, True)
                 if attacker and points:
-                    forgave.append("%s^7 [^3%s^7]" % (attacker.name, points))
+                    forgave.append(f"{attacker.name}^7 [^3{points}^7]")
                     if self._private_messages:
                         attacker.message(
                             self.getMessage(
@@ -812,7 +812,7 @@ class TkPlugin(b3.plugin.Plugin):
 
                     v = self.client_tkinfo(victim)
                     myvictims.append(
-                        "%s ^7(^1%s^7)" % (victim.name, v.attacker_points(sclient.cid))
+                        f"{victim.name} ^7(^1{v.attacker_points(sclient.cid)}^7)"
                     )
 
                 if myvictims:
@@ -825,9 +825,9 @@ class TkPlugin(b3.plugin.Plugin):
                         continue
 
                     if tkinfo.is_grudged(attacker.cid):
-                        myattackers.append("^1%s ^7[^3%s^7]" % (attacker.name, points))
+                        myattackers.append(f"^1{attacker.name} ^7[^3{points}^7]")
                     else:
-                        myattackers.append("%s ^7[^3%s^7]" % (attacker.name, points))
+                        myattackers.append(f"{attacker.name} ^7[^3{points}^7]")
 
                 if myattackers:
                     msg += ", ^3Attacked By^7: %s" % ", ".join(myattackers)

@@ -7,7 +7,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class mixin_conf:
     def setUp(self):
-        super(mixin_conf, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()

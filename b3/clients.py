@@ -42,7 +42,7 @@ class Cvar:
         String object representation.
         :return A string representing this CVAR.
         """
-        return '<%s name: "%s", value: "%s", default: "%s">' % (
+        return '<{} name: "{}", value: "{}", default: "{}">'.format(
             self.__class__.__name__,
             self.name,
             self.value,
@@ -1026,7 +1026,7 @@ class Client:
             return False
 
     def __str__(self):
-        return 'Client<@%s:%s|%s:"%s":%s>' % (
+        return 'Client<@{}:{}|{}:"{}":{}>'.format(
             self.id,
             self.guid,
             self.pbid,
@@ -1256,7 +1256,7 @@ class Alias(Struct):
         return console.storage.setClientAlias(self)
 
     def __str__(self):
-        return 'Alias(id=%s, alias="%s", clientId=%s, numUsed=%s)' % (
+        return 'Alias(id={}, alias="{}", clientId={}, numUsed={})'.format(
             self.id,
             self.alias,
             self.clientId,
@@ -1327,7 +1327,7 @@ class IpAlias(Struct):
         return console.storage.setClientIpAddress(self)
 
     def __str__(self):
-        return 'IpAlias(id=%s, ip="%s", clientId=%s, numUsed=%s)' % (
+        return 'IpAlias(id={}, ip="{}", clientId={}, numUsed={})'.format(
             self.id,
             self.ip,
             self.clientId,

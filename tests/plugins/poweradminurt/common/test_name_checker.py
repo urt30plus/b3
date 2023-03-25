@@ -9,7 +9,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class mixin_name_checker:
     def setUp(self):
-        super(mixin_name_checker, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """
@@ -33,7 +33,7 @@ checkbadnames: True
         self.p._ignoreTill = 0
 
     def tearDown(self):
-        super(mixin_name_checker, self).tearDown()
+        super().tearDown()
         self.sleep_patcher.stop()
 
     def test_checkdupes_no_dup(self):

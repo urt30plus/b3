@@ -119,7 +119,7 @@ def only_gear(*args):
 
 class Test_cmd_pagear(Iourt43TestCase):
     def setUp(self):
-        super(Test_cmd_pagear, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """
@@ -157,7 +157,7 @@ pagear-gear: 20
         self.superadmin.connects("2")
 
     def tearDown(self):
-        super(Test_cmd_pagear, self).tearDown()
+        super().tearDown()
         self.sleep_patcher.stop()
         self.setCvar_patcher.stop()
 
@@ -187,9 +187,9 @@ pagear-gear: 20
         self.maxDiff = None
         self.assertListEqual(
             [
-                "current gear: %s:ON" % (current_gear,),
-                "Usage: !pagear [+/-][%s]" % (weapon_usage,),
-                "Load weapon groups: !pagear [+/-][%s]" % (weapon_groups,),
+                f"current gear: {current_gear}:ON",
+                f"Usage: !pagear [+/-][{weapon_usage}]",
+                f"Load weapon groups: !pagear [+/-][{weapon_groups}]",
                 "Load defaults: !pagear [all|none|reset]",
             ],
             self.superadmin.message_history,

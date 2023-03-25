@@ -12,7 +12,7 @@ from tests.fake import FakeClient
 
 class Test_Tk_plugin(B3TestCase):
     def setUp(self):
-        super(Test_Tk_plugin, self).setUp()
+        super().setUp()
         self.console.gameName = "f00"
         self.conf = CfgConfigParser()
         self.p = TkPlugin(self.console, self.conf)

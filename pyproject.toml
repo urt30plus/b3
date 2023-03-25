@@ -30,7 +30,7 @@ select = [
     "SIM",  # simplify
 #    "T20",  # print statements
 #    "TRY",  # tryceratops
-#    "UP",  # pyupgrade
+    "UP",  # pyupgrade
     "W",  # pycodestyle (warnings)
 ]
 ignore = ["E501"]

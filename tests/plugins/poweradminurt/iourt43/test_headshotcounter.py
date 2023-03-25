@@ -7,7 +7,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class Test_headshotcounter(Iourt43TestCase):
     def setUp(self):
-        super(Test_headshotcounter, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """

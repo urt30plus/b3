@@ -8,7 +8,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class Test_cmd_swap(Iourt43TestCase):
     def setUp(self):
-        super(Test_cmd_swap, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """
@@ -30,5 +30,5 @@ paswap-swap: 20
         self.moderator.team = TEAM_BLUE
         self.admin.says("!swap 2 3")
         self.console.write.assert_has_calls(
-            [call("swap %s %s" % (self.admin.cid, self.moderator.cid))]
+            [call(f"swap {self.admin.cid} {self.moderator.cid}")]
         )

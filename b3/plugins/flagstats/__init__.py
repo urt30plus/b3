@@ -1,6 +1,5 @@
 import functools
 import time
-from typing import Optional
 
 import b3
 import b3.config
@@ -347,7 +346,7 @@ class FlagstatsPlugin(b3.plugin.Plugin):
     def best_team_flag_caps(
         team1: TeamData,
         team2: TeamData,
-    ) -> tuple[Optional[TeamData], ...]:
+    ) -> tuple[TeamData | None, ...]:
         if team1.max_flag > team2.max_flag:
             return team1, None
         elif team2.max_flag > team1.max_flag:
@@ -361,7 +360,7 @@ class FlagstatsPlugin(b3.plugin.Plugin):
     def best_team_flag_time(
         team1: TeamData,
         team2: TeamData,
-    ) -> tuple[Optional[TeamData], ...]:
+    ) -> tuple[TeamData | None, ...]:
         t1_time = team1.min_time
         t2_time = team2.min_time
         if t1_time != -1 and (t2_time == -1 or t2_time > t1_time):
@@ -448,7 +447,7 @@ class FlagstatsPlugin(b3.plugin.Plugin):
     def best_defensive_scorer(
         self,
         team: TeamData = None,
-    ) -> tuple[Optional[Client], int]:
+    ) -> tuple[Client | None, int]:
         clients = [
             (c, self.defensive_score(c))
             for c in self.console.clients.getList()

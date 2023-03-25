@@ -35,7 +35,7 @@ class AdvTestCase(B3TestCase):
 
         global ADV_CONFIG_CONTENT, ADV_CONFIG_FILE, ADMIN_CONFIG_FILE, timer_patcher
         if os.path.exists(ADV_CONFIG_FILE):
-            with open(ADV_CONFIG_FILE, "r") as f:
+            with open(ADV_CONFIG_FILE) as f:
                 ADV_CONFIG_CONTENT = f.read()
 
         self.adminPluginConf = CfgConfigParser()

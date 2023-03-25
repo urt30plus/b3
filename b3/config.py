@@ -53,7 +53,7 @@ class MissingRequirement(Exception):
 
     def __str__(self):
         if self.throwable:
-            return "%s - %r" % (self.args[0], repr(self.throwable))
+            return f"{self.args[0]} - {repr(self.throwable)!r}"
         return repr(self.args[0])
 
 
@@ -81,9 +81,7 @@ class B3ConfigParserMixin:
         elif value in ("no", "0", "off", "false"):
             return False
         else:
-            raise ValueError(
-                "%s.%s : '%s' is not a boolean value" % (section, setting, value)
-            )
+            raise ValueError(f"{section}.{setting} : '{value}' is not a boolean value")
 
     def getDuration(self, section, setting=None):
         """
@@ -150,7 +148,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
                 sectdict = self._sections[section]
             except KeyError:
                 raise NoSectionError(section)
-        sectdict["; %s" % (comment,)] = None
+        sectdict[f"; {comment}"] = None
 
     def get(self, section, option, *args, **kwargs):
         """
@@ -184,7 +182,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         """
         Load a configuration file.
         """
-        with open(filename, "r") as f:
+        with open(filename) as f:
             self.readfp(f)
         self.fileName = filename
         self.fileMtime = os.path.getmtime(self.fileName)
@@ -242,10 +240,10 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
             for line in key.split("\n"):
                 line = line.removeprefix(";")
                 line = line.removeprefix("#")
-                fp.write("; %s\n" % (line.strip(),))
+                fp.write(f"; {line.strip()}\n")
         else:
             if value is not None and str(value).strip() != "":
-                fp.write("%s: %s\n" % (key, str(value).replace("\n", "\n\t")))
+                fp.write("{}: {}\n".format(key, str(value).replace("\n", "\n\t")))
             else:
                 fp.write("%s: \n" % key)
 
@@ -349,9 +347,7 @@ class MainConfig(B3ConfigParserMixin):
 
         def _mandatory_option(section, option):
             if not self.has_option(section, option):
-                analysis.append(
-                    "missing configuration value %s::%s" % (section, option)
-                )
+                analysis.append(f"missing configuration value {section}::{option}")
 
         _mandatory_option("b3", "parser")
         _mandatory_option("b3", "database")
@@ -428,7 +424,7 @@ def getConfPath(decode=False, conf=None):
     if conf:
         if isinstance(conf, str):
             path = os.path.dirname(conf)
-        elif isinstance(conf, (CfgConfigParser, MainConfig)):
+        elif isinstance(conf, CfgConfigParser | MainConfig):
             path = os.path.dirname(conf.fileName)
         else:
             raise TypeError(

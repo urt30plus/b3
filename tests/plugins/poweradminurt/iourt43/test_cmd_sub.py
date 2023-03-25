@@ -8,7 +8,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class Test_cmd_sub(Iourt43TestCase):
     def setUp(self):
-        super(Test_cmd_sub, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """

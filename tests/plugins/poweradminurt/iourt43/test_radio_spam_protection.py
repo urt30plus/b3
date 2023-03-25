@@ -10,7 +10,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class Test_radio_spam_protection(Iourt43TestCase):
     def setUp(self):
-        super(Test_radio_spam_protection, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.p = PoweradminurtPlugin(self.console, self.conf)
         self.init_default_cvar()

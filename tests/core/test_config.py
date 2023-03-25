@@ -13,7 +13,7 @@ class CommonTestMethodsMixin:
         try:
             self.assertEqual(expected, func("section_foo", "foo"))
         except (configparser.Error, ValueError) as err:
-            self.fail("expecting %s, but got %r" % (expected, err))
+            self.fail(f"expecting {expected}, but got {err!r}")
 
     def _assert_func_raises(self, func, expected_error, section, name, conf):
         try:
@@ -22,7 +22,7 @@ class CommonTestMethodsMixin:
         except expected_error:
             pass
         except Exception as err:
-            self.fail("expecting %s, but got %r" % (expected_error, err))
+            self.fail(f"expecting {expected_error}, but got {err!r}")
         else:
             self.fail("expecting %s" % expected_error)
 

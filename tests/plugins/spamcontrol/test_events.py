@@ -35,7 +35,7 @@ class Test_plugin(SpamcontrolTestCase):
         self.assertEqual(
             points,
             actual,
-            "expecting %s to have %s spamins points" % (client.name, points),
+            f"expecting {client.name} to have {points} spamins points",
         )
 
     def test_say(self):

@@ -10,7 +10,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class Test_cmd_teams(Iourt43TestCase):
     def setUp(self):
-        super(Test_cmd_teams, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             dedent(

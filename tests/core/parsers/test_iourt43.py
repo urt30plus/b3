@@ -48,7 +48,7 @@ class Iourt43TestCase(unittest.TestCase):
         # simulate game server actions
         def write(*args, **kwargs):
             pretty_args = list(map(repr, args)) + [
-                "%s=%s" % (k, v) for k, v in kwargs.items()
+                f"{k}={v}" for k, v in kwargs.items()
             ]
             log.info("write(%s)" % ", ".join(pretty_args))
             if args == ("gamename",):
@@ -529,7 +529,7 @@ class Test_log_lines_parsing(Iourt43TestCase):
             )
             # THEN the next chat line should work
             self.assertEvent(
-                r"""777:18 say: 2 %s: %s""" % (new_name, text),
+                rf"""777:18 say: 2 {new_name}: {text}""",
                 event_type="EVT_CLIENT_SAY",
                 event_client=player,
                 event_data=text.lstrip(),
@@ -697,7 +697,7 @@ class Test_kill_mods(Test_log_lines_parsing):
 
 class Test_OnClientuserinfo(Iourt43TestCase):
     def setUp(self):
-        super(Test_OnClientuserinfo, self).setUp()
+        super().setUp()
 
     def test_ioclient(self):
         self.console.queryClientFrozenSandAccount = Mock(return_value={})
@@ -777,7 +777,7 @@ class Test_OnClientuserinfo(Iourt43TestCase):
 
 class Test_OnClientuserinfochanged(Iourt43TestCase):
     def setUp(self):
-        super(Test_OnClientuserinfochanged, self).setUp()
+        super().setUp()
 
     def test_ioclient(self):
         # do OnClientuserinfo first to generate the client

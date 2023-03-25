@@ -787,7 +787,7 @@ bar: bar
     def test_too_many_rules(self, sleep_mock):
         self.init(
             """[spamages]\n"""
-            + "\n".join(["""rule%s: this is rule #%s""" % (x, x) for x in range(1, 23)])
+            + "\n".join([f"""rule{x}: this is rule #{x}""" for x in range(1, 23)])
         )
         self.console.say = Mock(
             wraps=lambda *args: sys.stdout.write("\t\tSAY: " + str(args) + "\n")

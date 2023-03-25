@@ -177,9 +177,7 @@ class Test_misc(unittest.TestCase):
         }.items():
             result = functions.minutesStr(test_data)
             if expected != result:
-                self.fail(
-                    "%r, expecting '%s' but got '%s'" % (test_data, expected, result)
-                )
+                self.fail(f"{test_data!r}, expecting '{expected}' but got '{result}'")
 
     def test_vars2printf(self):
         for test_data, expected in {
@@ -193,9 +191,7 @@ class Test_misc(unittest.TestCase):
         }.items():
             result = functions.vars2printf(test_data)
             if expected != result:
-                self.fail(
-                    "%r, expecting '%s' but got '%s'" % (test_data, expected, result)
-                )
+                self.fail(f"{test_data!r}, expecting '{expected}' but got '{result}'")
 
     def test_meanstdv(self):
         for test_data, expected in {
@@ -205,9 +201,7 @@ class Test_misc(unittest.TestCase):
         }.items():
             result = functions.meanstdv(test_data)
             if expected != result:
-                self.fail(
-                    "%r, expecting '%s' but got '%s'" % (test_data, expected, result)
-                )
+                self.fail(f"{test_data!r}, expecting '{expected}' but got '{result}'")
 
     def test_getBytes(self):
         self.assertEqual(10, functions.getBytes(10))

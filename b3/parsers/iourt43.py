@@ -1463,9 +1463,7 @@ class Iourt43Parser(b3.parser.Parser):
             self.say(fullreason)
 
         if admin:
-            admin.message(
-                "^7Banned^7: ^1%s^7 (^2@%s^7)" % (client.exactName, client.id)
-            )
+            admin.message(f"^7Banned^7: ^1{client.exactName}^7 (^2@{client.id}^7)")
             admin.message(
                 "^7His last ip (^1%s^7) has been added to banlist" % client.ip
             )
@@ -1571,9 +1569,7 @@ class Iourt43Parser(b3.parser.Parser):
         # Make sure we remove up to 5 duplicates in a separate thread
         self.writelines([cmd, cmd, cmd, cmd, cmd])
         if admin:
-            admin.message(
-                "^7Unbanned^7: ^1%s^7 (^2@%s^7)" % (client.exactName, client.id)
-            )
+            admin.message(f"^7Unbanned^7: ^1{client.exactName}^7 (^2@{client.id}^7)")
             admin.message(
                 "^7His last ip (^1%s^7) has been removed from banlist" % client.ip
             )
@@ -1818,7 +1814,7 @@ class Iourt43Parser(b3.parser.Parser):
 
             var = line[:20].strip()
             val = line[20:].strip()
-            datatransformed += "\\%s\\%s" % (var, val)
+            datatransformed += f"\\{var}\\{val}"
 
         return datatransformed
 
@@ -2117,7 +2113,7 @@ class Iourt43Parser(b3.parser.Parser):
             self.error("OnUserinfo called without a ClientConnect ID")
             return None
 
-        return self.OnClientuserinfo(action, "%s %s" % (_id, data), match)
+        return self.OnClientuserinfo(action, f"{_id} {data}", match)
 
     def getClient(self, match=None, attacker=None, victim=None):
         """

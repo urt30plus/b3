@@ -63,7 +63,7 @@ class AdvPlugin(b3.plugin.Plugin):
             self.error("advertisement file %s does not exist", filename)
             return
 
-        with open(filename, "r") as f:
+        with open(filename) as f:
             self.load(f.readlines())
 
     def load_from_config(self):

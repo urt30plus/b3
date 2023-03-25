@@ -407,7 +407,7 @@ class AdminPlugin(b3.plugin.Plugin):
 
         for k, (duration, reason) in self.warn_reasons.items():
             self.info(
-                """{0:<10s} {1:<10s}\t"{2}" """.format(
+                """{:<10s} {:<10s}\t"{}" """.format(
                     k, functions.minutesStr(duration), reason
                 )
             )
@@ -653,7 +653,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 spell_check = self.get_cmdSoundingLike(cmd, event_client)
                 _msg = self.getMessage("unknown_command", cmd)
                 if spell_check:
-                    _msg += ". Did you mean %s%s?" % (event_data[:1], spell_check)
+                    _msg += f". Did you mean {event_data[:1]}{spell_check}?"
                 event_client.message(_msg)
                 if (
                     event_client.maxLevel < self._admins_level
@@ -749,9 +749,7 @@ class AdminPlugin(b3.plugin.Plugin):
                         return
 
                 if command.level is None:
-                    event_client.message(
-                        "^7%s%s command is disabled" % (self.cmdPrefix, cmd)
-                    )
+                    event_client.message(f"^7{self.cmdPrefix}{cmd} command is disabled")
                 else:
                     self.info(
                         "%s does not have sufficient rights to use %s%s. "
@@ -1435,9 +1433,9 @@ class AdminPlugin(b3.plugin.Plugin):
             nlist = []
             for c in clist:
                 if c.maskGroup:
-                    nlist.append("%s^7 [^3%s^7]" % (c.exactName, c.maskGroup.level))
+                    nlist.append(f"{c.exactName}^7 [^3{c.maskGroup.level}^7]")
                 else:
-                    nlist.append("%s^7 [^3%s^7]" % (c.exactName, c.maxLevel))
+                    nlist.append(f"{c.exactName}^7 [^3{c.maxLevel}^7]")
             cmd.sayLoudOrPM(client, self.getMessage("admins", ", ".join(nlist)))
         else:
             if msg := self.getMessage("no_admins"):
@@ -2084,7 +2082,7 @@ class AdminPlugin(b3.plugin.Plugin):
 
         def format_ban(penalty):
             c = self.console.storage.getClient(Client(_id=penalty.clientId))
-            txt = "^2@%s^7 %s^7" % (penalty.clientId, c.exactName)
+            txt = f"^2@{penalty.clientId}^7 {c.exactName}^7"
             if penalty.type == "Ban":
                 txt += " (Perm)"
             elif penalty.type == "TempBan":
@@ -2229,9 +2227,7 @@ class AdminPlugin(b3.plugin.Plugin):
                     )
                 else:
                     sclient.notice(notice, None, client)
-                    client.message(
-                        "^7Notice added to %s: %s" % (sclient.exactName, notice)
-                    )
+                    client.message(f"^7Notice added to {sclient.exactName}: {notice}")
 
     def cmd_warn(self, data, client=None, cmd=None):
         """
@@ -2271,7 +2267,7 @@ class AdminPlugin(b3.plugin.Plugin):
             duration, warning = self.getWarning(data)
         except Exception:
             duration, warning = self.getWarning("generic")
-            warning = "%s %s" % (warning, data)
+            warning = f"{warning} {data}"
 
         warning = warning % {"name": client.exactName}
         client.message(
@@ -2309,7 +2305,7 @@ class AdminPlugin(b3.plugin.Plugin):
 
             cmd.sayLoudOrPM(
                 client,
-                "%s ^7last warning cleared: ^3%s" % (sclient.exactName, w.reason),
+                f"{sclient.exactName} ^7last warning cleared: ^3{w.reason}",
             )
 
     def cmd_warnclear(self, data, client=None, cmd=None):
@@ -2372,7 +2368,7 @@ class AdminPlugin(b3.plugin.Plugin):
                         msg = ", expires in ^2%s" % expire
                     if warn := sclient.lastWarning:
                         msg += "^7: ^3%s" % warn.reason
-                    message = "^7%s ^7has ^1%s ^7active warnings%s" % (
+                    message = "^7{} ^7has ^1{} ^7active warnings{}".format(
                         sclient.exactName,
                         warns,
                         msg,
@@ -2561,7 +2557,7 @@ class AdminPlugin(b3.plugin.Plugin):
                     message = random.choice(
                         ("Wake up", "*poke*", "Attention", "Get up", "Go", "Move out")
                     )
-                    self.console.say("^7%s %s^7!" % (message, sclient.exactName))
+                    self.console.say(f"^7{message} {sclient.exactName}^7!")
 
 
 class Command:
@@ -2731,9 +2727,9 @@ class Command:
         else:
             h = ["^1Input Error! ^7Example: "]
             if self.loud:
-                h.append("%s%s" % (self.prefixLoud, self.command))
+                h.append(f"{self.prefixLoud}{self.command}")
             else:
-                h.append("%s%s" % (self.prefix, self.command))
+                h.append(f"{self.prefix}{self.command}")
 
             for a in args:
                 parm = f"[{a[0]}]" if len(a) == 3 else f"<{a[0]}>"

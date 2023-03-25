@@ -752,9 +752,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         # should we warn ?
         if spamins >= self._rsp_maxSpamins:
-            self.console.writelines(
-                ["mute %s %s" % (client.cid, self._rsp_mute_duration)]
-            )
+            self.console.writelines([f"mute {client.cid} {self._rsp_mute_duration}"])
             client.setvar(self, "radio_spamins", int(self._rsp_maxSpamins / 2.0))
             client.setvar(
                 self,
@@ -768,7 +766,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         avgdiff, diff = self._getTeamScoreDiffForAdvise()
         self.console.say(
-            "Avg kill ratio diff is %.2f, skill diff is %.2f" % (avgdiff, diff)
+            f"Avg kill ratio diff is {avgdiff:.2f}, skill diff is {diff:.2f}"
         )
         self._advise(avgdiff, 1)
 
@@ -992,7 +990,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         cmd.sayLoudOrPM(
             client,
-            "I am PowerAdminUrt version ^2%s ^7by ^3%s" % (__version__, __author__),
+            f"I am PowerAdminUrt version ^2{__version__} ^7by ^3{__author__}",
         )
 
     def cmd_paexec(self, data, client, cmd=None):
@@ -1738,7 +1736,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                         % (
                             ", ".join(
                                 [
-                                    "%s <%s> @%s" % (c.exactName, c.cid, c.id)
+                                    f"{c.exactName} <{c.cid}> @{c.id}"
                                     for c in map(self.console.clients.getByCID, cidlist)
                                 ]
                             )
@@ -1946,14 +1944,14 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     and headshots > 5
                     and percentage > self._hspercentmin
                 ):
-                    message = "^2%s^7: %s %s! ^7(%s percent)" % (
+                    message = "^2{}^7: {} {}! ^7({} percent)".format(
                         attacker.name,
                         int(headshots),
                         hstext,
                         percentage,
                     )
                 else:
-                    message = "^2%s^7: %s %s!" % (attacker.name, int(headshots), hstext)
+                    message = f"^2{attacker.name}^7: {int(headshots)} {hstext}!"
 
                 if self._hsbroadcast:
                     self.console.write(message)
@@ -2636,7 +2634,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 denom = maxstats[key] - minstats[key]
                 if denom < 0.0001:  # accurate at ne nimis
                     continue
-                msg.append("%s=%.3f" % (key, playerstats[c.id][key]))
+                msg.append(f"{key}={playerstats[c.id][key]:.3f}")
                 keyscore = (
                     weights[key] * (playerstats[c.id][key] - minstats[key]) / denom
                 )
@@ -2722,7 +2720,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         tmin = 2.0
         tmax = 4.0
-        totkpm = len(list((self._getRecentKills(60))))
+        totkpm = len(list(self._getRecentKills(60)))
         tm = max(tmin, tmax - 0.1 * totkpm)
         recentcontrib = {}
         t0 = self.console.time() - tm * 60
@@ -2974,13 +2972,13 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             team = avgdiff < 0 and "Red" or "Blue"
             if team == oldteam:
                 if word == oldword:
-                    msg = "%s team %s%s" % (team, same, word)
+                    msg = f"{team} team {same}{word}"
                 elif absdiff > oldabsdiff:
                     # stronger team is becoming even stronger
-                    msg = "%s team %s%s" % (team, stronger, word)
+                    msg = f"{team} team {stronger}{word}"
                 elif absdiff < oldabsdiff:
                     # stronger team is becoming weaker
-                    msg = "%s team is just %s" % (team, word)
+                    msg = f"{team} team is just {word}"
                     if absdiff < 4:
                         # difference not too big, teams may soon be fair
                         unfair = False

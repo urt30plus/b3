@@ -189,7 +189,7 @@ class FakeConsole(b3.parser.Parser):
         """
         Permban a client.
         """
-        print(">>>permbanning %s (%s)" % (client.name, reason))
+        print(f">>>permbanning {client.name} ({reason})")
         self.queueEvent(
             self.getEvent("EVT_CLIENT_BAN", {"reason": reason, "admin": admin}, client)
         )
@@ -213,14 +213,14 @@ class FakeConsole(b3.parser.Parser):
         """
         Unban a client.
         """
-        print(">>>unbanning %s (%s)" % (client.name, reason))
+        print(f">>>unbanning {client.name} ({reason})")
         self.queueEvent(self.getEvent("EVT_CLIENT_UNBAN", reason, client))
 
     def kick(self, client, reason="", admin=None, silent=False, *kwargs):
         """
         Kick a client.
         """
-        print(">>>kick %s for %s" % (client.name, reason))
+        print(f">>>kick {client.name} for {reason}")
         self.queueEvent(
             self.getEvent(
                 "EVT_CLIENT_KICK",
@@ -298,14 +298,14 @@ class FakeClient(b3.clients.Client):
         msg = msg % args
         cleanmsg = re.sub(re.compile(r"\^[0-9]"), "", msg).strip()
         self.message_history.append(cleanmsg)
-        print("sending msg to %s: %s" % (self.name, cleanmsg))
+        print(f"sending msg to {self.name}: {cleanmsg}")
 
     def warn(self, duration, warning, keyword=None, admin=None, data=""):
         w = super().warn(duration, warning, keyword=None, admin=None, data="")
-        print(">>>>%s gets a warning : %s" % (self, w))
+        print(f">>>>{self} gets a warning : {w}")
 
     def connects(self, cid):
-        print("\n%s connects to the game on slot #%s" % (self.name, cid))
+        print(f"\n{self.name} connects to the game on slot #{cid}")
         self.cid = cid
         self.timeAdd = self.console.time()
         # self.console.clients.newClient(cid)

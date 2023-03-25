@@ -592,7 +592,7 @@ def getWritableFilePath(filepath, decode=False):
         try:
             with tempfile.TemporaryFile(dir=os.path.dirname(filepath)):
                 pass
-        except (OSError, IOError):
+        except OSError:
             # no need to decode again since home_dir is already decoded
             # and os.path.join will handle everything itself
             home_dir = get_home_path(create=True)

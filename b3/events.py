@@ -119,7 +119,7 @@ class Events:
             return int(key)
         return self._events.get(key)
 
-    @functools.lru_cache(maxsize=None)
+    @functools.cache
     def getKey(self, event_id):
         """
         Get the key of a given event ID.
@@ -173,7 +173,7 @@ class Event:
         self.key = eventManager.getKey(type)
 
     def __str__(self):
-        return "Event<%s>(%r, %s, %s)" % (self.key, self.data, self.client, self.target)
+        return f"Event<{self.key}>({self.data!r}, {self.client}, {self.target})"
 
 
 class EventsStats:

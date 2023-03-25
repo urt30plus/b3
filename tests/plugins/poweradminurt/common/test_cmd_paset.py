@@ -8,7 +8,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class mixin_cmd_paset:
     def setUp(self):
-        super(mixin_cmd_paset, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """
@@ -32,7 +32,7 @@ paset: 20
         self.assertListEqual(expected_calls, self.setCvar_mock.mock_calls)
 
     def tearDown(self):
-        super(mixin_cmd_paset, self).tearDown()
+        super().tearDown()
         self.sleep_patcher.stop()
         self.setCvar_patcher.stop()
 

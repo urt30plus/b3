@@ -31,7 +31,7 @@ class QueryBuilder:
         Escape quotes from a given string.
         :param word: The string on which to perform the escape
         """
-        if isinstance(word, (int, complex, float)):
+        if isinstance(word, int | complex | float):
             return str(word)
         elif word is None:
             return '"None"'
@@ -53,7 +53,7 @@ class QueryBuilder:
         Return a list of fields whose keywords are surrounded by backticks.
         :param fields: The list of fields to format.
         """
-        if isinstance(fields, (tuple, list)):
+        if isinstance(fields, tuple | list):
             return "`%s`" % "`, `".join(fields)
         elif isinstance(fields, str):
             if fields == "*":
@@ -116,7 +116,7 @@ class QueryBuilder:
             elif not isinstance(fields[1], tuple):
                 values = (str(fields[1]),)
 
-            if isinstance(fields[0], (tuple, list)):
+            if isinstance(fields[0], tuple | list):
                 fields = tuple(fields[0])
             elif not isinstance(fields[0], tuple):
                 fields = (str(fields[0]),)
@@ -867,7 +867,7 @@ class DatabaseStorage(Storage):
         if not os.path.exists(path):
             raise Exception(f"SQL file does not exist: {path}")
 
-        with open(path, "r") as sqlfile:
+        with open(path) as sqlfile:
             statements = self.getQueriesFromFile(sqlfile)
 
         for stmt in statements:

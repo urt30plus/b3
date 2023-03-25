@@ -5,7 +5,7 @@ import os
 import sys
 import types
 from collections.abc import Callable
-from typing import Any, Optional
+from typing import Any
 
 import b3.config
 import b3.functions
@@ -27,7 +27,7 @@ class PluginData:
         name: str,
         module: types.ModuleType,
         clazz: B3PluginType,
-        conf: Optional[B3ConfigType] = None,
+        conf: B3ConfigType | None = None,
         disabled: bool = False,
     ) -> None:
         self.name = name.lower()
@@ -79,7 +79,7 @@ def _get_plugin_config(
     p_name: str,
     p_clazz: b3.plugin.Plugin,
     p_config_path: str = None,
-) -> Optional[B3ConfigType]:
+) -> B3ConfigType | None:
     ext_plugins_dir = console.config.get_external_plugins_dir()
     console.bot("Loading plugins (external plugin directory: %s)", ext_plugins_dir)
 

@@ -10,7 +10,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class mixin_cmd_pasetnextmap:
     def setUp(self):
-        super(mixin_cmd_pasetnextmap, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """
@@ -33,7 +33,7 @@ pasetnextmap-snmap: 20
         self.moderator.connects("2")
 
     def tearDown(self):
-        super(mixin_cmd_pasetnextmap, self).tearDown()
+        super().tearDown()
         self.sleep_patcher.stop()
 
     def test_missing_parameter(self):

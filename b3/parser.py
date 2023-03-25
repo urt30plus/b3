@@ -265,7 +265,7 @@ class Parser:
                 f"Using gamelog    : {b3.functions.getShortPath(os.path.abspath(f))}\n"
             )
             if os.path.isfile(f):
-                self.input = open(f, "r")  # noqa: SIM115
+                self.input = open(f)  # noqa: SIM115
                 if self.config.has_option("server", "seek"):
                     seek = self.config.getboolean("server", "seek")
                     if seek:
@@ -656,7 +656,7 @@ class Parser:
         if cmd := self._commands.get(cmd):
             return cmd % kwargs
 
-    @functools.lru_cache(maxsize=None)
+    @functools.cache
     def getGroup(self, data):
         """
         Return a valid Group from storage.

@@ -546,53 +546,49 @@ class Plugin:
         """
         Log an ERROR message to the main log.
         """
-        self.console.error("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.error(f"{self.__class__.__name__}: {msg}", *args, **kwargs)
 
     def debug(self, msg, *args, **kwargs):
         """
         Log a DEBUG message to the main log.
         """
-        self.console.debug("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.debug(f"{self.__class__.__name__}: {msg}", *args, **kwargs)
 
     def bot(self, msg, *args, **kwargs):
         """
         Log a BOT message to the main log.
         """
-        self.console.bot("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.bot(f"{self.__class__.__name__}: {msg}", *args, **kwargs)
 
     def verbose(self, msg, *args, **kwargs):
         """
         Log a VERBOSE message to the main log. More "chatty" than a debug message.
         """
-        self.console.verbose("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.verbose(f"{self.__class__.__name__}: {msg}", *args, **kwargs)
 
     def warning(self, msg, *args, **kwargs):
         """
         Log a WARNING message to the main log.
         """
-        self.console.warning("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.warning(f"{self.__class__.__name__}: {msg}", *args, **kwargs)
 
     def info(self, msg, *args, **kwargs):
         """
         Log an INFO message to the main log.
         """
-        self.console.info("%s: %s" % (self.__class__.__name__, msg), *args, **kwargs)
+        self.console.info(f"{self.__class__.__name__}: {msg}", *args, **kwargs)
 
     def exception(self, msg, *args, **kwargs):
         """
         Log an EXCEPTION message to the main log.
         """
-        self.console.exception(
-            "%s: %s" % (self.__class__.__name__, msg), *args, **kwargs
-        )
+        self.console.exception(f"{self.__class__.__name__}: {msg}", *args, **kwargs)
 
     def critical(self, msg, *args, **kwargs):
         """
         Log a CRITICAL message to the main log.
         """
-        self.console.critical(
-            "%s: %s" % (self.__class__.__name__, msg), *args, **kwargs
-        )
+        self.console.critical(f"{self.__class__.__name__}: {msg}", *args, **kwargs)
 
     def onLoadConfig(self):
         """

@@ -9,7 +9,7 @@ from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 
 class mixin_cmd_nuke:
     def setUp(self):
-        super(mixin_cmd_nuke, self).setUp()
+        super().setUp()
         self.conf = CfgConfigParser()
         self.conf.loadFromString(
             """
@@ -32,7 +32,7 @@ panuke-nuke: 20
         self.moderator.connects("2")
 
     def tearDown(self):
-        super(mixin_cmd_nuke, self).tearDown()
+        super().tearDown()
         self.sleep_patcher.stop()
 
     def test_no_argument(self):

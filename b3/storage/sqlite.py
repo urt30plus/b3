@@ -14,7 +14,7 @@ class SqliteStorage(DatabaseStorage):
         :param dsnDict: The database connection string parsed into a dict.
         :param console: The console instance.
         """
-        super(SqliteStorage, self).__init__(dsn, dsnDict, console)
+        super().__init__(dsn, dsnDict, console)
 
     def connect(self):
         """
@@ -87,7 +87,7 @@ class SqliteStorage(DatabaseStorage):
         :raise KeyError: If the table is not present in the database
         """
         current_tables = self.getTables()
-        if isinstance(table, (tuple, list)):
+        if isinstance(table, tuple | list):
             for v in table:
                 if v not in current_tables:
                     raise KeyError(f"could not find table '{v}' in the database")

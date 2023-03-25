@@ -41,8 +41,6 @@ class Test_DatabaseStorage(unittest.TestCase):
         "B3 SQL script not found @ %s" % b3.functions.getAbsolutePath("@b3/sql/b3.sql"),
     )
     def test_b3_sql_file_parsing(self):
-        with open(
-            b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql"), "r"
-        ) as sql_file:
+        with open(b3.functions.getAbsolutePath("@b3/sql/sqlite/b3.sql")) as sql_file:
             statements = DatabaseStorage.getQueriesFromFile(sql_file)
             self.assertEqual(15, len(statements))
