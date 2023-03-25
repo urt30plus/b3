@@ -1,11 +1,13 @@
 import time
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin
 from b3.plugins.poweradminurt import (
-    __version__ as plugin_version,
     __author__ as plugin_author,
+)
+from b3.plugins.poweradminurt import (
+    __version__ as plugin_version,
 )
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase
 

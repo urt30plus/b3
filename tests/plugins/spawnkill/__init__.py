@@ -1,7 +1,7 @@
 import unittest
 from textwrap import dedent
 
-from mockito import when, unstub
+from mockito import unstub, when
 
 from b3 import TEAM_BLUE, TEAM_RED
 from b3.clients import Cvar

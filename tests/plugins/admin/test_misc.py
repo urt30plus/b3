@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from tests.plugins.admin import Admin_TestCase, Admin_functional_test
+from tests.plugins.admin import Admin_functional_test, Admin_TestCase
 
 
 class Test_parseUserCmd(Admin_TestCase):

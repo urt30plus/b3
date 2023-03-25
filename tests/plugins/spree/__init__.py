@@ -1,10 +1,9 @@
 import unittest
 from textwrap import dedent
 
-from mockito import when, unstub
+from mockito import unstub, when
 
-from b3.config import CfgConfigParser
-from b3.config import MainConfig
+from b3.config import CfgConfigParser, MainConfig
 from b3.plugins.admin import AdminPlugin
 from b3.plugins.spree import SpreePlugin
 from tests import logging_disabled

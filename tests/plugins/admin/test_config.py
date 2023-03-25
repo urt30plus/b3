@@ -1,9 +1,9 @@
 import logging
 import sys
-from unittest.mock import ANY, patch, call, Mock
+from unittest.mock import ANY, Mock, call, patch
 
 import b3
-from tests.plugins.admin import Admin_TestCase, Admin_functional_test
+from tests.plugins.admin import Admin_functional_test, Admin_TestCase
 
 
 class Config_reading_TestCase(Admin_TestCase):

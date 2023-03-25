@@ -7,10 +7,12 @@ import b3.clients
 import b3.events
 import b3.parser
 from b3.clients import Client
-from b3.functions import getStuffSoundingLike
-from b3.functions import prefixText
-from b3.functions import start_daemon_thread
-from b3.functions import time2minutes
+from b3.functions import (
+    getStuffSoundingLike,
+    prefixText,
+    start_daemon_thread,
+    time2minutes,
+)
 
 __author__ = "xlr8or, Courgette, Fenix"
 __version__ = "4.34"

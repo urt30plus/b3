@@ -1,8 +1,8 @@
+import re
+
 import b3
 import b3.events
 import b3.plugin
-import re
-
 from b3.functions import clamp
 
 __author__ = "ThorN, Courgette"

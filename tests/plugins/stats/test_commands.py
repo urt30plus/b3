@@ -1,4 +1,4 @@
-from b3 import TEAM_RED, TEAM_BLUE, TEAM_FREE
+from b3 import TEAM_BLUE, TEAM_FREE, TEAM_RED
 from tests.plugins.stats import StatPluginTestCase
 
 

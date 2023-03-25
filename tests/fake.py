@@ -16,8 +16,7 @@ import b3.config
 import b3.events
 import b3.output
 import b3.parser
-from b3.clients import Clients
-from b3.clients import Cvar
+from b3.clients import Clients, Cvar
 from b3.functions import splitDSN
 from b3.game import Game
 from b3.plugins.admin import AdminPlugin

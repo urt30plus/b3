@@ -1,7 +1,6 @@
 import logging
 import sys
-from logging import CRITICAL, ERROR, INFO, WARNING, DEBUG
-from logging import handlers
+from logging import CRITICAL, DEBUG, ERROR, INFO, WARNING, handlers
 
 __author__ = "ThorN"
 __version__ = "1.7.2"

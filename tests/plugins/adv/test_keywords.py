@@ -1,6 +1,7 @@
-from unittest.mock import patch, call, Mock
+from unittest.mock import Mock, call, patch
 
-from mockito import when, any as ANY
+from mockito import any as ANY
+from mockito import when
 
 from tests.fake import FakeClient
 from tests.plugins.adv import AdvTestCase

@@ -1,7 +1,7 @@
 import operator
+import os
 import random
 import re
-import os
 import threading
 import time
 
@@ -11,8 +11,8 @@ import b3.cron
 import b3.events
 import b3.plugin
 from b3.functions import clamp
-from . import __author__
-from . import __version__
+
+from . import __author__, __version__
 
 
 class Poweradminurt43Plugin(b3.plugin.Plugin):

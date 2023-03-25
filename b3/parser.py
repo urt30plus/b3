@@ -7,7 +7,7 @@ import re
 import socket
 import sys
 import time
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from textwrap import TextWrapper
 from traceback import extract_tb
 
@@ -20,12 +20,8 @@ import b3.output
 import b3.plugins
 import b3.rcon
 import b3.storage
-from b3.clients import Clients
-from b3.clients import Group
-from b3.functions import getModule
-from b3.functions import splitDSN
-from b3.functions import start_daemon_thread
-from b3.functions import vars2printf
+from b3.clients import Clients, Group
+from b3.functions import getModule, splitDSN, start_daemon_thread, vars2printf
 
 __author__ = "ThorN, Courgette, xlr8or, Bakes, Ozon, Fenix"
 __version__ = "1.43.6"

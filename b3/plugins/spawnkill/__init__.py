@@ -1,6 +1,6 @@
 import b3
-import b3.plugin
 import b3.events
+import b3.plugin
 
 __author__ = "Fenix"
 __version__ = "1.5.1"

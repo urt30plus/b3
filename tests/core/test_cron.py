@@ -2,7 +2,7 @@ import time
 import unittest
 from unittest.mock import Mock, sentinel
 
-from b3.cron import CronTab, DayOfWeek, OneTimeCronTab, PluginCronTab, Cron
+from b3.cron import Cron, CronTab, DayOfWeek, OneTimeCronTab, PluginCronTab
 from tests import B3TestCase
 
 

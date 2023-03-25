@@ -1,5 +1,5 @@
 from textwrap import dedent
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 import b3
 import b3.functions

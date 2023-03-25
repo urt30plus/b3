@@ -1,10 +1,6 @@
 from unittest.mock import Mock
 
-from b3.clients import Alias
-from b3.clients import Client
-from b3.clients import Group
-from b3.clients import IpAlias
-from b3.clients import Penalty
+from b3.clients import Alias, Client, Group, IpAlias, Penalty
 
 
 class StorageAPITest:

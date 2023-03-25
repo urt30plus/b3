@@ -1,17 +1,17 @@
 import sys
 import time
-from unittest.mock import Mock, patch, call, ANY
+from unittest.mock import ANY, Mock, call, patch
 
-from mockito import when, any as whatever
+from mockito import any as whatever
+from mockito import when
 
 from b3 import TEAM_RED
-from b3.clients import Client, Group, ClientVar, ClientBan, ClientTempBan
+from b3.clients import Client, ClientBan, ClientTempBan, ClientVar, Group
 from b3.config import CfgConfigParser
 from b3.plugins.admin import Command
-from tests import InstantTimer, InstantThread
+from tests import InstantThread, InstantTimer
 from tests.fake import FakeClient
-from tests.plugins.admin import Admin_TestCase
-from tests.plugins.admin import Admin_functional_test
+from tests.plugins.admin import Admin_functional_test, Admin_TestCase
 
 
 class Test_misc_cmd(Admin_TestCase):

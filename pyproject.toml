@@ -18,7 +18,7 @@ select = [
 #    "ERA",  # eradicate (commented out code)
 #    "F",  # Pyflakes
 #    "FBT",  # boolean trap
-#    "I",   # isort
+    "I",   # isort
 #    "ISC",  # Implicit String Concat
 #    "N",  # pep8-naming
     "PIE",  # misc lints

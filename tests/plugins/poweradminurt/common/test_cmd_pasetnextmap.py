@@ -1,7 +1,7 @@
 import time
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
-from mockito import when, verify
+from mockito import verify, when
 
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin

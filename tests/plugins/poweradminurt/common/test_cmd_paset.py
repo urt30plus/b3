@@ -1,5 +1,5 @@
 import time
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin

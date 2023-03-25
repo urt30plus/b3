@@ -1,9 +1,9 @@
 import logging
 import os
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
-from mockito import when, unstub
+from mockito import unstub, when
 
 from b3 import __file__ as b3_module__file__
 from b3.config import CfgConfigParser

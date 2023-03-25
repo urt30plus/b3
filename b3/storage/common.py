@@ -5,13 +5,15 @@ import threading
 from time import time
 
 import b3.functions
-from b3.clients import Client
-from b3.clients import ClientBan
-from b3.clients import ClientKick
-from b3.clients import ClientNotice
-from b3.clients import ClientTempBan
-from b3.clients import ClientWarning
-from b3.clients import Penalty
+from b3.clients import (
+    Client,
+    ClientBan,
+    ClientKick,
+    ClientNotice,
+    ClientTempBan,
+    ClientWarning,
+    Penalty,
+)
 from b3.storage import Storage
 from b3.storage.cursor import Cursor as DBCursor
 

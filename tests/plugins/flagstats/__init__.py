@@ -5,8 +5,7 @@ from mockito import when
 
 from b3 import TEAM_BLUE, TEAM_RED
 from b3.clients import Cvar
-from b3.config import CfgConfigParser
-from b3.config import MainConfig
+from b3.config import CfgConfigParser, MainConfig
 from b3.parsers.iourt43 import Iourt43Parser
 from b3.plugins.admin import AdminPlugin
 from b3.plugins.flagstats import FlagstatsPlugin

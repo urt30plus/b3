@@ -1,7 +1,6 @@
-from unittest.mock import call, Mock
+from unittest.mock import Mock, call
 
-from b3 import TEAM_BLUE
-from b3 import TEAM_RED
+from b3 import TEAM_BLUE, TEAM_RED
 from b3.config import CfgConfigParser
 from b3.plugins.poweradminurt import PoweradminurtPlugin
 from tests.plugins.poweradminurt.iourt43 import Iourt43TestCase

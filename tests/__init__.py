@@ -9,8 +9,7 @@ from unittest.mock import Mock, patch
 from mockito import unstub
 
 import b3.output  # unused but we need to to add the `bot` log level
-from b3.config import CfgConfigParser
-from b3.config import MainConfig
+from b3.config import CfgConfigParser, MainConfig
 from b3.events import Event
 
 logging.raiseExceptions = (

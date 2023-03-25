@@ -1,10 +1,9 @@
 import operator
 import unittest
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import ANY, Mock, patch
 
-from b3 import TEAM_UNKNOWN, TEAM_RED, TEAM_BLUE
-from b3.clients import Alias, IpAlias
-from b3.clients import Client, Group
+from b3 import TEAM_BLUE, TEAM_RED, TEAM_UNKNOWN
+from b3.clients import Alias, Client, Group, IpAlias
 from tests import B3TestCase
 
 

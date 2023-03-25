@@ -2,7 +2,8 @@ import logging
 import unittest
 from unittest.mock import Mock, call, patch
 
-from mockito import mock, when, unstub, any as anything
+from mockito import any as anything
+from mockito import mock, unstub, when
 
 import b3
 from b3.clients import Client
@@ -10,7 +11,7 @@ from b3.config import CfgConfigParser
 from b3.events import Event
 from b3.output import VERBOSE2
 from b3.parsers.iourt43 import Iourt43Parser
-from tests import logging_disabled, InstantTimer
+from tests import InstantTimer, logging_disabled
 from tests.fake import FakeClient
 
 log = logging.getLogger("test")

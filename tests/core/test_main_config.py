@@ -3,9 +3,7 @@ import logging
 import unittest
 from textwrap import dedent
 
-from b3.config import CfgConfigParser
-from b3.config import MainConfig
-from b3.config import load
+from b3.config import CfgConfigParser, MainConfig, load
 from b3.functions import getAbsolutePath
 
 

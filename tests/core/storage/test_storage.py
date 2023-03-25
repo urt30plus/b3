@@ -2,8 +2,7 @@ import unittest
 from unittest.mock import Mock
 
 from b3.functions import splitDSN
-from b3.storage import Storage
-from b3.storage import getStorage
+from b3.storage import Storage, getStorage
 from b3.storage.sqlite import SqliteStorage
 from tests import B3TestCase
 

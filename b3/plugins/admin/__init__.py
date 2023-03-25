@@ -9,11 +9,9 @@ import traceback
 import b3.cron
 import b3.plugin
 from b3 import functions
-from b3.clients import Client
-from b3.clients import Group
+from b3.clients import Client, Group
 from b3.config import NoOptionError
-from b3.functions import getCmd
-from b3.functions import minutesStr
+from b3.functions import getCmd, minutesStr
 
 __version__ = "1.35"
 __author__ = "ThorN, xlr8or, Courgette, Ozon, Fenix"
