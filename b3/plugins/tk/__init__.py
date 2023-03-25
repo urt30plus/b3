@@ -91,7 +91,7 @@ class TkInfo:
                     points += self.plugin.client_tkinfo(client).attacker_points(
                         self.cid
                     )
-                except:
+                except Exception:
                     pass
         return points
 

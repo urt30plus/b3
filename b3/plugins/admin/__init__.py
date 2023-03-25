@@ -2719,7 +2719,7 @@ class Command:
         badfield = None
         valid = True
         for a in args:
-            if not a[0] in params.keys() or len(params[a[0]]) == 0:
+            if a[0] not in params.keys() or len(params[a[0]]) == 0:
                 if len(a) == 3:
                     # set the default
                     params[a[0]] = a[2]

@@ -682,7 +682,7 @@ class Iourt43Parser(b3.parser.Parser):
 
         try:
             data = m["data"].strip()
-        except:
+        except Exception:
             data = None
 
         return m, m["action"].lower(), data

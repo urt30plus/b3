@@ -14,7 +14,7 @@ select = [
 #    "B",  # bugbear
     "C40",  # comprehensions
 #    "DTZ",  # checks for naive datetimes
-#    "E",  # pycodestyle (errors)
+    "E",  # pycodestyle (errors)
 #    "ERA",  # eradicate (commented out code)
     "F",  # Pyflakes
 #    "FBT",  # boolean trap

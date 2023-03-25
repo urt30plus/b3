@@ -25,7 +25,7 @@ class StatsPlugin(b3.plugin.Plugin):
         if self.config.has_section("commands"):
             try:
                 commands_options = self.config.options("commands")
-            except:
+            except Exception:
                 pass
 
         def load_command_level(cmd_name):
