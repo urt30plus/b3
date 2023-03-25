@@ -11,7 +11,7 @@ extend-exclude = [".*"]
 select = [
 #    "A",  # shadowing builtins
 #    "ARG",  # unused arguments
-#    "B",  # bugbear
+    "B",  # bugbear
     "C40",  # comprehensions
     "DTZ",  # checks for naive datetimes
     "E",  # pycodestyle (errors)

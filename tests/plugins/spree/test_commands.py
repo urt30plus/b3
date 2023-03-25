@@ -40,7 +40,7 @@ class Test_commands(SpreeTestCase):
         self.bill.connects("1")
         self.mike.connects("2")
         # WHEN
-        for x in range(5):
+        for _x in range(5):
             self.console.queueEvent(
                 self.console.getEvent(
                     "EVT_CLIENT_KILL", client=self.bill, target=self.mike
@@ -58,7 +58,7 @@ class Test_commands(SpreeTestCase):
         self.bill.connects("1")
         self.mike.connects("2")
         # WHEN
-        for x in range(5):
+        for _x in range(5):
             self.console.queueEvent(
                 self.console.getEvent(
                     "EVT_CLIENT_KILL", client=self.mike, target=self.bill

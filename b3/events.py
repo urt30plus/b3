@@ -119,7 +119,7 @@ class Events:
             return int(key)
         return self._events.get(key)
 
-    @functools.cache
+    @functools.cache  # noqa: B019
     def getKey(self, event_id):
         """
         Get the key of a given event ID.

@@ -1443,7 +1443,7 @@ class Clients(dict):
         try:
             return self[self._nameIndex[name]]
         except Exception:
-            for cid, c in self.items():
+            for _cid, c in self.items():
                 if c.name and c.name.lower() == name:
                     self._nameIndex[name] = c.cid
                     return c
@@ -1458,7 +1458,7 @@ class Clients(dict):
             c = self[self._exactNameIndex[name]]
             return c
         except Exception:
-            for cid, c in self.items():
+            for _cid, c in self.items():
                 if c.exactName and c.exactName.lower() == name:
                     self._exactNameIndex[name] = c.cid
                     return c
@@ -1478,7 +1478,7 @@ class Clients(dict):
         """
         clist = []
         minlevel, maxlevel = int(min), int(max)
-        for cid, c in self.items():
+        for _cid, c in self.items():
             if c.hide:
                 continue
             elif (
@@ -1510,7 +1510,7 @@ class Clients(dict):
         :param name: The name to match
         """
         name = name.lower()
-        for cid, c in self.items():
+        for _cid, c in self.items():
             if not c.hide and name in c.name.lower():
                 return c
 
@@ -1573,7 +1573,7 @@ class Clients(dict):
         else:
             clients = []
             needle = re.sub(r"\s", "", handle.lower())
-            for cid, c in self.items():
+            for _cid, c in self.items():
                 cleanname = re.sub(r"\s", "", c.name.lower())
                 if (
                     not c.hide
@@ -1592,7 +1592,7 @@ class Clients(dict):
         try:
             return self[self._guidIndex[guid]]
         except Exception:
-            for cid, c in self.items():
+            for _cid, c in self.items():
                 if c.guid and c.guid == guid:
                     self._guidIndex[guid] = c.cid
                     return c

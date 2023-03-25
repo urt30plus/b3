@@ -87,7 +87,7 @@ class WelcomePlugin(b3.plugin.Plugin):
             ("show_user_greeting", F_CUSTOM_GREETING),
         ]
 
-        config_options = list(zip(*flag_options))[0]
+        config_options = list(zip(*flag_options, strict=True))[0]
 
         def set_flag(flag):
             self._welcomeFlags |= flag

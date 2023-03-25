@@ -353,7 +353,9 @@ class DatabaseStorage(Storage):
                 client._tempLevel = int(level.strip())
                 return client
             else:
-                raise KeyError(f"no client matching guid {client.guid} in admins_cache")
+                raise KeyError(
+                    f"no client matching guid {client.guid} in admins_cache"
+                ) from None
 
     def getClientsMatching(self, match):
         """

@@ -729,7 +729,7 @@ class Iourt43Parser(b3.parser.Parser):
         """Parses the back-slash delimited list of fields and returns a dict."""
         # \ip\145.99.135.227:27960\challenge\-232198920\qport\2781\protocol\68\battleye\1\name\[SNT]^1XLR^78or...
         parts = info.lstrip(" \\").split("\\")
-        return dict(zip(parts[0::2], parts[1::2]))
+        return dict(zip(parts[0::2], parts[1::2], strict=True))
 
     def parseUserInfo(self, info):
         """
@@ -2003,7 +2003,7 @@ class Iourt43Parser(b3.parser.Parser):
             if client and client.cid in player_teams:
                 newteam = player_teams[client.cid]
                 if newteam != client.team:
-                    setattr(client, "team", newteam)
+                    client.team = newteam
 
     def getPlayerScores(self):
         """

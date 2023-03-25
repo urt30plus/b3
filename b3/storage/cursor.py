@@ -54,7 +54,7 @@ class Cursor:
         """
         if self.EOF:
             return {}
-        return dict(zip(self.columns, self.fields))
+        return dict(zip(self.columns, self.fields, strict=True))
 
     def getValue(self, key, default=None):
         """

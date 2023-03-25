@@ -150,7 +150,7 @@ class StatsPlugin(b3.plugin.Plugin):
             self.cmd_topxp(None)
 
     def onRoundStart(self, event):
-        for cid, c in self.console.clients.items():
+        for _cid, c in self.console.clients.items():
             if c.maxLevel >= self.mapstatslevel:
                 try:
                     c.setvar(self, "shotsTeamHit", 0)

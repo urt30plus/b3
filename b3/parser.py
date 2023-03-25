@@ -656,7 +656,7 @@ class Parser:
         if cmd := self._commands.get(cmd):
             return cmd % kwargs
 
-    @functools.cache
+    @functools.cache  # noqa: B019
     def getGroup(self, data):
         """
         Return a valid Group from storage.

@@ -1308,7 +1308,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 i = random.randint(0, len(self._pass_lines) - 1)
                 newpassword = self._pass_lines[i]
 
-            for i in range(0, self._randnum):
+            for _ in range(0, self._randnum):
                 newpassword += str(random.randint(1, 9))
 
             if newpassword is None:

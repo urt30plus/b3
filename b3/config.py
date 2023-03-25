@@ -147,7 +147,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
             try:
                 sectdict = self._sections[section]
             except KeyError:
-                raise NoSectionError(section)
+                raise NoSectionError(section) from None
         sectdict[f"; {comment}"] = None
 
     def get(self, section, option, *args, **kwargs):
@@ -176,7 +176,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
             return "" if value is None else value
         except NoSectionError:
             # plugins are used to only catch NoOptionError
-            raise NoOptionError(option, section)
+            raise NoOptionError(option, section) from None
 
     def load(self, filename):
         """
@@ -206,7 +206,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
         try:
             configparser.ConfigParser.read_file(self, fp, filename)
         except Exception as e:
-            raise ConfigFileNotValid("%s" % e)
+            raise ConfigFileNotValid("%s" % e) from None
 
     def save(self):
         """
@@ -403,7 +403,7 @@ class MainConfig(B3ConfigParserMixin):
         """
         if hasattr(self._config_parser, name):
             attr = getattr(self._config_parser, name)
-            if hasattr(attr, "__call__"):
+            if callable(attr):
 
                 def newfunc(*args, **kwargs):
                     return attr(*args, **kwargs)

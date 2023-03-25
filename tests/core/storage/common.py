@@ -478,7 +478,7 @@ class StorageAPITest:
             data="pG",
         ).save(self.console)
 
-        def assertPenalties(client, types, penalties_in=[], penalties_notin=[]):
+        def assertPenalties(client, types, penalties_in=None, penalties_notin=None):
             penalties = self.storage.getClientPenalties(client=client, type=types)
             self.assertIsInstance(penalties, list)
             bucket = []
@@ -708,7 +708,9 @@ class StorageAPITest:
             data="pG",
         ).save(self.console)
 
-        def assertPenalties(client, types="Ban", penalties_in=[], penalties_notin=[]):
+        def assertPenalties(
+            client, types="Ban", penalties_in=None, penalties_notin=None
+        ):
             penalties = self.storage.getClientPenalties(client=client, type=types)
             self.assertIsInstance(penalties, list)
             bucket = []

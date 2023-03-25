@@ -48,8 +48,8 @@ class SqliteStorage(DatabaseStorage):
             if self._consoleNotice:
                 self.console.screen.write("Connecting to DB : OK\n")
                 self._consoleNotice = False
-        finally:
-            return self.db
+
+        return self.db
 
     def getConnection(self):
         """

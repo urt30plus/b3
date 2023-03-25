@@ -84,7 +84,7 @@ class TkInfo:
     def points(self):
         points = 0
         if self._attacked:
-            for cid, bol in self._attacked.items():
+            for cid, _bol in self._attacked.items():
                 try:
                     client = self.plugin.console.clients.getByCID(cid)
                     points += self.plugin.client_tkinfo(client).attacker_points(
@@ -385,7 +385,7 @@ class TkPlugin(b3.plugin.Plugin):
                 msg = ""
                 if len(tkinfo.attacked) > 0:
                     myvictims = []
-                    for cid, bol in tkinfo.attacked.items():
+                    for cid, _bol in tkinfo.attacked.items():
                         victim = self.console.clients.getByCID(cid)
                         if not victim:
                             continue
@@ -428,7 +428,7 @@ class TkPlugin(b3.plugin.Plugin):
                 mult = 1
 
             duration = self.getMultipliers(client)[2] * mult
-            for cid, a in list(tkinfo.attacked.items()):
+            for cid, _a in list(tkinfo.attacked.items()):
                 self.forgive(cid, client, True)
 
             client.tempban(self.getMessage("ban"), "tk", duration)
@@ -440,7 +440,7 @@ class TkPlugin(b3.plugin.Plugin):
         if msg is None:
             msg = "halving all TK Points"
         self.debug(msg)
-        for cid, c in self.console.clients.items():
+        for _cid, c in self.console.clients.items():
             tkinfo = self.client_tkinfo(c)
             for acid, points in list(tkinfo.attackers.items()):
                 points = int(round(points / 2))
@@ -640,7 +640,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         # forgive all his points
         points = 0
-        for cid, c in list(self.console.clients.items()):
+        for _cid, c in list(self.console.clients.items()):
             v = self.client_tkinfo(c)
             points += v.forgive(acid)
             a.forgiven(v.cid)
@@ -658,7 +658,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         if not data:
             if len(v.attackers) == 1:
-                for cid, points in list(v.attackers.items()):
+                for cid, _points in list(v.attackers.items()):
                     self.grudge(cid, client)
             else:
                 self.cmd_forgivelist(data, client)
@@ -668,7 +668,7 @@ class TkPlugin(b3.plugin.Plugin):
             self.grudge(data, client)
         else:
             data = data.lower()
-            for cid, points in list(v.attackers.items()):
+            for cid, _points in list(v.attackers.items()):
                 c = self.console.clients.getByCID(cid)
                 if c and c.name.lower().find(data) != -1:
                     self.grudge(c.cid, client)
@@ -684,7 +684,7 @@ class TkPlugin(b3.plugin.Plugin):
 
         if not data:
             if len(v.attackers) == 1:
-                for cid, points in list(v.attackers.items()):
+                for cid, _points in list(v.attackers.items()):
                     self.forgive(cid, client)
             else:
                 self.cmd_forgivelist(data, client)
@@ -694,7 +694,7 @@ class TkPlugin(b3.plugin.Plugin):
             self.forgive(data, client)
         else:
             data = data.lower()
-            for cid, points in list(v.attackers.items()):
+            for cid, _points in list(v.attackers.items()):
                 c = self.console.clients.getByCID(cid)
                 if c and c.name.lower().find(data) != -1:
                     self.forgive(c.cid, client)
@@ -705,7 +705,7 @@ class TkPlugin(b3.plugin.Plugin):
         """
         v = self.client_tkinfo(client)
         if len(v.attackers) == 1:
-            for cid, attacker in list(v.attackers.items()):
+            for cid, _attacker in list(v.attackers.items()):
                 if v.is_grudged(cid):
                     client.message(self.getMessage("no_forgive"))
                 else:
@@ -806,7 +806,7 @@ class TkPlugin(b3.plugin.Plugin):
             msg = ""
             if len(tkinfo.attacked) > 0:
                 myvictims = []
-                for cid, bol in tkinfo.attacked.items():
+                for cid, _bol in tkinfo.attacked.items():
                     if not (victim := self.console.clients.getByCID(cid)):
                         continue
 

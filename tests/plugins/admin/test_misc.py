@@ -9,7 +9,7 @@ class Test_parseUserCmd(Admin_TestCase):
         self.init()
 
     def test_clientinfo_bad_arg(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception):  # noqa: B017
             self.p.parseUserCmd(None)
 
     def test_clientinfo_empty_arg(self):

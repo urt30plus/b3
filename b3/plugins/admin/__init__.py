@@ -799,7 +799,7 @@ class AdminPlugin(b3.plugin.Plugin):
         :param client: The client who executed the command
         """
         c_list = []
-        for c, cmd in self._commands.items():
+        for _c, cmd in self._commands.items():
             if cmd.canUse(client) and cmd.command not in c_list:
                 c_list.append(cmd.command)
         result = functions.corrent_spell(c_word, " ".join(c_list))
@@ -1280,7 +1280,7 @@ class AdminPlugin(b3.plugin.Plugin):
                     )
                 )
         else:
-            for cid, c in list(self.console.clients.items()):
+            for _cid, c in list(self.console.clients.items()):
                 self.clearAll(c, client)
             self.console.say(
                 self.getMessage("cleared_warnings_for_all", {"admin": client.exactName})
@@ -1376,7 +1376,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 client.message(self.getMessage("help_no_command", data))
             return
         else:
-            for c, cmd in self._commands.items():
+            for _c, cmd in self._commands.items():
                 if cmd.canUse(client) and cmd.command not in commands:
                     commands.append(cmd.command)
 

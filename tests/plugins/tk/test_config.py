@@ -536,7 +536,7 @@ class Test_Tk_default_config(B3TestCase):
                     % conf_message_id
                 )
         for default_message_id in self.p._default_messages:
-            if default_message_id not in list(zip(*conf_items))[0]:
+            if default_message_id not in list(zip(*conf_items, strict=True))[0]:
                 self.fail(
                     "%s exists in the _default_messages dict, but not in the config file"
                     % default_message_id
