@@ -138,10 +138,8 @@ class WelcomePlugin(b3.plugin.Plugin):
         t.start()
 
     def welcome(self, client):
-        if client.lastVisit:
-            _timeDiff = time.time() - client.lastVisit
-        else:
-            _timeDiff = 1000000  # big enough so it will welcome new players
+        # default to 1000000, big enough so it will welcome new players
+        _timeDiff = time.time() - client.lastVisit if client.lastVisit else 1000000
 
         # don't need to welcome people who got kicked or where already
         # welcomed in before _min_gap s ago

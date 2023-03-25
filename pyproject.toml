@@ -27,7 +27,7 @@ select = [
 #    "RET",  # returns
     "RUF",  # Ruff-specific rules
 #    "S",  # bandit
-#    "SIM",  # simplify
+    "SIM",  # simplify
 #    "T20",  # print statements
 #    "TRY",  # tryceratops
 #    "UP",  # pyupgrade

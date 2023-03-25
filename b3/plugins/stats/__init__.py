@@ -1,3 +1,5 @@
+import contextlib
+
 import b3
 import b3.events
 import b3.plugin
@@ -23,19 +25,14 @@ class StatsPlugin(b3.plugin.Plugin):
     def onLoadConfig(self):
         commands_options = []
         if self.config.has_section("commands"):
-            try:
+            with contextlib.suppress(Exception):
                 commands_options = self.config.options("commands")
-            except Exception:
-                pass
 
         def load_command_level(cmd_name):
             matching_options = [
                 x for x in commands_options if x.startswith("%s-" % cmd_name)
             ]
-            if matching_options:
-                option_name = matching_options[0]
-            else:
-                option_name = cmd_name
+            option_name = matching_options[0] if matching_options else cmd_name
             return self.config.getint("commands", option_name)
 
         try:

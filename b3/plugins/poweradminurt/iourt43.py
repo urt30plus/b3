@@ -451,9 +451,8 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     if stinfo.st_size > self._max_dic_size:
                         self.warning("dictionary file is too big: switching to default")
                     else:
-                        dicfile = open(padicfile)
-                        text = dicfile.read().strip()
-                        dicfile.close()
+                        with open(padicfile) as dicfile:
+                            text = dicfile.read().strip()
                         if text == "":
                             self.warning(
                                 "dictionary file is empty: switching to default"
@@ -1226,10 +1225,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if team == "r":
             team = "red"
 
-        if team == "s":
-            teamname = "spectator"
-        else:
-            teamname = team
+        teamname = "spectator" if team == "s" else team
 
         if team == "free":
             if sclient.isvar(self, "paforced"):
@@ -1558,11 +1554,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                     return None
 
                 # did player join spectators?
-                if team == b3.TEAM_SPEC:
-                    # done balancing
-                    self._balancing = False
-                    return None
-                elif team == b3.TEAM_UNKNOWN:
+                if team == b3.TEAM_SPEC or team == b3.TEAM_UNKNOWN:
                     # done balancing
                     self._balancing = False
                     return None
@@ -1838,9 +1830,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                         % c.var(self, "teamtime").value
                     )
 
-                if c.maxLevel >= self._smaxlevel:
-                    continue
-                elif c.isvar(self, "paforced"):
+                if c.maxLevel >= self._smaxlevel or c.isvar(self, "paforced"):
                     continue
                 elif c.team == b3.TEAM_SPEC and (
                     self.console.time() - c.var(self, "teamtime").value
@@ -2928,17 +2918,16 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         if absdiff >= self._skilldiff:
             unbalanced = True
 
-        if unbalanced or self._skill_balance_mode == 1:
-            if absdiff > 0.2:
-                self.console.say(
-                    f"Avg kill ratio diff is {avgdiff:.2f}, skill diff is {diff:.2f}"
-                )
-                if self._skill_balance_mode == 1:
-                    # give advice if teams are unfair
-                    self._advise(avgdiff, 2)
-                else:
-                    # only report stronger team, we will balance/skuffle below
-                    self._advise(avgdiff, 0)
+        if (unbalanced or self._skill_balance_mode == 1) and absdiff > 0.2:
+            self.console.say(
+                f"Avg kill ratio diff is {avgdiff:.2f}, skill diff is {diff:.2f}"
+            )
+            if self._skill_balance_mode == 1:
+                # give advice if teams are unfair
+                self._advise(avgdiff, 2)
+            else:
+                # only report stronger team, we will balance/skuffle below
+                self._advise(avgdiff, 0)
 
         if unbalanced and 2 <= self._skill_balance_mode <= 3:
             if self._skill_balance_mode == 2:
@@ -2975,7 +2964,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             word = "supreme"
         elif 8 <= absdiff < 10:
             word = "Godlike!"
-        elif 10 <= absdiff:
+        elif absdiff >= 10:
             word = "probably cheating :P"
             same = "is "
             stronger = "is "

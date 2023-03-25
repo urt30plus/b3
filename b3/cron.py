@@ -161,10 +161,7 @@ class CronTab:
             lmin = int(r.group("lmin"))
             lmax = int(r.group("lmax"))
             step = r.group("step")
-            if step is None:
-                step = 1
-            else:
-                step = int(step)
+            step = 1 if step is None else int(step)
             if step > maxrate:
                 raise ValueError(f"{step} is out of accepted range 0-{maxrate}")
             if lmin < 0 or lmax > maxrate:

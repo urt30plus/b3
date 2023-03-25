@@ -104,9 +104,7 @@ class SpamcontrolPlugin(b3.plugin.Plugin):
             points += 5
         elif text == last_message:
             points += 3
-        elif color:
-            points += 2
-        elif text.startswith("QUICKMESSAGE_"):
+        elif color or text.startswith("QUICKMESSAGE_"):
             points += 2
         else:
             points += 1

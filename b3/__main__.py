@@ -1,4 +1,5 @@
 import argparse
+import contextlib
 import os
 import signal
 
@@ -38,12 +39,10 @@ def start(mainconfig, options):
         b3.console.bot("TERM signal received: shutting down")
         b3.console.shutdown()
 
-    try:
+    with contextlib.suppress(Exception):
         # necessary if using the profiler, because signal.signal cannot be
         # used in threads
         signal.signal(signal.SIGTERM, term_signal_handler)
-    except Exception:
-        pass
 
     try:
         b3.console.start()

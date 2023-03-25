@@ -91,11 +91,10 @@ class AdvPlugin(b3.plugin.Plugin):
     def adv(self, first_try=True):
         """
         Display an advertisement message.
-        :param first_try: Whether or not it's the first time we try to display this ad
+        :param first_try: Whether it's the first time we try to display this ad
         """
-        if self.console.clients.getList():
-            if ad := next(self._msg_cycle):
-                self.print_ad(ad, first_try)
+        if self.console.clients.getList() and (ad := next(self._msg_cycle)):
+            self.print_ad(ad, first_try)
 
     def print_ad(self, ad, first_try=True):
         if ad == "@nextmap":

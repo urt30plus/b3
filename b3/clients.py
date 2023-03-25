@@ -1,3 +1,4 @@
+import contextlib
 import re
 import threading
 import time
@@ -246,10 +247,8 @@ class Client:
         :param plugin: The plugin that stored the variable.
         :param key: The key of the variable.
         """
-        try:
+        with contextlib.suppress(KeyError):
             del self._pluginData[id(plugin)][key]
-        except Exception:
-            pass
 
     def getAliases(self):
         return self.console.storage.getClientAliases(self)
@@ -531,10 +530,7 @@ class Client:
     maskedLevel = property(_get_maskedLevel)
 
     def _set_name(self, name):
-        if self.console:
-            newName = self.console.stripColors(name)
-        else:
-            newName = name.strip()
+        newName = self.console.stripColors(name) if self.console else name.strip()
 
         if self._name == newName:
             return

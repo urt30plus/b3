@@ -28,15 +28,16 @@ def record_holder(
         f"WHERE plugin_name='{plugin_name}' and map_name='{map_name}'"
     )
     with console.storage.query(q) as cursor:
-        if r := cursor.getOneRow():
-            if clients := console.clients.getByDB(f'@{r["player_id"]}'):
-                return Record(
-                    plugin_name=plugin_name,
-                    map_name=map_name,
-                    client=clients[0],
-                    score=int(r["score"]),
-                    is_new=False,
-                )
+        if (r := cursor.getOneRow()) and (
+            clients := console.clients.getByDB(f'@{r["player_id"]}')
+        ):
+            return Record(
+                plugin_name=plugin_name,
+                map_name=map_name,
+                client=clients[0],
+                score=int(r["score"]),
+                is_new=False,
+            )
     raise LookupError(f"Record not found: {plugin_name} / {map_name}")
 
 

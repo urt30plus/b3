@@ -1,4 +1,5 @@
 import atexit
+import contextlib
 import datetime
 import functools
 import os
@@ -204,10 +205,8 @@ class Parser:
             self._rconPort = self.config.getint("server", "rcon_port")
         if self.config.has_option("server", "rcon_password"):
             self._rconPassword = self.config.get("server", "rcon_password")
-        try:
+        with contextlib.suppress(socket.gaierror):
             self._rconIp = socket.gethostbyname(self._rconIp)
-        except socket.gaierror:
-            pass
 
     def __init_bot(self):
         self.bot("--------------------------------------------")
@@ -266,7 +265,7 @@ class Parser:
                 f"Using gamelog    : {b3.functions.getShortPath(os.path.abspath(f))}\n"
             )
             if os.path.isfile(f):
-                self.input = open(f, "r")
+                self.input = open(f, "r")  # noqa: SIM115
                 if self.config.has_option("server", "seek"):
                     seek = self.config.getboolean("server", "seek")
                     if seek:

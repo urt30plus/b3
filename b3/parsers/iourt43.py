@@ -1982,7 +1982,7 @@ class Iourt43Parser(b3.parser.Parser):
 
     def __setup_connected_players(self):
         player_list = self.getPlayerList()
-        for cid in player_list.keys():
+        for cid in player_list:
             if userinfostring := self.queryClientUserInfoByCid(cid):
                 self.OnClientuserinfo(None, userinfostring)
         self.__reconcile_connected_player_teams(player_list)
@@ -2002,7 +2002,7 @@ class Iourt43Parser(b3.parser.Parser):
                     self.error("Cannot fix players teams: %s" % err)
                     return
 
-        for cid in player_list.keys():
+        for cid in player_list:
             client = self.clients.getByCID(cid)
             if client and client.cid in player_teams:
                 newteam = player_teams[client.cid]

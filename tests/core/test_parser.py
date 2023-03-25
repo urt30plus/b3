@@ -53,7 +53,7 @@ class Test_getMessageVariables(unittest.TestCase):
         self.parser = DummyParser()
 
     def assertDictIsSubset(self, subset, superset, *args):
-        compare_sub = {k: superset[k] for k in subset.keys() if k in superset.keys()}
+        compare_sub = {k: superset[k] for k in subset if k in superset}
         self.assertEqual(subset, compare_sub)
 
     def test_with_parameters(self):

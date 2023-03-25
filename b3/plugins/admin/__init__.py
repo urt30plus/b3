@@ -694,17 +694,16 @@ class AdminPlugin(b3.plugin.Plugin):
                 )
                 self.console.clients.authorizeClients()
                 return
-            elif private:
-                if event_client.maxLevel < command.secretLevel:
-                    event_client.message(
-                        "^7You do not have sufficient access to do silent commands"
-                    )
-                    self.warning(
-                        "Command [%s] private call not allowed by %s",
-                        cmd,
-                        event_client.name,
-                    )
-                    return False
+            elif private and event_client.maxLevel < command.secretLevel:
+                event_client.message(
+                    "^7You do not have sufficient access to do silent commands"
+                )
+                self.warning(
+                    "Command [%s] private call not allowed by %s",
+                    cmd,
+                    event_client.name,
+                )
+                return False
 
             if command.canUse(event_client):
                 try:
@@ -793,10 +792,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         if client.maxLevel >= self._admins_level:
             return True
-        elif cmd.time + delay <= self.console.time():
-            return True
-        else:
-            return False
+        return cmd.time + delay <= self.console.time()
 
     def get_cmdSoundingLike(self, c_word, client):
         """
@@ -806,9 +802,8 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         c_list = []
         for c, cmd in self._commands.items():
-            if cmd.canUse(client):
-                if cmd.command not in c_list:
-                    c_list.append(cmd.command)
+            if cmd.canUse(client) and cmd.command not in c_list:
+                c_list.append(cmd.command)
         result = functions.corrent_spell(c_word, " ".join(c_list))
         return result
 
@@ -1357,9 +1352,9 @@ class AdminPlugin(b3.plugin.Plugin):
                     cmd.level is not None
                     and cmd.level[0] == mlevel
                     and cmd.canUse(client)
+                    and cmd.command not in commands
                 ):
-                    if cmd.command not in commands:
-                        commands.append(cmd.command)
+                    commands.append(cmd.command)
         elif data[:1] == "*":
             search = data[1:]
             for cmd in self._commands.values():
@@ -1368,8 +1363,7 @@ class AdminPlugin(b3.plugin.Plugin):
                     and cmd.canUse(client)
                     and cmd.command not in commands
                 ):
-                    if cmd.command not in commands:
-                        commands.append(cmd.command)
+                    commands.append(cmd.command)
         elif data:
             try:
                 cmd = self._commands[data]
@@ -1385,9 +1379,8 @@ class AdminPlugin(b3.plugin.Plugin):
             return
         else:
             for c, cmd in self._commands.items():
-                if cmd.canUse(client):
-                    if cmd.command not in commands:
-                        commands.append(cmd.command)
+                if cmd.canUse(client) and cmd.command not in commands:
+                    commands.append(cmd.command)
 
         if not commands:
             cmd.sayLoudOrPM(client, self.getMessage("help_none"))
@@ -1886,9 +1879,7 @@ class AdminPlugin(b3.plugin.Plugin):
             else:
                 matches = self.console.clients.getByMagic(cid)
                 for sclient in matches:
-                    if sclient.cid == client.cid:
-                        continue
-                    elif sclient.maxLevel >= client.maxLevel:
+                    if sclient.cid == client.cid or sclient.maxLevel >= client.maxLevel:
                         continue
                     else:
                         sclient.kick(reason, keyword, client)
@@ -1963,9 +1954,7 @@ class AdminPlugin(b3.plugin.Plugin):
 
         matches = self.console.clients.getByMagic(cid)
         for sclient in matches:
-            if sclient.cid == client.cid:
-                continue
-            elif sclient.maxLevel >= client.maxLevel:
+            if sclient.cid == client.cid or sclient.maxLevel >= client.maxLevel:
                 continue
             else:
                 if reason:
@@ -2083,9 +2072,7 @@ class AdminPlugin(b3.plugin.Plugin):
         duration = self.config.getDuration("settings", "ban_duration")
         matches = self.console.clients.getByMagic(cid)
         for sclient in matches:
-            if sclient.cid == client.cid:
-                continue
-            elif sclient.maxLevel >= client.maxLevel:
+            if sclient.cid == client.cid or sclient.maxLevel >= client.maxLevel:
                 continue
             else:
                 sclient.tempban(reason, keyword, duration, client)
@@ -2220,11 +2207,7 @@ class AdminPlugin(b3.plugin.Plugin):
             "^7Warnings: %s"
             % ", ".join(
                 sorted(
-                    [
-                        x
-                        for x in self.warn_reasons.keys()
-                        if x not in ("default", "generic")
-                    ]
+                    [x for x in self.warn_reasons if x not in ("default", "generic")]
                 )
             )
         )
@@ -2753,11 +2736,7 @@ class Command:
                 h.append("%s%s" % (self.prefix, self.command))
 
             for a in args:
-                if len(a) == 3:
-                    # optional
-                    parm = "[%s]" % a[0]
-                else:
-                    parm = "<%s>" % a[0]
+                parm = f"[{a[0]}]" if len(a) == 3 else f"<{a[0]}>"
 
                 if a[0] == badfield:
                     parm = "^1%s^7" % parm
@@ -2793,9 +2772,7 @@ class Command:
                     params.append(buf)
                     buf = ""
                     in_dquote = False
-                elif in_quote:
-                    buf += c
-                elif buf:
+                elif in_quote or buf:
                     buf += c
                 else:
                     in_dquote = True

@@ -272,10 +272,9 @@ class FlagstatsPlugin(b3.plugin.Plugin):
             f"^7{client.name} took ^5{flags} ^7flags, returned ^5{returns}^7, "
             f"captured ^5{caps}^7, def ^5{defends}^7"
         )
-        if caps > 0:
-            if best_time := client.var(self, "flagbesttime", -1).value > 0:
-                best_time = self.show_time(best_time)
-                msg += f", best capture time ^5{best_time} ^7"
+        if caps > 0 and (best_time := client.var(self, "flagbesttime", -1).value > 0):
+            best_time = self.show_time(best_time)
+            msg += f", best capture time ^5{best_time} ^7"
         return msg
 
     def game_reinit(self, event) -> None:

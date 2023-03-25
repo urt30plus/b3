@@ -1,4 +1,5 @@
 import abc
+import contextlib
 import operator
 import threading
 
@@ -97,10 +98,8 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         for m in self.config.options("messages"):
             sp = m.split("_", maxsplit=1)
             if len(sp) == 2:
-                try:
+                with contextlib.suppress(Exception):
                     self._msg_levels.add(int(sp[1]))
-                except Exception:
-                    pass
 
         self.create_missing_command_methods()
         self.register_commands_from_config()
@@ -283,19 +282,15 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
                 break
 
     def cancel_challenge_thread(self, challenge_thread):
-        try:
+        with contextlib.suppress(Exception):
             challenge_thread.cancel()
-        except Exception:
-            pass
 
     def challenge_end(self, target_id=None, target_name=None):
         self.console.write(
             f'bigtext "^3{target_name} ^7has won the {self.weapon_name} challenge!"'
         )
-        try:
+        with contextlib.suppress(KeyError):
             del self._challenges[target_id]
-        except KeyError:
-            pass
 
     def update_hall_of_fame(self, killers, map_name):
         if top_kills := self._top_killers(killers, "kills", limit=1):

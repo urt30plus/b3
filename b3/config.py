@@ -428,7 +428,7 @@ def getConfPath(decode=False, conf=None):
     if conf:
         if isinstance(conf, str):
             path = os.path.dirname(conf)
-        elif isinstance(conf, CfgConfigParser) or isinstance(conf, MainConfig):
+        elif isinstance(conf, (CfgConfigParser, MainConfig)):
             path = os.path.dirname(conf.fileName)
         else:
             raise TypeError(

@@ -229,10 +229,7 @@ def levenshteinDistance(a, b):
         for j in range(1, m + 1):
             x = c[i - 1, j] + 1
             y = c[i, j - 1] + 1
-            if a[i - 1] == b[j - 1]:
-                z = c[i - 1, j - 1]
-            else:
-                z = c[i - 1, j - 1] + 1
+            z = c[i - 1, j - 1] if a[i - 1] == b[j - 1] else c[i - 1, j - 1] + 1
             c[i, j] = min(x, y, z)
     return c[n, m]
 
@@ -356,7 +353,7 @@ def getStuffSoundingLike(stuff, expected_stuff):
             match = [clean_expected_stuff[i] for i in matching_subset]
         else:
             # no luck with subset lookup, fallback on soundex magic
-            for m in clean_expected_stuff.keys():
+            for m in clean_expected_stuff:
                 s = soundex(m)
                 if s == soundex1:
                     match.append(clean_expected_stuff[m])

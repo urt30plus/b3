@@ -861,7 +861,7 @@ class DatabaseStorage(Storage):
         orig_stderr = sys.stderr
         if silent:
             # silence warnings and such
-            sys.stderr = open(os.devnull, "w")
+            sys.stderr = open(os.devnull, "w")  # noqa: SIM115
 
         path = b3.functions.getAbsolutePath(fp)
         if not os.path.exists(path):

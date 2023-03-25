@@ -1,3 +1,4 @@
+import contextlib
 import re
 import threading
 import time
@@ -47,10 +48,8 @@ class TkInfo:
         self._warnings[cid] = warning
 
     def forgiven(self, cid):
-        try:
+        with contextlib.suppress(KeyError):
             del self._attacked[cid]
-        except KeyError:
-            pass
 
         if w := self._warnings.pop(cid, None):
             w.inactive = 1
@@ -448,10 +447,7 @@ class TkPlugin(b3.plugin.Plugin):
                 if points == 0:
                     self.forgive(acid, c, True)
                 else:
-                    try:
-                        tkinfo.attackers[acid] = points
-                    except KeyError:
-                        pass
+                    tkinfo.attackers[acid] = points
 
         if self._tk_points_halflife > 0:
             if self._crontab_tkhalflife:
