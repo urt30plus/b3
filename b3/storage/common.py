@@ -766,7 +766,7 @@ class DatabaseStorage(Storage):
         """
         if hasattr(group, "keyword") and group.keyword:
             query = QueryBuilder(self.db).SelectQuery(
-                "*", "groups", dict(keyword=group.keyword), None, 1
+                "*", "groups", {"keyword": group.keyword}, None, 1
             )
             self.console.verbose2(query)
             if not (row := self.query(query).getOneRow()):
@@ -774,7 +774,7 @@ class DatabaseStorage(Storage):
 
         elif hasattr(group, "level") and group.level >= 0:
             query = QueryBuilder(self.db).SelectQuery(
-                "*", "groups", dict(level=group.level), None, 1
+                "*", "groups", {"level": group.level}, None, 1
             )
             self.console.verbose2(query)
             if not (row := self.query(query).getOneRow()):

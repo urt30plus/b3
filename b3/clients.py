@@ -873,7 +873,7 @@ class Client:
             return False
         else:
             # fix missing pbid. Workaround a bug in the database layer that would insert the string "None"
-            # in db if pbid is None :/ The empty string being the default value for that db column!! Ã´O
+            # in db if pbid is None :/ The empty string being the default value for that db column!!
             if self.pbid is None:
                 self.pbid = ""
             if console:
@@ -884,7 +884,7 @@ class Client:
 
     def auth(self):
         """
-        Authorize this client client.
+        Authorize this client.
         """
         if not self.authed and self.guid and not self.authorizing:
             self.authorizing = True
@@ -985,7 +985,7 @@ class Client:
         Authorize this client using his PBID.
         """
         clients_matching_pbid = self.console.storage.getClientsMatching(
-            dict(pbid=self.pbid)
+            {"pbid": self.pbid}
         )
         if len(clients_matching_pbid) > 1:
             self.console.warning(

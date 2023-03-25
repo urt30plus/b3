@@ -28,18 +28,16 @@ class Test_sqlite(B3TestCase, StorageAPITest):
 
     def test_getTables(self):
         self.assertSetEqual(
-            set(
-                [
-                    "sqlite_sequence",
-                    "aliases",
-                    "ipaliases",
-                    "clients",
-                    "groups",
-                    "penalties",
-                    "data",
-                    "plugin_hof",
-                ]
-            ),
+            {
+                "sqlite_sequence",
+                "aliases",
+                "ipaliases",
+                "clients",
+                "groups",
+                "penalties",
+                "data",
+                "plugin_hof",
+            },
             set(self.storage.getTables()),
         )
 

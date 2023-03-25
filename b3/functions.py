@@ -397,10 +397,10 @@ def corrent_spell(c_word, wordbook):
         return set(deletes + transposes + replaces + inserts)
 
     def known_edits2(word):
-        return set(e2 for e1 in edits1(word) for e2 in edits1(e1) if e2 in nwords)
+        return {e2 for e1 in edits1(word) for e2 in edits1(e1) if e2 in nwords}
 
     def known(word):
-        return set(w for w in word if w in nwords)
+        return {w for w in word if w in nwords}
 
     def correct(word):
         candidates = (

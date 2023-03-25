@@ -1,6 +1,5 @@
 [tool.black]
 target-version = ["py311"]
-exclude = '^.*'
 
 [tool.mypy]
 packages = "b3"
@@ -13,7 +12,7 @@ select = [
 #    "A",  # shadowing builtins
 #    "ARG",  # unused arguments
 #    "B",  # bugbear
-#    "C40",  # comprehensions
+    "C40",  # comprehensions
 #    "DTZ",  # checks for naive datetimes
 #    "E",  # pycodestyle (errors)
 #    "ERA",  # eradicate (commented out code)
@@ -26,12 +25,12 @@ select = [
 #    "PL",  # Pylint
 #    "PTH",  # favor pahtlib.Path
 #    "RET",  # returns
-#    "RUF",  # Ruff-specific rules
+    "RUF",  # Ruff-specific rules
 #    "S",  # bandit
 #    "SIM",  # simplify
 #    "T20",  # print statements
 #    "TRY",  # tryceratops
 #    "UP",  # pyupgrade
-#    "W",  # pycodestyle (warnings)
+    "W",  # pycodestyle (warnings)
 ]
 ignore = ["E501"]

@@ -1613,7 +1613,7 @@ class Iourt43Parser(b3.parser.Parser):
         a client from self.clients.
         """
         plist = self.getPlayerList(maxRetries=4)
-        mlist = dict()
+        mlist = {}
 
         for cid, c in plist.items():
             if client := self.getByCidOrJoinPlayer(cid):
@@ -1927,7 +1927,7 @@ class Iourt43Parser(b3.parser.Parser):
             6 total cvars
             6 cvar indexes
         """
-        cvars = dict()
+        cvars = {}
         cmd = "cvarlist" if cvar_filter is None else ("cvarlist %s" % cvar_filter)
         if raw_data := self.write(cmd):
             re_line = re.compile(
@@ -1989,7 +1989,7 @@ class Iourt43Parser(b3.parser.Parser):
         self.__reconcile_connected_player_teams(player_list)
 
     def __reconcile_connected_player_teams(self, player_list):
-        player_teams = dict()
+        player_teams = {}
         tries = 0
         while tries < 3:
             try:
