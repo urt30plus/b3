@@ -144,7 +144,7 @@ def _get_plugin_config(
 
         if p_clazz.requiresConfigFile:
             raise b3.config.ConfigFileNotFound(
-                f"plugin {p_name} cannot be " "loaded without a configuration file"
+                f"plugin {p_name} cannot be loaded without a configuration file"
             )
 
         console.warning(

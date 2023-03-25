@@ -749,7 +749,7 @@ class Parser:
         """
         self.screen.write("Startup complete : B3 is running! Let's get to work!\n\n")
         self.screen.write(
-            "If you run into problems check your B3 log file for " "more information\n"
+            "If you run into problems check your B3 log file for more information\n"
         )
         self.screen.flush()
 

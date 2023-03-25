@@ -45,7 +45,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
         self._total_kills += 1
         if self._total_kills == 1:
             self.console.write(
-                f'bigtext "^3{client.exactName} ^7: ' f'first {self.weapon_name} kill"'
+                f'bigtext "^3{client.exactName} ^7: first {self.weapon_name} kill"'
             )
 
         if client.cid not in self._killers:
@@ -224,7 +224,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
         if len(self._challenges) >= self._max_challenges:
             client.message(
-                "There are already several challenges underway, " "try again later"
+                "There are already several challenges underway, try again later"
             )
             return
 
@@ -290,7 +290,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
 
     def challenge_end(self, target_id=None, target_name=None):
         self.console.write(
-            f'bigtext "^3{target_name} ^7has won the ' f'{self.weapon_name} challenge!"'
+            f'bigtext "^3{target_name} ^7has won the {self.weapon_name} challenge!"'
         )
         try:
             del self._challenges[target_id]

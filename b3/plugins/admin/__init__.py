@@ -237,7 +237,7 @@ class AdminPlugin(b3.plugin.Plugin):
             self.warn_delay = raw_data
         except NoOptionError:
             self.warning(
-                "could not find warn/warn_delay in config file, " "using default: %s",
+                "could not find warn/warn_delay in config file, using default: %s",
                 self.warn_delay,
             )
         except ValueError as e:
@@ -513,7 +513,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 else:
                     self.warning(
                         "!iamgod command enabled by config file but %s superadmin are already registered: "
-                        + "make sure to disable the iamgod command in the admin plugin",
+                        "make sure to disable the iamgod command in the admin plugin",
                         len(superadmins),
                     )
             elif len(superadmins) == 0:

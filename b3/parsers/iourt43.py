@@ -129,7 +129,7 @@ class Iourt43Parser(b3.parser.Parser):
         ),
         # ClientUserinfo: 2 \ip\11.181.55.130:27960\snaps\20\name\|30+|money\...
         # ClientUserinfoChanged: 4 n\pibul\t\1\r\1\tl\0\f0\ninja\f1\\f2\\a0\0\a1\0\a2\0
-        re.compile(r"^(?P<action>ClientUserinfo(Changed)?):\s" r"(?P<data>.*)$"),
+        re.compile(r"^(?P<action>ClientUserinfo(Changed)?):\s(?P<data>.*)$"),
         # Flag: 2 2: team_CTF_blueflag
         re.compile(
             r"^(?P<action>Flag):\s"

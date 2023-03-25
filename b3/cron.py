@@ -334,7 +334,7 @@ class Cron:
                 delay = 62 - t2.tm_sec
             else:
                 self.console.warning(
-                    "Cron run crossed the minute mark: " "start %s:%s / end %s:%s",
+                    "Cron run crossed the minute mark: start %s:%s / end %s:%s",
                     t.tm_min,
                     t.tm_sec,
                     t2.tm_min,
