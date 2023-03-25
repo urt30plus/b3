@@ -222,7 +222,5 @@ class VetoEvent(Exception):
     Raised to cancel event processing.
     """
 
-    pass
-
 
 eventManager = Events()

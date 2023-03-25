@@ -1141,7 +1141,6 @@ class Iourt43Parser(b3.parser.Parser):
         the user in the database (usualy guid, ip) and call the
         Client.auth() method.
         """
-        pass
 
     def OnKill(self, action, data, match=None):
         if not (victim := self.getByCidOrJoinPlayer(match["cid"])):

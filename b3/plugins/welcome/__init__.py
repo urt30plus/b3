@@ -95,7 +95,7 @@ class WelcomePlugin(b3.plugin.Plugin):
         def unset_flag(flag):
             self._welcomeFlags &= ~flag
 
-        if not any([self.config.has_option("settings", o) for o in config_options]):
+        if not any(self.config.has_option("settings", o) for o in config_options):
             if self.config.has_option("settings", "flags"):
                 # old style config
                 try:

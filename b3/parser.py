@@ -456,14 +456,12 @@ class Parser:
         Called after the parser is created before run(). Overwrite this
         for anything you need to initialize you parser with.
         """
-        pass
 
     def pluginsStarted(self):
         """
         Called after the parser loaded and started all plugins.
         Overwrite this in parsers to take actions once plugins are ready
         """
-        pass
 
     def pause(self):
         """
@@ -999,7 +997,6 @@ class Parser:
         Commons operation to be done on B3 shutdown.
         Called internally by b3.parser.die()
         """
-        pass
 
     def getWrap(self, text):
         """
@@ -1274,7 +1271,6 @@ class Parser:
         'mute', 'kill' or anything you want.
         IMPORTANT: This method must return True if the penalty was inflicted.
         """
-        pass
 
     def queryClientFrozenSandAccount(self, cid):
         pass

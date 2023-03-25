@@ -119,7 +119,6 @@ class Plugin:
         """
         Called after Plugin.startup().
         """
-        pass
 
     def enable(self):
         """
@@ -600,7 +599,6 @@ class Plugin:
         This is called after loadConfig() and if a user use the !reconfig command.
         Any plugin private variables loaded from the config need to be reset here.
         """
-        pass
 
     def onStartup(self):
         """
@@ -619,27 +617,23 @@ class Plugin:
         """
         Called when the plugin is enabled.
         """
-        pass
 
     def onDisable(self):
         """
         Called when the plugin is disabled.
         """
-        pass
 
     def onExit(self, event):
         """
         Perform operations when EVT_EXIT is received.
         :param event: The event to be handled
         """
-        pass
 
     def onStop(self, event):
         """
         Perform operations when EVT_STOP is received.
         :param event: The event to be handled
         """
-        pass
 
     def handle(self, _):
         """

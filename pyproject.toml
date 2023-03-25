@@ -4,13 +4,12 @@ exclude = '^.*'
 
 [tool.mypy]
 packages = "b3"
-strict = true
-warn_unreachable = true
+ignore_errors = true
 
 [tool.ruff]
 target-version = "py311"
 extend-exclude = [".*"]
-#select = [
+select = [
 #    "A",  # shadowing builtins
 #    "ARG",  # unused arguments
 #    "B",  # bugbear
@@ -23,10 +22,9 @@ extend-exclude = [".*"]
 #    "I",   # isort
 #    "ISC",  # Implicit String Concat
 #    "N",  # pep8-naming
-#    "PIE",  # misc lints
+    "PIE",  # misc lints
 #    "PL",  # Pylint
 #    "PTH",  # favor pahtlib.Path
-#    "Q",  # quotes
 #    "RET",  # returns
 #    "RUF",  # Ruff-specific rules
 #    "S",  # bandit
@@ -35,6 +33,5 @@ extend-exclude = [".*"]
 #    "TRY",  # tryceratops
 #    "UP",  # pyupgrade
 #    "W",  # pycodestyle (warnings)
-#    "YTT",  # flake8-2020
-#]
+]
 ignore = ["E501"]

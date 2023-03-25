@@ -503,7 +503,7 @@ class Test_config(Admin_functional_test):
                         new_config_content += line + "\n"
                         is_in_warn_reasons_section = False
                     else:
-                        if line.startswith("generic") or line.startswith("default"):
+                        if line.startswith(("generic", "default")):
                             pass
                         else:
                             new_config_content += line + "\n"

@@ -237,7 +237,7 @@ class CfgConfigParser(B3ConfigParserMixin, configparser.ConfigParser):
 
     @staticmethod
     def _write_item(fp, key, value):
-        if (key.startswith(";") or key.startswith("#")) and value is None:
+        if key.startswith((";", "#")) and value is None:
             # consider multiline comments
             for line in key.split("\n"):
                 line = line.removeprefix(";")

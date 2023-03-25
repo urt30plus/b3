@@ -1,5 +1,5 @@
 __author__ = "ThorN"
-__version__ = "23.2.27"
+__version__ = "23.3.25"
 
 version = f"^2(b3) ^3v{__version__}"
 
