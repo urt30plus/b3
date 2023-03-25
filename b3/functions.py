@@ -593,7 +593,7 @@ def getWritableFilePath(filepath, decode=False):
     home_dir = get_home_path(create=False)
     if not filepath.startswith(home_dir):
         try:
-            with tempfile.TemporaryFile(dir=os.path.dirname(filepath)) as tf:
+            with tempfile.TemporaryFile(dir=os.path.dirname(filepath)):
                 pass
         except (OSError, IOError):
             # no need to decode again since home_dir is already decoded

@@ -801,7 +801,7 @@ class TkPlugin(b3.plugin.Plugin):
         """
         <name> - display a user's tk points
         """
-        if not (m := re.match("^([a-z0-9]+)$", data)):
+        if not re.match("^([a-z0-9]+)$", data):
             client.message("^7Invalid parameters")
             return
 
@@ -848,7 +848,7 @@ class TkPlugin(b3.plugin.Plugin):
         """
         <name> - clear a user's tk points
         """
-        if not (m := re.match("^([a-z0-9]+)$", data)):
+        if not re.match("^([a-z0-9]+)$", data):
             client.message("^7Invalid parameters")
             return False
 

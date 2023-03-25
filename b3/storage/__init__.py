@@ -87,7 +87,7 @@ class Storage:
         raise NotImplementedError
 
 
-from .sqlite import SqliteStorage
+from .sqlite import SqliteStorage  # noqa: F401
 
 
 def getStorage(dsn, dsnDict, console):

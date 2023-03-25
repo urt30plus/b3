@@ -1035,9 +1035,6 @@ class Iourt43Parser(b3.parser.Parser):
             "attempt_num": match["attempt_num"],
             "attempt_max": match["attempt_max"],
         }
-        way_id = match["way_id"]
-        attempt_num = match["attempt_num"]
-        attempt_max = match["attempt_max"]
         return self.getEvent(
             "EVT_CLIENT_JUMP_RUN_CANCEL", client=client, data=jump_data
         )

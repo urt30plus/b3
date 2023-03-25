@@ -848,13 +848,13 @@ class DatabaseStorage(Storage):
         """
         This method executes an external sql file on the current database.
         :param fp: The filepath of the file containing the SQL statements.
-        :param silent: Whether or not to silence warnings.
+        :param silent: Whether to silence warnings.
         :raise Exception: If the query cannot be evaluated or if the given path cannot be resolved.
         """
         # use existing connection or create a new one
         # duplicate code of query() method which is needed not to spam the database
         # with useless connection attempts (one for each query in the SQL file)
-        if not (connection := self.getConnection()):
+        if not self.getConnection():
             raise Exception("lost connection with the storage layer during query")
 
         # save standard error output

@@ -1853,7 +1853,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         if self.isEnabled() and not self._matchmode:
             try:
-                test = self.console.game.mapName
+                self.console.game.mapName
             except AttributeError:
                 self.warning("mapName not yet available")
             else:
@@ -2033,13 +2033,10 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             return
 
         if newrotation == 1:
-            rotname = "small"
             rotation = self._rotation_small
         elif newrotation == 2:
-            rotname = "medium"
             rotation = self._rotation_medium
         elif newrotation == 3:
-            rotname = "large"
             rotation = self._rotation_large
         else:
             self.error("invalid newrotation passed to setrotation")

@@ -51,7 +51,7 @@ paident_full_level: 40
         self.joe.pbid = "joe_pbid"
         self.joe.connects("3")
         # WHEN
-        with patch("time.time", return_value=0.0) as time_mock:
+        with patch("time.time", return_value=0.0):
             self.moderator.says("!id joe")
         # THEN
         self.assertListEqual(

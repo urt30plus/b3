@@ -221,7 +221,7 @@ class Test_Cron(B3TestCase):
 
     def test_cancel(self):
         mock_tab = Mock(spec=CronTab)
-        res = self.cron.add(mock_tab)
+        self.cron.add(mock_tab)
         self.assertEqual(1, len(self.cron._tabs))
 
         self.cron.cancel(-1)

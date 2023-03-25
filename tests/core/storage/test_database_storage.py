@@ -3,8 +3,8 @@ import unittest
 from unittest.mock import Mock
 
 import b3
+import b3.functions
 from b3.clients import Client
-from b3.functions import splitDSN
 from b3.storage.common import DatabaseStorage
 from b3.storage.sqlite import SqliteStorage
 

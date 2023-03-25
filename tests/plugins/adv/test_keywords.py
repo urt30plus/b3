@@ -1,4 +1,4 @@
-from unittest.mock import Mock, call, patch
+from unittest.mock import call, patch
 
 from mockito import any as ANY
 from mockito import when

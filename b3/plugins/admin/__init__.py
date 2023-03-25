@@ -1448,7 +1448,7 @@ class AdminPlugin(b3.plugin.Plugin):
             cmd.sayLoudOrPM(client, self.getMessage("admins", ", ".join(nlist)))
         else:
             if msg := self.getMessage("no_admins"):
-                cmd.sayLoudOrPM(client, self.getMessage("no_admins"))
+                cmd.sayLoudOrPM(client, msg)
 
     def cmd_rebuild(self, data, client, cmd=None):
         """
@@ -1764,7 +1764,7 @@ class AdminPlugin(b3.plugin.Plugin):
         if not self.console.storage.status():
             cmd.sayLoudOrPM(client, "^7Cannot lookup: database appears to be ^1DOWN")
         else:
-            if not (m := re.match("^(.+)$", data)):
+            if not re.match("^(.+)$", data):
                 client.message(self.getMessage("invalid_parameters"))
             else:
                 clients = self.console.clients.lookupByName(data)
@@ -2426,7 +2426,7 @@ class AdminPlugin(b3.plugin.Plugin):
         """
         <duration> - pause the bot from parsing
         """
-        if not (m := re.match("^([0-9]+[a-z]*)$", data)):
+        if not re.match("^([0-9]+[a-z]*)$", data):
             client.message(self.getMessage("invalid_parameters"))
         else:
             duration = functions.time2minutes(data)

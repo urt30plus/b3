@@ -103,7 +103,7 @@ class FishPlugin(Plugin):
                     f"fishing for {self.__team_name()} team with {self._fish_cmd}",
                 )
             else:
-                cmd.sayLoudOrPM(client, f"no team is being fished")
+                cmd.sayLoudOrPM(client, "no team is being fished")
             return
         if input[0] == "off":
             if self._target_team is not None:
@@ -112,7 +112,7 @@ class FishPlugin(Plugin):
                 )
                 self._target_team = None
             else:
-                client.message(f"ignored, no team was being fished")
+                client.message("ignored, no team was being fished")
             return
         fish_command = input[0]
         if fish_command == "on":

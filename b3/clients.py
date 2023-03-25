@@ -891,7 +891,6 @@ class Client:
 
             name = self.name
             pbid = self.pbid
-            guid = self.guid
             ip = self.ip
 
             if not pbid and self.cid:
