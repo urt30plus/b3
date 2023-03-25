@@ -9,9 +9,8 @@ warn_unreachable = true
 
 [tool.ruff]
 target-version = "py311"
-line-length = 88
-extend-exclude = ["*"]
-extend-select = [
+extend-exclude = [".*"]
+#select = [
 #    "A",  # shadowing builtins
 #    "ARG",  # unused arguments
 #    "B",  # bugbear
@@ -37,4 +36,5 @@ extend-select = [
 #    "UP",  # pyupgrade
 #    "W",  # pycodestyle (warnings)
 #    "YTT",  # flake8-2020
-]
+#]
+ignore = ["E501"]
