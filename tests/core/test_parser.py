@@ -88,6 +88,7 @@ class Test_getWrap(unittest.TestCase):
         self.parser._use_color_codes = False
         self.parser._line_length = 40
         self.parser._line_color_prefix = ""
+        self.parser.getWrap("TEST")
         self.assertIsNotNone(self.parser.wrapper)
 
     def test_with_invalid_input(self):
