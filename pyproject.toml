@@ -13,7 +13,7 @@ select = [
 #    "ARG",  # unused arguments
 #    "B",  # bugbear
     "C40",  # comprehensions
-#    "DTZ",  # checks for naive datetimes
+    "DTZ",  # checks for naive datetimes
     "E",  # pycodestyle (errors)
 #    "ERA",  # eradicate (commented out code)
     "F",  # Pyflakes

@@ -705,7 +705,7 @@ class Parser:
             self._tz_name = tz_name = "UTC"
             self._tz_offset = tz_offset = 0
         else:
-            local_dt = datetime.datetime.now().astimezone()
+            local_dt = datetime.datetime.now(datetime.UTC).astimezone()
             tz_offset = int(local_dt.utcoffset().total_seconds() / 3600)
             tz_name = local_dt.strftime("%Z")
             if " " in tz_name:
