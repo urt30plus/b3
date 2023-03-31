@@ -1839,17 +1839,16 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         """
         Check for bot support on the current map.
         """
-        if self.isEnabled() and not self._matchmode:
-            try:
-                self.console.game.mapName
-            except AttributeError:
-                self.warning("mapName not yet available")
-            else:
-                if self._botenable:
-                    for m in self._botmaps:
-                        if m == self.console.game.mapName:
-                            # we got ourselves a winner
-                            self.botsenable()
+        if (
+            self.isEnabled()
+            and not self._matchmode
+            and self.console.game.mapName
+            and self._botenable
+        ):
+            for m in self._botmaps:
+                if m == self.console.game.mapName:
+                    # we got ourselves a winner
+                    self.botsenable()
 
     def botsdisable(self):
         self.console.write("set bot_minplayers 0")
