@@ -26,7 +26,7 @@ select = [
 #    "PTH",  # favor pahtlib.Path
 #    "RET",  # returns
     "RUF",  # Ruff-specific rules
-#    "S",  # bandit
+    "S",  # bandit
     "SIM",  # simplify
 #    "T20",  # print statements
 #    "TRY",  # tryceratops
@@ -34,3 +34,11 @@ select = [
     "W",  # pycodestyle (warnings)
 ]
 ignore = ["E501"]
+
+[tool.ruff.per-file-ignores]
+"b3/plugins/hof.py" = ["S608"]  # Possible SQL Injection
+"b3/storage/*" = ["S608"]  # Possible SQL Injection
+"tests/*" = [
+    "S101",  # Use of assert
+    "S106",  # Possible hardcoded password
+]

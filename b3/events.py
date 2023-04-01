@@ -128,9 +128,10 @@ class Events:
         matching_keys = [k for k, v in self._events.items() if v == event_id]
         if not matching_keys:
             raise KeyError(f"could not find any B3 event with ID {event_id}")
-        assert (
-            len(matching_keys) == 1
-        ), f"expecting only one event key per event ID: {matching_keys!r}"
+        if len(matching_keys) != 1:
+            raise RuntimeError(
+                f"expecting only one event key per event ID: {matching_keys!r}"
+            )
         return matching_keys[0]
 
     def getName(self, key):

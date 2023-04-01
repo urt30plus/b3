@@ -1305,11 +1305,11 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         elif data == "off":
             newpassword = self._papublic_password
             if self._pass_lines is not None:
-                i = random.randint(0, len(self._pass_lines) - 1)
+                i = random.randint(0, len(self._pass_lines) - 1)  # noqa: S311
                 newpassword = self._pass_lines[i]
 
             for _ in range(0, self._randnum):
-                newpassword += str(random.randint(1, 9))
+                newpassword += str(random.randint(1, 9))  # noqa: S311
 
             if newpassword is None:
                 client.message(

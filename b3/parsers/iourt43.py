@@ -761,7 +761,7 @@ class Iourt43Parser(b3.parser.Parser):
         if "cl_guid" not in bclient and "skill" in bclient:
             # must be a bot connecting
             self.bot("Bot connecting!")
-            bclient["ip"] = "0.0.0.0"
+            bclient["ip"] = "0.0.0.0"  # noqa: S104
             bclient["cl_guid"] = "BOT" + str(bclient["cid"])
             bot = True
 

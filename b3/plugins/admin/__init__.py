@@ -916,9 +916,11 @@ class AdminPlugin(b3.plugin.Plugin):
                 admin = self.console.storage.getClient(Client(id=w.adminId))
                 # client object needs console to get groups
                 admin.console = self.console
-            except Exception:
+            except Exception as exc:
                 # warning given by the bot (censor, tk, etc) have adminId = 0 which match no client in storage
-                pass
+                self.console.warning(
+                    "clearall command failed for %s: %r", w.adminId, exc
+                )
 
             if admin is None or admin.maxLevel <= client.maxLevel:
                 w.inactive = 1
@@ -2157,8 +2159,10 @@ class AdminPlugin(b3.plugin.Plugin):
                                 "^7You cannot clear a ban from %s" % admin.exactName
                             )
                             return
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        self.console.warning(
+                            "unban command failed for %s: %r", w.adminId, exc
+                        )
 
             sclient.unban(reason, client)
 
@@ -2297,8 +2301,10 @@ class AdminPlugin(b3.plugin.Plugin):
                             "^7You cannot clear a warning from %s" % admin.exactName
                         )
                     return
-                except Exception:
-                    pass
+                except Exception as exc:
+                    self.console.warning(
+                        "warnremove command failed for %s: %r", w.adminId, exc
+                    )
 
             w.inactive = 1
             self.console.storage.setClientPenalty(w)
@@ -2330,8 +2336,10 @@ class AdminPlugin(b3.plugin.Plugin):
                         if admin.maxLevel > client.maxLevel:
                             failed += 1
                         break
-                    except Exception:
-                        pass
+                    except Exception as exc:
+                        self.console.warning(
+                            "warnclear command failed for %s: %r", w.adminId, exc
+                        )
 
                 cleared += 1
                 w.inactive = 1
@@ -2554,7 +2562,7 @@ class AdminPlugin(b3.plugin.Plugin):
                 self.warnClient(client, "Do not poke b3!", None, False, "", 1)
             else:
                 if sclient := self.findClientPrompt(m[0], client):
-                    message = random.choice(
+                    message = random.choice(  # noqa: S311
                         ("Wake up", "*poke*", "Attention", "Get up", "Go", "Move out")
                     )
                     self.console.say(f"^7{message} {sclient.exactName}^7!")

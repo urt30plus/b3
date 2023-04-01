@@ -90,8 +90,10 @@ class TkInfo:
                     points += self.plugin.client_tkinfo(client).attacker_points(
                         self.cid
                     )
-                except Exception:
-                    pass
+                except Exception as exc:
+                    self.plugin.console.warning(
+                        "failed to get points for %s: %r", cid, exc
+                    )
         return points
 
 

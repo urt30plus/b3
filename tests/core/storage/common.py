@@ -215,7 +215,7 @@ class StorageAPITest:
         )
         self.assertEqual(ipalias_id1 + 1, ipalias_id2)
         ipalias_id3 = self.storage.setClientIpAddress(
-            IpAlias(id=ipalias_id1, ip="0.0.0.0", clientId=1)
+            IpAlias(id=ipalias_id1, ip="0.0.0.0", clientId=1)  # noqa: S104
         )
         self.assertEqual(ipalias_id1, ipalias_id3)
 
