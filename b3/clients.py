@@ -1012,7 +1012,10 @@ class Client:
         Authorize this client using both his PBID and GUID.
         """
         clients_matching_pbid = self.console.storage.getClientsMatching(
-            {"pbid": self.pbid, "guid": self.guid}
+            {
+                "pbid": self.pbid,
+                "guid": self.guid,
+            }
         )
         if clients_matching_pbid:
             self.id = clients_matching_pbid[0].id

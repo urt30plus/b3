@@ -67,7 +67,11 @@ panuke-nuke: 20
         self.assertEqual([], self.moderator.message_history)
         self.assertEqual([], self.joe.message_history)
         self.console.write.assert_has_calls(
-            [call("nuke 3"), call("nuke 3"), call("nuke 3")]
+            [
+                call("nuke 3"),
+                call("nuke 3"),
+                call("nuke 3"),
+            ]
         )
 
 

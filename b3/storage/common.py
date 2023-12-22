@@ -664,7 +664,11 @@ class DatabaseStorage(Storage):
         :return: List of penalties
         """
         where = QueryBuilder(self.db).WhereClause(
-            {"type": type, "client_id": client.id, "inactive": 0}
+            {
+                "type": type,
+                "client_id": client.id,
+                "inactive": 0,
+            }
         )
         where += f" AND (time_expire = -1 OR time_expire > {int(time())})"
         stmt = QueryBuilder(self.db).SelectQuery(
@@ -681,7 +685,11 @@ class DatabaseStorage(Storage):
         :return: The last penalty added for the given client
         """
         where = QueryBuilder(self.db).WhereClause(
-            {"type": type, "client_id": client.id, "inactive": 0}
+            {
+                "type": type,
+                "client_id": client.id,
+                "inactive": 0,
+            }
         )
         where += f" AND (time_expire = -1 OR time_expire > {int(time())})"
         stmt = QueryBuilder(self.db).SelectQuery(
@@ -699,7 +707,11 @@ class DatabaseStorage(Storage):
         :return: The first penalty added for the given client.
         """
         where = QueryBuilder(self.db).WhereClause(
-            {"type": type, "client_id": client.id, "inactive": 0}
+            {
+                "type": type,
+                "client_id": client.id,
+                "inactive": 0,
+            }
         )
         where += f" AND (time_expire = -1 OR time_expire > {int(time())})"
         stmt = QueryBuilder(self.db).SelectQuery(
@@ -731,7 +743,11 @@ class DatabaseStorage(Storage):
         :return The number of penalties.
         """
         where = QueryBuilder(self.db).WhereClause(
-            {"type": type, "client_id": client.id, "inactive": 0}
+            {
+                "type": type,
+                "client_id": client.id,
+                "inactive": 0,
+            }
         )
         where += f" AND (time_expire = -1 OR time_expire > {int(time())})"
         with self.query(

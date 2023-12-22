@@ -739,7 +739,10 @@ bar: bar
         )
         self.p._sendRules(None)
         self.console.say.assert_has_calls(
-            [call("this is rule #1"), call("this is rule #2")]
+            [
+                call("this is rule #1"),
+                call("this is rule #2"),
+            ]
         )
 
     def test_no_rule_1(self, sleep_mock):
@@ -768,7 +771,10 @@ rule4: this is rule #4
         )
         self.p._sendRules(None)
         self.console.say.assert_has_calls(
-            [call("this is rule #1"), call("this is rule #2")]
+            [
+                call("this is rule #1"),
+                call("this is rule #2"),
+            ]
         )
 
     def test_no_rule_in_config(self, sleep_mock):
@@ -1133,9 +1139,7 @@ class Test_cmd_lastbans_functional(Admin_functional_test):
 class Test_cmd_help(Admin_functional_test):
     def setUp(self):
         Admin_functional_test.setUp(self)
-        self.p._commands = (
-            {}
-        )  # make sure to empty the commands list as _commands is a wrongly a class property
+        self.p._commands = {}  # make sure to empty the commands list as _commands is a wrongly a class property
         self.init()
         self.joe.message = Mock()
         self.joe.connects(0)
@@ -1709,9 +1713,7 @@ class Test_cmd_map(Admin_functional_test):
 class Test_cmd_register(Admin_functional_test):
     def setUp(self):
         Admin_functional_test.setUp(self)
-        self.p._commands = (
-            {}
-        )  # make sure to empty the commands list as _commands is a wrongly a class property
+        self.p._commands = {}  # make sure to empty the commands list as _commands is a wrongly a class property
         self.say_patcher = patch.object(self.console, "say")
         self.say_mock = self.say_patcher.start()
         self.player = FakeClient(

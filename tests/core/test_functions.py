@@ -246,7 +246,14 @@ class Test_getStuffSoundingLike(unittest.TestCase):
         )
         self.assertListEqual(
             sorted(
-                ["xxxfoOx1", "xxxfoOx2", "xxxfoOx3", "xxxfoOx4", "xxxfoOx5", "xxxfoOx6"]
+                [
+                    "xxxfoOx1",
+                    "xxxfoOx2",
+                    "xxxfoOx3",
+                    "xxxfoOx4",
+                    "xxxfoOx5",
+                    "xxxfoOx6",
+                ]
             ),
             sorted(
                 functions.getStuffSoundingLike(

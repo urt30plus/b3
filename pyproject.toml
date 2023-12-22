@@ -1,6 +1,3 @@
-[tool.black]
-target-version = ["py311"]
-
 [tool.mypy]
 packages = "b3"
 ignore_errors = true
@@ -30,10 +27,22 @@ select = [
     "SIM",  # simplify
 #    "T20",  # print statements
 #    "TRY",  # tryceratops
-    "UP",  # pyupgrade
+#    "UP",  # pyupgrade
     "W",  # pycodestyle (warnings)
 ]
-ignore = ["E501"]
+ignore = [
+    "B034",
+    "E501",
+    "E721",
+    "ISC001",
+    "PIE790",
+    "PIE808",
+    "RUF010",
+    "RUF012",
+    "RUF013",
+    "RUF015",
+    "SIM118",
+]
 
 [tool.ruff.per-file-ignores]
 "b3/plugins/hof.py" = ["S608"]  # Possible SQL Injection

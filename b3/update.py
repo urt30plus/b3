@@ -69,9 +69,7 @@ class DBUpdate:
                 |                                               |
                 +-----------------------------------------------+
 
-        """.format(
-                "B3 : %s" % b3.__version__
-            )
+        """.format("B3 : %s" % b3.__version__)
         )
 
         input("press any key to start the update...")

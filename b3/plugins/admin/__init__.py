@@ -41,9 +41,7 @@ class AdminPlugin(b3.plugin.Plugin):
     warn_delay = 15
     warn_instant_kick_num = 5
     warn_alert_kick_num = 3
-    warn_reasons = (
-        {}
-    )  # dict<warning keyword, tuple(warning duration in minute, warning reason)>
+    warn_reasons = {}  # dict<warning keyword, tuple(warning duration in minute, warning reason)>
 
     _noreason_level = 80
     _long_tempban_level = 80

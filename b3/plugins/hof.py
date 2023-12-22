@@ -1,6 +1,7 @@
 """
 Hall of Fame
 """
+
 from dataclasses import dataclass
 
 import b3.clients

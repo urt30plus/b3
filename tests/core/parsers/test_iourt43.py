@@ -1235,13 +1235,19 @@ auth: id: 0 - name: ^7laCourge - login: courgette - notoriety: serious - level: 
     def test_kick(self):
         self.console.kick(self.player, reason="f00")
         self.console.write.assert_has_calls(
-            [call('kick 4 "f00"'), call("say theName^7 was kicked f00")]
+            [
+                call('kick 4 "f00"'),
+                call("say theName^7 was kicked f00"),
+            ]
         )
 
     def test_ban(self):
         self.console.ban(self.player, reason="f00")
         self.console.write.assert_has_calls(
-            [call("addip 4"), call("say theName^7 was banned f00")]
+            [
+                call("addip 4"),
+                call("say theName^7 was banned f00"),
+            ]
         )
 
     def test_unban(self):
@@ -1299,7 +1305,10 @@ maps/ut4_ambush.bsp
     def test_rotateMap(self, timer_mock):
         self.console.rotateMap()
         self.console.write.assert_has_calls(
-            [call("say ^7Changing to next map"), call("cyclemap")]
+            [
+                call("say ^7Changing to next map"),
+                call("cyclemap"),
+            ]
         )
 
     @patch("threading.Timer", new_callable=lambda: InstantTimer)

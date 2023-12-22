@@ -3,6 +3,7 @@ This module make plugin testing simple. It provides you
 with fakeConsole and joe which can be used to say commands
 as if it where a player.
 """
+
 import logging
 import re
 import sys
@@ -276,9 +277,7 @@ class FakeClient(b3.clients.Client):
         :param console: The console implementation
         """
         self.console = console
-        self.message_history = (
-            []
-        )  # this allows unittests to check if a message was sent to the client
+        self.message_history = []  # this allows unittests to check if a message was sent to the client
         super().__init__(**kwargs)
 
     def clearMessageHistory(self):
