@@ -17,13 +17,12 @@ class Test_config(AdvTestCase):
                 self.p._crontab.dow,
             ),
         )
-        self.assertEqual(6, len(self.p.ad_list))
+        self.assertEqual(5, len(self.p.ad_list))
         self.assertListEqual(
             [
                 "^2Visit us at www.urt-30plus.org",
                 "^2Join our Discord server at discord.gg/Y5v9feWZAc",
                 "^2Type !register to register as a user",
-                "^2Send demos to urt30plus@gmail.com",
                 "^3Rule #8: No profanity or offensive language (in any language)",
                 "@nextmap",
             ],
