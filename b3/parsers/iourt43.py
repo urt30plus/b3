@@ -1926,7 +1926,7 @@ class Iourt43Parser(b3.parser.Parser):
         cmd = "cvarlist" if cvar_filter is None else ("cvarlist %s" % cvar_filter)
         if raw_data := self.write(cmd):
             re_line = re.compile(
-                r"""^.{7} (?P<cvar>\s*\w+)\s+"(?P<value>.*)"$""", re.MULTILINE
+                r"""^.{7}\s*(?P<cvar>\w+)\s+"(?P<value>.*)"$""", re.MULTILINE
             )
             for m in re_line.finditer(raw_data):
                 cvars[m["cvar"].lower()] = m["value"]
