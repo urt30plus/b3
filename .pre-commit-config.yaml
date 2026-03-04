@@ -1,8 +1,6 @@
-default_language_version:
-  python: python3.11
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: "v4.5.0"
+    rev: "v6.0.0"
     hooks:
       - id: check-added-large-files
       - id: check-toml
@@ -12,7 +10,7 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.1.9"
+    rev: "v0.15.4"
     hooks:
       - id: ruff
       - id: ruff-format

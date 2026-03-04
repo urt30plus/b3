@@ -2093,7 +2093,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
                 if client:
                     client.message(f"^7nextmap set to {mapname}")
             elif isinstance(match, list):
-                client.message(f'do you mean : {", ".join(match[:5])} ?')
+                client.message(f"do you mean : {', '.join(match[:5])} ?")
             else:
                 client.message(f"^7cannot find any map like [^4{data}^7]")
 
@@ -2511,11 +2511,11 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             gearstr = self.console.getCvar("g_gear").getString()
 
         lines = [
-            f'{k}:{"^2ON" if v not in gearstr else "^1OFF"}'
+            f"{k}:{'^2ON' if v not in gearstr else '^1OFF'}"
             for k, v in self._weapons.items()
         ]
 
-        cmd.sayLoudOrPM(client, f'^3current gear: ^7{"^7, ".join(sorted(lines))}')
+        cmd.sayLoudOrPM(client, f"^3current gear: ^7{'^7, '.join(sorted(lines))}")
 
     def getTime(self):
         """just to ease automated tests"""
@@ -2851,7 +2851,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
             blue, red = self._getRandomTeams(clients, checkforced=True)
             if maxmovesperc:
                 m = self._countMoves(oldblue, blue) + self._countMoves(oldred, red)
-                if m > max(2, int(round(maxmovesperc * n))):
+                if m > max(2, round(maxmovesperc * n)):
                     continue
 
             diff = self._getTeamScoreDiff(blue, red, scores)
@@ -2968,7 +2968,7 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
 
         if word:
             oldteam, oldword, oldabsdiff = self._oldadv
-            team = avgdiff < 0 and "Red" or "Blue"
+            team = "Red" if avgdiff < 0 else "Blue"
             if team == oldteam:
                 if word == oldword:
                     msg = f"{team} team {same}{word}"

@@ -343,9 +343,9 @@ class StatsPlugin(b3.plugin.Plugin):
         """
         if results := self._top_scores("points", top_n=5):
             if client:
-                client.message(f'^3Top Stats:^7 {", ".join(results)}')
+                client.message(f"^3Top Stats:^7 {', '.join(results)}")
             else:
-                self.console.say(f'^3Top Stats:^7 {", ".join(results)}')
+                self.console.say(f"^3Top Stats:^7 {', '.join(results)}")
         else:
             client.message("^3Stats: ^7No top players")
 
@@ -355,9 +355,9 @@ class StatsPlugin(b3.plugin.Plugin):
         """
         if results := self._top_scores("experience", top_n=5):
             if client:
-                client.message(f'^3Top Experienced Players:^7 {", ".join(results)}')
+                client.message(f"^3Top Experienced Players:^7 {', '.join(results)}")
             else:
-                self.console.say(f'^3Top Experienced Players:^7 {", ".join(results)}')
+                self.console.say(f"^3Top Experienced Players:^7 {', '.join(results)}")
         else:
             client.message("^3Stats: ^7No top experienced players")
 

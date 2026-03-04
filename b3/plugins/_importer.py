@@ -172,7 +172,7 @@ def _check_plugin_game(p_data: PluginData, game_name: str) -> None:
         raise b3.config.MissingRequirement(
             f"plugin {p_data.name} is not compatible with "
             f"{game_name} parser : supported games are :"
-            f' {", ".join(p_data.clazz.requiresParsers)}'
+            f" {', '.join(p_data.clazz.requiresParsers)}"
         )
 
 
@@ -185,7 +185,7 @@ def _check_plugin_storage(p_data: PluginData, storage_proto: str) -> None:
             f"plugin {p_data.name} is not compatible with the "
             f"storage protocol being used ({storage_proto}) : "
             f"supported protocols are : "
-            f'{", ".join(p_data.clazz.requiresStorage)}'
+            f"{', '.join(p_data.clazz.requiresStorage)}"
         )
 
 
@@ -226,8 +226,7 @@ def _get_plugins_from_config(console) -> dict[str, PluginData]:
         plugin_name = p["name"]
         if plugin_name in plugins:
             console.warning(
-                "Plugin %s already loaded: "
-                "avoid multiple entries of the same plugin",
+                "Plugin %s already loaded: avoid multiple entries of the same plugin",
                 plugin_name,
             )
             continue

@@ -32,7 +32,7 @@ class B3version:
             return NotImplemented
 
     def __repr__(self):
-        return f'B3Version<{".".join(map(str, self._version_info))}'
+        return f"B3Version<{'.'.join(map(str, self._version_info))}"
 
 
 class DBUpdate:

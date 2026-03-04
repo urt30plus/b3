@@ -324,7 +324,7 @@ class TkPlugin(b3.plugin.Plugin):
             )
 
         if self._tk_points_halflife > 0:
-            minute, sec = self.crontab_time()
+            minute, _ = self.crontab_time()
             self._crontab_tkhalflife = b3.cron.OneTimeCronTab(
                 self.halveTKPoints, minute=minute
             )
@@ -362,7 +362,7 @@ class TkPlugin(b3.plugin.Plugin):
                 if self._crontab_tkhalflife:
                     # remove existing crontab
                     self.console.cron - self._crontab_tkhalflife
-                (m, s) = self.crontab_time()
+                m, _ = self.crontab_time()
                 self._crontab_tkhalflife = b3.cron.OneTimeCronTab(
                     self.halveTKPoints, minute=m
                 )
@@ -445,7 +445,7 @@ class TkPlugin(b3.plugin.Plugin):
         for _cid, c in self.console.clients.items():
             tkinfo = self.client_tkinfo(c)
             for acid, points in list(tkinfo.attackers.items()):
-                points = int(round(points / 2))
+                points = round(points / 2)
                 if points == 0:
                     self.forgive(acid, c, True)
                 else:
@@ -455,7 +455,7 @@ class TkPlugin(b3.plugin.Plugin):
             if self._crontab_tkhalflife:
                 # remove existing crontab
                 self.console.cron - self._crontab_tkhalflife
-            m, s = self.crontab_time()
+            m, _ = self.crontab_time()
             self._crontab_tkhalflife = b3.cron.OneTimeCronTab(
                 self.halveTKPoints, minute=m
             )
@@ -499,9 +499,9 @@ class TkPlugin(b3.plugin.Plugin):
         # 10/20/2008 - 1.1.6b0 - mindriot
         # * in clientDamage, kill and damage mutlipliers were reversed - changed if killed: to [0] and else: to [1]
         if killed:
-            points = int(round(points * self.getMultipliers(attacker)[0]))
+            points = round(points * self.getMultipliers(attacker)[0])
         else:
-            points = int(round(points * self.getMultipliers(attacker)[1]))
+            points = round(points * self.getMultipliers(attacker)[1])
 
         a.damage(v.cid, points)
         v.damaged(a.cid, points)

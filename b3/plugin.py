@@ -511,7 +511,7 @@ class Plugin:
                         names.append(f"^7{c.name} [^2{c.cid}^7]")
 
                 if client:
-                    client.message(f'^7Players matching {handle} {", ".join(names)}')
+                    client.message(f"^7Players matching {handle} {', '.join(names)}")
                 return None
             else:
                 return matches[0]

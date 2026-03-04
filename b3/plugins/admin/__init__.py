@@ -262,8 +262,7 @@ class AdminPlugin(b3.plugin.Plugin):
             self.warn_alert_kick_num = raw_data
         except NoOptionError:
             self.warning(
-                "could not find warn/alert_kick_num in config file, "
-                "using default: %s",
+                "could not find warn/alert_kick_num in config file, using default: %s",
                 self.warn_alert_kick_num,
             )
         except ValueError as e:
@@ -722,7 +721,7 @@ class AdminPlugin(b3.plugin.Plugin):
                         results = command.executePrivate(data, event_client)
                     else:
                         results = command.execute(data, event_client)
-                except (KeyboardInterrupt, SystemExit):
+                except KeyboardInterrupt, SystemExit:
                     pass
                 except:
                     event_client.message("^7There was an error processing your command")
@@ -1059,7 +1058,7 @@ class AdminPlugin(b3.plugin.Plugin):
 
         try:
             pmglobal = self.config.getboolean("warn", "pm_global")
-        except (NoOptionError, ValueError):
+        except NoOptionError, ValueError:
             pmglobal = False
 
         if pmglobal:
@@ -2266,9 +2265,9 @@ class AdminPlugin(b3.plugin.Plugin):
         <warning> - test a warning
         """
         try:
-            duration, warning = self.getWarning(data)
+            _, warning = self.getWarning(data)
         except Exception:
-            duration, warning = self.getWarning("generic")
+            _, warning = self.getWarning("generic")
             warning = f"{warning} {data}"
 
         warning = warning % {"name": client.exactName}

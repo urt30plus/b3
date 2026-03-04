@@ -166,7 +166,7 @@ class Parser:
         log_level = self.config.getint("b3", "log_level")
         try:
             logsize = b3.functions.getBytes(self.config.get("b3", "logsize"))
-        except (TypeError, b3.config.NoOptionError):
+        except TypeError, b3.config.NoOptionError:
             logsize = b3.functions.getBytes("10MB")
         self.log = b3.output.getInstance(logfile, log_level, logsize, log2console)
         self.screen = sys.stdout
@@ -396,7 +396,7 @@ class Parser:
             )
             self.cron.add(self._cron_stats_crontab)
 
-        tz_offset, tz_name = self.tz_offset_and_name()
+        _, tz_name = self.tz_offset_and_name()
         if tz_name not in ("UTC", "GMT"):
             hour = self.to_utc_hour(2)
             self._timezone_crontab = b3.cron.CronTab(
@@ -663,7 +663,7 @@ class Parser:
         <data> can be either a group keyword or a group level.
         Raises KeyError if group is not found.
         """
-        if type(data) is int or isinstance(data, str) and data.isdigit():
+        if type(data) is int or (isinstance(data, str) and data.isdigit()):
             g = Group(level=data)
         else:
             g = Group(keyword=data)

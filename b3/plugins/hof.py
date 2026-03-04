@@ -30,7 +30,7 @@ def record_holder(
     )
     with console.storage.query(q) as cursor:
         if (r := cursor.getOneRow()) and (
-            clients := console.clients.getByDB(f'@{r["player_id"]}')
+            clients := console.clients.getByDB(f"@{r['player_id']}")
         ):
             return Record(
                 plugin_name=plugin_name,

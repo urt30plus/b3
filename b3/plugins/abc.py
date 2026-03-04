@@ -266,7 +266,7 @@ class WeaponKillPlugin(abc.ABC, b3.plugin.Plugin):
             ]
             self.console.say(
                 f"^1Top {len(top_kills)} {self.weapon_name} killers "
-                f'(total {self._total_kills})  : {" ,".join(results)}'
+                f"(total {self._total_kills})  : {' ,'.join(results)}"
             )
 
     def reset_scores(self):

@@ -40,7 +40,7 @@ class MappyPlugin(b3.plugin.Plugin):
             if isinstance(match, str):
                 map_name = match
             elif isinstance(match, list):
-                client.message(f'do you mean : {", ".join(match[:5])} ?')
+                client.message(f"do you mean : {', '.join(match[:5])} ?")
                 return
             else:
                 client.message(f"^7cannot find any map like [^4{data}^7]")

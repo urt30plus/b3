@@ -17,7 +17,7 @@ class PoweradminurtPlugin:
     requiresStorage = []
 
     def __new__(cls, *args, **kwargs):
-        console, plugin_config = args
+        console, _ = args
         if console.gameName == "iourt43":
             from .iourt43 import Poweradminurt43Plugin
 
