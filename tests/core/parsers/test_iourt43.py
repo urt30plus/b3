@@ -1186,6 +1186,37 @@ num score ping name            lastmsg address               qport rate
             rv,
         )
 
+    def test_getPlayerList2(self):
+        # GIVEN
+        when(self.console).write("status", maxRetries=anything()).thenReturn(
+            """\
+map: ut4_austria
+cl score ping name       address      rate
+-- ----- ---- ---------- ------------ -----
+8     0   79 |30+|money 77.111.19.29 32000
+"""
+        )
+        # WHEN
+        rv = self.console.getPlayerList()
+        # THEN
+        self.assertDictEqual(
+            {
+                "8": {
+                    "slot": "8",
+                    "last": "1",
+                    "name": "|30+|money",
+                    "ip": "77.111.19.29",
+                    "ping": "79",
+                    "pbid": None,
+                    "qport": "56415",
+                    "rate": "32000",
+                    "score": "0",
+                    "port": "27960",
+                },
+            },
+            rv,
+        )
+
     def test_sync(self):
         # GIVEN
         when(self.console).write("status", maxRetries=anything()).thenReturn(

@@ -374,6 +374,22 @@ class Iourt43Parser(b3.parser.Parser):
         re.IGNORECASE,
     )
 
+    # FTW/Quake3e/Slim binaries
+    #
+    # map: ut4_austria
+    # cl score ping name       address      rate
+    # -- ----- ---- ---------- ------------ -----
+    #  8     0   79 |30+|money 77.111.19.29 32000
+    _regPlayer2 = re.compile(
+        r"^(?P<slot>[0-9]+)\s+"
+        r"(?P<score>[0-9-]+)\s+"
+        r"(?P<ping>[0-9]+|CNCT|ZMBI)\s+"
+        r"(?P<name>.*?)\s+"
+        r"(?P<ip>[0-9.]+)\s+"
+        r"(?P<rate>[0-9]+)$",
+        re.IGNORECASE,
+    )
+
     _reColor = re.compile(r"(\^\d)")
 
     _rePlayerScore = re.compile(
@@ -1587,8 +1603,21 @@ class Iourt43Parser(b3.parser.Parser):
             return {}
 
         players = {}
-        for line in data.splitlines():
-            if m := re.match(self._regPlayer, line.strip()):
+        lines = data.splitlines()
+        if len(lines) < 4:
+            return players
+
+        header = lines[1]
+        if header.startswith("num"):
+            re_player = self._regPlayer
+        elif header.startswith("cl"):
+            re_player = self._regPlayer2
+        else:
+            self.error("invalid status header: %s", header)
+            return players
+
+        for line in lines[3:]:
+            if m := re.match(re_player, line.strip()):
                 if m["ping"] == "ZMBI":
                     # ignore them, let them not bother us with errors
                     pass
@@ -2014,9 +2043,22 @@ class Iourt43Parser(b3.parser.Parser):
             return {}
 
         players = {}
+        lines = data.splitlines()
+        if len(lines) < 4:
+            return players
+
+        header = lines[1]
+        if header.startswith("num"):
+            re_player = self._regPlayer
+        elif header.startswith("cl"):
+            re_player = self._regPlayer2
+        else:
+            self.error("invalid status header: %s", header)
+            return players
+
         for line in data.splitlines():
             if not (m := re.match(self._regPlayerShort, line)):
-                m = re.match(self._regPlayer, line.strip())
+                m = re.match(re_player, line.strip())
 
             if m:
                 players[str(m["slot"])] = int(m["score"])
@@ -2034,12 +2076,31 @@ class Iourt43Parser(b3.parser.Parser):
 
         players = {}
         lastslot = -1
-        for line in data.splitlines()[3:]:
-            if m := re.match(self._regPlayer, line.strip()):
+        lines = data.splitlines()
+        if len(lines) < 4:
+            return players
+
+        header = lines[1]
+        if header.startswith("num"):
+            re_player = self._regPlayer
+        elif header.startswith("cl"):
+            re_player = self._regPlayer2
+        else:
+            self.error("invalid status header: %s", header)
+            return players
+
+        for line in lines[3:]:
+            if m := re.match(re_player, line.strip()):
                 d = m.groupdict()
                 if int(m["slot"]) > lastslot:
                     lastslot = int(m["slot"])
                     d["pbid"] = None
+                    if re_player is self._regPlayer2:
+                        # provide some dummy values to maintain compat with
+                        # the vanilla server status
+                        d["last"] = "1"
+                        d["port"] = "27960"
+                        d["qport"] = "56415"
                     players[str(m["slot"])] = d
 
         return players
