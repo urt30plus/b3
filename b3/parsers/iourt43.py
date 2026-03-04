@@ -683,7 +683,7 @@ class Iourt43Parser(b3.parser.Parser):
         Parse a log line returning extracted tokens.
         :param line: The line to be parsed
         """
-        line = re.sub(self._lineClear, "", line, 1)
+        line = re.sub(self._lineClear, repl="", string=line, count=1)
         for index, f in enumerate(self._lineFormats):
             if m := re.match(f, line):
                 self._line_formats_counter[index] += 1
