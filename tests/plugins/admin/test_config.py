@@ -15,7 +15,7 @@ class Config_reading_TestCase(Admin_TestCase):
 
     def __init__(self, *args, **kwargs):
         Admin_TestCase.__init__(self, *args, **kwargs)
-        if not self.__class__.MESSAGE_BEACON:
+        if self.__class__ is not Config_reading_TestCase and not self.MESSAGE_BEACON:
             raise NotImplementedError(
                 "you are supposed to set MESSAGE_BEACON with a string to look for in warning "
                 "and error messages when inheriting from Config_reading_TestCase"

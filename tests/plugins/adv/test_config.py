@@ -21,7 +21,7 @@ class Test_config(AdvTestCase):
         self.assertListEqual(
             [
                 "^2Visit us at www.urt-30plus.org",
-                "^2Join our Discord server at discord.gg/Y5v9feWZAc",
+                "^2Join our Discord server at discord.gg/zsjqRzJjXF",
                 "^2Type !register to register as a user",
                 "^3Rule #8: No profanity or offensive language (in any language)",
                 "@nextmap",
