@@ -7,14 +7,14 @@ https://github.com/BigBrotherBot/big-brother-bot
 
 # Requirements
 
-* Python 3.9+
+* [uv](https://docs.astral.sh/uv/)
 
 # Running
 
-Use the following command to start the bot
+Use the following command from the `b3` directory to start the bot
 
 ```bash
-python3 -m b3 -c ~/.b3/b3.ini
+uv run -m b3 -c ~/.b3/b3.ini
 ```
 
 # Configuration
