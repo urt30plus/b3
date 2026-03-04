@@ -54,7 +54,6 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
     _smaxspectime = 0
     _smaxlevel = 0
     _smaxplayers = 0
-    _sv_maxclients = 0
     _g_maxGameClients = 0
     _teamsbalanced = False
     _matchmode = False
@@ -233,8 +232,11 @@ class Poweradminurt43Plugin(b3.plugin.Plugin):
         self._lastvote = self._origvote
 
         # how many players are allowed and if g_maxGameClients != 0 we will disable specchecking
-        self._sv_maxclients = self.console.getCvar("sv_maxclients").getInt()
-        self._g_maxGameClients = self.console.getCvar("g_maxGameClients").getInt()
+        try:
+            self._g_maxGameClients = self.console.getCvar("g_maxGameClients").getInt()
+        except ValueError as e:
+            self.warning("could not retrieve g_maxGameClients CVAR value: %s", e)
+            self._g_maxGameClients = 0
 
         self.installCrontabs()
 
