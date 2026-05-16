@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 set -xe
 
-echo "CI is set to [${CI}]"
-if [[ $CI != "true" ]]; then
-    pre-commit run --all-files
-fi
+export UV_FROZEN=1
 
-mypy --version
-mypy
+uv run --active prek run --all-files
+uv run --active mypy
 
-pytest
+export URT30DISCORD_CONFIG_FILE=./tests/test_config.toml
+
+uv run --active pytest -p no:cacheprovider
