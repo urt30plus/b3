@@ -10,7 +10,7 @@ dependencies = []
 dev = [
     "mockito>=2.0.4",
     "mypy>=2.1.0",
-    "prek>=0.4.5",
+    "prek>=0.4.6",
     "pytest>=9.1.1",
 ]
 
