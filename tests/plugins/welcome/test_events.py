@@ -96,8 +96,10 @@ class Test_welcome(Welcome_functional_test):
         self.assertListEqual([], self.say_mock.mock_calls)
         self.assertListEqual(
             [
-                "Welcome Jack, this must be your first visit, you are player #1. Type !help for "
-                "help"
+                (
+                    "Welcome Jack, this must be your first visit, you are player #1. "
+                    "Type !help for help"
+                )
             ],
             self.client.message_history,
         )
@@ -112,8 +114,7 @@ class Test_welcome(Welcome_functional_test):
         self.assertListEqual([], self.say_mock.mock_calls)
         self.assertListEqual(
             [
-                "[Authed] Welcome back Jack [@1], last visit Unknown. Type !register in chat to register."
-                " Type !help for help"
+                "[Authed] Welcome back Jack [@1], last visit Unknown. Type !register in chat to register. Type !help for help"
             ],
             self.client.message_history,
         )

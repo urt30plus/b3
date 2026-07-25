@@ -251,10 +251,8 @@ class FlagstatsPlugin(b3.plugin.Plugin):
             # see comment in self.update_hall_of_fame_time
             record_time = self.show_time(abs(time_record.score / 1000))
             messages = [
-                f"^7Flag record most caps: "
-                f"^3{caps_record.client.exactName} ^2{caps_record.score}",
-                f"^7Flag record fastest cap: "
-                f"^3{time_record.client.exactName} ^2{record_time}",
+                f"^7Flag record most caps: ^3{caps_record.client.exactName} ^2{caps_record.score}",
+                f"^7Flag record fastest cap: ^3{time_record.client.exactName} ^2{record_time}",
             ]
         for message in messages:
             client.message(message)
