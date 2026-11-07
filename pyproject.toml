@@ -9,9 +9,9 @@ dependencies = []
 [dependency-groups]
 dev = [
     "mockito>=2.0.4",
-    "mypy>=2.4.0",
-    "prek>=0.5.5",
-    "pytest>=9.1.1",
+    "mypy>=2.4.1",
+    "prek>=0.5.10",
+    "pytest>=9.2.0",
 ]
 
 [tool.mypy]
